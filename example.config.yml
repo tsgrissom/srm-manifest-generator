@@ -8,3 +8,7 @@ manifest-files:
 # UNIMPLEMENTED
 # Designates file output mode "combined" (default) or "individual"
 # output-mode: combined
+# Should output manifests be minified?
+# minify: true
+# If not minified, how many space characters should be used to indent output manifests?
+# indentation-spaces: 2

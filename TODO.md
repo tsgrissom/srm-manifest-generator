@@ -3,6 +3,7 @@
 * Add validation
   * Titles should have a title attribute
   * Title attribute should point to a valid exe, if not warn and skip
+* Add minify option to config
 * Tell user how long it took
 * Add config.yml options
   * List of manifest files to search for

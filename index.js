@@ -7,22 +7,11 @@ const isDebugging = process.argv.includes('--debug');
 function makeOutputManifest(inputManifest) {
     const file = fs.readFileSync(inputManifest, 'utf8');
     const parsed = YAML.parse(file);
-
-    // if (isDebugging) {
-    //     console.log(chalk.yellow(`Parsed raw YAML manifest: ${inputManifest}`));
-    //     console.log(parsed);
-    // }
-
+    
     const repackerName = parsed.name;
     const repackerDir = parsed.directory;
     const outputFile = parsed.output
     const rawTitles = parsed.titles;
-
-    // if (isDebugging) {
-    //     console.log(chalk.yellow(`Raw Titles from ${repackerName}`));
-    //     console.log(rawTitles);
-    // }
-
     const transformedTitles = [];
 
     rawTitles.forEach(rawTitle => {
