@@ -2,14 +2,15 @@
 
 # Install with `npm install`
 node_modules/
-# Ignore user manifest inputs, keep example manifest
-manifests/**
+# Ignore user manifest inputs
+config/manifests/**
 # Ignore user manifest outputs
 out/**
+output/**
 
 # FILES
 
 # OS Files
 .DS_Store
 # Ignore user configurations, keep example config
-config.yml
+config/config.yml

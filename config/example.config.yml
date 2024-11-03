@@ -1,0 +1,41 @@
+# Example Configuration File
+# Make sure your configuration file is named "config.yml" and resides in root folder of script
+
+# List of YAML manifest files to parse and convert into Steam ROM Manager-compatible json manifests
+manifests:
+  - ./manifests/some-manifest.yml
+
+output:
+  # Unimplemented; Where should generated manifest files be written? Recommended to use the script's local ./out/ directory
+  # Variables: $NAME$ ("name" field in manifest's .yml file)
+  path: ./out/$NAME$.manifest.json
+  # Unimplemented; Should space characters in the names of generated manifest files be substituted with another symbol? Set field to '' for no replacement.
+  # Default: "-"
+  replace-spaces: -
+  # Unimplemented; Should output files be minified?
+  minify: true
+  # Unimplemented; If not minified, how many space characters should be used to indent output files?
+  indentation-spaces: 2
+  # Unimplemented; Should one source equal one output file or should each entry within the source be its own manifest file?
+  # Default: combined   Options: combined, individual
+  mode: combined
+
+validation:
+  # Unimplemented; Should the config.yml be validated?
+  # Default: true   Options: true, false
+  config: true
+  # Unimplemented; List of file extensions to accept as an executable file 
+  # Default: "- exe"
+  executables:
+    - exe
+    # - AppImage
+    # - sh
+  # Unimplemented; Should file paths such as source base directories, source entry directories, 
+  # Default: true   Options: true, false
+  path: true
+  
+logging:
+  # Unimplemented; Should srm-manifest-generator log its actions to a text file?
+  enabled: true
+  # Unimplemented; Where should srm-manifest-generator write its logs?
+  file: ./srm-manifest-generator.log
