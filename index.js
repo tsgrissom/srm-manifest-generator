@@ -4,24 +4,24 @@ import YAML from 'yaml';
 
 const isDebugging = process.argv.includes('--debug');
 
-function makeJsonManifest(yamlManifest) {
-    const file = fs.readFileSync(yamlManifest, 'utf8');
+function makeOutputManifest(inputManifest) {
+    const file = fs.readFileSync(inputManifest, 'utf8');
     const parsed = YAML.parse(file);
 
-    if (isDebugging) {
-        console.log(chalk.yellow(`Parsed raw YAML manifest: ${yamlManifest}`));
-        console.log(parsed);
-    }
+    // if (isDebugging) {
+    //     console.log(chalk.yellow(`Parsed raw YAML manifest: ${inputManifest}`));
+    //     console.log(parsed);
+    // }
 
     const repackerName = parsed.name;
     const repackerDir = parsed.directory;
     const outputFile = parsed.output
     const rawTitles = parsed.titles;
 
-    if (isDebugging) {
-        console.log(chalk.yellow(`Raw Titles from ${repackerName}`));
-        console.log(rawTitles);
-    }
+    // if (isDebugging) {
+    //     console.log(chalk.yellow(`Raw Titles from ${repackerName}`));
+    //     console.log(rawTitles);
+    // }
 
     const transformedTitles = [];
 
@@ -47,9 +47,22 @@ function makeJsonManifest(yamlManifest) {
         if (err) {
             console.error('Error writing results to file', err);
         } else {
-            console.log(chalk.green(`Success! Titles from ${yamlManifest} written to ${outputFile}`));
+            console.log(chalk.green(`Success! Titles from ${inputManifest} written to ${outputFile}`));
         }
     })
 }
 
-makeJsonManifest('./fitgirl-manifest.yml');
+// TODO: Check if config exists
+const configFile = fs.readFileSync('./config.yml', 'utf8');
+const config = YAML.parse(configFile);
+// TODO: Check if config is valid, lint manifest file paths, etc.
+const manifests = config['manifest-files'];
+
+if (isDebugging) {
+    console.log(chalk.yellow('Manifests from config.yml:'));
+    console.log(manifests);
+}
+
+manifests.forEach(inputManifest => {
+    makeOutputManifest(inputManifest);
+});

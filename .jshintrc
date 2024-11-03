@@ -1,0 +1,11 @@
+{
+
+	"esversion": 6,
+	"camelcase": true,
+	"curly": true,
+	"eqeqeq": true,
+	"latedef": true,
+	"undef": true,
+	"unused": "strict",
+	"quotmark": true
+}
