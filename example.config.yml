@@ -1,0 +1,10 @@
+# Example Configuration File
+# Make sure your configuration file is named "config.yml" and resides in root folder of script
+
+# List of YAML manifest files to parse and convert into Steam ROM Manager-compatible json manifests
+manifest-files:
+  - ./manifests/some-manifest.yml
+
+# UNIMPLEMENTED
+# Designates file output mode "combined" (default) or "individual"
+# output-mode: combined
