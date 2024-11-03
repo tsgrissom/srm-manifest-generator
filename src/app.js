@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import yaml from 'yaml';
 
 import { getCountString } from './utilities.js';
+import config from './config.js';
 
 const isDebugging = process.argv.includes('--debug'); // TODO: Replace with better CLI
 
@@ -19,15 +20,19 @@ async function readInputManifest(inputFile) {
     }
 }
 
-async function writeOutputManifest(inputFile) {
-    const inputJson = await readInputManifest(inputFile);
+async function writeOutputManifest(inputPath) {
+    const inputJson = await readInputManifest(inputPath);
     const { directory, name } = inputJson;
     const outputPath = inputJson.output;
     
     if (!outputPath) {
-        console.error('Output path not specified');
+        console.error(`Output path not specified for source manifest file: ${inputPath}`);
         return;
     }
+
+    const check = chalk.green.bold('\u2713 ');
+    const inputName = `"${inputPath}"`;
+    const outputName = `"${outputPath}"`;
 
     const inputEntries = inputJson.entries || [];
     const outputValues = inputEntries.map(entry => {
@@ -39,33 +44,26 @@ async function writeOutputManifest(inputFile) {
         };
     });
 
-    const outputValuesCount = getCountString(outputValues.length, 'title');
+    const strCount = getCountString(outputValues.length, 'title');
+    const strHeader = `Transformed ${strCount} from source "${name}"`;
 
     if (isDebugging) {
-        console.log(chalk.yellow(`Transformed ${outputValuesCount} from ${name}`));
-        console.log(outputValues);
-    }
-
-    const check = chalk.green.bold('\u2713 ');
-    const inputName = `"${inputFile}"`;
-    const outputName = `"${outputPath}`;
-
-    console.log(check + 'Source ' + chalk.cyan(name) + ' looks valid');
-
-    if (isDebugging) {
-        console.log(`  - Input Manifest File: ${inputFile}`);
+        console.log(chalk.yellow(strHeader));
+        console.log(`  - Input Manifest File: ${inputPath}`);
         console.log(`  - Output Manifest File: ${outputPath}`);
         console.log(`  - Source Name: ${name}`);
         console.log(`  - Base Directory: ${directory}`);
+    } else {
+        console.log(strHeader);
     }
-    // console.log(check + `Titles from ${inputName} look valid. Writing to ${outputName}...`);
     
-    const jsonStrOutput = JSON.stringify(outputValues, null, 2);
-    fs.writeFile(outputPath, jsonStrOutput, (err) => {
+    const jsonString = JSON.stringify(outputValues, null, 2);
+    fs.writeFile(outputPath, jsonString, (err) => {
         if (err) {
-            console.error(chalk.red(`Error writing results to file: ${err}`));
+            console.error(chalk.red(`Error writing results to file: "${outputPath}"`));
+            console.error(chalk.red(err));
         } else {
-            console.log(check + 'Wrote ' + chalk.magenta(outputValuesCount) + ' for source ' + chalk.cyan(name));
+            console.log(check + 'Wrote ' + chalk.magenta(strCount) + ' for source ' + chalk.cyan(name));
             
             if (isDebugging) {
                 console.log(`  - Input File: ${inputName}`);
@@ -76,29 +74,30 @@ async function writeOutputManifest(inputFile) {
 }
 
 function startApp() {
-    fs.promises.readFile('./config/config.yml', 'utf8')
-        .then(data => {
-            const config = yaml.parse(data);
-            // TODO: Validate config, lint manifest file paths, etc.
-            const { manifests } = config;
+    const { manifests } = config;
 
-            if (!Array.isArray(manifests)) {
-                console.error('Expected key "manifests" to be an array of paths in config.yml');
-                return;
-            }
+    if (!Array.isArray(manifests)) {
+        console.error('Invalid config.yml: Key "manifests" should be a list of paths to manifest .yml files');
+        return;
+    }
 
-            if (isDebugging) {
-                console.log(chalk.yellow('Loaded Manifests (per config.yml):'));
-                console.log(manifests);
-            }
+    // TODO: Validate manifest paths
 
-            manifests.forEach(input => {
-                writeOutputManifest(input);
-            });
-        })
-        .catch(err => {
-            console.error('Failed to load config.yml', err);
-        });
+    const headerConfiguredManifestPaths = `Loaded ${manifests.length} Manifest Paths from Configuration`;
+
+    if (isDebugging) {
+        console.log(chalk.yellow(headerConfiguredManifestPaths));
+    } else {
+        console.log(headerConfiguredManifestPaths);
+    }
+
+    manifests.forEach(input => {
+        if (isDebugging) {
+            console.log(`  - "${input}"`);
+        }
+
+        writeOutputManifest(input);
+    });
 }
 
 export default startApp;

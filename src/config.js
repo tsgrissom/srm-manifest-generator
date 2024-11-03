@@ -1,14 +1,9 @@
-import chalk from 'chalk';
 import fs from 'node:fs';
-import YAML from 'yaml';
+import yaml from 'yaml';
 
-const data = await fs.promises.readFile('./config.yml', 'utf8');
-const parsed = YAML.parse(data);
+const userConfig = await fs.promises.readFile('./config/config.yml', 'utf8');
+const userConfigData = yaml.parse(userConfig);
 
-console.log(chalk.bgCyan(parsed));
-
-const config = {
-    test: 'Some data'
-};
+const config = userConfigData;
 
 export default config;

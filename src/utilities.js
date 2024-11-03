@@ -1,4 +1,4 @@
-export const getCountString = (count, singularNoun, pluralNoun = null) => {
+export function getCountString(count, singularNoun, pluralNoun = null) {
     if (typeof(count) !== 'number') {
         console.error('Cannot pluralize count which is not a number');
         return 'ERROR';
