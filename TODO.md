@@ -15,3 +15,8 @@
 * Support linting normal JSON SRM manifests
 * If outputting to jsonc, add comments for other data from session + date
 * Support outputting individual title manifests
+* Support the the reverse, converting your existing manifest.json into a .yml manifest
+* Only mandatory properties of a manifest input should be output and titles, the latter must be valid
+  * Ensure attributes name and directory CAN be ommitted, even if not recommended for ease of use
+  * Then files can be roughly cut in half from .json to .yml
+* Support other SRM manifest options, check SRM program
