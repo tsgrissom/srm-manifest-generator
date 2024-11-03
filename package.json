@@ -5,16 +5,25 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node index.js --debug",
-    "lint": "jshint ./",
-    "start": "node index.js"
+    "lint": "npx eslint",
+    "start": "npm run lint && node index.js",
+    "test": "node index.js --debug && npm run lint"
   },
-  "keywords": ["emulation", "steam-rom-manager", "srm"],
+  "keywords": [
+    "emulation",
+    "steam-rom-manager",
+    "srm"
+  ],
   "author": "tsgrissom",
   "license": "MIT",
   "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b",
   "dependencies": {
     "chalk": "^5.3.0",
     "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "eslint": "^9.14.0",
+    "globals": "^15.11.0"
   }
 }
