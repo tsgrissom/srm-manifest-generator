@@ -2,15 +2,17 @@
 # Create one for each custom source you add to Steam ROM Manager
 # Recommended to put them in a `manifests/` folder in the root of this project
 
-name: The Name of the Group or Source
+name: Nickname of Game Source
 # The working directory to search for target files within
 directory: C:/Users/YOU/Some/Working/Directory/To/Start/In
 # The file path to output the JSON file of transformed titles to
 # Recommended to use relative path ./output within the project, and to name file ending in .manifest.json for clarity
-output: ./output/SomeManifest.manifest.json
+output: ./out/SomeSource.manifest.json
 # The titles to find within your directory using relative paths
 # Attributes "title" and "target" are required
 # "target" must point to a valid .exe file at a relative path within your working directory above
 entries:
   - title: An Example Game
-    target: The Game Folder/TheGameExecutable.exe
+    target: SomeRelativePath/bin/Game.exe
+  - title: Some Other Game You Want Added to Steam
+    target: The Game Folder/TheExecutable.exe
