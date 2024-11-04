@@ -12,7 +12,9 @@ Game files which are stored in similar paths (say a folder at `D:\Games\Ports`) 
 
 [Project Example YAML Files](https://github.com/tsgrissom/srm-manifest-generator)
 
-[Learn YAML](https://yaml.org/spec/1.2.2/#chapter-1-introduction-to-yaml)
+[Learn YAML Basics](https://www.tutorialspoint.com/yaml/yaml_basics.htm)
+
+[Read YAML Reference](https://yaml.org/spec/1.2.2/#chapter-1-introduction-to-yaml)
 
 ## Example
 
@@ -60,30 +62,30 @@ entries:
 1. Open Terminal and navigate to directory you wish to install this project to
 2. Execute the script below AND don't forget to follow the Configuration section below after!
 
-```
+```shell
 git clone git@github.com:tsgrissom/srm-manifest-generator.git && cd srm-manifest-generator && npm install
 ```
 
 #### Manual Install
 
-1. Clone this repository (you can use the clone button in the top right) or download + extract [the .zip](https://github.com/tsgrissom/srm-manifest-generator/main.zip)
+1. Clone this repository (you can use the clone button in the top right) or download + extract [the .zip](https://github.com/tsgrissom/srm-manifest-generator/archive/refs/heads/main.zip)
 2. Using your Terminal, navigate to the project's root directory
 3. Execute `npm install` to install project dependencies
 4. MAKE SURE to read the Configuration section below in order to use this tool
 
 ### Configuration
 
-A bit of light configuration is required to use this tool, including at least:
+A bit of light configuration is required to use this tool. Minimum requirements are outlined below, along with example files to look at as needed.
 
-[Example Tool Configuration]()
+[Example Tool Configuration](https://github.com/tsgrissom/srm-manifest-generator/blob/main/config/examples/example.config.yml)
 
 1. You must have a tool config located at the tool's root folder named `config.yml`
-2. Using the [example]() above, this config must have at least: An attribute named manifests containing a list of file paths, each path pointing to a manifest `.yml` file to be transformed
+2. Using the [example](https://github.com/tsgrissom/srm-manifest-generator/blob/main/config/examples/example.config.yml) above, this config must have at least: An attribute named manifests containing a list of file paths, each path pointing to a manifest `.yml` file to be transformed
 
-[Example Manifest]()
+[Example Manifest](https://github.com/tsgrissom/srm-manifest-generator/blob/main/config/examples/example.manifest.yml)
 
 1. For each game source you want (say PC Ports as an example), make a `YOUR-SOURCE-NAME.manifest.yml` file
-2. You can base this file on the [example.manifest.yml]() if you need
+2. You can base this file on the [example.manifest.yml](https://github.com/tsgrissom/srm-manifest-generator/blob/main/config/examples/example.manifest.yml) if needed
 3. To be valid, each manifest file must have at least: An attribute `output` pointing to the output path of the generated `.json`, as well as an attribute `entries` which is outlined below
 
 #### Example: `entries` Attribute

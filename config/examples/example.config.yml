@@ -1,7 +1,7 @@
 # Example Configuration File
-# Make sure your configuration file is named "config.yml" and resides in root folder of script
+# Make sure your configuration file is named "config.yml" and resides in root folder of SRM Manifest Generator
 
-# List of YAML manifest files to parse and convert into Steam ROM Manager-compatible json manifests
+# Required: List of YAML manifest files to parse and convert into Steam ROM Manager-compatible json manifests
 manifests:
   - ./manifests/some-manifest.yml
 
