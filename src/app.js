@@ -4,7 +4,7 @@ import chalk from 'chalk';
 import yaml from 'yaml';
 
 import { getCountString } from './utilities.js';
-import config from './config.js';
+import userConfig from './config.js';
 
 const isDebugging = process.argv.includes('--debug'); // TODO: Replace with better CLI
 
@@ -74,7 +74,7 @@ async function writeOutputManifest(inputPath) {
 }
 
 function startApp() {
-    const { manifests } = config;
+    const { manifests } = userConfig;
 
     if (!Array.isArray(manifests)) {
         console.error('Invalid config.yml: Key "manifests" should be a list of paths to manifest .yml files');
