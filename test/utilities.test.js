@@ -2,15 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 import { isSteamRunning } from "../src/utilities.js";
 
+function yn(b) {
+    return b ? 'Yes' : 'No';
+}
+
 test('isSteamRunning has a result', () => {
     isSteamRunning()
         .then((running) => {
-            if (running) {
-                console.log('Steam is running');
-            } else {
-                console.log('Steam is not running');
-            }
-
+            console.log(`Is Steam running? ${yn(running)}`);
             assert.ok(true);
         })
         .catch(err => {
