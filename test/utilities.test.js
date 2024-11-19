@@ -1,19 +1,36 @@
-import { test } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { isSteamRunning } from "../src/utilities.js";
+import { getCountString, isSteamRunning } from "../src/utilities.js";
 
-function yn(b) {
-    return b ? 'Yes' : 'No';
-}
+describe('Function isSteamRunning', () => {
+    it('should return a resolved Promise', () => {
+        isSteamRunning()
+            .then(running => {
+                console.log('Is Steam running? ' + (running ? 'Y' : 'N'));
+                assert.ok(true);
+            })
+            .catch(err => {
+                console.error('Something went wrong while checking if Steam is running:', err);
+                assert.fail();
+            });
+    });
+});
 
-test('isSteamRunning has a result', () => {
-    isSteamRunning()
-        .then((running) => {
-            console.log(`Is Steam running? ${yn(running)}`);
-            assert.ok(true);
-        })
-        .catch(err => {
-            console.error('Error checking if Steam is running:', err);
-            assert.fail();
+describe('Function getCountString', () => {
+    // TODO: This
+    it('should infer plural noun when parameters are a plural number of things and no supplied plural noun', () => {
+
+    });
+
+    it('should return string literal "ERROR" when passed a non-number', () => {
+        const inputs = ['Some string', true, false, 'true'];
+
+        inputs.forEach(input => {
+            assert.strictEqual(
+                getCountString(input),
+                'ERROR',
+                `Expected "ERROR" for input: ${JSON.stringify(input)}`
+            );
         });
+    });
 });

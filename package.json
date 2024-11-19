@@ -2,11 +2,13 @@
   "name": "srm-manifest-generator",
   "version": "1.0.0",
   "description": "Lints and transforms Steam ROM Manager manifests written in YAML into the supported JSON format",
-  "main": "index.js",
+  "author": "tsgrissom",
+  "license": "MIT",
   "type": "module",
+  "main": "index.js",
   "scripts": {
-    "lint": "npx eslint",
-    "start": "node index.js && npm run lint",
+    "lint": "npx eslint . && echo 'ESLint has passed :)'",
+    "start": "node . && npm run lint",
     "test": "node --test && npm run lint"
   },
   "keywords": [
@@ -14,8 +16,6 @@
     "steam-rom-manager",
     "srm"
   ],
-  "author": "tsgrissom",
-  "license": "MIT",
   "packageManager": "pnpm@9.13.2+sha512.88c9c3864450350e65a33587ab801acf946d7c814ed1134da4a924f6df5a2120fd36b46aab68f7cd1d413149112d53c7db3a4136624cfd00ff1846a0c6cef48a",
   "dependencies": {
     "chalk": "^5.3.0",
