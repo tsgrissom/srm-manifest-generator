@@ -2,21 +2,35 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
 import Manifest from '../src/Manifest.js';
+import path from 'node:path';
 
-const filePathValidManifestFile = './test/valid-manifest.yml';
-const filePathInvalidManifestFile = './test/invalid-manifest.yml';
-const filePathNonExistentFile = './test/file-that-shouldnt-exist.yml';
-const instanceFromValidManifestFile = new Manifest(filePathValidManifestFile);
-const instanceFromInvalidManifestFile = new Manifest(filePathInvalidManifestFile);
-const instanceFromNonExistentManifestFile = new Manifest(filePathNonExistentFile);
+// Test resources
+const filePathValidManifestFile = './test/valid-manifest.yml',
+      filePathInvalidManifestFile = './test/invalid-manifest.yml',
+      filePathNonExistentManifestFile = './test/file-that-shouldnt-exist.yml';
+const instanceFromValidManifestFile = new Manifest(filePathValidManifestFile),
+      instanceFromInvalidManifestFile = new Manifest(filePathInvalidManifestFile),
+      instanceFromNonExistentManifestFile = new Manifest(filePathNonExistentManifestFile);
+const expectedNameAttributeFromValidManifestFile = 'A Valid Manifest';
 
 describe('Class: Manifest', () => {
 
     // Method: Manifest#doesFileExist
     describe('Method: doesFileExist()', () => {
 
-        it('should return true when instance is a valid manifest', () => {
-            assert(instanceFromValidManifestFile.doesFileExist(), `File does not exist: "${filePathValidManifestFile}"`);
+        it('should, when instance constructed from non-existent file, return false', async () => {
+            const fileExists = await instanceFromNonExistentManifestFile.doesFileExist();
+            assert.strictEqual(fileExists, false);
+        });
+
+        it('should, when instance constructed from valid manifest file, return true', async () => {
+            const fileExists = await instanceFromValidManifestFile.doesFileExist();
+            assert.strictEqual(fileExists, true);
+        });
+
+        it('should, when instance constructed from invalid manifest file, return true', async () => {
+            const fileExists = await instanceFromInvalidManifestFile.doesFileExist();
+            assert.strictEqual(fileExists, true);
         });
         
     });
@@ -24,16 +38,16 @@ describe('Class: Manifest', () => {
     // Method: Manifest#getFileContents
     describe('Method: getFileContents()', () => {
 
-        it('should throw error if the file does not exist', async () => {
+        it('should, when instance constructed from non-existent file, throw an error', async () => {
             await assert.rejects(() => instanceFromNonExistentManifestFile.getFileContents());
         });
 
-        it('should not return a null value when instance is a valid manifest', async () => {
+        it('should not, when instance constructed from valid manifest file, return a null value', async () => {
             const data = await instanceFromValidManifestFile.getFileContents();
             assert.notStrictEqual(data, null);
         });
 
-        it('should not return an empty str value when instance is a valid manifest', async () => {
+        it('should not, when instance constructed from valid manifest file, return an empty string value', async () => {
             const data = await instanceFromValidManifestFile.getFileContents();
             assert.notStrictEqual(data, '');
         });
@@ -45,11 +59,12 @@ describe('Class: Manifest', () => {
     // Method: Manifest#getNameOfFile
     describe('Method: getNameOfFile()', () => {
 
-        it('should throw error if the file does not exist', async () => {
-            await assert.rejects(() => instanceFromNonExistentManifestFile.getSourceName());
+        it('should, when instance constructed from non-existent file, throw an error', async () => {
+            await assert.rejects(() => instanceFromNonExistentManifestFile.getNameOfFile());
         });
 
-        it('should return a str not equal to the full valid manifest path when instance is the valid manifest', async () => {
+
+        it("should, when instance constructed from valid manifest file, return a string not equal to the file's original path", async () => {
             const name = await instanceFromValidManifestFile.getNameOfFile();
             const expected = filePathValidManifestFile;
 
@@ -58,24 +73,39 @@ describe('Class: Manifest', () => {
     
     });
 
-    describe('Method: getNameOfFile()', () => {
+    describe('Method: hasNameAttribute()', () => {
 
-    });
-
-    describe('Method: getNameInsideOfFile()', () => {
-
-    });
-
-    // Method: Manifest#getSourceName
-    describe('Method: getSourceName()', () => {
-
-        it('should throw error if the file does not exist', async () => {
-            await assert.rejects(() => instanceFromNonExistentManifestFile.getSourceName());
+        it('should, when instance constructed from non-existent file, throw an error', async () => {
+            await assert.rejects(() => instanceFromNonExistentManifestFile.hasNameAttribute());
         });
 
-        it('should return str literal "A Valid Manifest" when the file is the sample valid manifest', async () => {
-            const name = await instanceFromValidManifestFile.getSourceName();
-            assert.strictEqual(name, 'A Valid Manifest');
+    });
+
+    // Method: Manifest#getNameAttribute
+    describe('Method: getNameAttribute()', () => {
+
+        it('should, when instance constructed from non-existent file, throw an error', async () => {
+            await assert.rejects(() => instanceFromNonExistentManifestFile.getNameAttribute());
+        });
+
+    });
+
+    // Method: Manifest#getName
+    describe('Method: getName()', () => {
+
+        it('should, when instance constructed from non-existent file, throw an error', async () => {
+            await assert.rejects(() => instanceFromNonExistentManifestFile.getName());
+        });
+
+        it(`should, when instance constructed from valid manifest file, return string literal "${expectedNameAttributeFromValidManifestFile}"`, async () => {
+            const name = await instanceFromValidManifestFile.getName();
+            assert.strictEqual(name, expectedNameAttributeFromValidManifestFile);
+        });
+
+        it("should, when instance constructed from invalid manifest file, return file's basename as a string", async () => {
+            const name = await instanceFromInvalidManifestFile.getName();
+            const expected = path.basename(filePathInvalidManifestFile);
+            assert.strictEqual(name, expected);
         });
 
         // TODO: Write more coverage

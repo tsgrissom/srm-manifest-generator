@@ -4,7 +4,6 @@ import YAML from 'yaml';
 
 class Manifest {
 
-    // TODO: Write tests
     constructor(filePath) {
         this.filePath = filePath;
 
@@ -14,12 +13,21 @@ class Manifest {
     }
 
     async doesFileExist() {
+        let fileHandle;
+        let fileExists;
+        
         try {
-            await fs.promises.open(this.filePath, 'r');
-            return true;
+            fileHandle = await fs.promises.open(this.filePath, 'r');
+            fileExists = true;
         } catch {
-            return false;
+            fileExists = false;
+        } finally {
+            if (fileHandle) {
+                await fileHandle.close();
+            }
         }
+
+        return fileExists;
     }
 
     async getFileContents() {
@@ -40,10 +48,6 @@ class Manifest {
 
     // TODO: Write tests
     async getNameOfFile() {
-        // if (!fs.existsSync(this.filePath)) {
-        //     throw new Error(`File does not exist: "${this.filePath}"`);
-        // }
-
         const fileExists = await this.doesFileExist();
 
         if (!fileExists) {
@@ -55,18 +59,47 @@ class Manifest {
     }
 
     // TODO: Write tests
-    async getNameInsideOfFile() {
+    async hasNameAttribute() {
+        const fileExists = await this.doesFileExist();
+
+        if (!fileExists) {
+            throw new Error(`Unable to check if hasNameAttribute for non-existent file: "${this.filePath}"`);
+        }
+
         const data = await this.getJsonObject();
+
+        if (data === null) {
+            return false;
+        }
+
         const { name } = data;
 
         if (name === null || name.trim() === '') {
+            return false;
+        }
+
+        return true;
+    }
+
+    // TODO: Write tests
+    async getNameAttribute() {
+        let hasInnerName;
+        
+        try {
+            hasInnerName = await this.hasNameAttribute();
+        } catch (error) {
+            throw new Error(error);
+        }
+
+        if (!hasInnerName) {
             return null;
         }
 
-        return name;
+        const data = await this.getJsonObject();
+        return data.name;
     }
 
-    async getSourceName() {
+    async getName() {
         const fileExists = await this.doesFileExist();
 
         if (!fileExists) {
@@ -74,20 +107,15 @@ class Manifest {
         }
 
         const nameOfFile = await this.getNameOfFile();
-        const nameInFile = await this.getNameInsideOfFile();
+        const nameAttribute = await this.getNameAttribute();
 
-        let sourceName = nameOfFile;
+        let name = nameOfFile;
 
-        console.log(`NAME OF FILE: ${nameOfFile}`);
-        console.log(`NAME IN FILE: ${nameInFile}`);
-
-        if (nameInFile !== null) {
-            sourceName = nameInFile;
+        if (nameAttribute !== null) {
+            name = nameAttribute;
         }
 
-        console.log(`SOURCE NAME: ${sourceName}`);
-
-        return sourceName;
+        return name;
     }
 }
 

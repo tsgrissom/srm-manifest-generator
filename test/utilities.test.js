@@ -6,7 +6,7 @@ describe('File: utilities.js', () => {
     
     describe('Function: isSteamRunning', () => {
 
-        it('should return a resolved Promise', () => {
+        it('should not reject its Promise', () => {
             assert.doesNotReject(() => isSteamRunning());
         });
         
@@ -14,17 +14,18 @@ describe('File: utilities.js', () => {
     
     describe('Function: getCountString', () => {
 
-        it('should throw error when passed a non-number', () => {
+        it('should, when passed a non-number argument to number of things parameter, throw an error', () => {
             const inputs = ['Some string', true, false, 'true', '2'];
     
             inputs.forEach(input => {
                 assert.throws(() => getCountString(input));
             });
         });
-    
+
         // TODO: This
-        it('should infer plural noun when parameters are a plural number of things and no supplied plural noun', () => {
-    
+        // TODO: Rephrase last clause in description
+        it('should, when arguments include a plural number of things and no specified plural noun, infer a plural noun', () => {
+
         });
 
     });
