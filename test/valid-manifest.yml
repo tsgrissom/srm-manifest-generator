@@ -1,0 +1,8 @@
+name: A Valid Manifest
+directory: C:/Users/YOU/Some/Working/Directory/To/Start/In
+output: ./out/SomeSource.manifest.json
+entries:
+  - title: An Example Game
+    target: SomeRelativePath/bin/Game.exe
+  - title: Some Other Game You Want Added to Steam
+    target: The Game Folder/TheExecutable.exe

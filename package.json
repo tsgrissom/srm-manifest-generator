@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "npx eslint .",
     "start": "node . && npm run lint",
-    "test": "node --test && npm run lint"
+    "test": "node --test test/ && npm run lint"
   },
   "keywords": [
     "emulation",

@@ -3,37 +3,73 @@ import assert from 'node:assert';
 
 import Manifest from '../src/Manifest.js';
 
-const exampleManifestPath = './config/examples/example.manifest.yml';
-const exampleManifest = new Manifest(exampleManifestPath);
-const invalidManifest = new Manifest('./some-made-up-file.yml');
+const filePathValidManifestFile = './test/valid-manifest.yml';
+const filePathInvalidManifestFile = './test/invalid-manifest.yml';
+const filePathNonExistentFile = './test/file-that-shouldnt-exist.yml';
+const instanceFromValidManifestFile = new Manifest(filePathValidManifestFile);
+const instanceFromInvalidManifestFile = new Manifest(filePathInvalidManifestFile);
+const instanceFromNonExistentManifestFile = new Manifest(filePathNonExistentFile);
 
 describe('Class: Manifest', () => {
-    describe('Method: doesFileExist', () => {
-        it('should return true when constructor was passed example manifest path', () => {
-            assert(exampleManifest.doesFileExist, `File does not exist: "${exampleManifestPath}"`);
+
+    // Method: Manifest#doesFileExist
+    describe('Method: doesFileExist()', () => {
+
+        it('should return true when instance is a valid manifest', () => {
+            assert(instanceFromValidManifestFile.doesFileExist(), `File does not exist: "${filePathValidManifestFile}"`);
         });
+        
     });
 
-    describe('Method: getDataAsString', () => {
+    // Method: Manifest#getFileContents
+    describe('Method: getFileContents()', () => {
+
         it('should throw an error if the file does not exist', async () => {
-            await assert.rejects(() => invalidManifest.getDataAsString());
+            await assert.rejects(() => instanceFromNonExistentManifestFile.getFileContents());
         });
 
-        it('should not return a null value when constructor was passed example manifest path', async () => {
-            const data = await exampleManifest.getDataAsString();
+        it('should not return a null value when instance is a valid manifest', async () => {
+            const data = await instanceFromValidManifestFile.getFileContents();
             assert.notStrictEqual(data, null);
         });
 
-        it('should not return an empty string value when constructor was passed example manifest path', async () => {
-            const data = await exampleManifest.getDataAsString();
+        it('should not return an empty str value when instance is a valid manifest', async () => {
+            const data = await instanceFromValidManifestFile.getFileContents();
             assert.notStrictEqual(data, '');
         });
+
     });
 
-    describe('Method: getSourceName', () => {
-        it('should return string literal "Example Source Name" when path of example manifest was passed to constructor', async () => {
-            const name = await exampleManifest.getSourceName();
-            assert.strictEqual(name, 'Example Source Name');
+    // TODO: Any coverage needed for getJsonObject()?
+
+    // Method: Manifest#getNameOfFile
+    describe('Method: getNameOfFile()', () => {
+
+        it('should throw error if the file does not exist', async () => {
+            await assert.rejects(() => instanceFromNonExistentManifestFile.getSourceName());
         });
+
+        it('should return a str not equal to the full valid manifest path when instance is the valid manifest', async () => {
+            const name = await instanceFromValidManifestFile.getNameOfFile();
+            const expected = filePathValidManifestFile;
+
+            assert.notStrictEqual(name, expected, `Values were equal:\nname: ${name}\nexpected: ${expected}`);
+        });
+    
+    });
+
+    // Method: Manifest#getSourceName
+    describe('Method: getSourceName()', () => {
+
+        it('should throw error if the file does not exist', async () => {
+            await assert.rejects(() => instanceFromNonExistentManifestFile.getSourceName());
+        });
+
+        it('should return str literal "A Valid Manifest" when the file is the sample valid manifest', async () => {
+            const name = await instanceFromValidManifestFile.getSourceName();
+            assert.strictEqual(name, 'A Valid Manifest');
+        });
+
+        // TODO: Write more coverage
     });
 });
