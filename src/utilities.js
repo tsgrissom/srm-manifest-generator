@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 
-function getCountString(numberOfThings, singularNoun, pluralNoun = null) {
+export function getCountString(numberOfThings, singularNoun, pluralNoun = null) {
     if (typeof(numberOfThings) !== 'number') {
         throw new Error(`Unable to getCountString for non-numeric number of things parameter: ${numberOfThings}`);
     }
@@ -11,15 +11,16 @@ function getCountString(numberOfThings, singularNoun, pluralNoun = null) {
     return `${numberOfThings} ${verbiage}`;
 };
 
-function isSteamRunning() {
+export function isSteamRunning() {
     return new Promise((resolve, reject) => {
         const {platform} = process;
-        let platformName = null;
-        let command = null;
-        // "ps" will be the command used unless platform is Windows
-        let commandName = 'ps';
+        
+        // "ps" will be the command for Linux and macOS
         // "steam" is a valid search term for Linux and macOS
-        let searchFor = 'steam';
+        let platformName = null,
+            command = null,
+            commandName = 'ps',
+            searchFor = 'steam';
 
         switch (platform) {
             case 'win32':
@@ -63,5 +64,3 @@ function isSteamRunning() {
         });
     });
 }
-
-export { getCountString, isSteamRunning };
