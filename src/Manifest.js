@@ -4,8 +4,13 @@ import YAML from 'yaml';
 
 class Manifest {
 
+    // TODO: Write tests
     constructor(filePath) {
         this.filePath = filePath;
+
+        if (!fs.existsSync(filePath)) {
+            console.warn(`Manifest object created from non-existent file: "${filePath}"`);
+        }
     }
 
     async doesFileExist() {
@@ -18,7 +23,9 @@ class Manifest {
     }
 
     async getFileContents() {
-        if (!this.doesFileExist()) {
+        const fileExists = await this.doesFileExist();
+
+        if (!fileExists) {
             throw new Error(`Could not find the referenced file: "${this.filePath}"`);
         }
 
@@ -40,7 +47,7 @@ class Manifest {
         const fileExists = await this.doesFileExist();
 
         if (!fileExists) {
-            throw new Error(`File does not exist: "${this.filePath}"`);
+            throw new Error(`Unable to getNameOfFile for non-existent file: "${this.filePath}"`);
         }
 
         const name = path.basename(this.filePath);
@@ -49,23 +56,33 @@ class Manifest {
 
     // TODO: Write tests
     async getNameInsideOfFile() {
-
-    }
-
-    async getSourceName() {
         const data = await this.getJsonObject();
-        const nameInsideFile = data.name;
-        const nameOfFile = path.basename(this.filePath);
+        const { name } = data;
 
-        let name = nameOfFile;
-
-        if (nameInsideFile !== null && nameInsideFile.trim() !== '') {
-            name = nameInsideFile;
+        if (name !== null || name.trim() !== '') {
+            return null;
         }
 
         return name;
-        
-        // TODO: Return data.name or the input file's name is none is found
+    }
+
+    async getSourceName() {
+        const fileExists = await this.doesFileExist();
+
+        if (!fileExists) {
+            throw new Error(`Unable to getSourceName for non-existent file: "${this.filePath}"`);
+        }
+
+        const nameOfFile = await this.getNameOfFile();
+        const nameInFile = await this.getNameInsideOfFile();
+
+        let sourceName = nameOfFile;
+
+        if (nameInFile !== null) {
+            sourceName = nameInFile;
+        }
+
+        return sourceName;
     }
 }
 
