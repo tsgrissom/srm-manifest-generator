@@ -7,7 +7,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "lint": "npx eslint . && echo 'ESLint has passed :)'",
+    "lint": "npx eslint .",
     "start": "node . && npm run lint",
     "test": "node --test && npm run lint"
   },

@@ -1,15 +1,14 @@
 import { exec } from 'child_process';
 
-function getCountString(count, singularNoun, pluralNoun = null) {
-    if (typeof(count) !== 'number') {
-        console.error('Cannot pluralize count which is not a number');
-        return 'ERROR';
+function getCountString(numberOfThings, singularNoun, pluralNoun = null) {
+    if (typeof(numberOfThings) !== 'number') {
+        throw new Error(`Unable to getCountString for non-numeric number of things parameter: ${numberOfThings}`);
     }
 
     pluralNoun = pluralNoun || `${singularNoun}s`; 
 
-    const verbiage = (count === 0 || count > 1) ? pluralNoun : singularNoun;
-    return `${count} ${verbiage}`;
+    const verbiage = (numberOfThings === 0 || numberOfThings > 1) ? pluralNoun : singularNoun;
+    return `${numberOfThings} ${verbiage}`;
 };
 
 function isSteamRunning() {

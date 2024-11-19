@@ -2,7 +2,7 @@
 # Create one for each custom source you add to Steam ROM Manager
 # Recommended to put them in a `manifests/` folder in the root of this project
 
-name: Nickname of Game Source
+name: Example Source Name
 # The working directory to search for target files within
 directory: C:/Users/YOU/Some/Working/Directory/To/Start/In
 # The file path to output the JSON file of transformed titles to
