@@ -59,7 +59,7 @@ class Manifest {
         const data = await this.getJsonObject();
         const { name } = data;
 
-        if (name !== null || name.trim() !== '') {
+        if (name === null || name.trim() === '') {
             return null;
         }
 
@@ -78,9 +78,14 @@ class Manifest {
 
         let sourceName = nameOfFile;
 
+        console.log(`NAME OF FILE: ${nameOfFile}`);
+        console.log(`NAME IN FILE: ${nameInFile}`);
+
         if (nameInFile !== null) {
             sourceName = nameInFile;
         }
+
+        console.log(`SOURCE NAME: ${sourceName}`);
 
         return sourceName;
     }

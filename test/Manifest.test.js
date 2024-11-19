@@ -24,7 +24,7 @@ describe('Class: Manifest', () => {
     // Method: Manifest#getFileContents
     describe('Method: getFileContents()', () => {
 
-        it('should throw an error if the file does not exist', async () => {
+        it('should throw error if the file does not exist', async () => {
             await assert.rejects(() => instanceFromNonExistentManifestFile.getFileContents());
         });
 
@@ -56,6 +56,14 @@ describe('Class: Manifest', () => {
             assert.notStrictEqual(name, expected, `Values were equal:\nname: ${name}\nexpected: ${expected}`);
         });
     
+    });
+
+    describe('Method: getNameOfFile()', () => {
+
+    });
+
+    describe('Method: getNameInsideOfFile()', () => {
+
     });
 
     // Method: Manifest#getSourceName
