@@ -64,11 +64,9 @@ describe('Class: Manifest', () => {
         });
 
 
-        it("should, when instance constructed from valid manifest file, return a string not equal to the file's original path", async () => {
-            const name = await instanceFromValidManifestFile.getNameOfFile();
-            const expected = filePathValidManifestFile;
-
-            assert.notStrictEqual(name, expected, `Values were equal:\nname: ${name}\nexpected: ${expected}`);
+        it("should, when instance constructed from existing manifest file, return a string not equal to the file's original path", async () => {
+            const nameOfFile = await instanceFromValidManifestFile.getNameOfFile();
+            assert.notStrictEqual(nameOfFile, instanceFromValidManifestFile.filePath);
         });
     
     });
@@ -77,6 +75,16 @@ describe('Class: Manifest', () => {
 
         it('should, when instance constructed from non-existent file, throw an error', async () => {
             await assert.rejects(() => instanceFromNonExistentManifestFile.hasNameAttribute());
+        });
+
+        it('should, when instance constructed from valid manifest file, return true', async () => {
+            const hasAttr = await instanceFromValidManifestFile.hasNameAttribute();
+            assert.strictEqual(hasAttr, true);
+        });
+
+        it('should, when instance constructed from invalid manifest file, return false', async () => {
+            const hasAttr = await instanceFromInvalidManifestFile.hasNameAttribute();
+            assert.strictEqual(hasAttr, false);
         });
 
     });

@@ -46,7 +46,6 @@ class Manifest {
         return YAML.parse(fileContents);
     }
 
-    // TODO: Write tests
     async getNameOfFile() {
         const fileExists = await this.doesFileExist();
 
