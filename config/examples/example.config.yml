@@ -1,41 +1,88 @@
-# Example Configuration File
-# Make sure your configuration file is named "config.yml" and resides in root folder of SRM Manifest Generator
+# EXAMPLE CONFIGURATION FILE
+#  - Important: Ensure your configuration file is named "config.yml" and resides in the "srm-manifest-generator/config/" folder
 
-# Required: List of YAML manifest files to parse and convert into Steam ROM Manager-compatible json manifests
+# A list of file paths, each one pointing to a SRM Manifest Generator-compatible filetype
+# Make sure you create the "srm-manifest-generator/config/manifests" folder if you use the default location
+# REQUIRED? Yes
+# TODO: Maybe combine file + directory option, check if each listed path is a dir, and search it?
 manifests:
-  - ./manifests/some-manifest.yml
+  - "./config/manifests/some-manifest.yml"
 
+# Settings regarding how SRM Manifest Generator detects and searches for compatible Manifest Files
+search:
+  # Unimplemented; A list of file paths, each one pointing to either:
+  #  - A folder which should be scanned for Manifest Files (requires "search.scan-directories" enabled)
+  #  - Files which should be loaded as Manifest Files
+  # TODO: Move old manifests key to here
+  # TODO: Add support for folders
+  manifests:
+    - "./config/manifests/some-manifest.yml"
+    - "./config/manifests"
+  # Unimplemented; If a directory is added to the "manifests" list, should SRM Manifest Generator examine the files inside it for Manifest Files?
+  #  - If "search.recursive" is disabled and this option is enabled, the search will only take place in this folder, ignoring any subdirectories it contains
+  # Default: true
+  # TODO: Implement
+  scan-directories: true
+  # Unimplemented; If "scan-directories" is enabled and a directory is added to the "manifests" list, should SRM Manifest Generator examine any subfolders for Manifest Files?
+  #  - If "search.scan-directories" is disabled, this option will have no effect
+  # Default: false
+  # TODO: Implement
+  recursive: false
+
+# Settings regarding the output files created by SRM Manifest Generator
 output:
   # Unimplemented; Where should generated manifest files be written? Recommended to use the script's local ./out/ directory
   # Variables: $NAME$ ("name" field in manifest's .yml file)
+  # TODO: Consider merits and maybe cancel this
   path: ./out/$NAME$.manifest.json
-  # Unimplemented; Should space characters in the names of generated manifest files be substituted with another symbol? Set field to '' for no replacement.
-  # Default: "-"
-  replace-spaces: -
+  # Unimplemented; Should space characters in the names of generated manifest files be substituted with another symbol?
+  #  - To disable this feature, set this option to empty quotes ""
+  # Default: "-" 
+  # TODO: Implement
+  replace-spaces: "-"
   # Unimplemented; Should output files be minified?
+  # Default: true
+  # TODO: Implement
   minify: true
   # Unimplemented; If not minified, how many space characters should be used to indent output files?
+  # Default: 2
+  # TODO: Implement
   indentation-spaces: 2
-  # Unimplemented; Should one source equal one output file or should each entry within the source be its own manifest file?
-  # Default: combined   Options: combined, individual
-  mode: combined
+  # Unimplemented; Should a Manifest's contents be spread over multiple files inside a folder named after it ("folder" mode) or transformed into a single file
+  #  named after the Manifest ("file" mode, default)?
+  # Default: "file"
+  # Options: "file" or "folder"
+  # TODO: Implement
+  mode: "file"
 
+# Settings regarding the validation of options the user submits to SRM Manifest Generator, such as checking if a given file path is valid
 validation:
-  # Unimplemented; Should the config.yml be validated?
-  # Default: true   Options: true, false
-  config: true
-  # Unimplemented; List of file extensions to accept as an executable file 
-  # Default: "- exe"
-  executables:
-    - exe
-    # - AppImage
-    # - sh
-  # Unimplemented; Should file paths such as source base directories, source entry directories, 
-  # Default: true   Options: true, false
-  path: true
+  # Unimplemented; Should file paths be validated?
+  # Default: true
+  # TODO: Implement
+  validate-file-paths: true
+  # Unimplemented; Should executables be checked against the list of file extensions "accepted-executables" found below?
+  #  - If false, SRM Manifest Generator will not warn you of unknown/unsupported file extensions being passed to JSON Manifest files as executables
+  # Default: true
+  # TODO: Implement
+  validate-executables: true
+  # Unimplemented; A list of file extensions to accept as an executable file 
+  #  - If "validate-executables" is disabled, this option will have no effect
+  # Default:
+  # ---
+  # accepted-executables:
+  #   - ".exe"
+  # ---
+  # TODO: Implement
+  accepted-executables:
+    - ".exe"
   
+# Settings regarding the logging of actions taken by SRM Manifest Generator to a specified logfile
+# TODO: Implement
 logging:
   # Unimplemented; Should srm-manifest-generator log its actions to a text file?
+  # Default: true
   enabled: true
   # Unimplemented; Where should srm-manifest-generator write its logs?
-  file: ./srm-manifest-generator.log
+  # Default: "./srm-manifest-generator.log"
+  file: "./srm-manifest-generator.log"

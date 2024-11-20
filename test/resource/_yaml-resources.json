@@ -1,0 +1,38 @@
+[
+    {
+        "fileName": "generic-valid-manifest.yml",
+        "fileContents": {
+            "name": "Some Valid Manifest",
+            "directory": "C:/Users/Username/Some/Working/Directory/To/Search/In",
+            "output": "./out/some-valid-manifest.manifest.json",
+            "entries": [
+                {
+                    "title": "A Fake Game",
+                    "target": "Some/Relative/Path/bin/Game.exe"
+                }
+            ]
+        }
+    },
+    {
+        "fileName": "generic-invalid-manifest.yml",
+        "fileContents": {
+            "name": "Some Invalid Manifest",
+            "entries": []
+        }
+    },
+    {
+        "fileName": "manifest-without-name-attribute.yml",
+        "fileContents": {
+            "entries": [
+                {
+                    "title": "A Fake Game",
+                    "target": "Some/Relative/Path/bin/Game.exe"
+                }
+            ]
+        }
+    },
+    {
+        "fileName": "empty-manifest.yml",
+        "fileContents": {}
+    }
+]

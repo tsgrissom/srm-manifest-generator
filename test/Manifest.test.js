@@ -1,8 +1,11 @@
-import { describe, it } from 'node:test';
+import path from 'node:path';
+import fs from 'node:fs';
 import assert from 'node:assert';
+import { before, after, describe, it } from 'node:test';
+
+import YAML from 'yaml';
 
 import Manifest from '../src/Manifest.js';
-import path from 'node:path';
 
 // Test resources
 const filePathValidManifestFile = './test/valid-manifest.yml',
@@ -12,6 +15,54 @@ const instanceFromValidManifestFile = new Manifest(filePathValidManifestFile),
       instanceFromInvalidManifestFile = new Manifest(filePathInvalidManifestFile),
       instanceFromNonExistentManifestFile = new Manifest(filePathNonExistentManifestFile);
 const expectedNameAttributeFromValidManifestFile = 'A Valid Manifest';
+
+let resourceFilePaths = [];
+
+function setupTestResourceYamlFiles() {
+    const mapFilePath = './test/resource/_yaml-resources.json';
+    const mapFileContents = fs.readFileSync(mapFilePath);
+    const map = JSON.parse(mapFileContents);
+    
+    map.forEach(resourceFile => {
+        const { fileName, fileContents } = resourceFile;
+
+        if (fileName === undefined) {
+            throw new Error(`Test resource map is missing a "fileName" attribute: "${mapFilePath}"`);
+        }
+
+        const areContentsEmpty = fileContents === undefined || fileContents === null || Object.keys(fileContents).length === 0;
+        const writePath = `./test/resource/${fileName}`;
+        const writeContents = areContentsEmpty ? '' : YAML.stringify(fileContents);
+
+        fs.writeFileSync(writePath, writeContents);
+        console.log(`Created test resource temp file: "${writePath}"`);
+        resourceFilePaths.push(writePath);
+    });
+}
+
+function tearDownTestResourceFiles() {
+    const totalCount = resourceFilePaths.length;
+    let rmCount = 0;
+
+    resourceFilePaths.forEach(filePath => {
+        if (fs.existsSync(filePath)) {
+            rmCount++;
+            fs.unlinkSync(filePath);
+        }
+    });
+    resourceFilePaths = [];
+
+    // console.log(`Tear down test resources complete: Removed ${rmCount} files / ${totalCount} cached file paths`);
+    console.log(`Tear down test resources complete: Removed ${rmCount}/${totalCount} temp files`);
+}
+
+before(() => {
+    setupTestResourceYamlFiles();
+});
+
+after(() => {
+    // tearDownTestResourceFiles();
+});
 
 describe('Class: Manifest', () => {
 

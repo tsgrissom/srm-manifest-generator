@@ -1,5 +1,7 @@
 # TODO List
 
+* Add images to README
+  * Especially for Steam ROM Manager setup section
 * Add validation
   * Titles should have a title attribute
   * Title attribute should point to a valid exe, if not warn and skip

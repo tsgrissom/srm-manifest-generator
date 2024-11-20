@@ -1,18 +1,64 @@
-# Example Manifest File
-# Create one for each custom source you add to Steam ROM Manager
-# Recommended to put them in a `manifests/` folder in the root of this project
+# EXAMPLE MANIFEST FILE
+#  - SRM Manifest Generator can convert your YAML Manifest files into Steam ROM Manager-compatible JSON Manifest files.
+#  - Steam ROM Manager is required to utilize the created JSON files.
+#  - IMPORTANT: Make sure you read the project README: https://github.com/tsgrissom/srm-manifest-generator
 
+# Recommended setup: For each Parser you create in Steam ROM Manager, create one YAML Manifest File which maps the structure of your files.
+#  - It's recommended that you put your .yml manifest files in the "srm-manifest-generator/config/manifests" directory
+#  - More example config files can be found in the "srm-manifest-generator/config/examples" directory
+#  - The project README details how to create your Parser: https://github.com/tsgrissom/srm-manifest-generator
+
+# The nickname for your source. Only used within srm-manifest-generator for visual grepping.
+# REQUIRED? No
+#  - Without being set, the name of your source will be inferred from the name of this file.
 name: Example Source Name
-# The working directory to search for target files within
-directory: C:/Users/YOU/Some/Working/Directory/To/Start/In
-# The file path to output the JSON file of transformed titles to
-# Recommended to use relative path ./output within the project, and to name file ending in .manifest.json for clarity
+# The base directory to search for target executables within. Used as a base and combined with each entry's "target" attribute to create a
+#  valid path to your target executable.
+# REQUIRED? Yes
+#  - srm-manifest-generator dynamically constructs the full path to your executable based on this working directory, saving a lot of hassle.
+#  - This removes a good deal of hassle from having to maintain absolute paths to your executables as in manually written JSON manifests.
+directory: C:/Users/Username/Some/Working/Directory/To/Search/In
+# The file path to write your generated JSON Manifest File to
+# REQUIRED? Yes
+#  - Recommended to use relative path ./output within the project, and to name file ending in .manifest.json for clarity
 output: ./out/SomeSource.manifest.json
-# The titles to find within your directory using relative paths
-# Attributes "title" and "target" are required
-# "target" must point to a valid .exe file at a relative path within your working directory above
+# For each app you want Steam ROM Manager to detect, create an entry in the "entries" list
+# REQUIRED? No, with some exception:
+#  - You can leave the "entries" field blank for now
+#  - If you create an entry it requires a "target" property which points to the desired executable file
 entries:
+    # The name of your Game/App/etc.
+    # REQUIRED? No
+    #  - Without being set, SRM Manifest Generator will attempt to infer the name from the "target" property
+    #  - The "title" property can affect Steam ROM Manager's ability to find suitable artwork for your Steam shortcut
+    #  - It is highly recommended to set the "title" property; Use the internet to find the precise title of your app
+    #  - Steam ROM Manager is created by the team at SteamGridDB, so it would be a good idea to reference SGDB for properly titling your app
   - title: An Example Game
-    target: SomeRelativePath/bin/Game.exe
+    # A relative file path pointing to a valid executable file
+    #  - Remember, the Manifest File specifies a Base Directory
+    #  - The Base Directory is combined with your "target" property to create a full path
+    #  - This is to save time and avoid simple mistakes during the repetitive task of rewriting the base path for each entry
+    # REQUIRED? Yes
+    #  - A "target" property is required to create a working Steam shortcut
+    #  - This file path should point to a valid executable file
+    #  - Valid executable file extensions are configured in the config.yml: See the example file "example.config.yml"
+    target: Some/Relative/Path/Starting/From/Working/Directory/bin/Game.exe
+    # Each new entry in the list is demarcated by a hyphen, which ends the previous entry and begins a new one
+    # Technically speaking, this relies on the list of objects syntax of YAML
+    # See the incorrect examples below
   - title: Some Other Game You Want Added to Steam
     target: The Game Folder/TheExecutable.exe
+  - title: Some Third Game
+    target: A/Relative/Path/To/An/app_x64.exe
+    # This entries list illustrates a valid list of apps, assuming the "target" points to a real executable and the "title"
+    #  resolves some artwork when parsed by Steam ROM Manager.
+
+
+
+# EXAMPLE OF BAD ENTRIES SYNTAX
+# The example below would be interpreted as two separate apps, one with a title and no target, and the other with
+#  a target and no title. The first app would be invalid as it is missing a target executable.
+# --------------------
+# entries:
+#   - title: Some Game
+#   - target: 
