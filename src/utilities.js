@@ -13,6 +13,27 @@ export function logDebug(message, withPrefix = true, withColor = true) {
     }
 }
 
+// TODO: String prototype this
+// TODO: Write tests
+function capitalize(str) {
+    if (str.trim() === '') {
+        return str;
+    }
+    const firstLetter = str.substring(0, 1);
+    const restOfStr   = str.substring(1, str.length);
+
+    return firstLetter.toUpperCase() + restOfStr;
+}
+
+// TODO: Write tests
+export function getFormattedBoolean(b, withColor = true, withCapitalization = true, trueStr = 'yes', falseStr = 'no') {
+    let str = b ? trueStr : falseStr;
+    if (withCapitalization) {
+        str = capitalize(str);
+    }
+    return withColor ? (b ? chalk.greenBright(str) : chalk.redBright(str)) : str;
+}
+
 export function getCountString(numberOfThings, singularNoun, pluralNoun = null) {
     if (typeof(numberOfThings) !== 'number') {
         throw new Error(`Unable to getCountString for non-numeric number of things parameter: ${numberOfThings}`);

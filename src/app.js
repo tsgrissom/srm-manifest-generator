@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import chalk from 'chalk';
 import yaml from 'yaml';
 
-import { getCountString } from './utilities.js';
+import { getCountString, getFormattedBoolean, logDebug } from './utilities.js';
 import userConfig from './config.js';
 
 const isDebugging = process.argv.includes('--debug'); // TODO: Replace with better CLI
@@ -76,8 +76,10 @@ async function writeOutputManifest(inputPath) {
 function startApp() {
     const { manifests, scanDirectories, recursive } = userConfig.search;
 
-    const debug = `DEBUG:\nscanDirectories: ${scanDirectories}\nrecursive: ${recursive}\nmanifests: ${manifests}`;
-    console.log(chalk.blue(debug));
+    logDebug('User Config');
+    logDebug(` - Should Scan Directories: ${getFormattedBoolean(scanDirectories)}`, false);
+    logDebug(` - Should Scan Recursively: ${getFormattedBoolean(recursive)}`, false);
+    logDebug(` - Manifests: ${manifests}`, false);
 
     manifests.forEach(input => {
         if (isDebugging) {

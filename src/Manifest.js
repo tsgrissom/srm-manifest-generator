@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import chalk from 'chalk';
 import YAML from 'yaml';
+import { logDebug } from './utilities.js';
 
 class Manifest {
 
@@ -10,7 +11,7 @@ class Manifest {
         this.filePath = filePath;
 
         if (!fs.existsSync(filePath)) {
-            console.warn(chalk.yellow(`WARN: Manifest object created from non-existent file: "${filePath}"`));
+            logDebug(chalk.yellow(`WARN: Manifest object created from non-existent file: "${filePath}"`, false, false));
         }
     }
 
@@ -75,7 +76,18 @@ class Manifest {
 
         const { name } = data;
 
-        if (name === null || name.trim() === '') {
+        // if (name === null || name.trim() === '') {
+        //     return false;
+        // }
+        if (name === null) {
+            return false;
+        }
+
+        if (typeof(name) !== 'string') {
+            return false;
+        }
+
+        if (name.trim() === '') {
             return false;
         }
 
