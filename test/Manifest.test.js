@@ -9,19 +9,10 @@ import YAML from 'yaml';
 import Manifest from '../src/Manifest.js';
 import { logDebug } from '../src/utilities.js';
 
-// Test resources
-// const filePathValidManifestFile = './test/valid-manifest.yml',
-// const filePathInvalidManifestFile = './test/invalid-manifest.yml',
-    //   filePathNonExistentManifestFile = './test/file-that-shouldnt-exist.yml';
-// const instanceFromValidManifestFile = new Manifest(filePathValidManifestFile),
-// const instanceFromInvalidManifestFile = new Manifest(filePathInvalidManifestFile),
-    //   instanceFromNonExistentManifestFile = new Manifest(filePathNonExistentManifestFile);
-const expectedNameAttributeFromValidManifestFile = 'Some Valid Manifest';
-
 let resourceFilePaths = [];
 
 function setupTestResourceYamlFiles() {
-    const mapFilePath = './test/resource/_yaml-resources.json';
+    const mapFilePath = './test/resource/manifest-resources.json';
     const mapFileContents = fs.readFileSync(mapFilePath);
     const map = JSON.parse(mapFileContents);
     let count = 0;
@@ -177,9 +168,9 @@ describe('Class: Manifest', () => {
             await assert.rejects(() => manifestNonExistent.getName());
         });
 
-        it(`should, when instance constructed from valid manifest file, return string literal "${expectedNameAttributeFromValidManifestFile}"`, async () => {
+        it(`should, when instance constructed from valid manifest file, return string literal "Some Valid Manifest"`, async () => {
             const name = await manifestGenericValid.getName();
-            assert.strictEqual(name, expectedNameAttributeFromValidManifestFile);
+            assert.strictEqual(name, 'Some Valid Manifest');
         });
 
         it("should, when instance constructed from manifest that has no name attribute, return file's basename as a string", async () => {
