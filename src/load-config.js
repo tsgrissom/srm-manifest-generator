@@ -1,12 +1,13 @@
 import fs from 'node:fs';
 import https from 'node:https';
+import path from 'node:path';
 
 import yaml from 'yaml';
 
-export const URL_EXAMPLE_CONFIG = 'https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main/config/examples/example.config.yml',
-             PATH_EXAMPLE_CONFIG = './config/examples/example.config.yml',
+export const URL_EXAMPLE_CONFIG  = 'https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main/config/examples/example.config.yml',
+             PATH_EXAMPLE_CONFIG = path.join('config', 'examples', 'example.config.yml'),
              //PATH_USER_CONFIG = PATH_EXAMPLE_CONFIG;
-             PATH_USER_CONFIG = './config/config.yml';
+             PATH_USER_CONFIG    = path.join('config', 'config.yml');
 
 async function downloadExampleConfig() {
     return new Promise((resolve, reject) => {
