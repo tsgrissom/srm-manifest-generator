@@ -10,10 +10,9 @@ manifests:
 
 # Settings regarding how SRM Manifest Generator detects and searches for compatible Manifest Files
 search:
-  # Unimplemented; A list of file paths, each one pointing to either:
+  # A list of file paths, each one pointing to either:
   #  - A folder which should be scanned for Manifest Files (requires "search.scan-directories" enabled)
-  #  - Files which should be loaded as Manifest Files
-  # TODO: Move old manifests key to here
+  #  - A file which should be loaded as a Manifest File
   # TODO: Add support for folders
   manifests:
     - "./config/manifests/some-manifest.yml"

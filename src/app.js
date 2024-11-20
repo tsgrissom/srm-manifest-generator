@@ -79,14 +79,6 @@ function startApp() {
     const debug = `DEBUG:\nscanDirectories: ${scanDirectories}\nrecursive: ${recursive}\nmanifests: ${manifests}`;
     console.log(chalk.blue(debug));
 
-    const headerConfiguredManifestPaths = `Loaded ${manifests.length} Manifest Paths from Configuration`;
-
-    if (isDebugging) {
-        console.log(chalk.yellow(headerConfiguredManifestPaths));
-    } else {
-        console.log(headerConfiguredManifestPaths);
-    }
-
     manifests.forEach(input => {
         if (isDebugging) {
             console.log(`  - "${input}"`);
