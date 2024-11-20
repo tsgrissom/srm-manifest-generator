@@ -9,10 +9,12 @@ import YAML from 'yaml';
 import Manifest from '../src/Manifest.js';
 import { logDebug } from '../src/utilities.js';
 
+const __dirname = import.meta.dirname;
+
 let resourceFilePaths = [];
 
 function setupTestResourceYamlFiles() {
-    const mapFilePath = './test/resource/manifest-resources.json';
+    const mapFilePath = path.join(__dirname, 'resource', 'manifest-resources.json');
     const mapFileContents = fs.readFileSync(mapFilePath);
     const map = JSON.parse(mapFileContents);
     let count = 0;
@@ -25,7 +27,7 @@ function setupTestResourceYamlFiles() {
         }
 
         const areContentsEmpty = fileContents === undefined || fileContents === null || Object.keys(fileContents).length === 0;
-        const writePath = `./test/resource/${fileName}`;
+        const writePath = path.join(__dirname, 'resource', fileName);
         const writeContents = areContentsEmpty ? '' : YAML.stringify(fileContents);
 
         fs.writeFileSync(writePath, writeContents);
@@ -71,11 +73,11 @@ describe('Class: Manifest', () => {
         manifestEmpty;
 
     beforeEach(() => {
-        manifestGenericValid    = new Manifest('./test/resource/manifest/generic-valid.yml');
-        manifestGenericInvalid  = new Manifest('./test/resource/manifest/generic-invalid.yml');
-        manifestNonExistent     = new Manifest('./test/resource/manifest/some-file-that-doesnt-exist.yml');
-        manifestNoNameAttribute = new Manifest('./test/resource/manifest/no-name-attribute.yml');
-        manifestEmpty           = new Manifest('./test/resource/manifest/empty.yml');
+        manifestGenericValid    = new Manifest(path.join(__dirname, 'resource', 'manifest', 'generic-valid.yml'));
+        manifestGenericInvalid  = new Manifest(path.join(__dirname, 'resource', 'manifest', 'generic-invalid.yml'));
+        manifestNonExistent     = new Manifest(path.join(__dirname, 'resource', 'manifest', 'some-non-existent-file.yml'));
+        manifestNoNameAttribute = new Manifest(path.join(__dirname, 'resource', 'manifest', 'no-name-attribute.yml'));
+        manifestEmpty           = new Manifest(path.join(__dirname, 'resource', 'manifest', 'empty.yml'));
     });
 
     // Method: Manifest#doesFileExist
