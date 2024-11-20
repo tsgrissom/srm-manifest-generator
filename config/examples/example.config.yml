@@ -80,9 +80,9 @@ validation:
 # Settings regarding the logging of actions taken by SRM Manifest Generator to a specified logfile
 # TODO: Implement
 logging:
-  # Unimplemented; Should srm-manifest-generator log its actions to a text file?
+  # Unimplemented; Should SRM Manifest Generator log its actions to a text file?
   # Default: true
   enabled: true
-  # Unimplemented; Where should srm-manifest-generator write its logs?
+  # Unimplemented; Where should SRM Manifest Generator write its logs?
   # Default: "./srm-manifest-generator.log"
   file: "./srm-manifest-generator.log"
