@@ -15,7 +15,7 @@ export function logDebug(message, withPrefix = true, withColor = true) {
 
 // TODO: String prototype this
 // TODO: Write tests
-function capitalize(str) {
+export function capitalize(str) {
     if (str.trim() === '') {
         return str;
     }

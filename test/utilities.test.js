@@ -1,8 +1,21 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { getCountString, isSteamRunning } from "../src/utilities.js";
+import { capitalize, getCountString, isSteamRunning } from "../src/utilities.js";
 
 describe('File: utilities.js', () => {
+
+    describe('Function: capitalize', () => {
+
+        it('should, when passed an empty string or a string which only contains whitespace, return the given string', async (t) => {
+            const inputs = ['', ' ', '   ', '   '];
+            for (const input of inputs) {
+                await t.test(`Subtest for input: "${input}"`, () => {
+                    assert.strictEqual(capitalize(input), input);
+                });
+            }
+        });
+
+    });
     
     describe('Function: isSteamRunning', () => {
 
