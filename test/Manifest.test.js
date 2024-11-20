@@ -3,9 +3,11 @@ import fs from 'node:fs';
 import assert from 'node:assert';
 import { before, after, describe, it } from 'node:test';
 
+import chalk from 'chalk';
 import YAML from 'yaml';
 
 import Manifest from '../src/Manifest.js';
+import { logDebug } from '../src/utilities.js';
 
 // Test resources
 const filePathValidManifestFile = './test/valid-manifest.yml',
@@ -22,6 +24,7 @@ function setupTestResourceYamlFiles() {
     const mapFilePath = './test/resource/_yaml-resources.json';
     const mapFileContents = fs.readFileSync(mapFilePath);
     const map = JSON.parse(mapFileContents);
+    let count = 0;
     
     map.forEach(resourceFile => {
         const { fileName, fileContents } = resourceFile;
@@ -35,8 +38,13 @@ function setupTestResourceYamlFiles() {
         const writeContents = areContentsEmpty ? '' : YAML.stringify(fileContents);
 
         fs.writeFileSync(writePath, writeContents);
-        console.log(`Created test resource temp file: "${writePath}"`);
         resourceFilePaths.push(writePath);
+        count++;
+    });
+
+    logDebug(`Created ${count} test resource files`);
+    resourceFilePaths.forEach(filePath => {
+        logDebug(chalk.greenBright.bold('+ ') + filePath, false);
     });
 }
 
@@ -52,8 +60,7 @@ function tearDownTestResourceFiles() {
     });
     resourceFilePaths = [];
 
-    // console.log(`Tear down test resources complete: Removed ${rmCount} files / ${totalCount} cached file paths`);
-    console.log(`Tear down test resources complete: Removed ${rmCount}/${totalCount} temp files`);
+    logDebug(`Teardown of test resources completed: Removed ${rmCount}/${totalCount} temp files`);
 }
 
 before(() => {

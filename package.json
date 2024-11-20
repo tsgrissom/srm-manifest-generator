@@ -8,8 +8,11 @@
   "main": "index.js",
   "scripts": {
     "lint": "npx eslint .",
-    "start": "node . && npm run lint",
-    "test": "node --test test/ && npm run lint"
+    "start": "node .",
+    "test": "node --test",
+    "testd": "DEBUG=true && node --test && DEBUG=false && npx eslint .",
+    "poststart": "npx eslint .",
+    "posttest": "npx eslint ."
   },
   "keywords": [
     "emulation",

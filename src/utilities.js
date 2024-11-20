@@ -1,4 +1,17 @@
+import chalk from 'chalk';
 import { exec } from 'child_process';
+
+export function logDebug(message, withPrefix = true, withColor = true) {
+    const isDebugging = process.env.DEBUG === 'true' || process.argv.includes('--debug') || process.argv.includes('-D');
+
+    if (isDebugging) {
+        const prefix = 'DEBUG: ';
+        let builder = withPrefix ? (withColor ? chalk.magentaBright(prefix) : prefix) : '';
+        builder += message;
+
+        console.log(builder);
+    }
+}
 
 export function getCountString(numberOfThings, singularNoun, pluralNoun = null) {
     if (typeof(numberOfThings) !== 'number') {
