@@ -1,5 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
+
+import chalk from 'chalk';
 import YAML from 'yaml';
 
 class Manifest {
@@ -8,7 +10,7 @@ class Manifest {
         this.filePath = filePath;
 
         if (!fs.existsSync(filePath)) {
-            console.warn(`Manifest object created from non-existent file: "${filePath}"`);
+            console.warn(chalk.yellow(`WARN: Manifest object created from non-existent file: "${filePath}"`));
         }
     }
 
@@ -41,7 +43,7 @@ class Manifest {
         return fileContents;
     }
 
-    async getJsonObject() {
+    async getObject() {
         const fileContents = await this.getFileContents(); // Assumed to be YAML file
         return YAML.parse(fileContents);
     }
@@ -65,7 +67,7 @@ class Manifest {
             throw new Error(`Unable to check if hasNameAttribute for non-existent file: "${this.filePath}"`);
         }
 
-        const data = await this.getJsonObject();
+        const data = await this.getObject();
 
         if (data === null) {
             return false;
@@ -94,7 +96,7 @@ class Manifest {
             return null;
         }
 
-        const data = await this.getJsonObject();
+        const data = await this.getObject();
         return data.name;
     }
 

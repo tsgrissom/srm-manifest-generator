@@ -74,14 +74,10 @@ async function writeOutputManifest(inputPath) {
 }
 
 function startApp() {
-    const { manifests } = userConfig;
+    const { manifests, scanDirectories, recursive } = userConfig.search;
 
-    if (!Array.isArray(manifests)) {
-        console.error('Invalid config.yml: Key "manifests" should be a list of paths to manifest .yml files');
-        return;
-    }
-
-    // TODO: Validate manifest paths
+    const debug = `DEBUG:\nscanDirectories: ${scanDirectories}\nrecursive: ${recursive}\nmanifests: ${manifests}`;
+    console.log(chalk.blue(debug));
 
     const headerConfiguredManifestPaths = `Loaded ${manifests.length} Manifest Paths from Configuration`;
 

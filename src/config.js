@@ -1,11 +1,13 @@
 import fs from 'node:fs';
 import https from 'node:https';
 
+import chalk from 'chalk';
 import yaml from 'yaml';
 
 const URL_EXAMPLE_CONFIG = 'https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main/config/examples/example.config.yml';
 const PATH_EXAMPLE_CONFIG = './config/examples/example.config.yml';
 const PATH_USER_CONFIG = './config/config.yml';
+// const PATH_USER_CONFIG = './config/examples/example.config.yml';
 
 async function downloadExampleConfig() {
     return new Promise((resolve, reject) => {
@@ -93,5 +95,76 @@ async function loadUserConfigData() {
     return configData;
 }
 
-const userConfig = await loadUserConfigData();
+function printInvalidConfigReasonAndExit(message, displayReadme = true) {
+    console.error(chalk.red(`Invalid User Config: ${message}`));
+    if (displayReadme) {
+        console.log(chalk.red('See the project README: ') + chalk.red.underline('https://github.com/tsgrissom/srm-manifest-generator'));
+    }
+    process.exit();
+}
+
+function printConfigStatus(message) {
+    console.log(`User Config: ${message}`);
+}
+
+// LOAD, PARSE, AND EXPORT USER CONFIG
+
+let userConfigData;
+const userConfig = {
+    search: {},
+    output: {},
+    validation: {},
+    logging: {}
+};
+
+try {
+    userConfigData = await loadUserConfigData();
+} catch (error) {
+    console.error(chalk.red('An error occurred while loading the user config data:', error));
+}
+
+if (!userConfigData) {
+    if (!fs.existsSync(PATH_USER_CONFIG)) {
+        printInvalidConfigReasonAndExit('You must create a config.yml to use SRM Manifest Generator');
+    } else {
+        printInvalidConfigReasonAndExit('Your config.yml cannot be empty. Visit the link below to view required configuration options.');
+    }
+}
+
+// Process section: "search"
+{
+    const section = userConfigData.search;
+
+    if (section === null) {
+        printInvalidConfigReasonAndExit('Your config.yml "search" section cannot be empty');
+    }
+    if (!section) {
+        printInvalidConfigReasonAndExit('Your config.yml is missing the required section "search"');
+    }
+
+    const { manifests } = section;
+
+    if (!manifests) {
+        printInvalidConfigReasonAndExit('Your config.yml is missing the required list of paths "manifests" within the section "search"');
+    }
+    
+    const scanDirectories = section['scan-directories'] ?? true;
+    const recursive = section.recursive || false;
+    // TODO: Implement options
+    const processedManifests = manifests;
+    // TODO: Process manifest paths
+
+    userConfig.search.scanDirectories = scanDirectories;
+    userConfig.search.recursive = recursive;
+    userConfig.search.manifests = processedManifests;
+
+    printConfigStatus(`Loaded ${processedManifests.length}/${manifests.length} manifest paths`);
+}
+
+// Process section: "output"
+
+// Process section: "validation"
+
+// Process section: "logging"
+
 export default userConfig;

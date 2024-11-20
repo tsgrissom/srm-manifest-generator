@@ -61,7 +61,7 @@ before(() => {
 });
 
 after(() => {
-    // tearDownTestResourceFiles();
+    tearDownTestResourceFiles();
 });
 
 describe('Class: Manifest', () => {
