@@ -27,12 +27,13 @@ describe('File: utilities.js', () => {
     
     describe('Function: getCountString', () => {
 
-        it('should, when passed a non-number argument to number of things parameter, throw an error', () => {
+        it('should, when passed a non-number argument to number of things parameter, throw an error', async (t) => {
             const inputs = ['Some string', true, false, 'true', '2'];
-    
-            inputs.forEach(input => {
-                assert.throws(() => getCountString(input));
-            });
+            for (const input of inputs) {
+                await t.test(`Subtest for input: ${input}`, () => {
+                    assert.throws(() => getCountString(input));
+                });
+            }
         });
 
         // TODO: This

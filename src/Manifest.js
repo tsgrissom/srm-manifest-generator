@@ -14,7 +14,6 @@ class Manifest {
             logDebug(chalk.yellow(`WARN: Manifest object created from non-existent file: "${filePath}"`, false, false));
         } else {
             const stats = fs.statSync(filePath);
-
             // TODO: Write unit test
             if (!stats.isFile()) {
                 throw new Error(`Unable to create Manifest from non-file: "${filePath}"`);
