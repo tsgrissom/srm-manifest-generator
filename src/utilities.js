@@ -47,7 +47,7 @@ export function getCountString(numberOfThings, singularNoun, pluralNoun = null) 
 
 export function isSteamRunning() {
     return new Promise((resolve, reject) => {
-        const {platform} = process;
+        const { platform } = process;
         
         // "ps" will be the command for Linux and macOS
         // "steam" is a valid search term for Linux and macOS

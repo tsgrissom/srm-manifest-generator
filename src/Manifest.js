@@ -13,6 +13,13 @@ class Manifest {
         if (!fs.existsSync(filePath)) {
             logDebug(chalk.yellow(`WARN: Manifest object created from non-existent file: "${filePath}"`, false, false));
         }
+
+        const stats = fs.statSync(filePath);
+
+        // TODO: Write unit test
+        if (!stats.isFile()) {
+            throw new Error(`Unable to create Manifest from non-file: "${filePath}"`);
+        }
     }
 
     async doesFileExist() {
@@ -76,9 +83,6 @@ class Manifest {
 
         const { name } = data;
 
-        // if (name === null || name.trim() === '') {
-        //     return false;
-        // }
         if (name === null) {
             return false;
         }
