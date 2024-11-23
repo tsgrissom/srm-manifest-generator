@@ -1,5 +1,6 @@
 # TODO List
 
+* Upload sample manifest files from `PC Ports.manifest.yml` and its output `PC Ports.manifest.json`, as well as `Epic Games Store.manifest.yml`
 * Add images to README
   * Especially for Steam ROM Manager setup section
 * Add validation
