@@ -35,9 +35,15 @@ async function writeOutputManifest(inputPath) {
     const outputName = `"${outputPath}"`;
 
     const inputEntries = inputJson.entries || [];
-    const outputValues = inputEntries.map(entry => {
-        const { title, target } = entry;
-        // TODO: Lint the input object for valid path, exe, etc.
+    const outputValues = inputEntries
+    .filter(shortcut => {
+        const {enabled} = shortcut;
+        const isEnabled = enabled || enabled === undefined;
+        return isEnabled; // TODO Check for anticipated behavior
+    })
+    .map(shortcut => {
+        const {title, target} = shortcut;
+        // TODO Lint input object for valid path, executable, etc.
         return {
             title: title,
             target: `${directory}/${target}`
