@@ -151,6 +151,12 @@ class Manifest {
         }
     }
 
+    // TODO Rewrite to calculate output filepath based on given output value
+    async getWritePath() {
+        const outputPath = await this.getOutputPath();
+        return outputPath;
+    }
+
     async getRootDirectory() {
         const fileExists = await this.doesFileExist();
 
@@ -162,8 +168,8 @@ class Manifest {
 
         if (data.root) {
             return data.root;
-        } else if (data.entries) {
-            return data.entries;
+        } else if (data.directory) {
+            return data.directory;
         } else {
             throw new Error(`Could not find root directory for Manifest: ${this.name}`);
         }

@@ -14,6 +14,6 @@ shortcuts:
     # A second example to illustrate how the shortcuts list should be formatted
   - title: Rocket League
     # I do not play Rocket League, this is just an example
-    enabled: true
+    enabled: false
     # Expected path: G:/Libraries/Epic Games/Rocket League/Whatever/The/Path/To/Exe/Is.exe
     target: Rocket League/Whatever/The/Path/To/Exe/Is.exe

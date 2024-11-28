@@ -70,20 +70,20 @@ async function calculateOutputWritePathFromInputPath(fileName, inpPath) {
     return inpPath;
 }
 
-async function writeOutputManifest(inpPath) {
-    const manifest = new Manifest(inpPath); // TODO Replace with manifest in parameters
-    
+async function writeOutputManifest(manifest) {
     // TODO Replace the bulk of this code with methods from Manifest
     // TODO Additionally validate if write path is valid, make folders if missing
     // TODO If it's a file, write to the file, but if it's a folder, write the file inside of the folder, maybe based on the input file's name
 
-    const inputFileName = await manifest.getNameOfFile();
+    const inputFilePath = manifest.fileName;
+    const inputFileBasename = await manifest.getNameOfFile();
     const outputPath = await manifest.getOutputPath();
+    const writePath = await manifest.getWritePath();
     const rootDir = await manifest.getRootDirectory();
     const shortcuts = await manifest.getShortcuts(); // Top-level shortcuts in the manifest document, key "shortcuts"
 
     if (!outputPath) { // TODO Test this
-        const t = `Unable to write manifest file without specifying an output path: ${inpPath}`;
+        const t = `Unable to write manifest file without specifying an output path: ${inputFilePath}`;
         const tc = true ? chalk.red(t) : t; // TODO withColor
         const t2 = 'Ensure your manifest file has a top-level property named "output"';
         const tc2 = true ? chalk.red(t2) : t2; // TODO withColor
@@ -93,19 +93,16 @@ async function writeOutputManifest(inpPath) {
         return;
     }
 
-    const inpPathName = `"${inpPath}"`;
-    const outPathName = `"${outputPath}"`;
-
-    // TODO Calc writePath
-    const writePath = outputPath;
+    const inputName = `"${inputFilePath}"`;
+    const outputName = `"${outputPath}"`;
     const writePathName = `"${writePath}`;
     
     if (Array.isArray(shortcuts)) {
         if (shortcuts.length === 0) {
-            console.log(chalk.yellow(`WARN: No top-level shortcuts value found in manifest: ${inpPathName}`));
+            console.log(chalk.yellow(`WARN: No top-level shortcuts value found in manifest: ${inputName}`));
         }
     } else {
-        console.error(chalk.red(`ERROR: Manifest ${inpPathName} has a non-array shortcuts key when shortcuts must be a array`));
+        console.error(chalk.red(`ERROR: Manifest ${inputName} has a non-array shortcuts key when shortcuts must be a array`));
     }
 
     // TODO Any preprocessing needed for raw top-level shortcuts?
@@ -142,7 +139,7 @@ async function writeOutputManifest(inpPath) {
     const ctOk = getCountString(nOk, 'shortcut');
     
     if (isDebugging) {
-        let header = `Transformed ${ctRatioOkToTotal} from source "${inputFileName}"`;
+        let header = `Transformed ${ctRatioOkToTotal} from source "${inputFileBasename}"`;
 
         if (nOk > 1) {
             header += ` to output ${writePathName}`;
@@ -153,10 +150,10 @@ async function writeOutputManifest(inpPath) {
         const subheaderC = true ? chalk.yellow(subheader) : subheader; // TODO withColor
 
         console.log(headerC); // TODO withColor
-        console.log(` * Source File: ${inpPath}`);
+        console.log(` * Source File: ${inputFilePath}`);
         console.log(` * Output Path: ${outputPath}`);
         console.log(` * Output File: ${outputPath}`);
-        console.log(` * Source Name: ${inputFileName}`);
+        console.log(` * Source Name: ${inputFileBasename}`);
         console.log(` * Root Directory: ${rootDir}`);
         console.log(subheaderC); // TODO withColor
         console.log(` - Total Shortcuts in File: ${nTotal}`);
@@ -167,11 +164,10 @@ async function writeOutputManifest(inpPath) {
     }
 
     const sbCheck = '\u2713 ';
-    // const sbXmark = 'X';
     const sbXmark = '\u2715';
-    const pfxOk   = chalk.greenBright.bold(sbCheck);
-    const pfxFail = chalk.redBright.bold(sbXmark);
-    const pfxWarn = chalk.yellowBright.bold(sbXmark);
+    const pfxOk   = true ? chalk.greenBright.bold(sbCheck) : sbCheck; // TODO withColor check
+    const pfxFail = true ? chalk.redBright.bold(sbXmark) : sbXmark;
+    const pfxWarn = true ? chalk.yellowBright.bold('!') : '!';
 
     const writeStr = JSON.stringify(newShortcuts, null, 2);
 
@@ -184,16 +180,20 @@ async function writeOutputManifest(inpPath) {
 
             let wrotePrefix;
 
-            if (nOk > 0) {
+            if (nOk > 0) { // At least one shortcut was ok
                 if (nOk === nTotal) { // 100% success
                     wrotePrefix = pfxOk;
                 } else { // Success between 0-100%
-                    wrotePrefix = pfxWarn;
+                    if (nOk === (nTotal - nDisabled)) {
+                        wrotePrefix = pfxOk;
+                    } else { // TEST This condition
+                        wrotePrefix = pfxWarn;
+                    }
                 }
-            } else {
-                if (nOk === nTotal) { // 100% success because there were zero total and zero ok
+            } else { // All shortcuts might have failed
+                if (nOk === nTotal) { // Success because there were no shortcuts
                     wrotePrefix = pfxOk;
-                } else {
+                } else { // All shortcuts have failed
                     wrotePrefix = pfxFail;
                 }
             }
@@ -201,7 +201,7 @@ async function writeOutputManifest(inpPath) {
             // TODO This all needs withColor
 
             const strCtRatioOkToTotal = true ? chalk.magentaBright(ctRatioOkToTotal) : ctRatioOkToTotal;
-            const strFromSource = `from source ${true ? chalk.cyanBright(inputFileName) : inputFileName}`;
+            const strFromSource = `from source ${true ? chalk.cyanBright(inputFileBasename) : inputFileBasename}`;
 
             let strBuilder = `${wrotePrefix} Wrote `;
             if (nOk > 0) {
@@ -214,8 +214,8 @@ async function writeOutputManifest(inpPath) {
             console.log(strBuilder);
             
             if (isDebugging) {
-                console.log(`  - Input File: ${inpPathName}`);
-                console.log(`  - Output File: ${outPathName}`);
+                console.log(`  - Input File: ${inputName}`);
+                console.log(`  - Output File: ${outputName}`);
             }
         }
     });
@@ -227,13 +227,11 @@ function startApp() {
     logDebug('User Config');
     logDebug(` - Should Scan Directories: ${getFormattedBoolean(scanDirectories)}`, false);
     logDebug(` - Should Scan Recursively: ${getFormattedBoolean(recursive)}`, false);
+    logDebug(`   Manifest Paths:`, false);
 
-    manifests.forEach(input => {
-        if (isDebugging) {
-            console.log(`  - "${input}"`);
-        }
-
-        writeOutputManifest(input);
+    manifests.forEach(manifest => {
+        logDebug(`  - "${manifest.filePath}"`);
+        writeOutputManifest(manifest);
     });
 }
 

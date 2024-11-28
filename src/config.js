@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import chalk from 'chalk';
 import { PATH_USER_CONFIG, loadUserConfigData } from './load-config.js';
+import Manifest from './Manifest.js';
 
 function logConfigErrorAndExit(message, displayReadme = true) {
     console.error(chalk.red(`INVALID User Config: ${message}`));
@@ -107,15 +108,18 @@ if (!userConfigData) {
     const shouldScanRecursively = section.recursive || false;
     // TODO: Implement options
 
-    const okManifestPaths = manifestPaths.filter(filePath => verifyManifestPath(filePath, shouldScanDirectories));
-
-    // TODO: Process manifest paths
+    // const okManifestPaths = manifestPaths.filter(filePath => verifyManifestPath(filePath, shouldScanDirectories));
+    const okManifests = manifestPaths
+        .filter(mp => verifyManifestPath(mp, shouldScanDirectories))
+        .map(mp => {
+            return new Manifest(mp);
+        });
 
     userConfig.search.scanDirectories = shouldScanDirectories;
     userConfig.search.recursive = shouldScanRecursively;
-    userConfig.search.manifests = okManifestPaths;
+    userConfig.search.manifests = okManifests;
 
-    logConfigStatus(`Loaded ${okManifestPaths.length}/${manifestPaths.length} configured manifest paths`);
+    logConfigStatus(`Loaded ${okManifests.length}/${manifestPaths.length} configured manifest paths`);
 }
 
 // Process section: "output"

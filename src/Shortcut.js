@@ -1,13 +1,18 @@
-import fs from 'node:fs';
+import path from 'node:path';
 
 import chalk from "chalk";
-import path from 'node:path';
 
 class Shortcut {
 
     constructor(rootDir, json) {
         // TODO Accept Manifest itself instead of rootDir
         // TODO Accept config in constructor, check validity of executable
+
+        // Validate params
+
+        if (!json) {
+            throw new Error('Failed to create instance of Shortcut class: JSON parameter in constructor is invalid');
+        }
 
         // MARK: PARSING
 
@@ -19,10 +24,6 @@ class Shortcut {
 
         // MARK: Parse target
         {
-            if (!json) {
-                throw new Error('Failed to create instance of Shortcut class: JSON parameter in constructor is invalid');
-            }
-    
             if (json.target) {
                 if (json.target.trim() !== '') {
                     parsedValues.target = json.target;      
@@ -70,25 +71,33 @@ class Shortcut {
             if (json.disabled !== undefined && json.disabled) {
                 parsedValues.enabled = false;
             }
+
+            if (json.disabled !== undefined && json.enabled !== undefined) {
+                console.warn(chalk.yellow(`WARN: Properties "disabled" and "enabled" were found in a Shortcut at the same time which can cause issues. You probably want to remove one.`));
+            }
         }
 
         this.title = parsedValues.title;
         this.target = parsedValues.target;
         this.enabled = parsedValues.enabled;
 
-        // MARK: PARSING END
-
-        // const fullTargetPath = path.join(rootDir, this.target); // TODO To remove this, rewrite Manifest constructor and pass above
-        // const targetExists = fs.existsSync(fullTargetPath);
+        // const fullPath = path.join(rootDir, this.target); // TODO To remove this, rewrite Manifest constructor and pass above
+        // const targetExists = fs.existsSync(fullPath);
 
         // if (!targetExists) {
-        //     console.warn(`Failed to create instance of Shortcut class. Required attribute "target" points to a non-existent path: ${fullTargetPath}`);
+        //     console.warn(`Failed to create instance of Shortcut class. Required attribute "target" points to a non-existent path: ${fullPath}`);
         // }
 
+        // MARK: PARSING END
+        
         if (!this.title) { // Title still missing? Attempt to parse from target
             this.title = path.basename(this.title); // TODO What are cases this could fail?
         }
 
+        this.printDebugStatus();
+    }
+
+    printDebugStatus() {
         console.log(chalk.green('PARSED SHORTCUT OBJECT DEBUG'));
         console.log(`title: ${this.title}`);
         console.log(`target: ${this.target}`);
