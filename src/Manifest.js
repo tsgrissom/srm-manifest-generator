@@ -7,7 +7,20 @@ import { logDebug } from './utilities.js';
 
 class Manifest2 {
 
-    constructor(json) {
+    /**
+     * Constructs a new Manifest instance.
+     * @param {string} fileName In case the user doesn't set the name attribute of their manifest, we need a file name to fall back on.
+     * @param {object} json The object to parse into a Manifest instance.
+     */
+    constructor(fileName, json) {
+        if (typeof(filename) !== 'string') {
+            throw new Error(`Failed to create instance of Manifest class: fileName parameter in constructor is not a string (${filename})`);
+        }
+        if (typeof(json) !== 'object') {
+            throw new Error(`Failed to create instance of Manifest class: json parameter in constructor is not an object (${json})`);
+        }
+
+        this.fileName = fileName;
         this.json = json;
 
         if (!json) {
@@ -23,6 +36,19 @@ class Manifest2 {
             shortcuts: [] // Not required; Should always be an array
         };
 
+        // MARK: Parse name
+        {
+            if (json.name && json.name.trim() !== '') {
+                parsedValues.name = json.name;
+            } else {
+                parsedValues.name = this.getFileBasenameWithoutExtension;
+            }
+
+            if (!parsedValues.name) {
+                throw new Error(`Failed to create instance of Manifest class: Could not determine attribute "name" which should always be set in the file or inferred from the file name (${this.fileName})`);
+            }
+        }
+
         // MARK: Parse root directory
         {
             for (const value of [json.rootDirectory, json.root, json.directory, json.rootDir]) {
@@ -33,14 +59,8 @@ class Manifest2 {
             }
             
             if (!parsedValues.rootDirectory) {
-                throw new Error('Failed to create instance of Manifest class: Could not find required attribute "rootDirectory" or any of its aliases');
+                throw new Error(`Failed to create instance of Manifest class: Could not find required attribute "rootDirectory" or any of its aliases (${this.fileName})`);
             }
-
-            // if (json.rootDirectory) {
-            //     if (json.rootDirectory.trim() !== '') {
-            //         parsedValues.rootDirectory = json.rootDirectory;
-            //     }
-            // }
         }
 
         // MARK: Parse output path
@@ -53,21 +73,71 @@ class Manifest2 {
             }
 
             if (!parsedValues.outputPath) {
-                throw new Error('Failed to create instance of Manifest class: Could not find required attribute "outputPath" or any of its aliases');
+                throw new Error(`Failed to create instance of Manifest class: Could not find required attribute "outputPath" or any of its aliases (${this.fileName})`);
             }
         }
 
         // MARK: Parse shortcuts
-        // TODO
+        {
+            for (const value of [json.shortcuts, json.entries]) {
+                if (value) {
+                    if (!Array.isArray(value)) {
+                        throw new Error('Failed to create instance of Manifest class: Shortcuts were a non-array when expected to be an array of things or an empty array (${this.fileName})')
+                    } // TODO Reduce amount of errors in parsing, this is just for testing
 
-        // MARK: Parse name
-        // TODO
+                    for (const shortcut of value) {
+                        try {
+                            const instance = new Shortcut(parsedValues.rootDirectory, shortcut);
+                            if (!instance) {
+                                throw new Error(`Failed to instantiate Shortcut while constructing Manifest: Shortcut was not truthy (${parsedValues.name})`);
+                            }
+                            parsedValues.shortcuts.push(instance);
+                        } catch (err) {
+                            console.error(`Something went wrong when instantiating a Shortcut while constructing Manifest: ${parsedValues.name}`);
+                        }
+                    }
+                }
+            }
+
+            if (!parsedValues.shortcuts) {
+                throw new Error(`Failed to create instance of Manifest class: Shortcuts were invalid when expected to be an array of things or an empty array (${this.fileName})`);
+            }
+        }
+
+        this.name = parsedValues.name;
+        this.rootDirectory = parsedValues.rootDirectory;
+        this.outputPath = parsedValues.outputPath;
+        this.shortcuts = parsedValues.shortcuts;
     }
 
+    // TEST me
+    getFileBasenameWithoutExtension() {
+        const extToRemove = ['.yml', '.yaml', '.manifest', '.example'];
+        let name = this.fileName;
+        let ext = '';
 
+        do {
+            ext = path.extname(this.fileName);
+            if (ext === '') {
+                return name;
+            }
+
+            for (const str of extToRemove) {
+                if (str === name.toLowerCase()) {
+                    name = path.basename(name, str);
+                }
+            }
+        } while (ext !== '');
+
+        return name;
+    }
+
+    async doesFileExist() {
+
+    }
 }
 
-class Manifest {
+class Manifest2 {
 
     // TODO Rewrite to be constructed from JSON object arg
     constructor(filePath) {
