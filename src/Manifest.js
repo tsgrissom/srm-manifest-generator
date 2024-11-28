@@ -5,6 +5,68 @@ import chalk from 'chalk';
 import YAML from 'yaml';
 import { logDebug } from './utilities.js';
 
+class Manifest2 {
+
+    constructor(json) {
+        this.json = json;
+
+        if (!json) {
+            throw new Error('Failed to create instance of Manifest class: JSON argument in constructor is invalid');
+        }
+
+        // MARK: PARSING
+
+        const parsedValues = {
+            name: undefined, // Not required; A name will be determined one way or the other
+            rootDirectory: undefined, // Required, root directory
+            outputPath: undefined, // Required, output path
+            shortcuts: [] // Not required; Should always be an array
+        };
+
+        // MARK: Parse root directory
+        {
+            for (const value of [json.rootDirectory, json.root, json.directory, json.rootDir]) {
+                if (value && value.trim() !== '') {
+                    parsedValues.rootDirectory = value;
+                    break;
+                }
+            }
+            
+            if (!parsedValues.rootDirectory) {
+                throw new Error('Failed to create instance of Manifest class: Could not find required attribute "rootDirectory" or any of its aliases');
+            }
+
+            // if (json.rootDirectory) {
+            //     if (json.rootDirectory.trim() !== '') {
+            //         parsedValues.rootDirectory = json.rootDirectory;
+            //     }
+            // }
+        }
+
+        // MARK: Parse output path
+        {
+            for (const value of [json.outputPath, json.output]) {
+                if (value && value.trim() !== '') {
+                    parsedValues.outputPath = value;
+                    break;
+                }
+            }
+
+            if (!parsedValues.outputPath) {
+                throw new Error('Failed to create instance of Manifest class: Could not find required attribute "outputPath" or any of its aliases');
+            }
+        }
+
+        // MARK: Parse shortcuts
+        // TODO
+
+        // MARK: Parse name
+        // TODO
+    }
+
+
+}
+
 class Manifest {
 
     // TODO Rewrite to be constructed from JSON object arg

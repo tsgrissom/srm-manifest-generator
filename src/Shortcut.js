@@ -24,17 +24,9 @@ class Shortcut {
 
         // MARK: Parse target
         {
-            if (json.target) {
-                if (json.target.trim() !== '') {
-                    parsedValues.target = json.target;      
-                }
-            } else { // Fall back to json.exec
-                if (json.exec) {
-                    if (json.exec.trim() !== '') {
-                        parsedValues.target = json.exec;
-                    }
-                } else {
-                    console.warn(`Couldn't find required Shortcut attribute "target" and exhausted its aliases as well`);
+            for (const value of [json.target, json.exec]) {
+                if (value && value.trim() !== '') {
+                    parsedValues.target = value;
                 }
             }
     
@@ -46,19 +38,15 @@ class Shortcut {
 
         // MARK: Parse title
         {
-            if (json.title) {
-                if (json.title.trim() !== '') {
-                    parsedValues.title = json.title;
+            for (const value of [json.title, json.name]) {
+                if (value && value.trim() !== '') {
+                    parsedValues.title = value;
                 }
-            } else {
-                if (json.name) {
-                    if (json.name.trim() !== '') {
-                        parsedValues.title = json.name;
-                    }
-                } else {
-                    console.warn(`Could not find optional Shortcut attribute "title" and exhausted its aliases as well`);
-                    // TODO Attempt to parse title from target as last-ditch effort
-                }
+            }
+    
+            if (!parsedValues.title) {
+                console.warn(`Could not find optional Shortcut attribute "title" or any of its aliases. Will try to fall back on target executable's name.`);
+                // TODO Attempt to parse title from target as last-ditch effort
             }
         }
 
