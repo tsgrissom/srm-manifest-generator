@@ -17,7 +17,8 @@ export default [
       "eqeqeq": "warn",
       "curly": "warn",
       "camelcase": "warn",
-      "semi": "warn"
+      "semi": "warn",
+      "no-constant-condition": "warn"
     }
   }
 ];

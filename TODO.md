@@ -11,6 +11,7 @@
 * Accept folders as manifest paths in the config + Recursive option
 * Move my own manifests into a private folder and share some of my good examples for
 * Flag ``--list-shortcuts`` should list what shortcuts were written under the print Wrote N shortcuts for source X
+* Add PC Ports.yml personal manifest as example
 * Option to remove color from prints (config or flag)
 * Print Transformed N titles should identify how many were successful over how many were listed
 * Better solution for debug prints, perhaps one that rolls logging into it as well?

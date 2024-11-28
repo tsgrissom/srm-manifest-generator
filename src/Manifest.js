@@ -7,6 +7,7 @@ import { logDebug } from './utilities.js';
 
 class Manifest {
 
+    // TODO Rewrite to be constructed from JSON object arg
     constructor(filePath) {
         this.filePath = filePath;
 
@@ -132,6 +133,104 @@ class Manifest {
         }
 
         return name;
+    }
+
+    async getOutputPath() {
+        const fileExists = await this.doesFileExist();
+
+        if (!fileExists) {
+            throw new Error(`Unable to getRootDirectory for non-existent file: "${this.filePath}"`);
+        }
+
+        const data = await this.getObject();
+
+        if (data.output) {
+            return data.output;
+        } else {
+            return null;
+        }
+    }
+
+    async getRootDirectory() {
+        const fileExists = await this.doesFileExist();
+
+        if (!fileExists) {
+            throw new Error(`Unable to getRootDirectory for non-existent file: "${this.filePath}"`);
+        }
+
+        const data = await this.getObject();
+
+        if (data.root) {
+            return data.root;
+        } else if (data.entries) {
+            return data.entries;
+        } else {
+            throw new Error(`Could not find root directory for Manifest: ${this.name}`);
+        }
+    }
+
+    /**
+     * Finds the value of the shortcuts attribute for the current Manifest.
+     * @returns The value of YAML keys shortcuts,entries, otherwise returns an empty array.
+     */
+    async getShortcuts() {
+        const fileExists = await this.doesFileExist();
+
+        if (!fileExists) {
+            throw new Error(`Unable to getShortcuts for non-existent file: "${this.filePath}"`);
+        }
+
+        const data = await this.getObject();
+
+        // TODO "titles" as an alias?
+        if (data.entries) {
+            return data.entries;
+        } else if (data.shortcuts) {
+            return data.shortcuts;
+        } else {
+            return [];
+        }
+    }
+
+    async isShortcutsAnArray() {
+        try {
+            const shortcuts = await this.getShortcuts();
+            return Array.isArray(shortcuts);
+        } catch {
+            return false;
+        }
+    }
+
+    async isShortcutsEmpty() {
+        const shortcuts = await this.getShortcuts();
+        if (this.isShortcutsAnArray()) {
+            return shortcuts.length === 0;
+        } else {
+            return shortcuts.trim() === '';
+        }
+    }
+
+    async isShortcutsNotEmpty() {
+        const isEmpty = await this.isShortcutsEmpty();
+        return !isEmpty; 
+    }
+
+    async getEnabledShortcuts() {
+        const shortcuts = await this.getShortcuts();
+
+        return shortcuts.filter(sc => {
+            // enabled defaults to true, disabled defaults to false
+            // TEST for anticipated behavior for both enabled + disabled
+            // TEST edge case of contradiction
+            // TODO Move logic to method of a class
+            const {enabled, disabled} = sc;
+    
+            if (disabled || enabled === false) {
+                return false;
+            }
+    
+            return enabled !== false;
+        });
     }
 }
 

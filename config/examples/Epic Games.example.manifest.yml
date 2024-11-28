@@ -1,19 +1,19 @@
 name: Epic Games 
 # Wherever you store your Epic Games library
-directory: G:/Libraries/Epic Games
+root: G:/Libraries/Epic Games
 # Where the resulting .manifest.json file should be stored
 output: G:/_Metadata/Epic Games.manifest.json
-entries:
+shortcuts:
     
     # Could be anything, but used to search for artwork for the Steam shortcut and give it a name
-  - title: Fortnite
+  - name: Fortnite
     # Starting from your root directory, show where the app's executable is
     # Expected path: G:/Libraries/Epic Games/Fortnite/FortniteGame/Binaries/Win64/FortniteClient-Win64-Shipping.exe
-    target: Fortnite/FortniteGame/Binaries/Win64/FortniteClient-Win64-Shipping.exe
+    exec: Fortnite/FortniteGame/Binaries/Win64/FortniteClient-Win64-Shipping.exe
 
     # A second example to illustrate how the shortcuts list should be formatted
   - title: Rocket League
     # I do not play Rocket League, this is just an example
-    enabled: false
+    enabled: true
     # Expected path: G:/Libraries/Epic Games/Rocket League/Whatever/The/Path/To/Exe/Is.exe
     target: Rocket League/Whatever/The/Path/To/Exe/Is.exe
