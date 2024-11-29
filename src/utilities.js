@@ -1,6 +1,11 @@
-import chalk from 'chalk';
-import { exec } from 'child_process';
+import { exec } from 'node:child_process';
 
+import chalk from 'chalk';
+
+import { getDelimitedList } from './string-utilities.js';
+
+// MARK: logDebug
+// TODO jsdoc
 export function logDebug(message, withPrefix = true, withColor = true) {
     const isDebugging = process.env.DEBUG === 'true' || process.argv.includes('--debug') || process.argv.includes('-D');
 
@@ -13,87 +18,118 @@ export function logDebug(message, withPrefix = true, withColor = true) {
     }
 }
 
-// TODO: String prototype this
-// TODO: Write tests
-export function capitalize(str) {
-    if (str.trim() === '') {
-        return str;
+// MARK: isProcessRunning
+
+// const defaultPlatformOptionsForIsProcessRunning = {
+//     supportedPlatforms: ['win32', 'darwin', 'linux'],
+//     settings: {
+//         win32: {
+//             commandExec: 'tasklist',
+//             processSearchName: 'steam.exe'
+//         },
+//         darwin: {
+//             commandExec: 'ps aux | grep [S]team',
+//             processSearchName: 'steam'
+//         },
+//         linux: {
+//             commandExec: 'ps aux | grep [s]team',
+//             processSearchName: 'steam'
+//         }
+//     }
+// };
+
+/**
+ * Checks if a process is running on the system, with support for flexible Node
+ * process.platform-based multiplatform support. See example below for example
+ * options object.
+ * @param {object} platformOptions Indicates the commands for finding a process on a given system. See example.
+ * @returns Boolean indicating whether the given process is running on the system.
+ * @example
+ * ```
+ * {
+ *      supportedPlatforms: ['win32', 'darwin', 'linux'],
+ *      settings: {
+ *          win32: {
+ *              commandExec: 'tasklist',
+ *              processSearchName: 'steam.exe'
+ *          },
+ *          darwin: {
+ *              commandExec: 'ps aux | grep [S]team',
+ *              processSearchName: 'steam'
+ *          },
+ *          linux: {
+ *              commandExec: 'ps aux | grep [s]team',
+ *              processSearchName: 'steam'
+ *          }
+ *      }
+ *  };
+ * ```
+ */
+export function isProcessRunning(platformOptions = null) {
+    const refJsdoc = 'Reference the function jsdoc for help writing this platformOptions object.';
+
+    // Lint platformOptions type
+    if (!platformOptions)
+        throw new Error(`Arg platformOptions must be provided. ${refJsdoc}`);
+    if (typeof platformOptions !== 'object')
+        throw new Error(`Arg platformOptions must be an object. ${refJsdoc}`);
+    if (Array.isArray(platformOptions))
+        throw new Error(`Arg platformOptions must be an object but was an array. ${refJsdoc}`);
+
+    const {settings, supportedPlatforms} = platformOptions;
+
+    // Lint platformOptions.settings type
+    if (!settings)
+        throw new Error(`Arg platformOptions must include object keyed to "settings". ${refJsdoc}`);
+    if (typeof settings !== 'object')
+        throw new Error(`Arg platformOptions.settings must be an object. ${refJsdoc}`);
+    if (Array.isArray(settings))
+        throw new Error(`Arg platformOptions.settings must be an object but was an array. ${refJsdoc}`);
+
+    // Lint platformOptions.supportedPlatforms
+    if (!supportedPlatforms)
+        throw new Error(`Arg platformOptions must include array keyed to "supportedPlatforms" which lists supported Node process.platform options. ${refJsdoc}`);
+    if (!Array.isArray(supportedPlatforms))
+        throw new Error(`Arg platformOptions.supportedPlatforms must be array. ${refJsdoc}`);
+
+    // Lint values inside of platformOptions.settings.EACH-SUPPORTED-PLATFORM
+    for (const supportedPlatform of supportedPlatforms) {
+        // TODO Validate is supported platform exists in Node
+        const section = settings[supportedPlatform];
+        const sectionKeyName = `platformOptions.settings.${supportedPlatform}`;
+
+        if (!section)
+            throw new Error(`Arg ${sectionKeyName} was missing for a platform listed in platformOptions.supportedPlatforms: ${supportedPlatform}`);
+
+        if (!settings.commandExec)
+            throw new Error(`Arg ${sectionKeyName} was missing required option "commandExec". ${refJsdoc}`);
+        if (!settings.processSearchName)
+            throw new Error(`Arg ${sectionKeyName} was missing required option "processSearchName". ${refJsdoc}`);
     }
-    const firstLetter = str.substring(0, 1);
-    const restOfStr   = str.substring(1, str.length);
 
-    return firstLetter.toUpperCase() + restOfStr;
-}
+    const {platform} = process;
+    
+    if (!supportedPlatforms.includes(platform))
+        throw new Error(`This function does not support platform ${platform}. Supported platforms: ${getDelimitedList(supportedPlatforms)}.`);
 
-// TODO: Write tests
-export function getFormattedBoolean(b, withColor = true, withCapitalization = true, trueStr = 'yes', falseStr = 'no') {
-    let str = b ? trueStr : falseStr;
-    if (withCapitalization) {
-        str = capitalize(str);
-    }
-    return withColor ? (b ? chalk.greenBright(str) : chalk.redBright(str)) : str;
-}
+    const {commandExec, processSearchName} = platformOptions.settings[platform];
 
-export function getCountString(numberOfThings, singularNoun, pluralNoun = null) {
-    if (typeof(numberOfThings) !== 'number') {
-        throw new Error(`Unable to getCountString for non-numeric number of things parameter: ${numberOfThings}`);
-    }
-
-    pluralNoun = pluralNoun || `${singularNoun}s`; 
-
-    const verbiage = (numberOfThings === 0 || numberOfThings > 1) ? pluralNoun : singularNoun;
-    return `${numberOfThings} ${verbiage}`;
-};
-
-export function isSteamRunning() {
     return new Promise((resolve, reject) => {
-        const { platform } = process;
-        
-        // "ps" will be the command for Linux and macOS
-        // "steam" is a valid search term for Linux and macOS
-        let platformName = null,
-            command = null,
-            commandName = 'ps',
-            searchFor = 'steam';
-
-        switch (platform) {
-            case 'win32':
-                platformName = 'Windows';
-                command = 'tasklist';
-                commandName = 'tasklist';
-                searchFor = 'steam.exe';
-                break;
-            case 'darwin':
-                platformName = 'macOS';
-                command = 'ps aux | grep "[S]team"';
-                break;
-            case 'linux':
-                platformName = 'Linux';
-                command = 'ps aux | grep "[s]team"';
-                break;
-            default:
-                return reject(`Function isSteamRunning does not support platform "${platform}". Supported platforms are: Windows, macOS, and Linux.`);
-        }
-
-        if (platformName === null || command === null || commandName === null || searchFor === null) {
-            return reject('Before searching for Steam process, one of the following was was null: platform name, command, command name, or search term');
-        }
-
-        exec(command, (err, stdout, stderr) => {
+        exec(commandExec, (err, stdout, stderr) => {
             if (err) {
-                if (err.code === 1) {
-                    // Error code 1 means not found
+                if (err.code === 1)
                     return resolve(false);
-                }
-                console.error(`Error executing ${commandName}:`, err);
+
+                console.error(`Error executing ${commandExec}:`, err);
                 return reject(err);
             }
+
             if (stderr) {
-                console.error(`Error output from ${commandName}`, stderr);
+                console.error(`Error in output from command "${commandExec}":`, stderr);
                 return reject(new Error(stderr));
             }
 
-            const isRunning = stdout.toLowerCase().includes(searchFor);
+            const isRunning = stdout.toLowerCase().includes(processSearchName);
             resolve(isRunning);
         });
     });

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import assert from 'node:assert';
-import { before, after, describe, it, beforeEach } from 'node:test';
+import { before, beforeEach, after, describe, it } from 'node:test';
 
 import chalk from 'chalk';
 import YAML from 'yaml';

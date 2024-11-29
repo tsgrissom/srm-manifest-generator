@@ -43,44 +43,18 @@ const doesPathHaveJsonFileExtension = (filePath) => {
     return extension === '.json' || extension === '.jsonc'; // TODO Make valid JSON extensions configurable
 }
 
-/**
- * Calculates a write path for a JSON file given file name and a path. If the path is an existing file and/or
- * has a JSON file extension, returns the given path. Otherwise, the function returns the path joined to
- * the file name.
- * @param {*} fileName The file name which is expected to be written, either on top of or within the filePath
- * @param {*} inpPath The fs path to determine if the file name should be written on top of or within
- */
-async function calculateOutputWritePathFromInputPath(fileName, inpPath) {
-    if (!fileName) {
-        throw new Error('Unable to determine write path for given file name:', fileName);
-    }
-    if (doesPathHaveJsonFileExtension(fileName)) {
-        // TODO Point to config if needing custom json file extension recognized
-        throw new Error('Cannot calculate JSON file path for non-JSON file:', fileName);
-    }
-
-    if (!inpPath) {
-        throw new Error('Unable to determine write path for given path:', path);
-    }
-    // if (inpPath.endsWith('.json') || inpPath.endsWith('.jsonc')) {
- 
-    // }
-
-    // TODO Revisit this and figure out how to calculate either the inner path or the given path
-    return inpPath;
-}
-
 async function writeOutputManifest(manifest) {
     // TODO Replace the bulk of this code with methods from Manifest
     // TODO Additionally validate if write path is valid, make folders if missing
     // TODO If it's a file, write to the file, but if it's a folder, write the file inside of the folder, maybe based on the input file's name
 
     const inputFilePath = manifest.fileName;
-    const inputFileBasename = await manifest.getNameOfFile();
-    const outputPath = await manifest.getOutputPath();
-    const writePath = await manifest.getWritePath();
-    const rootDir = await manifest.getRootDirectory();
-    const shortcuts = await manifest.getShortcuts(); // Top-level shortcuts in the manifest document, key "shortcuts"
+    console.log(`manifest: ${manifest}`);
+    const inputFileBasename = path.basename(inputFilePath);
+    const outputPath = manifest.getOutputPath();
+    const writePath = manifest.getWritePath();
+    const rootDir = manifest.getRootDirectory();
+    const shortcuts = manifest.getShortcuts();
 
     if (!outputPath) { // TODO Test this
         const t = `Unable to write manifest file without specifying an output path: ${inputFilePath}`;
@@ -110,7 +84,7 @@ async function writeOutputManifest(manifest) {
     // TODO All of this loading should be done inside Manifest constructor
 
     const invalidShortcuts = [];
-    const enabledShortcuts = await manifest.getEnabledShortcuts();
+    const enabledShortcuts = manifest.getEnabledShortcuts();
     const newShortcuts = enabledShortcuts.map(json => {
         const shortcut = new Shortcut(rootDir, json);
         const title = shortcut.getTitle();

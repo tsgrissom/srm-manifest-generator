@@ -3,29 +3,28 @@ import path from 'node:path';
 
 import chalk from 'chalk';
 import YAML from 'yaml';
-import { logDebug } from './utilities.js';
+import { getFileBasenameWithoutExtensions, logDebug } from './utilities.js';
 
-class Manifest2 {
+import Shortcut from './Shortcut.js';
+
+class Manifest {
 
     /**
      * Constructs a new Manifest instance.
-     * @param {string} fileName In case the user doesn't set the name attribute of their manifest, we need a file name to fall back on.
-     * @param {object} json The object to parse into a Manifest instance.
+     * @param {string} fileName The filename to fallback on if the user doesn't set the name attribute in their manifest file.
+     * @param {object} object The object to parse into a Manifest instance.
      */
-    constructor(fileName, json) {
-        if (typeof(filename) !== 'string') {
-            throw new Error(`Failed to create instance of Manifest class: fileName parameter in constructor is not a string (${filename})`);
-        }
-        if (typeof(json) !== 'object') {
-            throw new Error(`Failed to create instance of Manifest class: json parameter in constructor is not an object (${json})`);
-        }
+    constructor(fileName, object) {
+        if (typeof(filename) !== 'string')
+            throw new Error(`Failed to create instance of Manifest class: Required arg "fileName" in constructor is not a string (${fileName})`);
+        if (typeof(object) !== 'object')
+            throw new Error(`Failed to create instance of Manifest class: Required arg "json" in constructor is not an object (${object})`);
 
         this.fileName = fileName;
-        this.json = json;
+        this.object = object;
 
-        if (!json) {
-            throw new Error('Failed to create instance of Manifest class: JSON argument in constructor is invalid');
-        }
+        if (!object)
+            throw new Error('Failed to create instance of Manifest class: Required arg "json" in constructor is invalid');
 
         // MARK: PARSING
 
@@ -38,10 +37,11 @@ class Manifest2 {
 
         // MARK: Parse name
         {
-            if (json.name && json.name.trim() !== '') {
-                parsedValues.name = json.name;
+            if (this.hasNameAttribute()) {
+                parsedValues.name = object.name;
             } else {
-                parsedValues.name = this.getFileBasenameWithoutExtension;
+                const extensionsToRemove = ['.yml', '.yaml', '.manifest', '.example'];
+                parsedValues.name = getFileBasenameWithoutExtensions(this.fileName, extensionsToRemove, true);
             }
 
             if (!parsedValues.name) {
@@ -51,7 +51,8 @@ class Manifest2 {
 
         // MARK: Parse root directory
         {
-            for (const value of [json.rootDirectory, json.root, json.directory, json.rootDir]) {
+            const keys = [object.rootDirectory, object.root, object.directory, object.rootDir];
+            for (const value of keys) {
                 if (value && value.trim() !== '') {
                     parsedValues.rootDirectory = value;
                     break;
@@ -65,7 +66,8 @@ class Manifest2 {
 
         // MARK: Parse output path
         {
-            for (const value of [json.outputPath, json.output]) {
+            const keys = [object.outputPath, object.output];
+            for (const value of keys) {
                 if (value && value.trim() !== '') {
                     parsedValues.outputPath = value;
                     break;
@@ -79,11 +81,13 @@ class Manifest2 {
 
         // MARK: Parse shortcuts
         {
-            for (const value of [json.shortcuts, json.entries]) {
+            const keys = [object.shortcuts, object.entries];
+            for (const value of keys) {
                 if (value) {
                     if (!Array.isArray(value)) {
                         throw new Error('Failed to create instance of Manifest class: Shortcuts were a non-array when expected to be an array of things or an empty array (${this.fileName})')
-                    } // TODO Reduce amount of errors in parsing, this is just for testing
+                    }
+                    // TODO Reduce amount of errors in parsing, this is just for testing
 
                     for (const shortcut of value) {
                         try {
@@ -92,7 +96,7 @@ class Manifest2 {
                                 throw new Error(`Failed to instantiate Shortcut while constructing Manifest: Shortcut was not truthy (${parsedValues.name})`);
                             }
                             parsedValues.shortcuts.push(instance);
-                        } catch (err) {
+                        } catch {
                             console.error(`Something went wrong when instantiating a Shortcut while constructing Manifest: ${parsedValues.name}`);
                         }
                     }
@@ -110,34 +114,78 @@ class Manifest2 {
         this.shortcuts = parsedValues.shortcuts;
     }
 
-    // TEST me
-    getFileBasenameWithoutExtension() {
-        const extToRemove = ['.yml', '.yaml', '.manifest', '.example'];
-        let name = this.fileName;
-        let ext = '';
-
-        do {
-            ext = path.extname(this.fileName);
-            if (ext === '') {
-                return name;
-            }
-
-            for (const str of extToRemove) {
-                if (str === name.toLowerCase()) {
-                    name = path.basename(name, str);
-                }
-            }
-        } while (ext !== '');
-
-        return name;
+    getOutputPath() {
+        return this.outputPath;
     }
 
-    async doesFileExist() {
+    // TODO Calculate write path
+    getWritePath() {
+        return this.outputPath;
+    }
 
+    getRootDirectory() {
+        return this.rootDirectory;
+    }
+
+    getFileName() {
+        return this.fileName;
+    }
+
+    hasNameAttribute() {
+        return this.object.name && this.object.name.trim() !== '';
+    }
+
+    getNameAttribute() {
+        if (!this.object.name || this.object.name.trim() === '')
+            return null;
+
+        return this.object.name;
+    }
+
+    /**
+     * Determine where Manifest#getName retrieves its name from.
+     * If there is a valid "name" attribute in the JSON, the value of it will be used
+     * and the returned value of this function will be "attribute".
+     * Otherwise, the fallback filename provided in the constructor will be used and
+     * the returned value of this function will be "filename";
+     * @returns {string} Either "attribute" or "filename"
+     */
+    getNameSource() {
+        if (this.hasNameAttribute()) {
+            return "attribute";
+        } else {
+            return "filename";
+        }
+    }
+
+    getName() {
+        if (this.hasNameAttribute()) {
+            return this.getNameAttribute();
+        } else {
+            return this.getFileName();
+        }
+    }
+
+    getShortcuts() {
+        return this.shortcuts;
+    }
+
+    isShortcutsEmpty() {
+        return this.getShortcuts().length === 0;
+    }
+
+    isShortcutsNotEmpty() {
+        return this.getShortcuts().length > 0;
+    }
+
+    getEnabledShortcuts() {
+        return this.getShortcuts().filter(shortcut => {
+            return shortcut.enabled === true;
+        });
     }
 }
 
-class Manifest2 {
+class ManifestOld {
 
     // TODO Rewrite to be constructed from JSON object arg
     constructor(filePath) {

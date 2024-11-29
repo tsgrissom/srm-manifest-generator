@@ -15,7 +15,7 @@ export default [
       "prefer-const": "warn",
       "no-var": "warn",
       "eqeqeq": "warn",
-      "curly": "warn",
+      "curly": "off",
       "camelcase": "warn",
       "semi": "warn",
       "no-constant-condition": "warn"

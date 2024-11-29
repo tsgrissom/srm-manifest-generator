@@ -1,5 +1,9 @@
 import fs from 'node:fs';
+import path from 'node:path';
+
 import chalk from 'chalk';
+import YAML from 'yaml';
+
 import { PATH_USER_CONFIG, loadUserConfigData } from './load-config.js';
 import Manifest from './Manifest.js';
 
@@ -63,6 +67,16 @@ function verifyManifestPath(filePath, shouldScanDirectories) {
     return true;
 }
 
+async function createManifestInstance(filePath, fallbackFileName) {
+    // TODO Check args
+
+    const contents = await fs.promises.readFile(filePath);
+    const object = YAML.parse(contents);
+    const instance = new Manifest(fallbackFileName, object);
+
+    return instance;
+}
+
 // LOAD, PARSE, AND EXPORT USER CONFIG
 
 let userConfigData;
@@ -98,9 +112,9 @@ if (!userConfigData) {
         logConfigErrorAndExit('Your config.yml is missing the required section "search"');
     }
 
-    const { manifests: manifestPaths } = section;
+    const { manifests: allManifestPaths } = section;
 
-    if (!manifestPaths) {
+    if (!allManifestPaths) {
         logConfigErrorAndExit('Your config.yml is missing the required list of paths "manifests" within the section "search"');
     }
     
@@ -109,17 +123,25 @@ if (!userConfigData) {
     // TODO: Implement options
 
     // const okManifestPaths = manifestPaths.filter(filePath => verifyManifestPath(filePath, shouldScanDirectories));
-    const okManifests = manifestPaths
-        .filter(mp => verifyManifestPath(mp, shouldScanDirectories))
-        .map(mp => {
-            return new Manifest(mp);
+    // const okManifests = allManifestPaths
+    //     .filter(mp => verifyManifestPath(mp, shouldScanDirectories))
+    //     .map(mp => {
+    //         return new Manifest(mp);
+    //     });
+
+    const okManifests = allManifestPaths
+        .filter(filePath => verifyManifestPath(filePath, shouldScanDirectories))
+        .map(async filePath => {
+            const fileName = path.basename(filePath);
+            const instance = await createManifestInstance(filePath, fileName);
+            return instance;
         });
 
     userConfig.search.scanDirectories = shouldScanDirectories;
     userConfig.search.recursive = shouldScanRecursively;
     userConfig.search.manifests = okManifests;
 
-    logConfigStatus(`Loaded ${okManifests.length}/${manifestPaths.length} configured manifest paths`);
+    logConfigStatus(`Loaded ${okManifests.length}/${allManifestPaths.length} configured manifest paths`);
 }
 
 // Process section: "output"
