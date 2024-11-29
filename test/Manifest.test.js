@@ -4,7 +4,7 @@ import assert from 'node:assert';
 import { before, beforeEach, after, describe, it } from 'node:test';
 
 import chalk from 'chalk';
-import YAML from 'yaml';
+import yaml from 'yaml';
 
 import Manifest from '../src/Manifest.js';
 import { logDebug } from '../src/utilities.js';
@@ -28,7 +28,7 @@ function setupTestResourceYamlFiles() {
 
         const areContentsEmpty = fileContents === undefined || fileContents === null || Object.keys(fileContents).length === 0;
         const writePath = path.join(__dirname, 'resource', fileName);
-        const writeContents = areContentsEmpty ? '' : YAML.stringify(fileContents);
+        const writeContents = areContentsEmpty ? '' : yaml.stringify(fileContents);
 
         fs.writeFileSync(writePath, writeContents);
         resourceFilePaths.push(writePath);

@@ -1,63 +1,28 @@
 import fs from 'node:fs';
 
 import chalk from 'chalk';
-import yaml from 'yaml';
 
-import { getCountString, getFormattedBoolean, logDebug } from './utilities.js';
+import { enabledDisabled, stylePath, yesNo } from './string-utilities.js';
+import { logDebug, logDebugLines, logDebugSectionWithData } from './utilities.js';
 import userConfig from './config.js';
-import path from 'node:path';
 import Manifest from './Manifest.js';
 import Shortcut from './Shortcut.js';
 
 const isDebugging = process.argv.includes('--debug'); // TODO: Replace with better CLI
 
-async function readInputManifest(inputFile) {
-    // TODO: Validate file is a yml
-    try {
-        const data = await fs.promises.readFile(inputFile, 'utf8');
-        const json = yaml.parse(data);
-        // TODO: Validate JSON data received from input manifest
-        return json;
-    } catch (err) {
-        console.error(`Failed to read input manifest file at ${inputFile}`, err);
-    }
-}
-
-async function pathExists(filePath) {
-    try {
-        await fs.access(filePath);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-// TODO Move to utils
-const isPathMissingFileExtension = (filePath) => {
-    const extension = path.extname(filePath);
-    return !extension;
-}
-
-const doesPathHaveJsonFileExtension = (filePath) => {
-    const extension = path.extname(filePath);
-    return extension === '.json' || extension === '.jsonc'; // TODO Make valid JSON extensions configurable
-}
-
+/**
+ * Writes the writable object of a Manifest instance to its output path.
+ * @param {Manifest} manifest The Manifest to derive the output manifest's contents from.
+ */
 async function writeOutputManifest(manifest) {
     // TODO Replace the bulk of this code with methods from Manifest
     // TODO Additionally validate if write path is valid, make folders if missing
     // TODO If it's a file, write to the file, but if it's a folder, write the file inside of the folder, maybe based on the input file's name
 
-    const inputFilePath = manifest.fileName;
-    console.log(`manifest: ${manifest}`);
-    const inputFileBasename = path.basename(inputFilePath);
-    const outputPath = manifest.getOutputPath();
-    const writePath = manifest.getWritePath();
-    const rootDir = manifest.getRootDirectory();
-    const shortcuts = manifest.getShortcuts();
+    const { name, rootDirectory, outputPath, shortcuts: allShortcuts } = manifest;
 
     if (!outputPath) { // TODO Test this
-        const t = `Unable to write manifest file without specifying an output path: ${inputFilePath}`;
+        const t = `Unable to write manifest file without specifying an output path: ${manifest.filePath}`;
         const tc = true ? chalk.red(t) : t; // TODO withColor
         const t2 = 'Ensure your manifest file has a top-level property named "output"';
         const tc2 = true ? chalk.red(t2) : t2; // TODO withColor
@@ -67,16 +32,14 @@ async function writeOutputManifest(manifest) {
         return;
     }
 
-    const inputName = `"${inputFilePath}"`;
-    const outputName = `"${outputPath}"`;
-    const writePathName = `"${writePath}`;
+    const writePath = manifest.getWritePath();
     
-    if (Array.isArray(shortcuts)) {
-        if (shortcuts.length === 0) {
-            console.log(chalk.yellow(`WARN: No top-level shortcuts value found in manifest: ${inputName}`));
+    if (Array.isArray(allShortcuts)) {
+        if (allShortcuts.length === 0) {
+            console.log(chalk.yellow(`WARN: No top-level shortcuts value found in manifest: ${name}`));
         }
     } else {
-        console.error(chalk.red(`ERROR: Manifest ${inputName} has a non-array shortcuts key when shortcuts must be a array`));
+        console.error(chalk.red(`ERROR: Manifest ${name} has a non-array shortcuts key when shortcuts must be a array`));
     }
 
     // TODO Any preprocessing needed for raw top-level shortcuts?
@@ -84,57 +47,47 @@ async function writeOutputManifest(manifest) {
     // TODO All of this loading should be done inside Manifest constructor
 
     const invalidShortcuts = [];
-    const enabledShortcuts = manifest.getEnabledShortcuts();
-    const newShortcuts = enabledShortcuts.map(json => {
-        const shortcut = new Shortcut(rootDir, json);
-        const title = shortcut.getTitle();
-        const relTarget = shortcut.getRelativeTargetPath();
-        const fullPath = path.join(rootDir, relTarget);
+    const enabledShortcuts = manifest.getShortcuts().filter(shortcut => shortcut.isEnabled());
+    const writeObjects = enabledShortcuts.map(shortcut => shortcut.getWritableObject());
 
-        const obj = {
-            title: title,
-            target: fullPath
-        };
-
-        return obj;
-    });
-
-    const nTotal    = shortcuts.length,
+    const nTotal    = allShortcuts.length,
           nEnabled  = enabledShortcuts.length,
           nInvalid  = invalidShortcuts.length,
           nDisabled = nTotal - nEnabled,
           nSkipped  = nInvalid + nDisabled,
-          nOk       = newShortcuts.length;
+          nOk       = writeObjects.length;
 
     let ctRatioOkToTotal = `${nOk}/${nTotal} shortcut`;
-    if (nTotal !== 1) {
+
+    if (nTotal !== 1)
         ctRatioOkToTotal += 's';
-    }
-    const ctOk = getCountString(nOk, 'shortcut');
     
-    if (isDebugging) {
-        let header = `Transformed ${ctRatioOkToTotal} from source "${inputFileBasename}"`;
+    { // Debug info
+        let header = `Transformed ${ctRatioOkToTotal} from source "${name}"`;
+        if (nOk > 1)
+            header += ` to output ${writePath}`;
 
-        if (nOk > 1) {
-            header += ` to output ${writePathName}`;
-        }
+    logDebugSectionWithData(
+        header,
+        `Name: "${name}"`,
+        `Input File Path: ${stylePath(manifest.filePath)}`,
+        `Name From: ${manifest.getNameSource()}`,
+        `Value of Name Attribute: "${manifest.getName()}"`,
+        `Fallback Name: "${manifest.getFallbackName()}"`,
+        `Output Path: ${stylePath(outputPath)}`,
+        `Write File Path: ${stylePath(writePath)}`,
+        `Root Directory: ${stylePath(rootDirectory)}` // TODO Display validation here for paths
+    );
 
-        const headerC = true ? chalk.cyan(header) : header; // TODO withColor
-        const subheader = 'SHORTCUTS BY THE NUMBERS:';
-        const subheaderC = true ? chalk.yellow(subheader) : subheader; // TODO withColor
-
-        console.log(headerC); // TODO withColor
-        console.log(` * Source File: ${inputFilePath}`);
-        console.log(` * Output Path: ${outputPath}`);
-        console.log(` * Output File: ${outputPath}`);
-        console.log(` * Source Name: ${inputFileBasename}`);
-        console.log(` * Root Directory: ${rootDir}`);
-        console.log(subheaderC); // TODO withColor
-        console.log(` - Total Shortcuts in File: ${nTotal}`);
-        console.log(` - Enabled/Disabled: ${nEnabled}/${nDisabled}`);
-        console.log(` - Skipped: ${nSkipped}`);
-        console.log(` - Written/Total: ${nOk}/${nTotal}`);
-        console.log('');
+    logDebugSectionWithData(
+        'Number of Shortcuts',
+        `Total in File: ${nTotal}`,
+        `Written: ${nOk}`,
+        `Enabled: ${nEnabled}`,
+        `Disabled: ${nDisabled}`,
+        `Skipped: ${nSkipped}`,
+        ``
+    );
     }
 
     const sbCheck = '\u2713 ';
@@ -143,7 +96,13 @@ async function writeOutputManifest(manifest) {
     const pfxFail = true ? chalk.redBright.bold(sbXmark) : sbXmark;
     const pfxWarn = true ? chalk.yellowBright.bold('!') : '!';
 
-    const writeStr = JSON.stringify(newShortcuts, null, 2);
+    const writeStr = JSON.stringify(writeObjects, null, 2);
+
+    try {
+        const data = fs.promises.writeFile(writePath, writeStr)
+    } catch (err) {
+        throw new Error(`Something went wrong writing manifest file output (${name})`);
+    }
 
     fs.writeFile(writePath, writeStr, (err) => {
         if (err) {
@@ -175,7 +134,7 @@ async function writeOutputManifest(manifest) {
             // TODO This all needs withColor
 
             const strCtRatioOkToTotal = true ? chalk.magentaBright(ctRatioOkToTotal) : ctRatioOkToTotal;
-            const strFromSource = `from source ${true ? chalk.cyanBright(inputFileBasename) : inputFileBasename}`;
+            const strFromSource = `from source ${true ? chalk.cyanBright(name) : name}`;
 
             let strBuilder = `${wrotePrefix} Wrote `;
             if (nOk > 0) {
@@ -185,12 +144,12 @@ async function writeOutputManifest(manifest) {
                 strBuilder += `nothing ${strFromSource}`;
             }
 
-            console.log(strBuilder);
-            
-            if (isDebugging) {
-                console.log(`  - Input File: ${inputName}`);
-                console.log(`  - Output File: ${outputName}`);
-            }
+            // console.log(strBuilder);
+
+            // if (isDebugging) {
+            //     console.log(`  - Input File: ${inputName}`);
+            //     console.log(`  - Output File: ${outputName}`);
+            // }
         }
     });
 }
@@ -198,13 +157,15 @@ async function writeOutputManifest(manifest) {
 function startApp() {
     const { manifests, scanDirectories, recursive } = userConfig.search;
 
-    logDebug('User Config');
-    logDebug(` - Should Scan Directories: ${getFormattedBoolean(scanDirectories)}`, false);
-    logDebug(` - Should Scan Recursively: ${getFormattedBoolean(recursive)}`, false);
-    logDebug(`   Manifest Paths:`, false);
+    logDebugSectionWithData(
+        'User Config finished loading',
+        `Scan Directories? ${enabledDisabled(scanDirectories)}`,
+        `Scan Recursively? ${enabledDisabled(recursive)}`,
+        chalk.magentaBright('Manifest Paths')
+    );
 
     manifests.forEach(manifest => {
-        logDebug(`  - "${manifest.filePath}"`);
+        logDebug(`  - "${manifest.filePath}"`, false);
         writeOutputManifest(manifest);
     });
 }

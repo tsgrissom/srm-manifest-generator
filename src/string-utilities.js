@@ -16,12 +16,17 @@ export function capitalize(str) {
 // MARK: Fn getFormattedBoolean
 // TODO jsdoc
 // TODO TEST Unit
-export function getFormattedBoolean(b, withColor = true, withCapitalization = true, trueStr = 'yes', falseStr = 'no') {
+// TODO More flexible abstract fn
+export function yesNo(b, withColor = true, withCapitalization = true, trueStr = 'yes', falseStr = 'no') {
     let str = b ? trueStr : falseStr;
     if (withCapitalization) {
         str = capitalize(str);
     }
     return withColor ? (b ? chalk.greenBright(str) : chalk.redBright(str)) : str;
+}
+
+export function enabledDisabled(b, withColor = true, withCapitalization = true) {
+    return yesNo(b, withColor, withCapitalization, 'enabled', 'disabled');
 }
 
 // MARK: Fn getCountString
@@ -72,4 +77,19 @@ export function getDelimitedList(items, delimiter = ', ') {
     }
 
     return list;
+}
+
+export function stylePath(filePath, valid = false) {
+    if (typeof filePath !== 'string')
+        throw new Error(`Unable to style non-string filePath argument: ${filePath}`);
+    if (typeof valid !== 'boolean')
+        throw new Error(`Unable to style with non-boolean "valid" argument: ${valid}`);
+
+    if (!filePath.startsWith('"'))
+        filePath = '"' + filePath;
+
+    if (!filePath.endsWith('"'))
+        filePath = filePath + '"';
+
+    return valid ? chalk.greenBright(filePath) : chalk.redBright(filePath);
 }

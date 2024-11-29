@@ -9,8 +9,9 @@
   "scripts": {
     "lint": "npx eslint .",
     "start": "node .",
+    "start:debug": "node . --debug",
     "test": "node --test",
-    "testd": "DEBUG=true && node --test && DEBUG=false && npx eslint .",
+    "test:debug": "DEBUG=true && node --test && DEBUG=false && npx eslint .",
     "poststart": "npx eslint .",
     "posttest": "npx eslint ."
   },

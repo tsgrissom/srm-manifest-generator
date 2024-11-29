@@ -2,7 +2,7 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
-import { getFileBasenameWithoutExtensions, normalizeFileExtension } from '../src/file-utilities.js';
+import { basenameWithoutExtensions, normalizeFileExtension } from '../src/file-utilities.js';
 
 describe('File: file-utilities.js', () => {
 
@@ -57,7 +57,7 @@ describe('File: file-utilities.js', () => {
             const cases = [[], {}];
             for (const c of cases) {
                 await t.test(`Subtest for input: ${c}`, () => {
-                    assert.throws(() => getFileBasenameWithoutExtensions(c));
+                    assert.throws(() => basenameWithoutExtensions(c));
                 });
             }
         });
@@ -66,7 +66,7 @@ describe('File: file-utilities.js', () => {
             const cases = ['Some string', 123, '123', [], {}];
             for (const c of cases) {
                 await t.test(`Subtest for input: ${c}`, () => {
-                    assert.throws(() => getFileBasenameWithoutExtensions(c));
+                    assert.throws(() => basenameWithoutExtensions(c));
                 });
             }
         });
@@ -84,7 +84,7 @@ describe('File: file-utilities.js', () => {
             for (const c of cases) {
                 const {fileName, extensionsToRemove, iterate, expected} = c;
                 await t.test(`Subtest for arguments fileName=${fileName} extensionsToRemove=${extensionsToRemove}`, () => {
-                    const actual = getFileBasenameWithoutExtensions(fileName, extensionsToRemove, iterate);
+                    const actual = basenameWithoutExtensions(fileName, extensionsToRemove, iterate);
                     assert.strictEqual(actual, expected);
                 });
             }
@@ -95,7 +95,7 @@ describe('File: file-utilities.js', () => {
     
             for (const value of values) {
                 await t.test(`Subtest for fileName=${value}:`, () => {
-                    const value = getFileBasenameWithoutExtensions(value, '*', true);
+                    const value = basenameWithoutExtensions(value, '*', true);
                     const actual = path.extname(value);
                     const expected = '';
                     assert.strictEqual(actual, expected);

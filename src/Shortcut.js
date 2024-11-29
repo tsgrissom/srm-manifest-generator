@@ -1,18 +1,26 @@
 import path from 'node:path';
 
 import chalk from "chalk";
+import { basenameWithoutExtensions } from './file-utilities.js';
+import { logDebugSectionWithData } from './utilities.js';
+import { yesNo } from './string-utilities.js';
 
 class Shortcut {
 
-    constructor(rootDir, json) {
-        // TODO Accept Manifest itself instead of rootDir
+    constructor(manifest, object) {
         // TODO Accept config in constructor, check validity of executable
+        // TODO Lint args
+
+        if (!manifest)
+            throw new Error('Constructor argument manifest is invalid');
+        if (!object) {
+            throw new Error('Constructor argument object is invalid');
+        }
+
+        this.manifest = manifest;
+        this.object = object;
 
         // Validate params
-
-        if (!json) {
-            throw new Error('Failed to create instance of Shortcut class: JSON parameter in constructor is invalid');
-        }
 
         // MARK: PARSING
 
@@ -24,72 +32,78 @@ class Shortcut {
 
         // MARK: Parse target
         {
-            for (const value of [json.target, json.exec]) {
+            for (const value of [object.target, object.exec]) {
                 if (value && value.trim() !== '') {
                     parsedValues.target = value;
                 }
             }
-    
-            if (!parsedValues.target) {
-                throw new Error('Failed to create instance of Shortcut class: Could not find required attribute "target" or any of its aliases');
-            }
         }
+
+        if (!parsedValues.target) {
+            throw new Error('Could not find required attribute "target" or any of its aliases within the given object');
+        }
+
+        this.target = parsedValues.target;
 
 
         // MARK: Parse title
         {
-            for (const value of [json.title, json.name]) {
+            for (const value of [object.title, object.name]) {
                 if (value && value.trim() !== '') {
                     parsedValues.title = value;
                 }
             }
-    
+
             if (!parsedValues.title) {
-                console.warn(`Could not find optional Shortcut attribute "title" or any of its aliases. Will try to fall back on target executable's name.`);
-                // TODO Attempt to parse title from target as last-ditch effort
-            }
-        }
+                const fileName = basenameWithoutExtensions(this.manifest.fileName);
+                
+                if (!fileName)
+                    throw new Error(`Unable to infer a name for Shortcut at the following target: ${parsedValues.target}`);
 
-        // MARK: Parse enabled
-        {
-            if (json.enabled !== undefined && !json.enabled) {
-                parsedValues.enabled = false;
-            }
-    
-            if (json.disabled !== undefined && json.disabled) {
-                parsedValues.enabled = false;
-            }
-
-            if (json.disabled !== undefined && json.enabled !== undefined) {
-                console.warn(chalk.yellow(`WARN: Properties "disabled" and "enabled" were found in a Shortcut at the same time which can cause issues. You probably want to remove one.`));
+                parsedValues.title = fileName; // TODO TEST This
             }
         }
 
         this.title = parsedValues.title;
-        this.target = parsedValues.target;
-        this.enabled = parsedValues.enabled;
 
-        // const fullPath = path.join(rootDir, this.target); // TODO To remove this, rewrite Manifest constructor and pass above
-        // const targetExists = fs.existsSync(fullPath);
+        // MARK: Parse enabled
+        {
+            if (object.enabled !== undefined && !object.enabled) {
+                parsedValues.enabled = false;
+            }
+    
+            if (object.disabled !== undefined && object.disabled) {
+                parsedValues.enabled = false;
+            }
 
-        // if (!targetExists) {
-        //     console.warn(`Failed to create instance of Shortcut class. Required attribute "target" points to a non-existent path: ${fullPath}`);
-        // }
-
-        // MARK: PARSING END
-        
-        if (!this.title) { // Title still missing? Attempt to parse from target
-            this.title = path.basename(this.title); // TODO What are cases this could fail?
+            if (object.disabled !== undefined && object.enabled !== undefined) {
+                console.warn(chalk.yellow(`WARN: Properties "disabled" and "enabled" were found in a Shortcut at the same time which can cause issues. You probably want to remove one.`));
+            }
         }
 
-        this.printDebugStatus();
+        this.enabled = parsedValues.enabled;
+
+        // MARK: PARSING END
+
+        if (process.argv.includes('--list-shortcuts')) {
+            console.log(chalk.blue('LOADED SHORTCUT'));
+            console.log(`Title: ${this.title}`);
+            console.log(`Target: ${this.target}`);
+            console.log(`Enabled: ${this.enabled}`);
+        }
     }
 
-    printDebugStatus() {
-        console.log(chalk.green('PARSED SHORTCUT OBJECT DEBUG'));
-        console.log(`title: ${this.title}`);
-        console.log(`target: ${this.target}`);
-        console.log(`enabled: ${this.enabled}`);
+    /**
+     * Maps the Shortcut instance's attributes to a JavaScript object
+     * which is compatible for writing to a JSON manifest for Steam
+     * ROM Manager.
+     * @returns {object} The JSON designed for handling by Steam ROM Manager.
+     */
+    getWritableObject() {
+        return {
+            title: this.getTitle(),
+            target: this.getFullTargetPath()
+        };
     }
 
     getTitle() {
@@ -101,28 +115,31 @@ class Shortcut {
     }
 
     getFullTargetPath() {
-        return '';
+        const rootDir = this.manifest.getRootDirectory();
+
+        if (!rootDir)
+            throw new Error(`Error while constructing full target path for Shortcut (${this.getTitle()}): Manifest (${this.manifest.getName()}) root directory was invalid`);
+
+        return path.join(this.manifest.getRootDirectory(), this.getRelativeTargetPath());
     }
 
-    // async doesTargetFileExist() {
+    isEnabled() {
+        return !this.enabled;
+    }
 
-    // }
+    isDisabled() {
+        return !this.isEnabled();
+    }
 
-    // async isTargetFileValidExecutable() {
+    // TODO
+    async doesTargetFileExist() {
 
-    // }
+    }
 
-    // async isTargetPathValid() {
+    // TODO
+    async isTargetFileValidExecutable() {
 
-    // }
-
-    // async getTitle() {
-        
-    // }
-
-    // async getTargetPath() {
-
-    // }
+    }
 }
 
 export default Shortcut;
