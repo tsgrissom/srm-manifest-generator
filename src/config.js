@@ -3,17 +3,10 @@ import fs from 'node:fs';
 import chalk from 'chalk';
 import yaml from 'yaml';
 
-import { PATH_USER_CONFIG, loadUserConfigData } from './load-config.js';
+import { PATH_USER_CONFIG, loadDataFromUserConfig as loadUserConfigData } from './load-config.js';
 import Manifest from './Manifest.js';
-import { logDebug, logDebugHeader, logDebugPlain } from './utilities.js';
-import { enabledDisabled, yesNo } from './string-utilities.js';
-
-const userConfig = {
-    search: {},
-    output: {},
-    validation: {},
-    logging: {}
-};
+import { logDebugHeader, logDebugPlain, logDebugSectionWithData } from './utilities.js';
+import { enabledDisabled } from './string-utilities.js';
 
 // MARK: HELPERS
 
@@ -35,24 +28,22 @@ function logConfigStatus(message) {
     console.log(`User Config: ${message}`);
 }
 
-function verifyManifestPath(filePath) {
+async function verifyManifestPath(filePath, scanDirectories, scanRecursively) {
     logDebugHeader('Verifying Manifest Path');
 
     try {
-        const fileExists = fs.existsSync(filePath);
-
-        if (!fileExists) {
+        await fs.promises.access(filePath).catch(() => {
             logConfigWarn(` > Given manifest file path does not exist: ${filePath}`);
             return false;
-        } else {
-            logDebugPlain(` > Given manifest file path does exist: ${filePath}`);
-        }
+        });
+
+        logDebugPlain(` > Given manifest file path exists: ${filePath}`);
     } catch (err) {
         throw new Error(`Error while checking if manifest path exists (Path: ${filePath}):`, err);
     }
 
     try {
-        const stats = fs.statSync(filePath);
+        const stats = await fs.promises.stat(filePath);
 
         if (!stats.isFile() && !stats.isDirectory()) {
             logConfigWarn(`Unsupported filesystem type (Supported: File or Folder) was set as a manifest file path in the user config.yml.`);
@@ -63,13 +54,11 @@ function verifyManifestPath(filePath) {
             // TODO: Make sure it's a supported filetype
             return true;
         } else if (stats.isDirectory()) { // Directories are accepted if enabled in config.yml, default true
-            const { scanDirectories, recursive } = userConfig.search;
-
             logDebugPlain(` > Manifest path is a directory: ${filePath}`);
             logDebugPlain(` > Scan Directories? ${enabledDisabled(scanDirectories)}`);
-            logDebugPlain(` > Scan Recursively? ${enabledDisabled(recursive)}`);
+            logDebugPlain(` > Scan Recursively? ${enabledDisabled(scanRecursively)}`);
             
-            if (!shouldScanDirectories) {
+            if (!scanDirectories) {
                 logConfigWarn(`Config option "manifests" contains a path which points to a directory, but Scanning Directories is disabled by the config.yml. Skipping the following manifest path: "${filePath}"`);
                 return false;
             }
@@ -111,6 +100,12 @@ async function createManifestInstance(filePath) {
 
 // MARK: LOAD CONFIG
 
+const userConfig = {
+    search: {},
+    output: {},
+    validation: {},
+    logging: {}
+};
 let userConfigData;
 
 try {
@@ -128,7 +123,6 @@ if (!userConfigData) {
 }
 
 // MARK: Search Section
-
 {
     const section = userConfigData.search;
 
@@ -145,22 +139,27 @@ if (!userConfigData) {
         logConfigErrorAndExit('Your config.yml is missing the required list of paths "manifests" within the section "search"');
     }
     
-    const shouldScanDirectories = section['scan-directories'] ?? true;
-    const shouldScanRecursively = section.recursive || false;
+    const scanDirectories = section.scanDirectories ?? true;
+    const scanRecursively = section.recursive || false;
 
     // TODO: Implement options
 
-    const okManifests = await Promise.all(
-        allManifestPaths
-            .filter(filePath => verifyManifestPath(filePath))
-            .map(async filePath => {
-                const instance = await createManifestInstance(filePath);
-                return instance;
-            })
-    );
+    const okManifests = [];
 
-    userConfig.search.scanDirectories = shouldScanDirectories;
-    userConfig.search.recursive = shouldScanRecursively;
+    for (const filePath of allManifestPaths) {
+        try {
+            const isValid = await verifyManifestPath(filePath, scanDirectories, scanRecursively);
+            if (!isValid)
+                continue;
+            const instance = await createManifestInstance(filePath);
+            okManifests.push(instance);
+        } catch (err) {
+            console.error(`Error processing manifest at ${filePath}:`, err);
+        }
+    }
+
+    userConfig.search.scanDirectories = scanDirectories;
+    userConfig.search.recursive = scanRecursively; // TODO Update to scanRecursively
     userConfig.search.manifests = okManifests;
 
     const nOk = okManifests.length,
@@ -175,6 +174,13 @@ if (!userConfigData) {
     }
 
     logConfigStatus(`Loaded ${ctOk} configured manifest paths`);
+
+    logDebugSectionWithData(
+        'User Config: Search section finished loading',
+        `Scan Directories? ${enabledDisabled(scanDirectories)}`,
+        `Scan Recursively? ${enabledDisabled(scanRecursively)}`,
+        chalk.blueBright('Manifest Paths')
+    );
 }
 
 // MARK: Output Section

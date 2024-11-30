@@ -137,6 +137,10 @@ class Manifest {
         return this.rootDirectory;
     }
 
+    getFilePath() {
+        return this.filePath;
+    }
+
     getFileBasename() {
         return path.basename(this.filePath);
     }

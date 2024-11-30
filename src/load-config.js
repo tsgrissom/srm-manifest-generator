@@ -61,7 +61,7 @@ async function copyExampleConfigToUserConfigPath() {
     }
 }
 
-export async function loadUserConfigData() {
+export async function loadDataFromUserConfig() {
     let userConfigHandle;
     let exampleConfigHandle;
 
