@@ -1,7 +1,8 @@
 import path from 'node:path';
 
 import chalk from "chalk";
-import { basenameWithoutExtensions } from './file-utilities.js';
+import { basenameWithoutExtensions } from './util/file-utilities.js';
+import Manifest from './Manifest.js';
 
 class Shortcut {
 
@@ -10,10 +11,16 @@ class Shortcut {
         // TODO Lint args
 
         if (!manifest)
-            throw new Error('Constructor argument manifest is invalid');
-        if (!object) {
-            throw new Error('Constructor argument object is invalid');
-        }
+            throw new Error(`Constructor arg "manifest" is invalid: ${manifest}`);
+        if (!manifest instanceof Manifest)
+            throw new Error(`Constructor arg "manifest" is a non-Manifest type: ${manifest}`);
+
+        if (!object)
+            throw new Error(`Constructor arg "object" is invalid: ${object}`);
+        if (typeof object !== 'object')
+            throw new Error(`Constructor arg "object" must be a JavaScript object: ${object}`);
+        if (Array.isArray(object))
+            throw new Error(`Constructor arg "object" must be an object, not an array: ${object}`);
 
         this.manifest = manifest;
         this.object = object;

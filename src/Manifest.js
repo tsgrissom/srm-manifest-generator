@@ -1,7 +1,7 @@
 import path from 'node:path';
 
-import { logDebug } from './utilities.js';
-import { basenameWithoutExtensions } from './file-utilities.js';
+import { logDebug } from './util/utilities.js';
+import { basenameWithoutExtensions } from './util/file-utilities.js';
 import Shortcut from './Shortcut.js';
 
 class Manifest {
@@ -154,7 +154,10 @@ class Manifest {
 
     // TODO jsdoc
     hasNameAttribute() {
-        return this.object.name && this.object.name.trim() !== '';
+        if (!this.object.name)
+            return false;
+
+        return this.object.name.trim() !== '';
     }
 
     // TODO jsdoc
@@ -186,7 +189,7 @@ class Manifest {
         if (this.hasNameAttribute()) {
             return this.getNameAttribute();
         } else {
-            return this.getFileName();
+            return this.getFileBasename();
         }
     }
 

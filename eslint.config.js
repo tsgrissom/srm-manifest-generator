@@ -8,17 +8,19 @@ export default [
   {
     ignores: ["**/*.config.js"],
     rules: {
+      "curly": "off",
+
       "no-unused-vars": "warn",
-      "no-undef": "error",
       "prefer-destructuring": "warn",
       "prefer-arrow-callback": "warn",
       "prefer-const": "warn",
       "no-var": "warn",
       "eqeqeq": "warn",
-      "curly": "off",
       "camelcase": "warn",
       "semi": "warn",
-      "no-constant-condition": "warn"
+      "no-constant-condition": "warn",
+      
+      "no-undef": "error",
     }
   }
 ];

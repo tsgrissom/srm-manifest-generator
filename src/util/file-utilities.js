@@ -27,6 +27,59 @@ export function pathHasFileExtension(filePath, fileExt = '*') {
     // TODO Write code
 }
 
+/**
+ * Within the given `fileName`, replaces the `findExt` with `replaceExt` if they are found.
+ * @param {string} fileName The filename you want to find and replace the extension of.
+ * @param {Array} findExt The extensions you want to replace if found.
+ * @param {string} replaceExt The new extension to append to `fileName`.
+ * @param {boolean} normalize Default: `true`. Should extensions be checked to ensure they have a period at
+ * the beginning, with one added if they do not?
+ * @returns The `fileName`, with a new file extension `replaceExt` if one in `findExt` was found.
+ */
+export function replaceFileExtension(fileName, findExt, replaceExt, normalize = true) {
+    if (!fileName || typeof fileName !== 'string')
+        throw new Error(`Arg fileName must be a string: ${fileName}`);
+    if (!findExt || (typeof findExt !== 'string' && !Array.isArray(findExt))) // TEST And make sure this doesn't have unexpected behavior
+        throw new Error(`Arg findExt must be an array of strings or strings: ${fileName}`);
+    if (typeof findExt === 'string' && findExt.trim() === '')
+        throw new Error(`Arg findExt cannot be an empty string`)
+    if (typeof replaceExt !== 'string')
+        throw new Error(`Arg replaceExt must be a string: ${replaceExt}`);
+    if (typeof normalize !== 'boolean')
+        throw new Error(`Arg normalize must be a boolean: ${normalize}`);
+
+    const extsToRemove = [];
+
+    if (typeof findExt === 'string') {
+        findExt = normalize ? normalizeFileExtension(findExt) : findExt;
+        extsToRemove.push(findExt);
+    } else if (Array.isArray(findExt)) {
+        const normalized = findExt
+            .filter(entry => {
+                if (typeof entry !== 'string') {
+                    console.error(`Arg findExt contained a non-string within its array value: ${entry}`);
+                    return false;
+                }
+                
+                return true;
+            })
+            .map(entry => normalize ? normalizeFileExtension(entry) : entry);
+        extsToRemove.push(...normalized);
+    }
+
+    for (const remExt of extsToRemove) {
+        const extname = path.extname(fileName);
+        if (!extname || extname === '')
+            return fileName;
+        
+        if (extname === remExt) {
+            return path.basename(fileName, remExt);
+        }
+    }
+
+    return fileName;
+}
+
 export async function pathExists(filePath) {
     try {
         await fs.access(filePath);

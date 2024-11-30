@@ -5,8 +5,8 @@ import yaml from 'yaml';
 
 import { PATH_USER_CONFIG, loadDataFromUserConfig as loadUserConfigData } from './load-config.js';
 import Manifest from './Manifest.js';
-import { logDebugHeader, logDebugPlain, logDebugSectionWithData } from './utilities.js';
-import { enabledDisabled } from './string-utilities.js';
+import { logDebugHeader, logDebugPlain, logDebugSectionWithData } from './util/utilities.js';
+import { enabledDisabled } from './util/string-utilities.js';
 
 // MARK: HELPERS
 

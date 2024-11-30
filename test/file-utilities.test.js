@@ -1,16 +1,34 @@
 import path from 'node:path';
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { after, before, describe, it } from 'node:test';
 
-import { basenameWithoutExtensions, normalizeFileExtension } from '../src/file-utilities.js';
+import { setOfBooleans, setOfEmptyAndWhitespaceStrings, setOfFalsy, setOfNonArrays, setOfNonStrings, unionOfNonArraysAndNonStrings } from './test-values.js';
+
+import { basenameWithoutExtensions, normalizeFileExtension, replaceFileExtension } from '../src/file-utilities.js';
+
+function setup() {
+    // TODO Some files for real file testing
+}
+
+function teardown() {
+
+}
+
+before(() => {
+    setup();
+});
+
+after(() => {
+    teardown();
+});
 
 describe('File: file-utilities.js', () => {
 
+    // MARK: normalizeFileExtension
     describe('Function: normalizeFileExtension', () => {
 
         it('should, when passed a non-string argument, throw an error', async (t) => {
-            const cases = [undefined, null, [], {}];
-            for (const value of cases) {
+            for (const value of setOfNonStrings) {
                 await t.test(`Subtest for input: ${value}`, () => {
                     assert.throws(() => normalizeFileExtension(value));
                 });
@@ -18,17 +36,7 @@ describe('File: file-utilities.js', () => {
         });
     
         it('should, when passed a string which is not in extension form, return the expected string"', async (t) => {
-            const cases = [
-                {
-                    input: 'yml',
-                    expected: '.yml'
-                },
-                {
-                    input: 'json',
-                    expected: '.json'
-                }
-            ];
-
+            const cases = [{input: 'yml', expected: '.yml'},{input: 'json', expected: '.json'}];
             for (const value of cases) {
                 const {input, expected} = value;
                 await t.test(`Subtest for input: ${input}`, () => {
@@ -39,9 +47,9 @@ describe('File: file-utilities.js', () => {
         });
 
         it('should, when passed a string which is already in extension form, return the same string', async (t) => {
-            const cases = ['.yml', '.json', '.txt'];
-            for (const [value, index] of cases) {
-                await t.test(`Subtest #${index} for input: ${value}`, () => {
+            const values = ['.yml', '.json', '.txt'];
+            for (const value of values) {
+                await t.test(`Subtest for input: ${value}`, () => {
                     const actual = normalizeFileExtension(value);
                     const expected = value;
                     assert.strictEqual(actual, expected);
@@ -50,23 +58,73 @@ describe('File: file-utilities.js', () => {
         });
     
     });
+
+    // MARK: replaceFileExtension
+    describe('Function: replaceFileExtension', () => {
+
+        // Arg: fileName
+        it('should, when passed a non-string fileName arg, throw an error', async (t) => {
+            for (const value of setOfNonStrings) {
+                await t.test(`Subtest for fileName=${value}`, () => {
+                    assert.throws(() => replaceFileExtension(value, ['.yml', '.yaml'], '.json'));
+                });
+            }
+        });
+
+        // Arg: findExt
+        it('should, when passed a findExt arg which is neither a string nor an array, throw an error', async (t) => {
+            for (const value of unionOfNonArraysAndNonStrings) {
+                await t.test(`Subtest for findExt=${value}`, () => {
+                    assert.throws(() => replaceFileExtension('file.yaml', value, '.json'));
+                })
+            }
+        })
+        it('should, when passed an empty or whitespace-only string, throw an error', async (t) => {
+            for (const value of setOfEmptyAndWhitespaceStrings) {
+                await t.test(`Subtest for findExt="${value}"`, () => {
+                    assert.throws(() => replaceFileExtension('file.yaml', value, '.json'));
+                })
+            }
+        })
+
+        // Arg: replaceExt
+        it('should, when passed a non-string replaceExt arg, throw an error', async (t) => {
+            for (const value of setOfNonStrings) {
+                await t.test(`Subtest for replaceExt=${value}`, () => {
+                    assert.throws(() => replaceFileExtension('file.yaml', ['.yml', '.yaml'], value));
+                })
+            }
+        })
+
+        // Arg: normalize
+        it('should, when passed a non-boolean normalize arg, throw an error', async (t) => {
+            for (const value of setOfBooleans) {
+                await t.test(`Subtest for normalize=${value}`, () => {
+                    assert.throws(() => replaceFileExtension('file.yaml', ['.yml', '.yaml'], '.json', value));
+                })
+            }
+        })
+
+        // TODO TEST Functionality
+
+    });
     
-    describe('Function: getFileBasenameWithoutExtensions', () => {
+    // MARK: basenameWithoutExtensions
+    describe('Function: basenameWithoutExtensions', () => {
     
-        it('should, when passed a non-string fileName argument, throw an error', async (t) => {
-            const cases = [[], {}];
-            for (const c of cases) {
-                await t.test(`Subtest for input: ${c}`, () => {
-                    assert.throws(() => basenameWithoutExtensions(c));
+        it('should, when passed a non-string fileName arg, throw an error', async (t) => {
+            for (const value of setOfNonStrings) {
+                await t.test(`Subtest for input: ${value}`, () => {
+                    assert.throws(() => basenameWithoutExtensions(value));
                 });
             }
         });
     
-        it('should, when passed a non-boolean iterate argument, throw an error', async (t) => {
-            const cases = ['Some string', 123, '123', [], {}];
-            for (const c of cases) {
-                await t.test(`Subtest for input: ${c}`, () => {
-                    assert.throws(() => basenameWithoutExtensions(c));
+        it('should, when passed a non-boolean iterate arg, throw an error', async (t) => {
+            const values = ['Some string', 123, '123', [], {}];
+            for (const value of values) {
+                await t.test(`Subtest for input: ${value}`, () => {
+                    assert.throws(() => basenameWithoutExtensions(value));
                 });
             }
         });
@@ -95,8 +153,8 @@ describe('File: file-utilities.js', () => {
     
             for (const value of values) {
                 await t.test(`Subtest for fileName=${value}:`, () => {
-                    const value = basenameWithoutExtensions(value, '*', true);
-                    const actual = path.extname(value);
+                    const result = basenameWithoutExtensions(value, '*', true);
+                    const actual = path.extname(result);
                     const expected = '';
                     assert.strictEqual(actual, expected);
                 });
