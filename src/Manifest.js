@@ -18,15 +18,15 @@ class Manifest {
      */
     constructor(filePath, object) {
         if (typeof(filePath) !== 'string')
-            throw new Error(`Failed to create instance of Manifest class: Required arg "fileName" in constructor is not a string (${filePath})`);
+            throw new Error(`Failed to create instance of Manifest class: Required arg "filePath" in constructor is not a string (${filePath})`);
         if (typeof(object) !== 'object')
-            throw new Error(`Failed to create instance of Manifest class: Required arg "json" in constructor is not an object (${object})`);
+            throw new Error(`Failed to create instance of Manifest class: Required arg "object" in constructor is not an object (${object})`);
 
         this.filePath = filePath;
         this.object = object;
 
         if (!object)
-            throw new Error('Failed to create instance of Manifest class: Required arg "json" in constructor is invalid');
+            throw new Error('Failed to create instance of Manifest class: Required arg "object" in constructor is invalid');
 
         // MARK: PARSING
 
@@ -92,24 +92,26 @@ class Manifest {
 
         // MARK: Parse shortcuts
         {
-            const keys = [object.shortcuts, object.entries];
-            for (const keyOfShortcutsArray of keys) {
-                if (!keyOfShortcutsArray)
+            const sectionKeys = [object.shortcuts, object.entries, object.titles];
+
+            for (const sectionKey of sectionKeys) {
+                if (!sectionKey) {
+                    console.warn(`Non-truthy section key: ${sectionKey}`);
                     continue;
-                if (!Array.isArray(keyOfShortcutsArray))
-                    throw new Error(`Shortcuts was a non-array where it should be array for Manifest: ${this.name}`);
+                }
 
-                for (const shortcutObject of keyOfShortcutsArray) {
-                    try {
-                        const shortcut = new Shortcut(this, shortcutObject);
-                        
-                        if (!shortcut)
-                            throw new Error(`A created Shortcut was not truthy: ${this.name}`);
+                if (!Array.isArray(sectionKey)) {
+                    console.error(`Shortcuts was a non-array where it should be an array for Manifest: ${this.name}`);
+                }
 
-                        parsedValues.shortcuts.push(shortcut);
-                    } catch (err) {
-                        console.error(`Something went wrong when instantiating a Shortcut inside of a Manifest (${this.name}):`, err);
-                    }
+                for (const object of sectionKey) {
+                    console.log(`typeof expected shortcut obj: ${typeof object}`);
+
+                    const shortcut = new Shortcut(this, object);
+                    if (!shortcut)
+                        console.error(`A created Shortcut was not truthy: ${this.name}`);
+                    
+                    parsedValues.shortcuts.push(shortcut);
                 }
             }
         }
@@ -191,16 +193,6 @@ class Manifest {
     // TODO jsdoc
     getShortcuts() {
         return this.shortcuts;
-    }
-
-    // TODO jsdoc
-    isShortcutsEmpty() {
-        return this.getShortcuts().length === 0;
-    }
-
-    // TODO jsdoc
-    isShortcutsNotEmpty() {
-        return this.getShortcuts().length > 0;
     }
 }
 

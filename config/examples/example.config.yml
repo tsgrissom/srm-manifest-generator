@@ -11,7 +11,7 @@ manifests:
 # Settings regarding how SRM Manifest Generator detects and searches for compatible Manifest Files
 search:
   # A list of file paths, each one pointing to either:
-  #  - A folder which should be scanned for Manifest Files (requires "search.scan-directories" enabled)
+  #  - A folder which should be scanned for Manifest Files (requires "search.scanDirectories" enabled)
   #  - A file which should be loaded as a Manifest File
   # TODO: Add support for folders
   manifests:
@@ -21,9 +21,9 @@ search:
   #  - If "search.recursive" is disabled and this option is enabled, the search will only take place in this folder, ignoring any subdirectories it contains
   # Default: true
   # TODO: Implement
-  scan-directories: true
-  # Unimplemented; If "scan-directories" is enabled and a directory is added to the "manifests" list, should SRM Manifest Generator examine any subfolders for Manifest Files?
-  #  - If "search.scan-directories" is disabled, this option will have no effect
+  scanDirectories: true
+  # Unimplemented; If "scanDirectories" is enabled and a directory is added to the "manifests" list, should SRM Manifest Generator examine any subfolders for Manifest Files?
+  #  - If "search.scanDirectories" is disabled, this option will have no effect
   # Default: false
   # TODO: Implement
   recursive: false
@@ -38,7 +38,7 @@ output:
   #  - To disable this feature, set this option to empty quotes ""
   # Default: "-" 
   # TODO: Implement
-  replace-spaces: "-"
+  replaceSpaces: "-"
   # Unimplemented; Should output files be minified?
   # Default: true
   # TODO: Implement
@@ -46,7 +46,7 @@ output:
   # Unimplemented; If not minified, how many space characters should be used to indent output files?
   # Default: 2
   # TODO: Implement
-  indentation-spaces: 2
+  indentationSpaces: 2
   # Unimplemented; Should a Manifest's contents be spread over multiple files inside a folder named after it ("folder" mode) or transformed into a single file
   #  named after the Manifest ("file" mode, default)?
   # Default: "file"
@@ -59,21 +59,21 @@ validation:
   # Unimplemented; Should file paths be validated?
   # Default: true
   # TODO: Implement
-  validate-file-paths: true
-  # Unimplemented; Should executables be checked against the list of file extensions "accepted-executables" found below?
+  validateFilePaths: true
+  # Unimplemented; Should executables be checked against the list of file extensions "acceptedExecutables" found below?
   #  - If false, SRM Manifest Generator will not warn you of unknown/unsupported file extensions being passed to JSON Manifest files as executables
   # Default: true
   # TODO: Implement
-  validate-executables: true
+  validateExecutables: true
   # Unimplemented; A list of file extensions to accept as an executable file 
-  #  - If "validate-executables" is disabled, this option will have no effect
+  #  - If "validateExecutables" is disabled, this option will have no effect
   # Default:
   # ---
-  # accepted-executables:
+  # acceptedExecutables:
   #   - ".exe"
   # ---
   # TODO: Implement
-  accepted-executables:
+  acceptedExecutables:
     - ".exe"
   
 # Settings regarding the logging of actions taken by SRM Manifest Generator to a specified logfile

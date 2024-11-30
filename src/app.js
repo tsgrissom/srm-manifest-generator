@@ -6,8 +6,6 @@ import { stylePath } from './string-utilities.js';
 import { logDebugPlain, logDebugSectionWithData } from './utilities.js';
 import userConfig from './config.js';
 
-const isDebugging = process.argv.includes('--debug'); // TODO: Replace with better CLI
-
 async function writeManifestOutput(manifest) {
     // const invalidShortcuts = [];
     const enabledShortcuts = manifest.getShortcuts().filter(shortcut => shortcut.isEnabled());
@@ -15,7 +13,16 @@ async function writeManifestOutput(manifest) {
     const filePath = manifest.getWritePath();
     const output = enabledShortcuts.map(shortcut => shortcut.getWritableObject());
     const contents = JSON.stringify(output);
-    
+
+    logDebugSectionWithData(
+        'MANIFEST WRITE OPERATION',
+        `filePath: ${filePath}`,
+        `enabled len: ${enabledShortcuts.length}`,
+        `output: ${output}`,
+        `output len: ${output.length}`,
+        `contents: ${contents}`
+    );
+
     return new Promise((resolve, reject) => {
         fs.writeFile(filePath, contents, 'utf-8', err => {
             if (err) {
@@ -33,6 +40,7 @@ async function writeManifestOutput(manifest) {
                         disabled: nTotal - nEnabled,
                         // invalid: nInvalid // TODO
                         // skipped: nInvalid + nDisabled // TODO
+                        skipped: nTotal - nEnabled,
                         ok: output.length
                     }
                 };
@@ -44,7 +52,7 @@ async function writeManifestOutput(manifest) {
 }
 
 function printWriteResults(results) {
-    const { manifestIn, manifestOut, stats } = results;
+    const { manifestIn, stats } = results;
 
     const name = manifestIn.getName(),
           writePath = manifestIn.getWritePath();
@@ -84,8 +92,7 @@ function printWriteResults(results) {
             `Written: ${nOk}`,
             `Enabled: ${nEnabled}`,
             `Disabled: ${nDisabled}`,
-            `Skipped: ${nSkipped}`,
-            ``
+            `Skipped: ${nSkipped}`
         );
     }
 
@@ -130,10 +137,8 @@ function printWriteResults(results) {
 
     console.log(builder);
 
-    if (isDebugging) {
-        console.log(`  - Source File Path: ${stylePath(manifestIn.getFilePath())}`);
-        console.log(`  - Write File Path: ${stylePath(writePath)}`);
-    }
+    logDebugPlain(`  - Source File Path: ${stylePath(manifestIn.getFilePath())}`);
+    logDebugPlain(`  - Write File Path: ${stylePath(writePath)}`);
 }
 
 async function processManifest(manifest) {
@@ -157,7 +162,7 @@ async function processManifest(manifest) {
 }
 
 async function startApp() {
-    const { manifests } = userConfig.search;    
+    const { manifests } = userConfig.search;
 
     for (const manifest of manifests) {
         logDebugPlain(`  - "${manifest.getFilePath()}"`);

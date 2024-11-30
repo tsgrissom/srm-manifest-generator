@@ -4,97 +4,229 @@ import assert from 'node:assert';
 import { before, beforeEach, after, describe, it } from 'node:test';
 
 import chalk from 'chalk';
+import tmp from 'tmp';
 import yaml from 'yaml';
 
 import Manifest from '../src/Manifest.js';
 import { logDebug } from '../src/utilities.js';
+import { json } from 'node:stream/consumers';
 
 const __dirname = import.meta.dirname;
+const dirTestTmp = path.join(__dirname, 'tmp');
+const dirScopeTmpPrefix = 'Manifest.test.js';
 
-let resourceFilePaths = [];
+console.log(chalk.red(`pathTestResources: ${dirTestTmp}`));
 
-function setupTestResourceYamlFiles() {
-    const mapFilePath = path.join(__dirname, 'resource', 'manifest-resources.json');
-    const mapFileContents = fs.readFileSync(mapFilePath);
-    const map = JSON.parse(mapFileContents);
-    let count = 0;
-    
-    map.forEach(resourceFile => {
-        const { fileName, fileContents } = resourceFile;
+const replaceYamlExtensionWithJson = (fileName) => {
+    if (typeof fileName !== 'string')
+        throw new Error(`Cannot replace file extension of non-string arg: ${fileName}`);
 
-        if (fileName === undefined) {
-            throw new Error(`Test resource map is missing a "fileName" attribute: "${mapFilePath}"`);
-        }
+    if (fileName.endsWith('.yml')) {
+        return path.basename(fileName, '.yml');
+    } else if (fileName.endsWith('.yaml')) {
+        return path.basename(fileName, '.yaml');
+    }
 
-        const areContentsEmpty = fileContents === undefined || fileContents === null || Object.keys(fileContents).length === 0;
-        const writePath = path.join(__dirname, 'resource', fileName);
-        const writeContents = areContentsEmpty ? '' : yaml.stringify(fileContents);
+    return fileName;
+};
 
-        fs.writeFileSync(writePath, writeContents);
-        resourceFilePaths.push(writePath);
-        count++;
-    });
+let tmpDir,
+    tmpDirManifests,
+    tmpDirManRootDir,
+    tmpDirManOutput,
+    tmpDirManExecutables;
 
-    logDebug(`Created ${count} test resource files`);
-    resourceFilePaths.forEach(filePath => {
-        logDebug(chalk.greenBright.bold('+ ') + filePath, false);
+let tmpFileGenValid,
+    tmpFileGenInvalid,
+    tmpFileNonExistent,
+    tmpFileEmpty,
+    tmpFileNoNameAttr;
+let manGenValid,
+    manGenInvalid,
+    manNonExistent,
+    manEmpty,
+    manNoNameAttr;
+
+let tmpFileMockValidExecutable,
+    tmpFileMockInvalidExecutable;
+
+function tmpSubdir(prefix) {
+    return tmp.dirSync({
+        keep: true,
+        tmpdir: dirTestTmp,
+        dir: dirScopeTmpPrefix,
+        prefix: prefix
     });
 }
 
-function tearDownTestResourceFiles() {
-    const totalCount = resourceFilePaths.length;
-    let rmCount = 0;
-
-    resourceFilePaths.forEach(filePath => {
-        if (fs.existsSync(filePath)) {
-            rmCount++;
-            fs.unlinkSync(filePath);
-        }
+function tmpManifestYamlFileSync(prefix = 'manifest') {
+    return tmp.fileSync({
+        keep: true,
+        tmpdir: dirTestTmp,
+        dir: tmpDirManifests.name,
+        prefix: prefix,
+        postfix: '.manifest.yml',
     });
-    resourceFilePaths = [];
+}
 
-    logDebug(`Teardown of test resources completed: Removed ${rmCount}/${totalCount} temp files`);
+function setupDirs() {
+    tmpDir = tmp.dirSync({
+        keep: true,
+        tmpdir: dirTestTmp,
+        name: dirScopeTmpPrefix
+    });
+    tmpDirManifests = tmpSubdir('manifests');
+    tmpDirManRootDir = tmpSubdir('root');
+    tmpDirManOutput = tmpSubdir('output');
+    tmpDirManExecutables = tmpSubdir('executables');
+
+    logDebug(`Setup of Manifest dir test resource completed`);
+}
+
+function setupMockManifestYmlFiles() {
+    {
+        tmpFileGenValid = tmpManifestYamlFileSync('generic-valid');
+        const content = {
+            name: "Some Valid Manifest",
+            root: `${tmpDirManRootDir.name}`,
+            output: `${path.join(tmpDirManOutput.name, replaceYamlExtensionWithJson(tmpFileGenValid.name))}`,
+            entries: [{name: "A Fake Game", exec: tmpFileMockValidExecutable.name}]
+        };
+        fs.writeFileSync(tmpFileGenValid.name, yaml.stringify(content));
+        manGenValid = new Manifest(tmpFileGenValid.name, content);
+    }
+
+    {
+        tmpFileGenInvalid = tmpManifestYamlFileSync('generic-invalid');
+        const content = {
+            name: "Some Invalid Manifest",
+            // root: `${tmpDirManRootDir.name}`,
+            // output: `${path.join(tmpDirManOutput.name, replaceYamlExtensionWithJson(tmpFileGenInvalid.name))}`,
+            entries: false
+        };
+        fs.writeFileSync(tmpFileGenInvalid.name, yaml.stringify(content));
+        manGenInvalid = new Manifest(tmpFileGenInvalid.name, content);
+    }
+
+    {
+        tmpFileNonExistent = tmpManifestYamlFileSync('non-existent');
+        const content = {
+            name: "Some Non-Existent Manifest",
+            root: `${tmpDirManRootDir.name}`,
+            output: `${path.join(tmpDirManOutput.name, replaceYamlExtensionWithJson(tmpFileNonExistent.name))}`,
+            entries: [{name: "A Fake Game", exec: tmpFileMockValidExecutable.name}]
+        }
+        fs.writeFileSync(tmpFileNonExistent.name, content);
+        manNonExistent = new Manifest(tmpFileNonExistent.name, content);
+        tmpFileNonExistent.removeCallback();
+    }
+
+    {
+        tmpFileEmpty = tmpManifestYamlFileSync('empty');
+        fs.writeFileSync(tmpFileEmpty.name, '');
+        manEmpty = new Manifest(tmpFileEmpty.name, {});
+    }
+
+    {
+        tmpFileNoNameAttr = tmpManifestYamlFileSync('no-name-attribute');
+        const content = {
+            root: `${tmpDirManRootDir.name}`,
+            output: `${path.join(tmpDirManOutput.name, replaceYamlExtensionWithJson(tmpFileNoNameAttr.name))}`,
+            entries: [{name: "A Fake Game", exec: tmpFileMockValidExecutable.name}]
+        };
+        fs.writeFileSync(tmpFileNoNameAttr.name, yaml.stringify(content));
+        manNoNameAttr = new Manifest(tmpFileNoNameAttr.name, content);
+    }
+
+    logDebug(`Setup of YAML test resources completed`);
+}
+
+function setupMockExecutables() {
+    tmpFileMockValidExecutable = tmp.fileSync({
+        keep: true,
+        tmpdir: dirTestTmp,
+        dir: tmpDirManExecutables.name,
+        prefix: 'valid-exec',
+        postfix: '.exe'
+    });
+    tmpFileMockInvalidExecutable = tmp.fileSync({
+        keep: true,
+        tmpdir: dirTestTmp,
+        dir: tmpDirManExecutables.name,
+        prefix: 'invalid-exec',
+        postfix: '.txt'
+    });
+
+    logDebug(`Setup of mock executable test resources completed`);
+}
+
+function teardownMockExecutables() {
+    tmpFileMockValidExecutable.removeCallback();
+    tmpFileMockInvalidExecutable.removeCallback();
+
+    logDebug(`Teardown of mock executable test resources completed`);
+}
+
+function teardownMockManifestYmlFiles() {
+    tmpFileGenValid.removeCallback();
+    tmpFileGenInvalid.removeCallback();
+    tmpFileEmpty.removeCallback();
+    tmpFileNoNameAttr.removeCallback();
+
+    logDebug(`Teardown of YAML test resources completed`);
+}
+
+function teardownDirs() {
+    tmpDirManExecutables.removeCallback();
+    tmpDirManOutput.removeCallback();
+    tmpDirManRootDir.removeCallback();
+    tmpDirManifests.removeCallback();
+    tmpDir.removeCallback();
+
+    logDebug(`Teardown of manifest directory test resources completed`);
+}
+
+function setup() {
+    setupDirs();
+    setupMockExecutables();
+    setupMockManifestYmlFiles();
+
+    console.log(`Test setup completed`);
+}
+
+function teardown() {
+    teardownMockExecutables();
+    teardownMockManifestYmlFiles();
+    teardownDirs();
+
+    console.log(`Test teardown completed`);
 }
 
 before(() => {
-    setupTestResourceYamlFiles();
+    setup();
 });
 
 after(() => {
-    tearDownTestResourceFiles();
+    teardown();
 });
 
 describe('Class: Manifest', () => {
-
-    let manifestGenericValid,
-        manifestGenericInvalid,
-        manifestNonExistent,
-        manifestNoNameAttribute,
-        manifestEmpty;
-
-    beforeEach(() => {
-        manifestGenericValid    = new Manifest(path.join(__dirname, 'resource', 'manifest', 'generic-valid.yml'));
-        manifestGenericInvalid  = new Manifest(path.join(__dirname, 'resource', 'manifest', 'generic-invalid.yml'));
-        manifestNonExistent     = new Manifest(path.join(__dirname, 'resource', 'manifest', 'some-non-existent-file.yml'));
-        manifestNoNameAttribute = new Manifest(path.join(__dirname, 'resource', 'manifest', 'no-name-attribute.yml'));
-        manifestEmpty           = new Manifest(path.join(__dirname, 'resource', 'manifest', 'empty.yml'));
-    });
 
     // Method: Manifest#doesFileExist
     describe('Method: doesFileExist()', () => {
 
         it('should, when instance constructed from non-existent file, return false', async () => {
-            const fileExists = await manifestNonExistent.doesFileExist();
+            const fileExists = await manNonExistent.doesFileExist();
             assert.strictEqual(fileExists, false);
         });
 
         it('should, when instance constructed from valid manifest file, return true', async () => {
-            const fileExists = await manifestGenericValid.doesFileExist();
+            const fileExists = await manGenValid.doesFileExist();
             assert.strictEqual(fileExists, true);
         });
 
         it('should, when instance constructed from invalid manifest file, return true', async () => {
-            const fileExists = await manifestGenericInvalid.doesFileExist();
+            const fileExists = await manGenInvalid.doesFileExist();
             assert.strictEqual(fileExists, true);
         });
         
@@ -104,16 +236,16 @@ describe('Class: Manifest', () => {
     describe('Method: getFileContents()', () => {
 
         it('should, when instance constructed from non-existent file, throw an error', async () => {
-            await assert.rejects(() => manifestNonExistent.getFileContents());
+            await assert.rejects(() => manNonExistent.getFileContents());
         });
 
         it('should not, when instance constructed from valid manifest file, return a null value', async () => {
-            const data = await manifestGenericValid.getFileContents();
+            const data = await manGenValid.getFileContents();
             assert.notStrictEqual(data, null);
         });
 
         it('should not, when instance constructed from valid manifest file, return an empty string value', async () => {
-            const data = await manifestGenericValid.getFileContents();
+            const data = await manGenValid.getFileContents();
             assert.notStrictEqual(data, '');
         });
 
@@ -125,13 +257,13 @@ describe('Class: Manifest', () => {
     describe('Method: getNameOfFile()', () => {
 
         it('should, when instance constructed from non-existent file, throw an error', async () => {
-            await assert.rejects(() => manifestNonExistent.getNameOfFile());
+            await assert.rejects(() => manNonExistent.getNameOfFile());
         });
 
 
         it("should, when instance constructed from existing manifest file, return a string not equal to the file's original path", async () => {
-            const nameOfFile = await manifestGenericValid.getNameOfFile();
-            assert.notStrictEqual(nameOfFile, manifestGenericValid.filePath);
+            const nameOfFile = await manGenValid.getNameOfFile();
+            assert.notStrictEqual(nameOfFile, manGenValid.filePath);
         });
     
     });
@@ -139,16 +271,16 @@ describe('Class: Manifest', () => {
     describe('Method: hasNameAttribute()', () => {
 
         it('should, when instance constructed from non-existent file, throw an error', async () => {
-            await assert.rejects(() => manifestNonExistent.hasNameAttribute());
+            await assert.rejects(() => manNonExistent.hasNameAttribute());
         });
 
         it('should, when instance constructed from valid manifest file, return true', async () => {
-            const hasAttr = await manifestGenericValid.hasNameAttribute();
+            const hasAttr = await manGenValid.hasNameAttribute();
             assert.strictEqual(hasAttr, true);
         });
 
         it('should, when instance constructed from manifest that has no name attribute, return false', async () => {
-            const hasAttr = await manifestNoNameAttribute.hasNameAttribute();
+            const hasAttr = await manNoNameAttr.hasNameAttribute();
             assert.strictEqual(hasAttr, false);
         });
 
@@ -158,7 +290,7 @@ describe('Class: Manifest', () => {
     describe('Method: getNameAttribute()', () => {
 
         it('should, when instance constructed from non-existent file, throw an error', async () => {
-            await assert.rejects(() => manifestNonExistent.getNameAttribute());
+            await assert.rejects(() => manNonExistent.getNameAttribute());
         });
 
     });
@@ -167,20 +299,21 @@ describe('Class: Manifest', () => {
     describe('Method: getName()', () => {
 
         it('should, when instance constructed from non-existent file, throw an error', async () => {
-            await assert.rejects(() => manifestNonExistent.getName());
+            await assert.rejects(() => manNonExistent.getName());
         });
 
         it(`should, when instance constructed from valid manifest file, return string literal "Some Valid Manifest"`, async () => {
-            const name = await manifestGenericValid.getName();
+            const name = await manGenValid.getName();
             assert.strictEqual(name, 'Some Valid Manifest');
         });
 
         it("should, when instance constructed from manifest that has no name attribute, return file's basename as a string", async () => {
-            const name = await manifestNoNameAttribute.getName();
-            const expected = path.basename(manifestNoNameAttribute.filePath);
+            const name = await manNoNameAttr.getName();
+            const expected = path.basename(manNoNameAttr.filePath);
             assert.strictEqual(name, expected);
         });
 
         // TODO: Write more coverage
     });
+
 });

@@ -2,8 +2,6 @@ import path from 'node:path';
 
 import chalk from "chalk";
 import { basenameWithoutExtensions } from './file-utilities.js';
-import { logDebugSectionWithData } from './utilities.js';
-import { yesNo } from './string-utilities.js';
 
 class Shortcut {
 

@@ -2,7 +2,7 @@ import { exec } from 'node:child_process';
 
 import chalk from 'chalk';
 
-import { getDelimitedList } from './string-utilities.js';
+import { delimitedList } from './string-utilities.js';
 
 // MARK: logDebug
 // TODO jsdoc
@@ -143,7 +143,7 @@ export function isProcessRunning(platformOptions = null) {
     const {platform} = process;
     
     if (!supportedPlatforms.includes(platform))
-        throw new Error(`This function does not support platform ${platform}. Supported platforms: ${getDelimitedList(supportedPlatforms)}.`);
+        throw new Error(`This function does not support platform ${platform}. Supported platforms: ${delimitedList(supportedPlatforms)}.`);
 
     const {commandExec, processSearchName} = platformOptions.settings[platform];
 

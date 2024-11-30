@@ -75,27 +75,43 @@ async function verifyManifestPath(filePath, scanDirectories, scanRecursively) {
 }
 
 /**
- * Creates an instance of the Manifest class based on a `filePath`, with a fallback `fileName` as required by the constructor of Manifest.
- * @param {string} filePath The path of the manifest file from which to create a Manifest instance.
- * @returns {Manifest} The Manifest instance created from the given `filePath`.
+ * Reads the contents of an manifest.yml file which is expected to be found at `filePath`, then
+ * parses those contents into a JavaScript object.
+ * @param {string} filePath The file path to find the manifest file at.
+ * @returns {object} The YAML document parsed into JSON.
  */
-async function createManifestInstance(filePath) {
-    // TODO Rewrite jsdoc to reflect removed fileName param
+async function readManifestContents(filePath) {
+    console.log(chalk.magenta('REACHED READ MANIFEST'));
 
     if (!filePath)
         throw new Error(`Unable to create Manifest instance from invalid constructor arg filePath: "${filePath}"`);
     if (filePath.trim() === '')
-        throw new Error(`Unable to create Manifest instance from empty constructor arg: filePath: "${filePath}"`);
+        throw new Error(`Unable to create Manifest instance from empty constructor arg filePath: "${filePath}"`);
 
     try {
         const data = await fs.promises.readFile(filePath, 'utf-8');
-        const object = yaml.parse(data);
-        const manifest = new Manifest(filePath, object);
-        
-        return manifest;
+        console.log(chalk.magenta('END OF READ MANIFEST'));
+        return data;
     } catch (err) {
+        console.log(chalk.magenta('END OF READ MANIFEST'));
         throw new Error(`Error reading or parsing file: ${err.message}`);
     }
+}
+
+async function createManifestInstance(filePath, contents) {
+    // TODO Rewrite jsdoc to reflect removed fileName param
+
+    console.log(chalk.magenta('REACHED CREATE MANIFEST INSTANCE'));
+
+    if (!filePath)
+        throw new Error(`Unable to create Manifest instance from invalid constructor arg filePath: "${filePath}"`);
+    if (filePath.trim() === '')
+        throw new Error(`Unable to create Manifest instance from empty constructor arg filePath: "${filePath}"`);
+
+    const object = yaml.parse(contents);
+    const instance = new Manifest(filePath, object);
+    console.log(chalk.magenta('END OF CREATE MANIFEST INSTANCE'));
+    return instance;
 }
 
 // MARK: LOAD CONFIG
@@ -148,10 +164,16 @@ if (!userConfigData) {
 
     for (const filePath of allManifestPaths) {
         try {
-            const isValid = await verifyManifestPath(filePath, scanDirectories, scanRecursively);
-            if (!isValid)
+            const isPathValid = await verifyManifestPath(filePath, scanDirectories, scanRecursively);
+            
+            if (!isPathValid) {
+                logConfigWarn(`Path is not valid, skipped: ${filePath}`);
                 continue;
-            const instance = await createManifestInstance(filePath);
+            }
+
+            const contents = await readManifestContents(filePath);
+            const instance = await createManifestInstance(filePath, contents);
+            
             okManifests.push(instance);
         } catch (err) {
             console.error(`Error processing manifest at ${filePath}:`, err);

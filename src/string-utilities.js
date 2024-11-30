@@ -29,12 +29,12 @@ export function enabledDisabled(b, withColor = true, withCapitalization = true) 
     return yesNo(b, withColor, withCapitalization, 'enabled', 'disabled');
 }
 
-// MARK: Fn getCountString
+// MARK: Fn countString
 // TODO jsdoc
 // TODO TEST Unit
-export function getCountString(numberOfThings, singularNoun, pluralNoun = null) {
+export function countString(numberOfThings, singularNoun, pluralNoun = null) {
     if (typeof(numberOfThings) !== 'number') {
-        throw new Error(`Unable to getCountString for non-numeric number of things parameter: ${numberOfThings}`);
+        throw new Error(`Non-numeric arg numberOfThings: ${numberOfThings}`);
     }
 
     pluralNoun = pluralNoun || `${singularNoun}s`; 
@@ -46,7 +46,7 @@ export function getCountString(numberOfThings, singularNoun, pluralNoun = null) 
 // MARK: getDelimitedList
 // TODO jsdoc
 // TODO TEST Unit
-export function getDelimitedList(items, delimiter = ', ') {
+export function delimitedList(items, delimiter = ', ') {
     if (!items)
         throw new Error(`Cannot create delimited list from given items: ${items}`);
     if (!delimiter)
