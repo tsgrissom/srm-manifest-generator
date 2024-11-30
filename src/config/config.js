@@ -4,9 +4,9 @@ import chalk from 'chalk';
 import yaml from 'yaml';
 
 import { PATH_USER_CONFIG, loadDataFromUserConfig as loadUserConfigData } from './load-config.js';
-import Manifest from './Manifest.js';
-import { logDebugHeader, logDebugPlain, logDebugSectionWithData } from './util/utilities.js';
-import { enabledDisabled } from './util/string-utilities.js';
+import Manifest from '../Manifest.js';
+import { logDebugHeader, logDebugPlain, logDebugSectionWithData } from '../util/utilities.js';
+import { enabledDisabled } from '../util/string-utilities.js';
 
 // MARK: HELPERS
 

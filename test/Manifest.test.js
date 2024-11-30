@@ -101,13 +101,13 @@ function setupFiles() {
     {
         tmpManifestFileGenValid = makeTmpManifestYml('generic-valid');
         
-        const rootDir = tmpSubdirManRoot.name;
-        const outputPath = path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileGenValid.name));
+        const root = tmpSubdirManRoot.name;
+        const output = path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileGenValid.name));
         const object = {
-            name: "Some Valid Manifest",
-            root: rootDir,
-            output: outputPath,
-            entries: [{name: "A Fake Game", exec: tmpFileValidExecExt.name}]
+            name: 'Some Valid Manifest',
+            root: root,
+            output: output,
+            entries: [{name: 'A Fake Game', exec: tmpFileValidExecExt.name}]
         };
         fs.writeFileSync(tmpManifestFileGenValid.name, yaml.stringify(object));
 
@@ -116,26 +116,29 @@ function setupFiles() {
 
     {
         tmpManifestFileGenInvalid = makeTmpManifestYml('generic-invalid');
-        const content = {
-            name: "Some Invalid Manifest",
+        const object = {
+            name: 'Some Invalid Manifest',
             // root: `${tmpDirManRootDir.name}`,
             // output: `${path.join(tmpDirManOutput.name, replaceYamlExtensionWithJson(tmpFileGenInvalid.name))}`,
             entries: false
         };
-        fs.writeFileSync(tmpManifestFileGenInvalid.name, yaml.stringify(content));
+        fs.writeFileSync(tmpManifestFileGenInvalid.name, yaml.stringify(object));
         // manGenInvalid = new Manifest(tmpFileGenInvalid.name, content);
     }
 
     {
         tmpManifestFileNonExistent = makeTmpManifestYml('non-existent');
-        const content = {
-            name: "Some Non-Existent Manifest",
-            root: `${tmpSubdirManRoot.name}`,
-            output: `${path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileNonExistent.name))}`,
-            entries: [{name: "A Fake Game", exec: tmpFileValidExecExt.name}]
-        }
-        fs.writeFileSync(tmpManifestFileNonExistent.name, yaml.stringify(content));
-        manifestNonExistent = new Manifest(tmpManifestFileNonExistent.name, content);
+        const root = tmpSubdirManRoot.name,
+              output = path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileNonExistent.name)),
+              entries = [{name: 'A Fake Game', exec: tmpFileValidExecExt.name}];
+        const object = {
+            name: 'Some Non-Existent Manifest',
+            root: root,
+            output: output,
+            entries: entries
+        };
+        fs.writeFileSync(tmpManifestFileNonExistent.name, yaml.stringify(object));
+        manifestNonExistent = new Manifest(tmpManifestFileNonExistent.name, object);
         tmpManifestFileNonExistent.removeCallback();
     }
 
@@ -147,11 +150,11 @@ function setupFiles() {
 
     {
         tmpManifestFileNoNameAttr = makeTmpManifestYml('no-name-attribute');
-        const output = path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileNoNameAttr.name))
+        const output = path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileNoNameAttr.name));
         const content = {
             root: `${tmpSubdirManRoot.name}`,
             output: `${path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileNoNameAttr.name))}`,
-            entries: [{name: "A Fake Game", exec: tmpFileValidExecExt.name}]
+            entries: [{name: 'A Fake Game', exec: tmpFileValidExecExt.name}]
         };
         fs.writeFileSync(tmpManifestFileNoNameAttr.name, yaml.stringify(content));
         manifestNoNameAttr = new Manifest(tmpManifestFileNoNameAttr.name, content);

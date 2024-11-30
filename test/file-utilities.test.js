@@ -2,7 +2,7 @@ import path from 'node:path';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 
-import { setOfBooleans, setOfEmptyAndWhitespaceStrings, setOfFalsy, setOfNonArrays, setOfNonStrings, unionOfNonArraysAndNonStrings } from './test-values.js';
+import { setOfBooleans, setOfEmptyAndWhitespaceStrings, setOfNonStrings, unionOfNonArraysAndNonStrings } from './test-values.js';
 
 import { basenameWithoutExtensions, normalizeFileExtension, replaceFileExtension } from '../src/file-utilities.js';
 
@@ -76,34 +76,34 @@ describe('File: file-utilities.js', () => {
             for (const value of unionOfNonArraysAndNonStrings) {
                 await t.test(`Subtest for findExt=${value}`, () => {
                     assert.throws(() => replaceFileExtension('file.yaml', value, '.json'));
-                })
+                });
             }
-        })
+        });
         it('should, when passed an empty or whitespace-only string, throw an error', async (t) => {
             for (const value of setOfEmptyAndWhitespaceStrings) {
                 await t.test(`Subtest for findExt="${value}"`, () => {
                     assert.throws(() => replaceFileExtension('file.yaml', value, '.json'));
-                })
+                });
             }
-        })
+        });
 
         // Arg: replaceExt
         it('should, when passed a non-string replaceExt arg, throw an error', async (t) => {
             for (const value of setOfNonStrings) {
                 await t.test(`Subtest for replaceExt=${value}`, () => {
                     assert.throws(() => replaceFileExtension('file.yaml', ['.yml', '.yaml'], value));
-                })
+                });
             }
-        })
+        });
 
         // Arg: normalize
         it('should, when passed a non-boolean normalize arg, throw an error', async (t) => {
             for (const value of setOfBooleans) {
                 await t.test(`Subtest for normalize=${value}`, () => {
                     assert.throws(() => replaceFileExtension('file.yaml', ['.yml', '.yaml'], '.json', value));
-                })
+                });
             }
-        })
+        });
 
         // TODO TEST Functionality
 

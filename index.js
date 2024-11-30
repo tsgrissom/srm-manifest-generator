@@ -1,9 +1,10 @@
-import chalk from "chalk";
-import startApp from "./src/app.js";
+import chalk from 'chalk';
+import startApp from './src/app.js';
+import { logDebug } from './src/util/utilities.js';
 
 try {
     await startApp();
-    console.log(chalk.green('STARTED'));
+    logDebug(chalk.green('APP STARTED'));
 } catch (err) {
     console.error('An error occurred on app start:', err);
 }

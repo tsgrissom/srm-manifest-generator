@@ -19,6 +19,7 @@ export default [
       "camelcase": "warn",
       "semi": "warn",
       "no-constant-condition": "warn",
+      "quotes": ["warn", "single", { "avoidEscape": true, "allowTemplateLiterals": true }],
       
       "no-undef": "error",
     }

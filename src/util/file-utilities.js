@@ -42,7 +42,7 @@ export function replaceFileExtension(fileName, findExt, replaceExt, normalize = 
     if (!findExt || (typeof findExt !== 'string' && !Array.isArray(findExt))) // TEST And make sure this doesn't have unexpected behavior
         throw new Error(`Arg findExt must be an array of strings or strings: ${fileName}`);
     if (typeof findExt === 'string' && findExt.trim() === '')
-        throw new Error(`Arg findExt cannot be an empty string`)
+        throw new Error(`Arg findExt cannot be an empty string`);
     if (typeof replaceExt !== 'string')
         throw new Error(`Arg replaceExt must be a string: ${replaceExt}`);
     if (typeof normalize !== 'boolean')

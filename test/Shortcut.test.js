@@ -1,15 +1,18 @@
-import path from "node:path";
-import assert from "node:assert";
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert';
 import { before, after, describe, it } from 'node:test';
 
-import chalk from "chalk";
+import chalk from 'chalk';
 import tmp from 'tmp';
+import yaml from 'yaml';
 
-import { setOfFalsy } from "./util/test-values.js";
+import { setOfFalsy } from './util/test-values.js';
 
-import { logDebugPlain } from "../src/util/utilities.js";
-import Shortcut from "../src/Shortcut.js";
-import Manifest from "../src/Manifest.js";
+import { logDebugPlain } from '../src/util/utilities.js';
+import Shortcut from '../src/Shortcut.js';
+import Manifest from '../src/Manifest.js';
+import { basenameWithoutExtensions } from '../src/util/file-utilities.js';
 
 const __dirname = import.meta.dirname;
 const __filename = path.basename(import.meta.filename);
@@ -33,7 +36,7 @@ const makeTmpSubdir = (prefix) => {
         dir: tmpDir.name,
         prefix: prefix
     });
-}
+};
 
 const makeTmpManifestYml = (prefix = 'manifest') => {
     return tmp.fileSync({
@@ -42,8 +45,8 @@ const makeTmpManifestYml = (prefix = 'manifest') => {
         dir: tmpSubdirManifests.name,
         prefix: prefix,
         postfix: '.manifest.yml'
-    })
-}
+    });
+};
 
 function setupFolders() {
     tmpDir = tmp.dirSync({
@@ -67,6 +70,13 @@ function teardownFolders() {
 
 function setupFiles() {
     tmpManifestFileGenValid = makeTmpManifestYml('gen-valid');
+    const object = {
+        name: basenameWithoutExtensions(tmpManifestFileGenValid.name),
+        root: tmpSubdirManRoot.name,
+        output: tmpSubdirManOutput.name
+    };
+    fs.writeFileSync(tmpManifestFileGenValid.name, yaml.stringify(object));
+    manifestGenValid = new Manifest(tmpManifestFileGenValid.name, object);
 
     logDebugPlain(`Test Resources: ${__filename} setupFiles done`);
 }
@@ -83,8 +93,8 @@ function setup() {
 }
 
 function teardown() {
-    // teardownFiles();
-    // teardownFolders();
+    teardownFiles();
+    teardownFolders();
     console.log(chalk.green('Test Resources: Teardown completed'));
 }
 
@@ -109,9 +119,9 @@ describe('Class: Shortcut', () => {
             for (const value of values) {
                 await t.test(`Subtest for arg manifest=${value}`, () => {
                     assert.throws(() => new Shortcut(value, shortcutObjectOk));
-                })
+                });
             }
-        })
+        });
     });
 
     it('should, if constructed with a non-truthy manifest arg, throw an error', async (t) => {

@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import chalk from "chalk";
+import chalk from 'chalk';
 import { basenameWithoutExtensions } from './util/file-utilities.js';
 import Manifest from './Manifest.js';
 
@@ -12,7 +12,7 @@ class Shortcut {
 
         if (!manifest)
             throw new Error(`Constructor arg "manifest" is invalid: ${manifest}`);
-        if (!manifest instanceof Manifest)
+        if (!(manifest instanceof Manifest))
             throw new Error(`Constructor arg "manifest" is a non-Manifest type: ${manifest}`);
 
         if (!object)

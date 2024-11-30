@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { isProcessRunning } from "../src/utilities.js";
+import { isProcessRunning } from '../src/utilities.js';
 
 describe('File: utilities.js', () => {
 

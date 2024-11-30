@@ -4,7 +4,7 @@ import chalk from 'chalk';
 
 import { stylePath } from './util/string-utilities.js';
 import { logDebugPlain, logDebugSectionWithData } from './util/utilities.js';
-import userConfig from './config.js';
+import userConfig from './config/config.js';
 
 async function writeManifestOutput(manifest) {
     // const invalidShortcuts = [];

@@ -7,8 +7,8 @@ import Shortcut from './Shortcut.js';
 class Manifest {
 
     static NameSource = {
-        ATTRIBUTE: "Attribute",
-        FILENAME: "Filename"
+        ATTRIBUTE: 'Attribute',
+        FILENAME: 'Filename'
     };
 
     /**
