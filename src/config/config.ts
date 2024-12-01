@@ -33,52 +33,54 @@ const logConfigInvalid = (message: string, withReadme: boolean = true) => {
 
 // MARK: HELPERS
 
-async function validateManifestPath(manPath: string, config: ConfigData) : Promise<boolean> {
-    dlog(`Validate Manpath > Starting ${manPath}`);
+async function validateManifestPathExists(manPath: string, config: ConfigData) : Promise<boolean> {
+    const manPathName = `(Path: "${manPath}")`;
 
-    // TODO Maybe split these two checks up?
     try {
         await fs.promises.access(manPath).catch(() => {
-            logConfigWarn(` > Given manifest file path does not exist: ${manPath}`);
+            logConfigWarn(`Manifest file path does not exist ${manPathName}`);
             return false;
         });
 
-        dlog(` > Given manifest file path exists: ${manPath}`);
+        dlog(`Manifest file path exists ${manPathName}`);
     } catch (err) {
-        throw new Error(`Error while checking if manifest path exists (Path: ${manPath}): ${err}`);
+        throw new Error(`Error while validating manifest path existence (Path: ${manPath}): ${err}`);
     }
+
+    return true;
+}
+
+async function validateManifestPathIsSupportedFilesystemType(manPath: string, config: ConfigData) : Promise<boolean> {
+    const manPathName = `(Path: "${manPath}")`;
 
     try {
         const stats = await fs.promises.stat(manPath);
 
-        if (!stats.isFile() && !stats.isDirectory()) {
-            logConfigWarn(`Unsupported filesystem type (Supported: File or Folder) was set as a manifest file path in the user config.yml.`);
-        }
+        if (!stats.isFile() && !stats.isDirectory())
+            logConfigWarn(`Unsupported filesystem type (Supported: File or Folder) was set as a manifest path in the user ${USER_CONFIG_FILENAME}.`);
 
         const { scanDirectories, scanRecursively } = config.search;
 
-        if (stats.isFile()) { // Files are always accepted
-            dlog(` > Manifest path is a file: ${manPath}`);
-            // TODO: Make sure it's a supported filetype
+        if (stats.isFile()) {
+            dlog(`Manpath is a file ${manPathName}`);
             return true;
-        } else if (stats.isDirectory()) { // Directories are accepted if enabled in config.yml, default true
-            dlog(` > Manifest path is a directory: ${manPath}`);
-            dlog(` > Scan Directories? ${enabledDisabled(scanDirectories)}`);
-            dlog(` > Scan Recursively? ${enabledDisabled(scanRecursively)}`);
-            
+        } else if (stats.isDirectory()) {
+            dlog(`> Manpath is a directory ${manPathName}`);
+            dlog(`- Scan Directories? ${enabledDisabled(scanDirectories)}`);
+            dlog(`- Scan Recursively? ${enabledDisabled(scanRecursively)}`);
+
             if (!scanDirectories) {
-                logConfigWarn(`Config option "manifests" contains a path which points to a directory, but Scanning Directories is disabled by the config.yml. Skipping the following manifest path: "${manPath}"`);
+                logConfigWarn(`Manifests file path list contains a path pointing to a directory, but scanning directories is disabled by the user's ${USER_CONFIG_FILENAME}. The following path will be skipped: ${manPath}`);
                 return false;
             }
 
             return true;
         } else {
-            logConfigWarn(`Unsupported type at the given path was ignored: ${manPath}`);
+            logConfigWarn(`Unsupported filesystem type at the given path was ignored ${manPathName}`);
         }
     } catch (err) {
-        throw new Error(`Could not stat manifest path (Path: ${manPath}): ${err}`);
+        throw new Error(`Could not stat manifest path ${manPath}`);
     }
-
     
     return true;
 }
@@ -177,10 +179,15 @@ async function makeManifestsArray(manPaths: string[], config: ConfigData) : Prom
     }
 
     for (const [index, manPath] of manPaths.entries()) {
-        dlog(`Manifest Instance > Starting manpath #${index}`);
+        const manPathName = `(Path: "${manPath}")`;
+        dlog(`Manifest Instance #${index} > Starting processing of manpath ${manPathName}`);
 
-        const exists = await validateManifestPath(manPath, config);
+        const exists = await validateManifestPathExists(manPath, config);
+        const validFsType = await validateManifestPathIsSupportedFilesystemType(manPath, config);
+        
         dlog(`Manpath exists? ${checkCross(exists)} (${manPath})`);
+        dlog(`Manpath is a valid fs type? ${checkCross(validFsType)} ${manPathName}`);
+
         if (!exists) {
             console.log(`Skipping manifest (Path: ${manPath})`);
             continue;
@@ -192,7 +199,7 @@ async function makeManifestsArray(manPaths: string[], config: ConfigData) : Prom
 
         okManifests.push(instance);
 
-        dlog(`Manifest Instance > Completed manpath #${index}`);
+        dlog(`Manifest Instance #${index} > Completed processing of manpath ${manPathName}`);
     }
     
     return okManifests;
