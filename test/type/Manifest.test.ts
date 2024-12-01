@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import tmp, { DirResult, FileResult } from 'tmp';
 import yaml from 'yaml';
 
-import { logDebug } from '../../src/utility/logging.js';
+import { dlog } from '../../src/utility/logging.js';
 import { replaceFileExtension } from '../../src/utility/file.js';
 import { Manifest } from '../../src/type/Manifest.js';
 
@@ -56,7 +56,7 @@ function setupDirs() {
     resourceSubdirManRoot     = tmpSubdir(scopeDirName, 'root');
     resourceSubdirManOutput   = tmpSubdir(scopeDirName, 'output');
     resourceSubdirExecutables = tmpSubdir(scopeDirName, 'executables');
-    logDebug(`Test resource setup finished: Manifest.test.js folders`);
+    dlog(`Test resource setup finished: Manifest.test.js folders`);
 }
 
 function teardownDirs() {
@@ -65,14 +65,14 @@ function teardownDirs() {
     resourceSubdirManRoot.removeCallback();
     resourceSubdirManifests.removeCallback();
     resourceDir.removeCallback();
-    logDebug(`Test resource teardown finished: Manifest.test.js folders`);
+    dlog(`Test resource teardown finished: Manifest.test.js folders`);
 }
 
 function setupFiles() { // TODO Replace execs with a func from utils
     resourceFileExecutableOk = tmpExecutableFile(true, 'valid-executable');
     resourceFileExecutableBad = tmpExecutableFile(false, 'invalid-executable');
 
-    logDebug(`Test resource setup finished: Manifest.test.js executable files`);
+    dlog(`Test resource setup finished: Manifest.test.js executable files`);
         
     {
         resourceFileManOk = tmpManifestYml('generic-valid', resourceSubdirManifests.name);
@@ -129,19 +129,19 @@ function setupFiles() { // TODO Replace execs with a func from utils
         resourceManifestNoNameAttribute = new Manifest(resourceFileManNoNameAttribute.name, content);
     }
 
-    logDebug(`Test resource setup finished: Manifest.test.js .manifest.yml files`);
+    dlog(`Test resource setup finished: Manifest.test.js .manifest.yml files`);
 }
 
 function teardownFiles() {
     resourceFileExecutableOk.removeCallback();
     resourceFileExecutableBad.removeCallback();
-    logDebug(`Test resource teardown finished: Manifest.test.js executable files`);
+    dlog(`Test resource teardown finished: Manifest.test.js executable files`);
 
     resourceFileManOk.removeCallback();
     resourceFileManBad.removeCallback();
     resourceFileManEmptyContents.removeCallback();
     resourceFileManNoNameAttribute.removeCallback();
-    logDebug(`Test resource teardown finished: Manifest.test.js Manifest YAML files`);
+    dlog(`Test resource teardown finished: Manifest.test.js Manifest YAML files`);
 }
 
 before(() => {

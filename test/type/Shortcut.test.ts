@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import tmp, { DirResult, FileResult } from 'tmp';
 import yaml from 'yaml';
 
-import { logDebug } from '../../src/utility/logging.js';
+import { dlog } from '../../src/utility/logging.js';
 import { basenameWithoutExtensions } from '../../src/utility/file.js';
 import { Shortcut } from '../../src/type/Shortcut.js';
 import { Manifest } from '../../src/type/Manifest.js';
@@ -27,25 +27,25 @@ let resourceFileManOk: FileResult;
 let resourceManifestOk: Manifest;
 
 function setupFolders() {
-    logDebug(`Test Resources: ${__filebasename} setupFolders begin`);
+    dlog(`Test Resources: ${__filebasename} setupFolders begin`);
     resourceDir = tmpDirForScope(__filebasename);
     resourceSubdirManifests = tmpSubdir(resourceDir.name, 'manifests');
     resourceSubdirManOutput = tmpSubdir(resourceDir.name, 'output');
     resourceSubdirManRoot = tmpSubdir(resourceDir.name, 'root');
-    logDebug(`Test Resources: ${__filebasename} setupFolders done`);
+    dlog(`Test Resources: ${__filebasename} setupFolders done`);
 }
 
 function teardownFolders() {
-    logDebug(`Test Resources: ${__filebasename} teardownFolders begin`);
+    dlog(`Test Resources: ${__filebasename} teardownFolders begin`);
     resourceSubdirManRoot.removeCallback();
     resourceSubdirManOutput.removeCallback();
     resourceSubdirManifests.removeCallback();
     resourceDir.removeCallback();
-    logDebug(`Test Resources: ${__filebasename} teardownFolders done`);
+    dlog(`Test Resources: ${__filebasename} teardownFolders done`);
 }
 
 function setupFiles() {
-    logDebug(`Test Resources: ${__filebasename} setupFiles begin`);
+    dlog(`Test Resources: ${__filebasename} setupFiles begin`);
 
     resourceFileManOk = tmpManifestYml('gen-valid', resourceSubdirManifests.name);
 
@@ -57,24 +57,24 @@ function setupFiles() {
     fs.writeFileSync(resourceFileManOk.name, yaml.stringify(object));
     resourceManifestOk = new Manifest(resourceFileManOk.name, object);
 
-    logDebug(`Test Resources: ${__filebasename} setupFiles done`);
+    dlog(`Test Resources: ${__filebasename} setupFiles done`);
 }
 
 function teardownFiles() {
-    logDebug(`Test Resources: ${__filebasename} teardownFiles begin`);
+    dlog(`Test Resources: ${__filebasename} teardownFiles begin`);
     resourceFileManOk.removeCallback();
-    logDebug(`Test Resources: ${__filebasename} teardownFiles done`);
+    dlog(`Test Resources: ${__filebasename} teardownFiles done`);
 }
 
 before(() => {
-    logDebug(`Test Resources: ${__filebasename} Setup started`);
+    dlog(`Test Resources: ${__filebasename} Setup started`);
     setupFolders();
     setupFiles();
     console.log(chalk.green('Test Resources: Setup completed'));
 });
 
 after(() => {
-    logDebug(`Test Resources: ${__filebasename} Teardown started`);
+    dlog(`Test Resources: ${__filebasename} Teardown started`);
     teardownFiles();
     teardownFolders();
     console.log(chalk.green('Test Resources: Teardown completed'));

@@ -14,34 +14,12 @@ export function capitalize(str: string) {
     return firstLetter.toUpperCase() + restOfStr;
 }
 
-// MARK: Fn getFormattedBoolean
-// TODO jsdoc
-// TODO TEST Unit
-// TODO More flexible abstract fn
-export function yesNo(
-    b: boolean, 
-    color: boolean = true, 
-    capitalized: boolean = true, 
-    trueStr: string = 'yes', 
-    falseStr: string = 'no'
-) {
-    let str = b ? trueStr : falseStr;
-    if (capitalized) {
-        str = capitalize(str);
-    }
-    return color ? (b ? chalk.greenBright(str) : chalk.redBright(str)) : str;
-}
-
-export function enabledDisabled(b: boolean, withColor: boolean = true, withCapitalization: boolean = true) {
-    return yesNo(b, withColor, withCapitalization, 'enabled', 'disabled');
-}
-
 // MARK: Fn countString
 // TODO jsdoc
 // TODO TEST Unit
 export function countString(numberOfThings: number, singularNoun: string, pluralNoun: string = '') {
     if (typeof(numberOfThings) !== 'number')
-        throw new Error(`Non-numeric arg numberOfThings: ${numberOfThings}`);
+        throw new TypeError(`Arg numberOfThings must be a number: ${numberOfThings}`);
     // TODO Recode to account for typescript
 
     pluralNoun = pluralNoun || `${singularNoun}s`; 
@@ -88,9 +66,9 @@ export function delimitedList(items: string[], delimiter: string = ', ') {
 
 export function stylePath(filePath: PathLike, valid: boolean = false) {
     if (typeof filePath !== 'string')
-        throw new Error(`Unable to style non-string filePath argument: ${filePath}`);
+        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
     if (typeof valid !== 'boolean')
-        throw new Error(`Unable to style with non-boolean "valid" argument: ${valid}`);
+        throw new TypeError(`Arg valid must be a boolean: ${valid}`);
 
     if (!filePath.startsWith('"'))
         filePath = '"' + filePath;

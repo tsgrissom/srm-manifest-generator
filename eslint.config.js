@@ -19,7 +19,8 @@ export default tslint.config(
     rules: {
       '@typescript-eslint/curly': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',
-      '@typescript-eslint/array-type': 'warn'
+      '@typescript-eslint/array-type': 'warn',
+      '@typescript-eslint/no-constant-condition': 'warn'
     }
   },
   // ...

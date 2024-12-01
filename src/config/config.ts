@@ -1,222 +1,162 @@
 import fs from 'node:fs';
+import path from 'node:path';
 
 import chalk from 'chalk';
-import yaml from 'yaml';
 
-import { logDebug, logDebugSectionWithData } from '../utility/logging.js';
-import { enabledDisabled } from '../utility/string.js';
+import { UserConfig } from './UserConfig.js';
+import { loadUserConfigData } from './load-config.js';
+import { dlog, isDebugging } from '../utility/logging.js';
+import { delimitedList } from '../utility/string.js';
+import { boolFmt } from '../utility/boolean.js';
 
-import {
-    USER_CONFIG_FILENAME,
-    USER_CONFIG_PATH,
-    loadUserConfigData
-} from './load-config.js';
-import { UserConfigData } from './UserConfig.js';
-import { Manifest } from '../type/Manifest.js';
+const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
+const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
+const EXAMPLE_CONFIG_URL = `https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main${EXAMPLE_CONFIG_PATH}`;
 
-// MARK: HELPERS
+const USER_CONFIG_FILENAME = 'config.yml';
+const USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME) // PATH_EXAMPLE_CONFIG;
 
-function logConfigErrorAndExit(message: string, displayReadme: boolean = true) {
+const logConfigStatus = (message: string) => console.log(`User Config: ${message}`);
+const dlogConfigStatus = (message: string) => { if (isDebugging()) logConfigStatus(message) }
+
+const logConfigInvalid = (message: string, withReadme: boolean = true) => {
     console.error(chalk.red(`INVALID User Config: ${message}`));
-    if (displayReadme) {
-        console.log(chalk.red('See the project README: ') + chalk.red.underline('https://github.com/tsgrissom/srm-manifest-generator'));
-    }
-    process.exit();
+    if (withReadme)
+        console.error(chalk.redBright(`See the project README: `) + chalk.redBright.underline('https://github.com/tsgrissom/srm-manifest-generator'))
 }
 
-function logConfigWarn(message: string, withColor: boolean = true) {
-    let text = `WARN User Config: ${message}`;
-    text = withColor ? chalk.yellow(text) : text;
-    console.warn(text);
-}
-
-function logConfigStatus(message: string) {
-    console.log(`User Config: ${message}`);
-}
-
-async function verifyManifestPath(filePath: string, scanDirectories: boolean, scanRecursively: boolean) {
-    logDebug('Verifying Manifest Path', true);
-
+async function loadData() : Promise<object> {
+    let userConfigData;
     try {
-        await fs.promises.access(filePath).catch(() => {
-            logConfigWarn(` > Given manifest file path does not exist: ${filePath}`);
-            return false;
-        });
-
-        logDebug(` > Given manifest file path exists: ${filePath}`);
+        userConfigData = await loadUserConfigData();
+        return userConfigData;
     } catch (err) {
-        throw new Error(`Error while checking if manifest path exists (Path: ${filePath}): ${err}`);
+        throw new Error(`Error loading user config data: ${err}`);
+    }
+}
+
+function parseSearchSection(data: object, userConfig: UserConfig) : UserConfig {
+    if (!Object.keys(data).includes('search'))
+        throw new Error(chalk.red('User Config is missing required section "search"'));
+
+    const section = (data as Record<string, unknown>)['search'];
+    
+    if (typeof section !== 'object' || section === null)
+        throw new Error(chalk.red('User Config "search" section is not a valid object'));
+    if (Array.isArray(section))
+        throw new Error(chalk.red('User Config "search" section must be a mapping, not a list (Expected object, Found array)'));
+
+    for (const key of Object.keys(section)) {
+        console.log(`Key in search section: ${key}`);
     }
 
-    try {
-        const stats = await fs.promises.stat(filePath);
+    const keyAliases: Record<string, string> = {
+        scanDirectories: 'directories',
+        scanRecursively: 'recursively',
+        manifests: 'sources'
+    }
+    const resolveAlias = (key: string): string => {
+        return keyAliases[key] || key;
+    }
 
-        if (!stats.isFile() && !stats.isDirectory()) {
-            logConfigWarn(`Unsupported filesystem type (Supported: File or Folder) was set as a manifest file path in the user config.yml.`);
-        }
+    for (const [key, value] of Object.entries(section)) {
+        const resolved = resolveAlias(key);
 
-        if (stats.isFile()) { // Files are always accepted
-            logDebug(` > Manifest path is a file: ${filePath}`);
-            // TODO: Make sure it's a supported filetype
-            return true;
-        } else if (stats.isDirectory()) { // Directories are accepted if enabled in config.yml, default true
-            logDebug(` > Manifest path is a directory: ${filePath}`);
-            logDebug(` > Scan Directories? ${enabledDisabled(scanDirectories)}`);
-            logDebug(` > Scan Recursively? ${enabledDisabled(scanRecursively)}`);
-            
-            if (!scanDirectories) {
-                logConfigWarn(`Config option "manifests" contains a path which points to a directory, but Scanning Directories is disabled by the config.yml. Skipping the following manifest path: "${filePath}"`);
-                return false;
+        switch (resolved) {
+            case 'scanDirectories': {
+                if (typeof value === 'boolean') {
+                    userConfig.search.scanDirectories = value;
+                    dlogConfigStatus(`search.scanDirectories set=${boolFmt(value)}`);
+                } else {
+                    logConfigInvalid(`Value of search.scanDirectories must be a boolean but was not: ${value}`);
+                }
+                break;
             }
-
-            return true;
-        } else {
-            logConfigWarn(`Unsupported type at the given path was ignored: ${filePath}`);
+            case 'scanRecursively': {
+                if (typeof value === 'boolean') {
+                    userConfig.search.scanRecursively = value;
+                    dlogConfigStatus(`search.scanRecursively set=${boolFmt(value)}`);
+                } else {
+                    logConfigInvalid(`Value of search.scanRecursively must be a boolean but was not: ${value}`);
+                }
+                break;
+            }
+            case `manifests`:
+                if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
+                    userConfig.search.manifests = value;
+                    dlogConfigStatus(`search.manifests set=${delimitedList(value)}`)
+                } else {
+                    if (!Array.isArray(value)) {
+                        logConfigInvalid('Value of search.manifests must be array of strings but was not an array');
+                    } else {
+                        logConfigInvalid('All entries of search.manifests must be a string but at least one was not');
+                    }
+                }
+                break;
         }
-    } catch (err) {
-        throw new Error(`Could not stat manifest path (Path: ${filePath}): ${err}`);
     }
 
-    return true;
+    return userConfig;
 }
 
-/**
- * Reads the contents of an manifest.yml file which is expected to be found at `filePath`, then
- * parses those contents into a JavaScript object.
- * @param filePath The file path to find the manifest file at.
- * @returns The YAML document parsed into JSON.
- */
-async function readManifestContents(filePath: string) {
-    console.log(chalk.magenta('REACHED READ MANIFEST'));
+export async function parseUserConfigData() : Promise<UserConfig> {
+    const userConfigData = await loadData();
 
-    if (!filePath)
-        throw new Error(`Unable to create Manifest instance from invalid constructor arg filePath: "${filePath}"`);
-    if (filePath.trim() === '')
-        throw new Error(`Unable to create Manifest instance from empty constructor arg filePath: "${filePath}"`);
-
-    try {
-        const data = await fs.promises.readFile(filePath, 'utf-8');
-        console.log(chalk.magenta('END OF READ MANIFEST'));
-        return data;
-    } catch (err) {
-        console.log(chalk.magenta('END OF READ MANIFEST'));
-        throw new Error(`Error reading or parsing file: ${err}`);
-    }
-}
-
-async function createManifestInstance(filePath: string, fileContents: string) {
-    // TODO Rewrite jsdoc to reflect removed fileName param
-
-    if (!filePath)
-        throw new Error(`Unable to create Manifest instance from invalid constructor arg filePath: "${filePath}"`);
-    if (filePath.trim() === '')
-        throw new Error(`Unable to create Manifest instance from empty constructor arg filePath: "${filePath}"`);
-
-    const object = yaml.parse(fileContents);
-    const manifest = new Manifest(filePath, object);
-    return manifest;
-}
-
-// MARK: LOAD CONFIG
-
-const userConfig: UserConfigData = {
-    search: {
-        scanDirectories: true,
-        scanRecursively: false,
-        manifests: []
-    },
-    output: {},
-    validation: {},
-    logging: {}
-};
-let userConfigData;
-
-try {
-    userConfigData = await loadUserConfigData();
-} catch (error) {
-    console.error(chalk.red('An error occurred while loading the user config data:', error));
-}
-
-if (!userConfigData) {
-    if (!fs.existsSync(USER_CONFIG_PATH)) {
-        logConfigErrorAndExit(`You must create a ${USER_CONFIG_FILENAME} to use SRM Manifest Generator`);
-    } else {
-        logConfigErrorAndExit(`Your ${USER_CONFIG_FILENAME} cannot be empty.`);
-    }
-}
-
-// MARK: Search Section
-{
-    const section = userConfigData.search;
-
-    if (section === null)
-        logConfigErrorAndExit('Your config.yml "search" section cannot be empty');
-    
-    if (!section)
-        logConfigErrorAndExit('Your config.yml is missing the required section "search"');
-
-    const { manifests: allManifests } = section;
-
-    if (!allManifests) {
-        logConfigErrorAndExit('Your config.yml is missing the required list of paths "manifests" within the section "search"');
-    }
-    
-    const scanDirectories = section.scanDirectories ?? true;
-    const scanRecursively = section.scanRecursively || false;
-
-    // TODO: Implement options
-
-    const okManifests = [];
-
-    for (const manifest of allManifests) {
-        const { filePath } = manifest;
-
+    if (!userConfigData) {
         try {
-            const isPathValid = await verifyManifestPath(filePath, scanDirectories, scanRecursively);
-            
-            if (!isPathValid) {
-                logConfigWarn(`Path is not valid, skipped: ${filePath}`);
-                continue;
-            }
-
-            const contents = await readManifestContents(filePath);
-            const instance = await createManifestInstance(filePath, contents);
-            
-            okManifests.push(instance);
-        } catch (err) {
-            console.error(`Error processing manifest at ${filePath}:`, err);
+            await fs.promises.access(USER_CONFIG_PATH);
+            throw new Error(`Your ${USER_CONFIG_FILENAME} cannot be empty.`);
+        } catch {
+            throw new Error(`You must create a ${USER_CONFIG_FILENAME} to use SRM Manifest Generator`)
         }
     }
 
-    userConfig.search.scanDirectories = scanDirectories;
-    userConfig.search.scanRecursively = scanRecursively; // TODO Update to scanRecursively
-    userConfig.search.manifests = okManifests;
+    if (typeof userConfigData !== 'object' || Array.isArray(userConfigData)) {
+        console.error(chalk.red(`
+            User Config is malformed: Expected parsed data to be of type object, but was actually an array or other non-object.
+            For an example config, please see: ${EXAMPLE_CONFIG_URL}
+        `));
+        throw new Error(`User ${USER_CONFIG_FILENAME} is invalid`);
+    }  
 
-    const nOk = okManifests.length,
-          nAllPaths = allManifests.length;
-    
-    let ctOk = `${nOk}/${nAllPaths}`;
+    let userConfig: UserConfig = {
+        search: {
+            scanDirectories: false,
+            scanRecursively: false,
+            manifests: []
+        },
+        output: {
+            minify: false,
+            indentationSpaces: 0,
+            spreadMode: 'file'
+        },
+        validation: {
+            validateFilePaths: false,
+            validateExecutables: false,
+            acceptedExecutables: []
+        },
+        logging: {
+            enabled: false,
+            outputFile: ''
+        }
+    };
 
-    if (nOk === nAllPaths) {
-        ctOk = chalk.green(ctOk);
-    } else if (nOk < nAllPaths) {
-        ctOk = chalk.red(ctOk);
-    }
+    // TODO Sift through and load data
 
-    logConfigStatus(`Loaded ${ctOk} configured manifest paths`);
+    userConfig = parseSearchSection(userConfigData, userConfig);
 
-    logDebugSectionWithData(
-        'User Config: Search section finished loading',
-        `Scan Directories? ${enabledDisabled(scanDirectories)}`,
-        `Scan Recursively? ${enabledDisabled(scanRecursively)}`,
-        chalk.blueBright('Manifest Paths')
-    );
+    return userConfig;
 }
 
-// MARK: Output Section
+(async () => {
+    console.log(EXAMPLE_CONFIG_PATH);
+    await parseUserConfigData();
+})();
 
-// MARK: Validation Section
-
-// MARK: Logging Section
-
-export default userConfig;
+export {
+    EXAMPLE_CONFIG_FILENAME,
+    EXAMPLE_CONFIG_PATH,
+    EXAMPLE_CONFIG_URL,
+    USER_CONFIG_FILENAME,
+    USER_CONFIG_PATH
+}

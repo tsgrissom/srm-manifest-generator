@@ -1,12 +1,11 @@
 import chalk from 'chalk';
 
-const isDebugFlagOn = () : boolean => process.argv.includes('--debug') || process.argv.includes('-D');
-const isDebugging = () : boolean => process.env.DEBUG === 'true' || isDebugFlagOn();
-
-function getDebugPrefix(withColor: boolean = true) : string {
+const getDebugPrefix = (withColor: boolean = true) : string => {
     const prefix = 'DEBUG: ';
     return withColor ? chalk.bgMagenta(prefix) : prefix;
 }
+const isDebugFlagOn = () : boolean => process.argv.includes('--debug') || process.argv.includes('-D');
+export const isDebugging = () : boolean => process.env.DEBUG === 'true' || isDebugFlagOn();
 
 /**
  * Logs a message to the console if debugging is active, which occurs if:
@@ -15,14 +14,14 @@ function getDebugPrefix(withColor: boolean = true) : string {
  * @param {string} text The 
  * @param {boolean} withPrefix
  */
-export function logDebug(text: string, withPrefix: boolean = false, withColor: boolean = true) {
+export function dlog(text: string, withPrefix: boolean = false, withColor: boolean = true) {
     if (!isDebugging())
         return;
 
     console.log(withPrefix ? getDebugPrefix(withColor) : '' + text);
 }
 
-export function logDebugLines(linePrefix: string = ' - ', ...lines: string[]) {
+export function dlogLines(linePrefix: string = ' - ', ...lines: string[]) {
     if (!isDebugging())
         return;
 
@@ -30,7 +29,7 @@ export function logDebugLines(linePrefix: string = ' - ', ...lines: string[]) {
         console.log(linePrefix + line);
 }
 
-export function logDebugSectionWithData(header: string, linePrefix: string = ' > ', ...lines: string[]) {
+export function dlogSectionWithData(header: string, linePrefix: string = ' > ', ...lines: string[]) {
     if (!isDebugging())
         return;
     

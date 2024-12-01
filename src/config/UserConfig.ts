@@ -1,10 +1,10 @@
 import { Manifest } from '../type/Manifest.js';
 
-interface UserConfigData {
+interface UserConfig {
     search: {
         scanDirectories: boolean;
         scanRecursively: boolean;
-        manifests: Manifest[];
+        manifests: string[];
     },
     output: {
         minify: boolean;
@@ -22,31 +22,6 @@ interface UserConfigData {
     }
 }
 
-class UserConfig {
-    data: UserConfigData = {
-        search: {
-            scanDirectories: true,
-            scanRecursively: false,
-            manifests: []
-        },
-        output: {
-            minify: true, // TODO Implement
-            indentationSpaces: 2, // TODO Implement
-            spreadMode: 'file' // TODO Implement
-        },
-        validation: {
-            validateFilePaths: true, // TODO Implement
-            validateExecutables: true, // TODO Implement
-            acceptedExecutables: ['.exe'] // TODO Implement
-        },
-        logging: {
-            enabled: true, // TODO Implement
-            outputFile: './srm-manifest-generator.log' // TODO Implement
-        }
-    }
-}
-
 export {
-    UserConfigData,
     UserConfig
 };

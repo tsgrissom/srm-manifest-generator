@@ -1,20 +1,16 @@
-import chalk from 'chalk';
 import fs from 'node:fs';
 import https from 'node:https';
-import path from 'node:path';
 
 import yaml from 'yaml';
 
-import { UserConfigData } from './UserConfig.js';
-
-const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
-const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
-const EXAMPLE_CONFIG_URL = `https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main${EXAMPLE_CONFIG_PATH}`;
-
-// console.log(chalk.bgMagenta(EXAMPLE_CONFIG_URL));
-
-const USER_CONFIG_FILENAME = 'config.yml';
-const USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME) // PATH_EXAMPLE_CONFIG;
+import { UserConfig } from './UserConfig.js';
+import {
+    EXAMPLE_CONFIG_FILENAME,
+    EXAMPLE_CONFIG_PATH,
+    EXAMPLE_CONFIG_URL,
+    USER_CONFIG_FILENAME,
+    USER_CONFIG_PATH
+ } from './config.js';
 
 /**
  * Attempts to download the example.config.yml from the project repository,
@@ -105,7 +101,7 @@ async function copyExampleConfigToUserConfigPath() : Promise<void> {
  *   resolved, or otherwise rejects when all fallback methods are
  *   exhausted or unhandled errors occur.
  */
-async function loadUserConfigData() : Promise<UserConfigData> {
+async function loadUserConfigData() {
     let userConfigHandle;
     let exampleConfigHandle;
 
@@ -122,22 +118,12 @@ async function loadUserConfigData() : Promise<UserConfigData> {
             await downloadExampleConfig();
         }
     } finally {
-        if (userConfigHandle)
-            await userConfigHandle.close();
-        if (exampleConfigHandle)
-            await exampleConfigHandle.close();
+        if (userConfigHandle) await userConfigHandle.close();
+        if (exampleConfigHandle) await exampleConfigHandle.close();
     }
 
     const fileContents = await fs.promises.readFile(USER_CONFIG_PATH, 'utf8');
     const configData = yaml.parse(fileContents);
-
-    if (typeof configData !== 'object' || Array.isArray(configData)) {
-        console.error(chalk.red(`
-            User Config is malformed: Expected parsed data to be of type object, but was actually an array or other non-object.
-            For an example config, please see: ${EXAMPLE_CONFIG_URL}
-        `));
-        throw new Error(`User ${USER_CONFIG_FILENAME} is invalid`);
-    }  
 
     return configData;
 }

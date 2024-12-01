@@ -3,10 +3,11 @@ import fs from 'node:fs';
 import chalk from 'chalk';
 
 import { stylePath } from './utility/string.js';
-import { logDebug, logDebugSectionWithData } from './utility/logging.js';
-import userConfig from './config/config.js';
+import { dlog, dlogSectionWithData } from './utility/logging.js';
+import { UserConfig } from './config/UserConfig.js';
 import { Manifest } from './type/Manifest.js';
 import { ShortcutOutput } from './type/Shortcut.js';
+import { parseUserConfigData } from './config/config.js';
 
 interface ManifestWriteOperationResults {
     manifestIn: Manifest,
@@ -28,7 +29,7 @@ async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOp
     const output = enabledShortcuts.map(shortcut => shortcut.getWritableObject());
     const contents = JSON.stringify(output);
 
-    logDebugSectionWithData(
+    dlogSectionWithData(
         'MANIFEST WRITE OPERATION',
         `filePath: ${filePath}`,
         `enabled len: ${enabledShortcuts.length}`,
@@ -88,7 +89,7 @@ function printWriteResults(results: ManifestWriteOperationResults) {
         if (nOk > 1)
             header += ` to file ${writePath}`;
 
-        logDebugSectionWithData(
+        dlogSectionWithData(
             header,
             `Name: "${name}"`,
             `Input File Path: ${stylePath(manifestIn.filePath)}`,
@@ -100,7 +101,7 @@ function printWriteResults(results: ManifestWriteOperationResults) {
             `Root Directory: ${stylePath(manifestIn.data.rootDirectory)}` // TODO Display validation here for paths
         );
 
-        logDebugSectionWithData(
+        dlogSectionWithData(
             'Number of Shortcuts',
             `Total in File: ${nTotal}`,
             `Written: ${nOk}`,
@@ -151,8 +152,8 @@ function printWriteResults(results: ManifestWriteOperationResults) {
 
     console.log(builder);
 
-    logDebug(`  - Source File Path: ${stylePath(manifestIn.getFilePath())}`);
-    logDebug(`  - Write File Path: ${stylePath(writePath)}`);
+    dlog(`  - Source File Path: ${stylePath(manifestIn.getFilePath())}`);
+    dlog(`  - Write File Path: ${stylePath(writePath)}`);
 }
 
 async function processManifest(manifest: Manifest) {
@@ -167,24 +168,26 @@ async function processManifest(manifest: Manifest) {
     if (shortcuts.length === 0)
         console.log(chalk.yellow(`WARN: No top-level shortcuts value found in manifest: ${name}`));
 
-    try {
-        const results = await writeManifestOutput(manifest);
-        await printWriteResults(results);
-    } catch (err) {
-        throw new Error(`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}): ${err}`);
-    }
+    await writeManifestOutput(manifest)
+            .then(results => {
+                printWriteResults(results);
+            })
+            .catch(err => {
+                throw new Error(`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}): ${err}`);
+            });
 }
 
 async function startApp() {
-    const { manifests } = userConfig.search;
+    const userConfig = await parseUserConfigData();
+    const { manifests: manifestPaths } = userConfig.search;
 
-    for (const manifest of manifests) {
-        logDebug(`  - "${manifest.getFilePath()}"`);
+    for (const filePath of manifestPaths) {
+        dlog(`  - "${filePath.getFilePath()}"`);
 
         try {
-            await processManifest(manifest);
+            await processManifest(filePath);
         } catch (err) {
-            console.error(chalk.red(`Error processing manifest (${manifest.getFilePath()}): ${err}`));
+            console.error(chalk.red(`Error processing manifest (${filePath.getFilePath()}): ${err}`));
         }
     }
 }
