@@ -1,7 +1,6 @@
 import path from 'node:path';
 
 import chalk from 'chalk';
-import { basenameWithoutExtensions } from '../utility/file.js';
 import { Manifest } from './Manifest.js';
 
 export interface ShortcutOutput {

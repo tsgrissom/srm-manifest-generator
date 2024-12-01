@@ -26,7 +26,7 @@ import path from 'node:path';
  * );
  */
 // TODO TEST Unit
-export function pathHasFileExtension(filePath: string, fileExt: any = '*') {
+export function pathHasFileExtension(filePath: string, fileExt: string | string[] = '*') {
     if (typeof filePath !== 'string')
         throw new TypeError(`Arg filePath must be a string: ${filePath}`);
     if (typeof fileExt !== 'string' && !Array.isArray(fileExt))
@@ -34,33 +34,40 @@ export function pathHasFileExtension(filePath: string, fileExt: any = '*') {
     if (typeof fileExt === 'string' && fileExt.trim() === '')
         throw new Error(`Arg fileExt cannot be an empty string: "${fileExt}"`);
 
-    if (typeof fileExt === 'string')
-        fileExt = [fileExt];
-
     const extname = path.extname(filePath);
 
-    if (fileExt === '*' && (!extname || extname === ''))
-        return true;
-
-    for (const findExt of fileExt) {
-        if (fileExt === findExt.toLowerCase()) {
+    if (typeof fileExt === 'string') {
+        if (fileExt === '*' && (!extname || extname === '')) {
             return true;
+        }
+    } else {
+        for (const findExt of fileExt) {
+            if (extname === findExt.toLowerCase()) {
+                return true;
+            }
         }
     }
 
-    return true;
+    return false;
 }
 
 /**
  * Within the given `fileName`, replaces the `findExt` with `replaceExt` if they are found.
+ * 
  * @param {string} fileName The filename you want to find and replace the extension of.
  * @param {Array} findExt The extensions you want to replace if found.
  * @param {string} replaceExt The new extension to append to `fileName`.
  * @param {boolean} normalize Default: `true`. Should extensions be checked to ensure they have a period at
  * the beginning, with one added if they do not?
+ * 
  * @returns The `fileName`, with a new file extension `replaceExt` if one in `findExt` was found.
  */
-export function replaceFileExtension(fileName: string, findExt: any, replaceExt: string, normalize: boolean = true) {
+export function replaceFileExtension(
+    fileName: string,
+    findExt: string | string[],
+    replaceExt: string,
+    normalize: boolean = true
+) : string {
     if (!fileName || typeof fileName !== 'string')
         throw new TypeError(`Arg fileName must be a string: ${fileName}`);
     if (!findExt || (typeof findExt !== 'string' && !Array.isArray(findExt))) // TEST And make sure this doesn't have unexpected behavior
@@ -77,7 +84,7 @@ export function replaceFileExtension(fileName: string, findExt: any, replaceExt:
     if (typeof findExt === 'string') {
         findExt = normalize ? normalizeFileExtension(findExt) : findExt;
         extsToRemove.push(findExt);
-    } else if (Array.isArray(findExt)) {
+    } else {
         const normalized = findExt
             .filter(entry => {
                 if (typeof entry !== 'string') {
@@ -116,23 +123,34 @@ export async function pathExists(filePath: string) {
 
 /**
  * Normalizes a file extension name by prepending a period to it if needed.
+ * 
  * @param {string} extname The file extension to normalize.
- * @param {*} exclude A str, array, or null. Lists which extension names should be ignored.
- *      Default is `*` which does not mean "ignore all file extensions", but to avoid prepending the extname if
- *      it is string literal `*`.
+ * @param {*} excludeExts A string or string array which decides which extension names should be ignored.
+ * * Default is `*` which does not mean "ignore all file extensions", but to avoid prepending the extname if
+ *   it is string literal `*`.
+ * 
  * @returns The file extension in normalized form, with a period prepended to the input if it was missing.
  */
-export function normalizeFileExtension(extname: string, exclude: any = ['*']) {
+export function normalizeFileExtension(
+    extname: string,
+    excludeExts: string | string[] = ['*']
+) : string {
     if (typeof extname !== 'string')
-        throw new Error(`Cannot normalize extension of non-string parameter fileExt: ${extname}`);
+        throw new TypeError(`Arg extname must be a string: ${extname}`);
+    if (typeof excludeExts !== 'string' && !Array.isArray(excludeExts))
+        throw new TypeError(`Arg excludeExtensions must be a string or a string array: ${excludeExts}`);
     
-    if (!exclude)
-        exclude = [''];
-    if (!Array.isArray(exclude) && typeof exclude === 'string')
-        exclude = [exclude];
+    if (typeof excludeExts === 'string') {
+        if (excludeExts === '') {
+            excludeExts = [''];
+        } else {
+            excludeExts = [excludeExts];
+        }
+    }
+
     if (extname.startsWith('.'))
         return extname;
-    if (exclude.includes(extname.toLowerCase()))
+    if (excludeExts.includes(extname.toLowerCase()))
         return extname;
 
     return `.${extname}`;
@@ -140,37 +158,42 @@ export function normalizeFileExtension(extname: string, exclude: any = ['*']) {
 
 /**
  * Gets a file's basename with selected extensions removed.
- * If `iterative` is turned on, this process will be repeated until none of the extensions are present.
+ * If `iterate` is enabled, this process will be repeated until none of the extensions are present.
+ * 
  * @param {string} fileName The filename to remove the extensions from. 
- * @param {*} extensionsToRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
+ * @param {*} extsToRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
  * @param {boolean} iterate Should the basename be iteraviley modified until all of the listed extensions are gone?
+ * 
  * @returns {string} The final filename after being stripped of some selected extensions, if they were present.
+ * 
  * @example // TODO Write example
  */
-export function basenameWithoutExtensions(fileName: string, extensionsToRemove: any, iterate: boolean = false) {
-    // TODO Lint args
-
+export function basenameWithoutExtensions(
+    fileName: string,
+    extsToRemove: string | string[],
+    iterate: boolean = false
+) : string {
     if (typeof fileName !== 'string')
         throw new TypeError(`Arg "fileName" must be a string: ${fileName}`);
-    if (typeof extensionsToRemove !== 'string' && !Array.isArray(extensionsToRemove))
-        throw new TypeError(`Arg "extensionsToRemove" must be a string or an array of strings: ${extensionsToRemove}`);
+    if (typeof extsToRemove !== 'string' && !Array.isArray(extsToRemove))
+        throw new TypeError(`Arg "extensionsToRemove" must be a string or an array of strings: ${extsToRemove}`);
     if (typeof iterate !== 'boolean')
         throw new TypeError(`Arg "iterate" must be a boolean: ${iterate}`);
 
-    if (!Array.isArray(extensionsToRemove)) // TEST Unit
-        extensionsToRemove = [extensionsToRemove];
+    if (!Array.isArray(extsToRemove)) // TEST Unit
+        extsToRemove = [extsToRemove];
 
-    for (const [index, entry] of extensionsToRemove.entries()) {
+    for (const [index, entry] of extsToRemove.entries()) {
         if (typeof entry !== 'string')
             continue;
-        extensionsToRemove[index] = normalizeFileExtension(entry);
+        extsToRemove[index] = normalizeFileExtension(entry);
     }
 
     let newName = path.basename(fileName);
     let extFound;
     
     if (!iterate) {
-        for (const extToRemove of extensionsToRemove) {
+        for (const extToRemove of extsToRemove) {
             extFound = path.extname(newName);
 
             if (!extFound || extFound === '')
@@ -191,7 +214,7 @@ export function basenameWithoutExtensions(fileName: string, extensionsToRemove: 
         if (!extFound || extFound === '')
             return newName;
 
-        for (const extToRemove of extensionsToRemove) {
+        for (const extToRemove of extsToRemove) {
             if (extToRemove === '*' || extToRemove === extFound.toLowerCase()) {
                 newName = path.basename(newName, extFound);
                 removedExt = true;

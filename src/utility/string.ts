@@ -53,7 +53,7 @@ export function countString(numberOfThings: number, singularNoun: string, plural
 // MARK: getDelimitedList
 // TODO jsdoc
 // TODO TEST Unit
-export function delimitedList(items: Array<string>, delimiter: string = ', ') {
+export function delimitedList(items: string[], delimiter: string = ', ') {
     if (!items)
         throw new Error(`Cannot create delimited list from given items: ${items}`);
     if (!delimiter)

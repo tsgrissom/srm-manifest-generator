@@ -1,27 +1,24 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
+import globals from 'globals';
+import tslint from 'typescript-eslint';
 
-/** @type {import('eslint').Linter.Config[]} */
-export default [
-  {languageOptions: { globals: globals.node }},
-  pluginJs.configs.recommended,
+export default tslint.config(
+  tslint.configs.recommended,
   {
-    ignores: ["**/*.config.js"],
-    rules: {
-      "curly": "off",
-
-      "no-unused-vars": "warn",
-      "prefer-destructuring": "warn",
-      "prefer-arrow-callback": "warn",
-      "prefer-const": "warn",
-      "no-var": "warn",
-      "eqeqeq": "warn",
-      "camelcase": "warn",
-      "semi": "warn",
-      "no-constant-condition": "warn",
-      "quotes": ["warn", "single", { "avoidEscape": true, "allowTemplateLiterals": true }],
-      
-      "no-undef": "error",
+    languageOptions: {
+      globals: globals.node
     }
-  }
-];
+  },
+  {
+    languageOptions: {
+      globals: globals.node
+    },
+    files: ['**/*.ts', '**/*.tsx'],
+    ignores: ['dist/**/*.js', 'dist/*.js'],
+    rules: {
+      '@typescript-eslint/curly': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/array-type': 'warn'
+    }
+  },
+  // ...
+);

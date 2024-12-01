@@ -18,23 +18,14 @@ const yamlToJsonExt = (fileName) => {
     return replaceFileExtension(fileName, ['.yml', '.yaml'], '.json');
 };
 
-let resourceDir,
-    resourceSubdirManifests,
-    resourceSubdirManRoot,
-    resourceSubdirManOutput,
-    resourceSubdirExecutables;
+let resourceDir, resourceSubdirManifests, resourceSubdirManRoot,
+    resourceSubdirManOutput, resourceSubdirExecutables;
 
-let resourceFileManOk,
-    resourceFileManBad,
-    resourceFileManNonExistent,
-    resourceFileManEmptyContents,
-    resourceFileManNoNameAttribute;
+let resourceFileManOk, resourceFileManBad, resourceFileManNonExistent,
+    resourceFileManEmptyContents, resourceFileManNoNameAttribute;
     
-let resourceManifestOk,
-    resourceManifestBad,
-    resourceManifestNonExistent,
-    resourceManifestEmptyContents,
-    resourceManifestNoNameAttribute;
+let resourceManifestOk, resourceManifestBad, resourceManifestEmptyContents,
+    resourceManifestNonExistent, resourceManifestNoNameAttribute;
 
 let resourceFileExecutableOk,
     resourceFileExecutableBad;

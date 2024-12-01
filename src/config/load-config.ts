@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import yaml from 'yaml';
 
+// TODO Docs
 export const URL_EXAMPLE_CONFIG  = 'https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main/config/examples/example.config.yml',
              PATH_EXAMPLE_CONFIG = path.join('config', 'examples', 'example.config.yml'),
              //PATH_USER_CONFIG = PATH_EXAMPLE_CONFIG;

@@ -1,15 +1,13 @@
 import path from 'node:path';
 
-import { logDebug } from '../utility/logging.js';
 import { basenameWithoutExtensions } from '../utility/file.js';
 import { Shortcut } from './Shortcut.js';
-import { PathLike } from 'node:fs';
 
 export interface ManifestData {
     name: string,
     rootDirectory: string,
     outputPath: string,
-    shortcuts: Array<Shortcut>
+    shortcuts: Shortcut[]
 }
 
 export enum ManifestNameSource {
@@ -20,7 +18,7 @@ export enum ManifestNameSource {
 export class Manifest {
 
     filePath: string;
-    data: ManifestData
+    data: ManifestData;
 
     /**
      * Constructs a new Manifest instance.

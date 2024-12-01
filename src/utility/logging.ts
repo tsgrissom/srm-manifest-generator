@@ -22,7 +22,7 @@ export function logDebug(text: string, withPrefix: boolean = false, withColor: b
     console.log(withPrefix ? getDebugPrefix(withColor) : '' + text);
 }
 
-export function logDebugLines(linePrefix: string = ' - ', ...lines: Array<string>) {
+export function logDebugLines(linePrefix: string = ' - ', ...lines: string[]) {
     if (!isDebugging())
         return;
 
@@ -30,7 +30,7 @@ export function logDebugLines(linePrefix: string = ' - ', ...lines: Array<string
         console.log(linePrefix + line);
 }
 
-export function logDebugSectionWithData(header: string, linePrefix: string = ' > ', ...lines: Array<string>) {
+export function logDebugSectionWithData(header: string, linePrefix: string = ' > ', ...lines: string[]) {
     if (!isDebugging())
         return;
     

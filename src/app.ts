@@ -5,8 +5,8 @@ import chalk from 'chalk';
 import { stylePath } from './utility/string.js';
 import { logDebug, logDebugSectionWithData } from './utility/logging.js';
 import userConfig from './config/config.js';
-import { Manifest } from './class/Manifest.js';
-import { Shortcut, ShortcutOutput } from './class/Shortcut.js';
+import { Manifest } from './type/Manifest.js';
+import { ShortcutOutput } from './type/Shortcut.js';
 
 interface ManifestWriteOperationResults {
     manifestIn: Manifest,
