@@ -82,11 +82,10 @@ after(() => {
 
 describe('Class: Shortcut', () => {
 
-    // const shortcutObjectOk = {
-    //     name: 'A Shortcut',
-    //     exec: tmp.tmpNameSync({prefix: 'valid-executable', postfix: '.exe'})
-    // };
-    const shortcutObjectOk = {name: 'A Shortcut', exec: 'Some path/App.exe'};
+    const shortcutObjectOk = {
+        name: 'A Shortcut',
+        exec: tmp.tmpNameSync({prefix: 'valid-executable', postfix: '.exe'})
+    };
 
     describe('Constructor', () => {
         it('should, if constructed with a type other than Manifest given for arg manifest, throw an error', async (t) => {

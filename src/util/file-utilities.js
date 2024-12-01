@@ -27,7 +27,28 @@ import path from 'node:path';
  */
 // TODO TEST Unit
 export function pathHasFileExtension(filePath, fileExt = '*') {
-    // TODO Write code
+    if (typeof filePath !== 'string')
+        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
+    if (typeof fileExt !== 'string' && !Array.isArray(fileExt))
+        throw new TypeError(`Arg fileExt must a string or an array: ${fileExt}`);
+    if (typeof fileExt === 'string' && fileExt.trim() === '')
+        throw new Error(`Arg fileExt cannot be an empty string: "${fileExt}"`);
+
+    if (typeof fileExt === 'string')
+        fileExt = [fileExt];
+
+    const extname = path.extname(filePath);
+
+    if (fileExt === '*' && (!extname || extname === ''))
+        return true;
+
+    for (const findExt of fileExt) {
+        if (fileExt === findExt.toLowerCase()) {
+            return true;
+        }
+    }
+
+    return true;
 }
 
 /**
@@ -41,15 +62,15 @@ export function pathHasFileExtension(filePath, fileExt = '*') {
  */
 export function replaceFileExtension(fileName, findExt, replaceExt, normalize = true) {
     if (!fileName || typeof fileName !== 'string')
-        throw new Error(`Arg fileName must be a string: ${fileName}`);
+        throw new TypeError(`Arg fileName must be a string: ${fileName}`);
     if (!findExt || (typeof findExt !== 'string' && !Array.isArray(findExt))) // TEST And make sure this doesn't have unexpected behavior
-        throw new Error(`Arg findExt must be an array of strings or strings: ${fileName}`);
+        throw new TypeError(`Arg findExt must be a string or an array: ${fileName}`);
     if (typeof findExt === 'string' && findExt.trim() === '')
         throw new Error(`Arg findExt cannot be an empty string`);
     if (typeof replaceExt !== 'string')
-        throw new Error(`Arg replaceExt must be a string: ${replaceExt}`);
+        throw new TypeError(`Arg replaceExt must be a string: ${replaceExt}`);
     if (typeof normalize !== 'boolean')
-        throw new Error(`Arg normalize must be a boolean: ${normalize}`);
+        throw new TypeError(`Arg normalize must be a boolean: ${normalize}`);
 
     const extsToRemove = [];
 
@@ -83,6 +104,7 @@ export function replaceFileExtension(fileName, findExt, replaceExt, normalize = 
     return fileName;
 }
 
+// TODO TEST Unit
 export async function pathExists(filePath) {
     try {
         await fs.access(filePath);
@@ -129,19 +151,14 @@ export function basenameWithoutExtensions(fileName, extensionsToRemove, iterate 
     // TODO Lint args
 
     if (typeof fileName !== 'string')
-        throw new Error(`Cannot determine file basename of non-string: ${fileName}`);
+        throw new TypeError(`Arg "fileName" must be a string: ${fileName}`);
+    if (typeof extensionsToRemove !== 'string' && !Array.isArray(extensionsToRemove))
+        throw new TypeError(`Arg "extensionsToRemove" must be a string or an array of strings: ${extensionsToRemove}`);
     if (typeof iterate !== 'boolean')
-        throw new Error(`Cannot use non-boolean value for parameter "iterate": ${iterate}`);
+        throw new TypeError(`Arg "iterate" must be a boolean: ${iterate}`);
 
     if (!Array.isArray(extensionsToRemove)) // TEST Unit
         extensionsToRemove = [extensionsToRemove];
-
-    // for (let i = 0; i < extensionsToRemove.length; i++) { // TEST Unit
-    //     const ext = extensionsToRemove[i];
-    //     if (typeof ext !== 'string')
-    //         continue;
-    //     extensionsToRemove[i] = normalizeFileExtension(ext);
-    // }
 
     for (const [index, entry] of extensionsToRemove.entries()) {
         if (typeof entry !== 'string')

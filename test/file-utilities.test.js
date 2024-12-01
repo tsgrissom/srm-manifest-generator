@@ -2,9 +2,9 @@ import path from 'node:path';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 
-import { setOfBooleans, setOfEmptyAndWhitespaceStrings, setOfNonStrings, unionOfNonArraysAndNonStrings } from './util/sample-values.js';
+import { setOfNonBooleans, setOfNonStrings, setOfWhitespaceStrings, unionOfNonArraysAndNonStrings } from './util/sample-values.js';
 
-import { basenameWithoutExtensions, normalizeFileExtension, replaceFileExtension } from '../src/util/file-utilities.js';
+import { basenameWithoutExtensions, normalizeFileExtension, pathHasFileExtension, replaceFileExtension } from '../src/util/file-utilities.js';
 
 function setup() {
     // TODO Some files for real file testing
@@ -27,7 +27,7 @@ describe('File: file-utilities.js', () => {
     // MARK: normalizeFileExtension
     describe('Function: normalizeFileExtension', () => {
 
-        it('should, when passed a non-string argument, throw an error', async (t) => {
+        it('should throw an error when parameter extname passed a non-string', async (t) => {
             for (const value of setOfNonStrings) {
                 await t.test(`Subtest for input: ${value}`, () => {
                     assert.throws(() => normalizeFileExtension(value));
@@ -35,7 +35,7 @@ describe('File: file-utilities.js', () => {
             }
         });
     
-        it('should, when passed a string which is not in extension form, return the expected string"', async (t) => {
+        it('should, when parameter extname passed a string which is not in extension form, return the extname argument with a dot prepended"', async (t) => {
             const cases = [{input: 'yml', expected: '.yml'},{input: 'json', expected: '.json'}];
             for (const value of cases) {
                 const {input, expected} = value;
@@ -46,7 +46,7 @@ describe('File: file-utilities.js', () => {
             }
         });
 
-        it('should, when passed a string which is already in extension form, return the same string', async (t) => {
+        it('should, when parameter extname passed a string which is already in extension form, return the extname', async (t) => {
             const values = ['.yml', '.json', '.txt'];
             for (const value of values) {
                 await t.test(`Subtest for input: ${value}`, () => {
@@ -59,47 +59,68 @@ describe('File: file-utilities.js', () => {
     
     });
 
+    // MARK: pathHasFileExtension
+    describe('Function: pathHasFileExtension', () => {
+        it('should throw an error when parameter filePath passed a non-string', async (t) => {
+            for (const [i, value] of setOfNonStrings.entries()) {
+                await t.test(`Subtest #${i+1} for filePath=${value}`, () => {
+                    assert.throws(() => pathHasFileExtension(value));
+                });
+            }
+        });
+
+        it('should throw an error when parameter fileExt passed an empty string', () => {
+            assert.throws(() => pathHasFileExtension('manifest.yml', ''));
+        });
+
+        it('should throw an error when parameter fileExt passed a whitespace-only string', async (t) => {
+            for (const [i, value] of setOfWhitespaceStrings.entries()) {
+                await t.test(`Subtest #${i+1} for fileExt=${value}`, () => {
+                    assert.throws(() => pathHasFileExtension('manifest.yml', value));
+                });
+            }
+        });
+
+        // TODO TEST Functionality
+    });
+
     // MARK: replaceFileExtension
     describe('Function: replaceFileExtension', () => {
-
-        // Arg: fileName
-        it.skip('should, when passed a non-string fileName arg, throw an error', async (t) => {
-            for (const value of setOfNonStrings) {
-                await t.test(`Subtest for fileName=${value}`, () => {
+        // Parameter: fileName
+        it('should throw an error when parameter fileName passed a non-string', async (t) => {
+            for (const [i, value] of setOfNonStrings.entries()) {
+                await t.test(`Subtest #${i+1} for fileName=${value}`, () => {
                     assert.throws(() => replaceFileExtension(value, ['.yml', '.yaml'], '.json'));
                 });
             }
         });
 
-        // Arg: findExt
-        it.skip('should, when passed a findExt arg which is neither a string nor an array, throw an error', async (t) => {
-            for (const value of unionOfNonArraysAndNonStrings) {
-                await t.test(`Subtest for findExt=${value}`, () => {
-                    assert.throws(() => replaceFileExtension('file.yaml', value, '.json'));
-                });
-            }
+        // Parameter: findExt
+        it('should throw an error when findExt parameter passed an empty string', () => {
+            assert.throws(() => replaceFileExtension('file.yaml', '', '.json'));
         });
-        it.skip('should, when passed an empty or whitespace-only string, throw an error', async (t) => {
-            for (const value of setOfEmptyAndWhitespaceStrings) {
-                await t.test(`Subtest for findExt="${value}"`, () => {
+
+        it('should throw an error when findExt parameter passed a whitespace-only string', async (t) => {
+            for (const [i, value] of setOfWhitespaceStrings.entries()) {
+                await t.test(`Subtest #${i+1} for findExt=${value}`, () => {
                     assert.throws(() => replaceFileExtension('file.yaml', value, '.json'));
                 });
             }
         });
 
-        // Arg: replaceExt
-        it.skip('should, when passed a non-string replaceExt arg, throw an error', async (t) => {
-            for (const value of setOfNonStrings) {
-                await t.test(`Subtest for replaceExt=${value}`, () => {
+        // Parameter: replaceExt
+        it('should throw an error when replaceExt parameter passed a non-string', async (t) => {
+            for (const [i, value] of setOfNonStrings.entries()) {
+                await t.test(`Subtest #${i+1} for replaceExt=${value}`, () => {
                     assert.throws(() => replaceFileExtension('file.yaml', ['.yml', '.yaml'], value));
                 });
             }
         });
 
         // Arg: normalize
-        it.skip('should, when passed a non-boolean normalize arg, throw an error', async (t) => {
-            for (const value of setOfBooleans) {
-                await t.test(`Subtest for normalize=${value}`, () => {
+        it('should throw an error when parameter normalize passed a non-boolean', async (t) => {
+            for (const [i, value] of setOfNonBooleans.entries()) {
+                await t.test(`Subtest #${i+1} for normalize=${value}`, () => {
                     assert.throws(() => replaceFileExtension('file.yaml', ['.yml', '.yaml'], '.json', value));
                 });
             }
@@ -112,18 +133,24 @@ describe('File: file-utilities.js', () => {
     // MARK: basenameWithoutExtensions
     describe('Function: basenameWithoutExtensions', () => {
     
-        it.skip('should, when passed a non-string fileName arg, throw an error', async (t) => {
-            for (const value of setOfNonStrings) {
-                await t.test(`Subtest for input: ${value}`, () => {
+        it('should throw an error when parameter fileName passed a non-string', async (t) => {
+            for (const [i, value] of setOfNonStrings.entries()) {
+                await t.test(`Subtest #${i+1} for arg fileName=${value}`, () => {
                     assert.throws(() => basenameWithoutExtensions(value));
                 });
             }
         });
+
+        it('should throw an error when parameter extensionsToRemove passed arg which is neither a string nor an array, throw an error', async (t) => {
+            for (const [i, value] of unionOfNonArraysAndNonStrings.entries()) {
+                await t.test(`Subtest #${i+1} for arg extensionsToRemove=${value}`);
+            }
+        });
     
-        it.skip('should, when passed a non-boolean iterate arg, throw an error', async (t) => {
+        it('should, when passed a non-boolean iterate arg, throw an error', async (t) => {
             const values = ['Some string', 123, '123', [], {}];
-            for (const value of values) {
-                await t.test(`Subtest for input: ${value}`, () => {
+            for (const [i, value] of values.entries()) {
+                await t.test(`Subtest #${i+1} for arg iterate=${value}`, () => {
                     assert.throws(() => basenameWithoutExtensions(value));
                 });
             }
@@ -139,9 +166,9 @@ describe('File: file-utilities.js', () => {
                 } // TODO More cases
             ];
     
-            for (const c of cases) {
-                const {fileName, extensionsToRemove, iterate, expected} = c;
-                await t.test(`Subtest for arguments fileName=${fileName} extensionsToRemove=${extensionsToRemove}`, () => {
+            for (const [i, data] of cases.entries()) {
+                const {fileName, extensionsToRemove, iterate, expected} = data;
+                await t.test(`Subtest #${i+1} for args fileName=${fileName} extensionsToRemove=${extensionsToRemove}`, () => {
                     const actual = basenameWithoutExtensions(fileName, extensionsToRemove, iterate);
                     assert.strictEqual(actual, expected);
                 });
@@ -151,8 +178,8 @@ describe('File: file-utilities.js', () => {
         it('should, when passed a wildcard extensionsToRemove argument and iterate is true, have a path.extname equal to an empty string literal', async (t) => {
             const values = ['Manifest.example.manifest.yml', 'Manifest.yml', 'Some Output.json'];
     
-            for (const value of values) {
-                await t.test(`Subtest for fileName=${value}:`, () => {
+            for (const [i, value] of values.entries()) {
+                await t.test(`Subtest #${i+1} for fileName=${value}:`, () => {
                     const result = basenameWithoutExtensions(value, '*', true);
                     const actual = path.extname(result);
                     const expected = '';

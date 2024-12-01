@@ -6,6 +6,11 @@
 
 ## General TODO
 
+* Review all new Error throws and change many to use TypeError
+* Review all function argument parsing for verbose messages
+* Rephrase the bulk of test descriptions
+* Write more unit tests
+* Consider converting parts of this project to TypeScript
 * Move old YAML keys over to new namespaces
 * Rename manifest attribute "directory" to root directory for clarity
 * Accept folders as manifest paths in the config + Recursive option
