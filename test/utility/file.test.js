@@ -2,8 +2,18 @@ import path from 'node:path';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 
-import { setOfNonBooleans, setOfNonStrings, setOfWhitespaceStrings, unionOfNonArraysAndNonStrings } from '../resource/test-values.js';
-import { basenameWithoutExtensions, normalizeFileExtension, pathHasFileExtension, replaceFileExtension } from '../../src/utility/file.js';
+import {
+    setOfNonBooleans,
+    setOfNonStrings,
+    setOfWhitespaceStrings,
+    unionOfNonArraysAndNonStrings 
+} from '../resource/test-values.js';
+import {
+    basenameWithoutExtensions,
+    normalizeFileExtension,
+    pathHasFileExtension,
+    replaceFileExtension
+} from '../../dist/utility/file.js';
 
 function setup() {
     // TODO Some files for real file testing

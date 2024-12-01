@@ -8,14 +8,13 @@
   "main": "index.js",
   "scripts": {
     "lint": "npx eslint .",
-    "clean": "",
+    "clean": "npx rimraf --interactive --glob \"./dist\"",
     "build": "tsc",
     "start": "node --loader ts-node/esm ./src/app.ts",
-    "start:debug": "node . --debug",
+    "start:debug": "node --debug --loader ts-node/esm ./src/app.ts",
     "test": "node --test",
-    "test:debug": "DEBUG=true && node --test && DEBUG=false && npx eslint .",
-    "poststart": "npx eslint .",
-    "posttest": "npx eslint ."
+    "test:debug": "DEBUG=true && node --test && DEBUG=false",
+    "pretest": "npx eslint ."
   },
   "keywords": [
     "emulation",

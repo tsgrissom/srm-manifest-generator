@@ -1,7 +1,11 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { capitalize, countString, delimitedList } from '../../src/utility/string.js';
+import {
+    capitalize,
+    countString,
+    delimitedList
+} from '../../dist/utility/string.js';
 
 describe('Function: capitalize', () => {
 

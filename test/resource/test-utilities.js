@@ -3,7 +3,10 @@
 import path from 'path';
 import tmp from 'tmp';
 const { DirResult, FileResult } = tmp;
-import { basenameWithoutExtensions, normalizeFileExtension } from '../../src/utility/file.js';
+import {
+    basenameWithoutExtensions,
+    normalizeFileExtension
+} from '../../dist/utility/file.js';
 
 const __dirname = import.meta.dirname;
 

@@ -4,9 +4,9 @@ import fs from 'node:fs';
 import tmp from 'tmp';
 import yaml from 'yaml';
 
-import { logDebug } from '../../src/utility/logging.js';
-import { replaceFileExtension } from '../../src/utility/file.js';
-import Manifest from '../../src/class/Manifest.js';
+import { logDebug } from '../../dist/utility/logging.js';
+import { replaceFileExtension } from '../../dist/utility/file.js';
+import Manifest from '../../dist/class/Manifest.js';
 
 import assert from 'node:assert';
 import { before, after, describe, it } from 'node:test';

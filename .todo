@@ -6,6 +6,7 @@
 
 ## General TODO
 
+* Figure out what the TS entrypoint should be now
 * Review all new Error throws and change many to use TypeError
 * Review all function argument parsing for verbose messages
 * Rephrase the bulk of test descriptions
