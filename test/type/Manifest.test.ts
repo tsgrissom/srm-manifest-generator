@@ -1,45 +1,65 @@
 import path from 'node:path';
 import fs from 'node:fs';
 
-import tmp from 'tmp';
+import tmp, { DirResult, FileResult } from 'tmp';
 import yaml from 'yaml';
 
-import { logDebug } from '../../dist/utility/logging.js';
-import { replaceFileExtension } from '../../dist/utility/file.js';
-import Manifest from '../../dist/class/Manifest.js';
+import { logDebug } from '../../src/utility/logging.js';
+import { replaceFileExtension } from '../../src/utility/file.js';
+import { Manifest } from '../../src/type/Manifest.js';
 
 import assert from 'node:assert';
-import { before, after, describe, it } from 'node:test';
-import { shortcutObjFromFileName, tmpDirForScope, tmpManifestYml, tmpSubdir, tmpExecutableFile } from '../resource/test-utilities.js';
+import {
+    before, after,
+    describe, it 
+} from 'node:test';
+import { 
+    shortcutObjFromFileName,
+    tmpDirForScope,
+    tmpManifestYml,
+    tmpSubdir,
+    tmpExecutableFile
+} from '../resource/test-utilities.js';
 
 const __filebasename = path.basename(import.meta.filename);
 
-const yamlToJsonExt = (fileName) => {
+const yamlToJsonExt = (fileName: string) => {
     return replaceFileExtension(fileName, ['.yml', '.yaml'], '.json');
 };
 
-let resourceDir, resourceSubdirManifests, resourceSubdirManRoot,
-    resourceSubdirManOutput, resourceSubdirExecutables;
+let resourceDir: DirResult,
+    resourceSubdirManifests: DirResult,
+    resourceSubdirManRoot: DirResult,
+    resourceSubdirManOutput: DirResult,
+    resourceSubdirExecutables: DirResult;
 
-let resourceFileManOk, resourceFileManBad, resourceFileManNonExistent,
-    resourceFileManEmptyContents, resourceFileManNoNameAttribute;
+let resourceFileExecutableOk: FileResult,
+    resourceFileExecutableBad: FileResult;
+
+let resourceFileManOk: FileResult,
+    resourceFileManBad: FileResult,
+    resourceFileManNonExistent: FileResult,
+    resourceFileManEmptyContents: FileResult,
+    resourceFileManNoNameAttribute: FileResult;
     
-let resourceManifestOk, resourceManifestBad, resourceManifestEmptyContents,
-    resourceManifestNonExistent, resourceManifestNoNameAttribute;
+let resourceManifestOk: Manifest,
+    resourceManifestBad: Manifest,
+    resourceManifestEmptyContents: Manifest,
+    resourceManifestNonExistent: Manifest,
+    resourceManifestNoNameAttribute: Manifest;
 
-let resourceFileExecutableOk,
-    resourceFileExecutableBad;
-
-function setupFolders() {
+function setupDirs() {
     resourceDir = tmpDirForScope(__filebasename);
-    resourceSubdirManifests = tmpSubdir(resourceDir.name, 'manifests');
-    resourceSubdirManRoot = tmpSubdir(resourceDir.name, 'root');
-    resourceSubdirManOutput = tmpSubdir(resourceDir.name, 'output');
-    resourceSubdirExecutables = tmpSubdir(resourceDir.name, 'executables');
+    const scopeDirName = resourceDir.name;
+
+    resourceSubdirManifests   = tmpSubdir(scopeDirName, 'manifests');
+    resourceSubdirManRoot     = tmpSubdir(scopeDirName, 'root');
+    resourceSubdirManOutput   = tmpSubdir(scopeDirName, 'output');
+    resourceSubdirExecutables = tmpSubdir(scopeDirName, 'executables');
     logDebug(`Test resource setup finished: Manifest.test.js folders`);
 }
 
-function teardownFolders() {
+function teardownDirs() {
     resourceSubdirExecutables.removeCallback();
     resourceSubdirManOutput.removeCallback();
     resourceSubdirManRoot.removeCallback();
@@ -125,14 +145,14 @@ function teardownFiles() {
 }
 
 before(() => {
-    setupFolders();
+    setupDirs();
     setupFiles();
     console.log(`Test setup completed: Manifest.test.js`);
 });
 
 after(() => {
     teardownFiles();
-    teardownFolders();
+    teardownDirs();
     console.log(`Test teardown completed: Manifest.test.js`);
 });
 

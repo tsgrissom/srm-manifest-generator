@@ -30,10 +30,6 @@ search:
 
 # Settings regarding the output files created by SRM Manifest Generator
 output:
-  # Unimplemented; Where should generated manifest files be written? Recommended to use the script's local ./out/ directory
-  # Variables: $NAME$ ("name" field in manifest's .yml file)
-  # TODO: Consider merits and maybe cancel this
-  path: ./out/$NAME$.manifest.json
   # Unimplemented; Should space characters in the names of generated manifest files be substituted with another symbol?
   #  - To disable this feature, set this option to empty quotes ""
   # Default: "-" 
@@ -52,7 +48,7 @@ output:
   # Default: "file"
   # Options: "file" or "folder"
   # TODO: Implement
-  mode: "file"
+  spreadMode: "file"
 
 # Settings regarding the validation of options the user submits to SRM Manifest Generator, such as checking if a given file path is valid
 validation:
@@ -84,4 +80,4 @@ logging:
   enabled: true
   # Unimplemented; Where should SRM Manifest Generator write its logs?
   # Default: "./srm-manifest-generator.log"
-  file: "./srm-manifest-generator.log"
+  outputFile: "./srm-manifest-generator.log"

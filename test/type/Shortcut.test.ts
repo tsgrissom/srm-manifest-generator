@@ -2,13 +2,13 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import chalk from 'chalk';
-import tmp from 'tmp';
+import tmp, { DirResult, FileResult } from 'tmp';
 import yaml from 'yaml';
 
-import { logDebug } from '../../dist/utility/logging.js';
-import { basenameWithoutExtensions } from '../../dist/utility/file.js';
-import { Shortcut } from '../../dist/type/Shortcut.js';
-import { Manifest } from '../../dist/type/Manifest.js';
+import { logDebug } from '../../src/utility/logging.js';
+import { basenameWithoutExtensions } from '../../src/utility/file.js';
+import { Shortcut } from '../../src/type/Shortcut.js';
+import { Manifest } from '../../src/type/Manifest.js';
 
 import assert from 'node:assert';
 import { before, after, describe, it } from 'node:test';
@@ -17,11 +17,14 @@ import { tmpDirForScope, tmpManifestYml, tmpSubdir } from '../resource/test-util
 
 const __filebasename = path.basename(import.meta.filename);
 
-let resourceDir, resourceSubdirManifests, resourceSubdirManRoot, resourceSubdirManOutput;
+let resourceDir: DirResult,
+    resourceSubdirManifests: DirResult,
+    resourceSubdirManRoot: DirResult,
+    resourceSubdirManOutput: DirResult;
 
-let resourceFileManOk;
+let resourceFileManOk: FileResult;
 
-let resourceManifestOk;
+let resourceManifestOk: Manifest;
 
 function setupFolders() {
     logDebug(`Test Resources: ${__filebasename} setupFolders begin`);
@@ -42,7 +45,7 @@ function teardownFolders() {
 }
 
 function setupFiles() {
-    logDebugPlain(`Test Resources: ${__filebasename} setupFiles begin`);
+    logDebug(`Test Resources: ${__filebasename} setupFiles begin`);
 
     resourceFileManOk = tmpManifestYml('gen-valid', resourceSubdirManifests.name);
 

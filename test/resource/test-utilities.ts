@@ -1,7 +1,7 @@
  
 
 import path from 'node:path';
-import tmp, { DirResult } from 'tmp';
+import tmp, { DirResult, FileResult } from 'tmp';
 import { basenameWithoutExtensions, normalizeFileExtension } from '../../src/utility/file.js';
 
 const __dirname = import.meta.dirname;
@@ -91,7 +91,7 @@ export function tmpDirForScope(__jsfilebasename: string) : DirResult {
 export function tmpSubdir(
     parentDirname: string,
     prefix: string = 'subdir'
-) : tmp.DirResult {
+) : DirResult {
     return tmp.dirSync({tmpdir: __dirtmp, dir: parentDirname, prefix: prefix});
 }
 
@@ -119,7 +119,7 @@ export function tmpManifestYml(
     prefix: string = 'manifest',
     dirname: string = '.',
     randomness: boolean = true
-) : tmp.FileResult {
+) : FileResult {
     const stdExt = '.manifest.yml';
     let postfix;
 
@@ -158,7 +158,7 @@ export function tmpExecutableFile(
     dirname: string = '.',
     validPostfix: string = '.exe',
     invalidPostfix: string = '.txt'
-) : tmp.FileResult {
+) : FileResult {
     if (typeof valid !== 'boolean')
         throw new Error(`Arg "valid" must be a boolean: ${valid}`);
     

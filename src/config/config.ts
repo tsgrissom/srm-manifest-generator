@@ -3,10 +3,16 @@ import fs from 'node:fs';
 import chalk from 'chalk';
 import yaml from 'yaml';
 
-import { PATH_USER_CONFIG, loadDataFromUserConfig as loadUserConfigData } from './load-config.js';
-import { Manifest } from '../type/Manifest.js';
 import { logDebug, logDebugSectionWithData } from '../utility/logging.js';
 import { enabledDisabled } from '../utility/string.js';
+
+import {
+    USER_CONFIG_FILENAME,
+    USER_CONFIG_PATH,
+    loadUserConfigData
+} from './load-config.js';
+import { UserConfigData } from './UserConfig.js';
+import { Manifest } from '../type/Manifest.js';
 
 // MARK: HELPERS
 
@@ -77,8 +83,8 @@ async function verifyManifestPath(filePath: string, scanDirectories: boolean, sc
 /**
  * Reads the contents of an manifest.yml file which is expected to be found at `filePath`, then
  * parses those contents into a JavaScript object.
- * @param {string} filePath The file path to find the manifest file at.
- * @returns {object} The YAML document parsed into JSON.
+ * @param filePath The file path to find the manifest file at.
+ * @returns The YAML document parsed into JSON.
  */
 async function readManifestContents(filePath: string) {
     console.log(chalk.magenta('REACHED READ MANIFEST'));
@@ -113,20 +119,7 @@ async function createManifestInstance(filePath: string, fileContents: string) {
 
 // MARK: LOAD CONFIG
 
-interface UserConfig {
-    search: {
-        scanDirectories: boolean;
-        scanRecursively: boolean;
-        manifests: Manifest[];
-    },
-    output: {
-        
-    },
-    validation: {},
-    logging: {}
-}
-
-const userConfig: UserConfig = {
+const userConfig: UserConfigData = {
     search: {
         scanDirectories: true,
         scanRecursively: false,
@@ -145,10 +138,10 @@ try {
 }
 
 if (!userConfigData) {
-    if (!fs.existsSync(PATH_USER_CONFIG)) {
-        logConfigErrorAndExit('You must create a config.yml to use SRM Manifest Generator');
+    if (!fs.existsSync(USER_CONFIG_PATH)) {
+        logConfigErrorAndExit(`You must create a ${USER_CONFIG_FILENAME} to use SRM Manifest Generator`);
     } else {
-        logConfigErrorAndExit('Your config.yml cannot be empty. Visit the link below to view required configuration options.');
+        logConfigErrorAndExit(`Your ${USER_CONFIG_FILENAME} cannot be empty.`);
     }
 }
 
@@ -156,27 +149,28 @@ if (!userConfigData) {
 {
     const section = userConfigData.search;
 
-    if (section === null) {
+    if (section === null)
         logConfigErrorAndExit('Your config.yml "search" section cannot be empty');
-    }
-    if (!section) {
+    
+    if (!section)
         logConfigErrorAndExit('Your config.yml is missing the required section "search"');
-    }
 
-    const { manifests: allManifestPaths } = section;
+    const { manifests: allManifests } = section;
 
-    if (!allManifestPaths) {
+    if (!allManifests) {
         logConfigErrorAndExit('Your config.yml is missing the required list of paths "manifests" within the section "search"');
     }
     
     const scanDirectories = section.scanDirectories ?? true;
-    const scanRecursively = section.recursive || false;
+    const scanRecursively = section.scanRecursively || false;
 
     // TODO: Implement options
 
     const okManifests = [];
 
-    for (const filePath of allManifestPaths) {
+    for (const manifest of allManifests) {
+        const { filePath } = manifest;
+
         try {
             const isPathValid = await verifyManifestPath(filePath, scanDirectories, scanRecursively);
             
@@ -199,7 +193,7 @@ if (!userConfigData) {
     userConfig.search.manifests = okManifests;
 
     const nOk = okManifests.length,
-          nAllPaths = allManifestPaths.length;
+          nAllPaths = allManifests.length;
     
     let ctOk = `${nOk}/${nAllPaths}`;
 
