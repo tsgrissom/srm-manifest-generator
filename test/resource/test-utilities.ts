@@ -1,12 +1,8 @@
  
 
 import path from 'node:path';
-import tmp from 'tmp';
-const { DirResult, FileResult } = tmp;
-import {
-    basenameWithoutExtensions,
-    normalizeFileExtension
-} from '../../dist/utility/file.js';
+import tmp, { DirResult } from 'tmp';
+import { basenameWithoutExtensions, normalizeFileExtension } from '../../src/utility/file.js';
 
 const __dirname = import.meta.dirname;
 
@@ -28,9 +24,9 @@ export const __dirtmp = path.join(__dirtest, 'resource', 'tmp');
  * - IMPORTANT: This file is synchronous, so MUST be closed in your teardown by
  * invoking `DirResult#removeCallback`.
  * 
- * @param {string} __jsfilebasename The basename  of the current test
+ * @param __jsfilebasename The basename  of the current test
  * file. Can be found using `path.basename(import.meta.filename)`.
- * @returns {DirResult} The `DirResult` returned by the `tmp.dirSync` operation.
+ * @returns The `DirResult` returned by the `tmp.dirSync` operation.
  * 
  * @example
  * // Obtain the __jsfilebasename at the top of your test file
@@ -69,7 +65,7 @@ export const __dirtmp = path.join(__dirtest, 'resource', 'tmp');
  *      // setupDirs();
  * });
  */
-export function tmpDirForScope(__jsfilebasename) {
+export function tmpDirForScope(__jsfilebasename: string) : DirResult {
     return tmp.dirSync({
         tmpdir: __dirtmp,
         prefix: __jsfilebasename
@@ -86,13 +82,16 @@ export function tmpDirForScope(__jsfilebasename) {
  * - IMPORTANT: This file is synchronous, so MUST be closed in your teardown by
  * invoking `DirResult#removeCallback`.
  * 
- * @param {string} parentDirname The dirname of the dir made by `tmpDirForScope`.
- * @param {string} prefix The prefix to apply to the subdirectory to aid
+ * @param parentDirname The dirname of the dir made by `tmpDirForScope`.
+ * @param prefix The prefix to apply to the subdirectory to aid
  * randomization.
  * 
- * @returns {DirResult} The `DirResult` returned by the `tmp.dirSync` operation.
+ * @returns The `DirResult` returned by the `tmp.dirSync` operation.
  */
-export function tmpSubdir(parentDirname, prefix = 'subdir') {
+export function tmpSubdir(
+    parentDirname: string,
+    prefix: string = 'subdir'
+) : tmp.DirResult {
     return tmp.dirSync({tmpdir: __dirtmp, dir: parentDirname, prefix: prefix});
 }
 
@@ -104,19 +103,23 @@ export function tmpSubdir(parentDirname, prefix = 'subdir') {
  * - IMPORTANT: This file is synchronous, so MUST be closed in your teardown by
  * invoking `FileResult#removeCallback`.
  * 
- * @param {string} prefix The prefix to prepend to the filename for debugging.
+ * @param prefix The prefix to prepend to the filename for debugging.
  * Default: "manifest".
- * @param {string} dirname The directory to place the file in, especially a
+ * @param dirname The directory to place the file in, especially a
  * subdirectory. Default: ".".
- * @param {boolean} randomness Whether to use randomness to sometimes use
+ * @param randomness Whether to use randomness to sometimes use
  * the alternate YAML file extension ".yaml". 
  * If true, the created file will randomly end in either ".manifest.yml"
  * or ".manifest.yaml", whereas if false the file will only ever end in
  * ".manifest.yml".
  * 
- * @returns {FileResult} The `FileResult` returned by the `tmp.fileSync` operation.
+ * @returns The `FileResult` returned by the `tmp.fileSync` operation.
  */
-export function tmpManifestYml(prefix = 'manifest', dirname = '.', randomness = true) {
+export function tmpManifestYml(
+    prefix: string = 'manifest',
+    dirname: string = '.',
+    randomness: boolean = true
+) : tmp.FileResult {
     const stdExt = '.manifest.yml';
     let postfix;
 
@@ -137,19 +140,25 @@ export function tmpManifestYml(prefix = 'manifest', dirname = '.', randomness = 
  * - IMPORTANT: This file is synchronous, so MUST be closed in your teardown by
  * invoking `DirResult#removeCallback`.
  * 
- * @param {boolean} valid Whether the executable file is representing an actual
+ * @param valid Whether the executable file is representing an actual
  * executable or a non-executable passed as an executable. Default: true.
- * @param {string} prefix The prefix to prepend to the filename for debugging.
+ * @param prefix The prefix to prepend to the filename for debugging.
  * Default: "exec".
- * @param {string} dirname The directory to place the file in, especially a
+ * @param dirname The directory to place the file in, especially a
  * subdirectory. Default: ".".
- * @param {string} validPostfix The postfix to apply if `valid` is true. Should be
+ * @param validPostfix The postfix to apply if `valid` is true. Should be
  * an extension which is representing a real executable, such as the default ".exe".
- * @param {string} invalidPostfix The postfix to apply if `valid` is false.
+ * @param invalidPostfix The postfix to apply if `valid` is false.
  * 
- * @returns {FileResult} The `FileResult` returned by the `tmp.fileSync` operation.
+ * @returns The `FileResult` returned by the `tmp.fileSync` operation.
  */
-export function tmpExecutableFile(valid = true, prefix = 'exec', dirname = '.', validPostfix = '.exe', invalidPostfix = '.txt') {
+export function tmpExecutableFile(
+    valid: boolean = true,
+    prefix: string = 'exec',
+    dirname: string = '.',
+    validPostfix: string = '.exe',
+    invalidPostfix: string = '.txt'
+) : tmp.FileResult {
     if (typeof valid !== 'boolean')
         throw new Error(`Arg "valid" must be a boolean: ${valid}`);
     
@@ -180,10 +189,10 @@ export function tmpExecutableFile(valid = true, prefix = 'exec', dirname = '.', 
  * create a simple object from a filename string.
  * * The created object can be successfully used to construct a Shortcut instance.
  * 
- * @param {string} fileName The filename to create the JSON from. The whole path will
+ * @param fileName The filename to create the JSON from. The whole path will
  * be used for the target, while the basename without extensions will be used
  * for the title.
- * @param {boolean} randomness Whether to incorporate randomness, sometimes making
+ * @param randomness Whether to incorporate randomness, sometimes making
  * the shortcut object in its alternate forms using aliases of its keys.
  * 
  * * Default: `true`
@@ -192,7 +201,7 @@ export function tmpExecutableFile(valid = true, prefix = 'exec', dirname = '.', 
  * * If `false`, the only format which will be output from this function will be
  * the Steam ROM Manager-compatible `title` and `target` JSON format.
  * 
- * @returns {object} The JSON representation of the given filename.
+ * @returns The JSON representation of the given filename.
  * 
  * @example
  * // Given an exe file in the working directory named "App.exe", though not checked by fn
@@ -205,7 +214,11 @@ export function tmpExecutableFile(valid = true, prefix = 'exec', dirname = '.', 
  * // or
  * { name: "App", exec: "App.exe" } // The compact format we use for YAML structure
  */
-export function shortcutObjFromFileName(fileName, randomness = true) {
+// TODO Return type annotation
+export function shortcutObjFromFileName(
+    fileName: string, 
+    randomness: boolean = true
+) {
     if (!fileName || typeof fileName !== 'string')
         throw new Error(`Arg "fileName" must be a string: ${fileName}`);
     if (typeof fileName === 'string' && fileName.trim() === '')
@@ -224,7 +237,7 @@ export function shortcutObjFromFileName(fileName, randomness = true) {
     const random = Math.random();
 
     if (random < 0.5)
-        return {name: title, exec: target};
+        return { name: title, exec: target };
 
     return standardForm;
 }

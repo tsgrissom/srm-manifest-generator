@@ -2,7 +2,7 @@
   "name": "srm-manifest-generator",
   "version": "1.0.0",
   "description": "Create Steam ROM Manager manual manifests from YAML documents",
-  "author": { 
+  "author": {
     "name": "tsgrissom",
     "url": "https://github.com/tsgrissom/srm-manifest-generator"
   },
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@eslint/js": "^9.14.0",
     "@types/node": "^22.10.1",
+    "@types/tmp": "^0.2.6",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.14.0",
