@@ -8,7 +8,7 @@ config/manifests/**
 out/**
 output/**
 # Ignore test resource files
-test/tmp/**
+test/resource/**
 
 # FILES
 
