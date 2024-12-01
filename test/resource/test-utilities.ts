@@ -3,6 +3,7 @@
 import path from 'node:path';
 import tmp, { DirResult, FileResult } from 'tmp';
 import { basenameWithoutExtensions, normalizeFileExtension } from '../../src/utility/file.js';
+import { ShortcutData } from '../../src/type/Shortcut.js';
 
 const __dirname = import.meta.dirname;
 
@@ -192,52 +193,24 @@ export function tmpExecutableFile(
  * @param fileName The filename to create the JSON from. The whole path will
  * be used for the target, while the basename without extensions will be used
  * for the title.
- * @param randomness Whether to incorporate randomness, sometimes making
- * the shortcut object in its alternate forms using aliases of its keys.
- * 
- * * Default: `true`
- * * If `true`, instead of the standard, Steam ROM Manager-compatible `title` and
- * `target` keys, the SRM Manifest Generator keys `name` and `exec` might be used.
- * * If `false`, the only format which will be output from this function will be
- * the Steam ROM Manager-compatible `title` and `target` JSON format.
- * 
  * @returns The JSON representation of the given filename.
  * 
  * @example
  * // Given an exe file in the working directory named "App.exe", though not checked by fn
- * const objWithoutRandomness = shortcutObjFromFileName('App.exe', false);
+ * const objWithoutRandomness = shortcutObjFromFileName('App.exe');
  * // Output will only be:
- * { title: "App", target: "App.exe" }
- * const objWithRandomness = shortcutObjFromFileName('App.exe', true);
- * // Output could be either:
- * { title: "App", target: "App.exe" } // The format Steam ROM Manager uses in manual manifests
- * // or
- * { name: "App", exec: "App.exe" } // The compact format we use for YAML structure
+ * { title: "App", target: "App.exe", enabled: true }
  */
-// TODO Return type annotation
 export function shortcutObjFromFileName(
     fileName: string, 
-    randomness: boolean = true
-) {
+) : ShortcutData {
     if (!fileName || typeof fileName !== 'string')
         throw new Error(`Arg "fileName" must be a string: ${fileName}`);
     if (typeof fileName === 'string' && fileName.trim() === '')
         throw new Error(`Arg "fileName" cannot be an empty string: "${fileName}"`);
-    if (typeof randomness !== 'boolean')
-        throw new Error(`Arg "randomness" must be a boolean: ${randomness}`);
 
     const title = basenameWithoutExtensions(fileName, '*');
     const target = fileName;
 
-    const standardForm = {title:title,target:target};
-
-    if (!randomness)
-        return standardForm;
-
-    const random = Math.random();
-
-    if (random < 0.5)
-        return { name: title, exec: target };
-
-    return standardForm;
+    return {title: title, target: target, enabled: true};
 }

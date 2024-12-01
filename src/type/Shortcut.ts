@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import chalk from 'chalk';
-import { Manifest } from './Manifest.js';
+import { Manifest, ManifestData } from './Manifest.js';
 
 export interface ShortcutOutput {
     title: string,
@@ -16,10 +16,10 @@ export interface ShortcutData extends ShortcutOutput {
 
 export class Shortcut {
 
-    manifest: Manifest;
+    manifest: ManifestData;
     data: ShortcutData;
 
-    constructor(manifest: Manifest, data: ShortcutData) {
+    constructor(manifest: ManifestData, data: ShortcutData) {
         // TODO Accept config in constructor, check validity of executable
         // TODO Lint args
 
@@ -68,12 +68,12 @@ export class Shortcut {
     }
 
     getFullTargetPath() : string {
-        const rootDir = this.manifest.getRootDirectory();
+        const rootDir = this.manifest.rootDirectory;
 
         if (!rootDir)
-            throw new Error(`Error while constructing full target path for Shortcut (${this.getTitle()}): Manifest (${this.manifest.getName()}) root directory was invalid`);
+            throw new Error(`Error while constructing full target path for Shortcut (${this.getTitle()}): Manifest (${this.manifest.name}) root directory was invalid`);
 
-        return path.join(this.manifest.getRootDirectory(), this.getRelativeTargetPath());
+        return path.join(this.manifest.rootDirectory, this.getRelativeTargetPath());
     }
 
     isEnabled() : boolean {

@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { capitalize as strCapitalize } from './string';
+import { capitalize as strCapitalize } from './string.js';
 
 // TODO Benchmark is it faster to store four string values: trueLowerStr trueUpperStr falseLowerStr and falseUpperStr or current?
 
@@ -76,9 +76,10 @@ function formattedBoolean(
 const boolFmt = (b: boolean, options: BoolFmtOptions = BoolFmtPreset.TrueFalse) => formattedBoolean(b, options.color, options.capitalize, options.trueStr, options.falseStr);
 const yesNo = (b: boolean) : string => boolFmt(b, BoolFmtPreset.YesNo);
 const enabledDisabled = (b: boolean) : string => boolFmt(b, BoolFmtPreset.EnabledDisabled);
+const checkCross = (b: boolean) : string => boolFmt(b, BoolFmtPreset.CheckCross);
 
 export {
     formattedBoolean,
     boolFmt, BoolFmtOptions, BoolFmtPreset,
-    yesNo, enabledDisabled
+    yesNo, enabledDisabled, checkCross
 }

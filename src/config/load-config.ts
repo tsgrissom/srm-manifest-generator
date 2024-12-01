@@ -3,7 +3,7 @@ import https from 'node:https';
 
 import yaml from 'yaml';
 
-import { UserConfig } from './UserConfig.js';
+import { UserConfig } from '../type/UserConfig.js';
 import {
     EXAMPLE_CONFIG_FILENAME,
     EXAMPLE_CONFIG_PATH,

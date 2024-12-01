@@ -1,15 +1,15 @@
-import { Manifest } from '../type/Manifest.js';
+import { Manifest } from './Manifest';
 
-interface UserConfig {
+interface ConfigData {
     search: {
         scanDirectories: boolean;
         scanRecursively: boolean;
-        manifests: string[];
+        manifests: Manifest[];
     },
     output: {
         minify: boolean;
         indentationSpaces: number;
-        spreadMode: "file";
+        spreadMode: string;
     },
     validation: {
         validateFilePaths: boolean;
@@ -22,6 +22,4 @@ interface UserConfig {
     }
 }
 
-export {
-    UserConfig
-};
+export { ConfigData };
