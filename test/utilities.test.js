@@ -1,7 +1,7 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
 
-import { isProcessRunning } from '../src/utilities.js';
+import { isProcessRunning } from '../src/util/utilities.js';
 
 describe('File: utilities.js', () => {
 
@@ -9,10 +9,18 @@ describe('File: utilities.js', () => {
     // TODO TEST More unit tests
     // TODO TEST Test argument checking 
     describe('Function: isProcessRunning', () => {
-        it('should not reject its Promise', () => {
-            assert.doesNotReject(() => isProcessRunning());
+        const defaultPlatformOptions = {
+            supportedPlatforms: ['win32', 'darwin', 'linux'],
+            settings: {
+                win32: { commandExec: 'tasklist', processSearchName: 'steam.exe' },
+                darwin: { commandExec: 'ps aux | grep [S]team', processSearchName: 'steam' },
+                linux: { commandExec: 'ps aux | grep [s]team', processSearchName: 'steam' }
+            }
+        };
+
+        it('should not reject its Promise', async () => {
+            await assert.doesNotReject(isProcessRunning(defaultPlatformOptions)); 
         });
     });
-
 });
 

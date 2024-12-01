@@ -5,13 +5,17 @@ import path from 'node:path';
  * Checks if a given file path has a file extension. When `fileExt` is set to *,
  * including by default, the function will return true if there is any extension
  * present in the given file path.
+ * 
  * Optionally, set `fileExt` to a single file extension to only return true if
  * that single extension is present. Further, you can specify an array of
  * file extensions so the function returns true if any of the given extensions are
  * found.
- * @param {string} filePath 
- * @param {*} fileExt
- * @returns
+ * 
+ * @param {string} filePath The filepath to check for the given extensions.
+ * @param {*} fileExt String or array of strings indicating which extensions to search for. Set to
+ * "*" or keep at default value to return true for the presence of any extension.
+ * @returns {boolean} Whether the given file extensions were found for the given filepath.
+ * 
  * @example
  * // Checking for JSON extensions
  * const jsonExts = ['.json', '.jsonc'];
@@ -21,7 +25,6 @@ import path from 'node:path';
  *      }
  * );
  */
-// TODO jsdoc example
 // TODO TEST Unit
 export function pathHasFileExtension(filePath, fileExt = '*') {
     // TODO Write code
@@ -117,12 +120,12 @@ export function normalizeFileExtension(extname, exclude = ['*']) {
  * Gets a file's basename with selected extensions removed.
  * If `iterative` is turned on, this process will be repeated until none of the extensions are present.
  * @param {string} fileName The filename to remove the extensions from. 
- * @param {*} extsRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
+ * @param {*} extensionsToRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
  * @param {boolean} iterate Should the basename be iteraviley modified until all of the listed extensions are gone?
  * @returns {string} The final filename after being stripped of some selected extensions, if they were present.
  * @example // TODO Write example
  */
-export function basenameWithoutExtensions(fileName, extsRemove, iterate = false) {
+export function basenameWithoutExtensions(fileName, extensionsToRemove, iterate = false) {
     // TODO Lint args
 
     if (typeof fileName !== 'string')
@@ -130,42 +133,55 @@ export function basenameWithoutExtensions(fileName, extsRemove, iterate = false)
     if (typeof iterate !== 'boolean')
         throw new Error(`Cannot use non-boolean value for parameter "iterate": ${iterate}`);
 
-    if (!Array.isArray(extsRemove)) // TEST Unit
-        extsRemove = [extsRemove];
+    if (!Array.isArray(extensionsToRemove)) // TEST Unit
+        extensionsToRemove = [extensionsToRemove];
 
-    for (let i = 0; i < extsRemove.length; i++) { // TEST Unit
-        const ext = extsRemove[i];
-        extsRemove[i] = normalizeFileExtension(ext);
+    // for (let i = 0; i < extensionsToRemove.length; i++) { // TEST Unit
+    //     const ext = extensionsToRemove[i];
+    //     if (typeof ext !== 'string')
+    //         continue;
+    //     extensionsToRemove[i] = normalizeFileExtension(ext);
+    // }
+
+    for (const [index, entry] of extensionsToRemove.entries()) {
+        if (typeof entry !== 'string')
+            continue;
+        extensionsToRemove[index] = normalizeFileExtension(entry);
     }
 
     let newName = path.basename(fileName);
     let extFound;
-
-    if (iterate) { // TEST Unit
-        do {
-            extFound = path.extname(newName);
-
-            if (!extFound || extFound === '')
-                return newName;
     
-            for (const extRemove of extsRemove) {
-                if (extRemove === '*' || extRemove === extFound.toLowerCase()) {
-                    newName = path.basename(newName, extRemove);
-                }
-            }
-        } while (extFound !== null);
-    } else { // TEST Unit
-        for (const extRemove of extsRemove) {
+    if (!iterate) {
+        for (const extToRemove of extensionsToRemove) {
             extFound = path.extname(newName);
 
             if (!extFound || extFound === '')
                 return newName;
 
-            if (extRemove === '*' || extRemove === extFound.toLowerCase()) {
-                return path.basename(newName, extRemove);
+            if (extToRemove === '*' || extToRemove === extFound.toLowerCase()) {
+                return path.basename(newName, extFound);
             }
         }
     }
+
+    let removedExt = false;
+
+    do {
+        removedExt = false;
+        extFound = path.extname(newName);
+
+        if (!extFound || extFound === '')
+            return newName;
+
+        for (const extToRemove of extensionsToRemove) {
+            if (extToRemove === '*' || extToRemove === extFound.toLowerCase()) {
+                newName = path.basename(newName, extFound);
+                removedExt = true;
+                break;
+            }
+        }
+    } while (removedExt);
 
     return newName;
 }

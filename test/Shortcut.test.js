@@ -1,121 +1,96 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import assert from 'node:assert';
-import { before, after, describe, it } from 'node:test';
 
 import chalk from 'chalk';
 import tmp from 'tmp';
 import yaml from 'yaml';
 
-import { setOfFalsy } from './util/test-values.js';
-
 import { logDebugPlain } from '../src/util/utilities.js';
+import { basenameWithoutExtensions } from '../src/util/file-utilities.js';
 import Shortcut from '../src/Shortcut.js';
 import Manifest from '../src/Manifest.js';
-import { basenameWithoutExtensions } from '../src/util/file-utilities.js';
 
-const __dirname = import.meta.dirname;
-const __filename = path.basename(import.meta.filename);
-const __dirtmp = path.join(__dirname, 'tmp');
-// const dirScopeTmpPrefix = 'Shortcut.test.js';
-// const dirScopeTmpPrefix = path.basename(__filename);
+import assert from 'node:assert';
+import { before, after, describe, it } from 'node:test';
+import { setOfFalsy } from './util/sample-values.js';
+import { tmpDirForScope, tmpManifestYml, tmpSubdir } from './util/resource-utilities.js';
 
-let tmpDir,
-    tmpSubdirManifests,
-    tmpSubdirManRoot,
-    tmpSubdirManOutput;
+const __filebasename = path.basename(import.meta.filename);
 
-let tmpManifestFileGenValid;
+let resourceDir,
+    resourceSubdirManifests,
+    resourceSubdirManRoot,
+    resourceSubdirManOutput;
 
-let manifestGenValid;
+let resourceFileManOk;
 
-const makeTmpSubdir = (prefix) => {
-    return tmp.dirSync({
-        keep: true,
-        tmpdir: __dirtmp,
-        dir: tmpDir.name,
-        prefix: prefix
-    });
-};
-
-const makeTmpManifestYml = (prefix = 'manifest') => {
-    return tmp.fileSync({
-        keep: true,
-        tmpdir: __dirtmp,
-        dir: tmpSubdirManifests.name,
-        prefix: prefix,
-        postfix: '.manifest.yml'
-    });
-};
+let resourceManifestOk;
 
 function setupFolders() {
-    tmpDir = tmp.dirSync({
-        keep: true,
-        tmpdir: __dirtmp,
-        prefix: __filename
-    });
-    tmpSubdirManifests = makeTmpSubdir('manifests');
-    tmpSubdirManOutput = makeTmpSubdir('output');
-    tmpSubdirManRoot = makeTmpSubdir('root');
-    logDebugPlain(`Test Resources: ${__filename} setupFolders done`);
+    logDebugPlain(`Test Resources: ${__filebasename} setupFolders begin`);
+    resourceDir = tmpDirForScope(__filebasename);
+    resourceSubdirManifests = tmpSubdir(resourceDir.name, 'manifests');
+    resourceSubdirManOutput = tmpSubdir(resourceDir.name, 'output');
+    resourceSubdirManRoot = tmpSubdir(resourceDir.name, 'root');
+    logDebugPlain(`Test Resources: ${__filebasename} setupFolders done`);
 }
 
 function teardownFolders() {
-    tmpSubdirManRoot.removeCallback();
-    tmpSubdirManOutput.removeCallback();
-    tmpSubdirManifests.removeCallback();
-    tmpDir.removeCallback();
-    logDebugPlain(`Test Resources: ${__filename} teardownFolders done`);
+    logDebugPlain(`Test Resources: ${__filebasename} teardownFolders begin`);
+    resourceSubdirManRoot.removeCallback();
+    resourceSubdirManOutput.removeCallback();
+    resourceSubdirManifests.removeCallback();
+    resourceDir.removeCallback();
+    logDebugPlain(`Test Resources: ${__filebasename} teardownFolders done`);
 }
 
 function setupFiles() {
-    tmpManifestFileGenValid = makeTmpManifestYml('gen-valid');
-    const object = {
-        name: basenameWithoutExtensions(tmpManifestFileGenValid.name),
-        root: tmpSubdirManRoot.name,
-        output: tmpSubdirManOutput.name
-    };
-    fs.writeFileSync(tmpManifestFileGenValid.name, yaml.stringify(object));
-    manifestGenValid = new Manifest(tmpManifestFileGenValid.name, object);
+    logDebugPlain(`Test Resources: ${__filebasename} setupFiles begin`);
 
-    logDebugPlain(`Test Resources: ${__filename} setupFiles done`);
+    resourceFileManOk = tmpManifestYml('gen-valid', resourceSubdirManifests.name);
+
+    const name = basenameWithoutExtensions(resourceFileManOk.name, '*', true),
+          root = resourceSubdirManRoot.name,
+          output = resourceSubdirManOutput.name;
+    const object = {name: name, root: root, output: output};
+    
+    fs.writeFileSync(resourceFileManOk.name, yaml.stringify(object));
+    resourceManifestOk = new Manifest(resourceFileManOk.name, object);
+
+    logDebugPlain(`Test Resources: ${__filebasename} setupFiles done`);
 }
 
 function teardownFiles() {
-    tmpManifestFileGenValid.removeCallback();
-    logDebugPlain(`Test Resources: ${__filename} teardownFiles done`);
-}
-
-function setup() {
-    setupFolders();
-    setupFiles();
-    console.log(chalk.green('Test Resources: Setup completed'));
-}
-
-function teardown() {
-    teardownFiles();
-    teardownFolders();
-    console.log(chalk.green('Test Resources: Teardown completed'));
+    logDebugPlain(`Test Resources: ${__filebasename} teardownFiles begin`);
+    resourceFileManOk.removeCallback();
+    logDebugPlain(`Test Resources: ${__filebasename} teardownFiles done`);
 }
 
 before(() => {
-    setup();
+    logDebugPlain(`Test Resources: ${__filebasename} Setup started`);
+    setupFolders();
+    setupFiles();
+    console.log(chalk.green('Test Resources: Setup completed'));
 });
 
 after(() => {
-    teardown();
+    logDebugPlain(`Test Resources: ${__filebasename} Teardown started`);
+    teardownFiles();
+    teardownFolders();
+    console.log(chalk.green('Test Resources: Teardown completed'));
 });
 
 describe('Class: Shortcut', () => {
 
-    const shortcutObjectOk = {
-        name: 'A Shortcut',
-        exec: tmp.tmpNameSync({prefix: 'valid-executable', postfix: '.exe'})
-    };
+    // const shortcutObjectOk = {
+    //     name: 'A Shortcut',
+    //     exec: tmp.tmpNameSync({prefix: 'valid-executable', postfix: '.exe'})
+    // };
+    const shortcutObjectOk = {name: 'A Shortcut', exec: 'Some path/App.exe'};
 
     describe('Constructor', () => {
         it('should, if constructed with a type other than Manifest given for arg manifest, throw an error', async (t) => {
-            const values = [];
+            const values = ['string', 0, 3.14];
             for (const value of values) {
                 await t.test(`Subtest for arg manifest=${value}`, () => {
                     assert.throws(() => new Shortcut(value, shortcutObjectOk));
@@ -135,7 +110,7 @@ describe('Class: Shortcut', () => {
     it('should, if constructed with a non-truthy object arg, throw an error', async (t) => {
         for (const value of setOfFalsy) {
             await t.test(`Subtest for arg manifest=${value}`, () => {
-                assert.throws(() => new Shortcut(manifestGenValid, value));
+                assert.throws(() => new Shortcut(resourceManifestOk, value));
             });
         }
     });

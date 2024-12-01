@@ -1,198 +1,148 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import assert from 'node:assert';
-import { before, after, describe, it } from 'node:test';
 
 import tmp from 'tmp';
 import yaml from 'yaml';
 
-import Manifest from '../src/Manifest.js';
-
 import { logDebug } from '../src/util/utilities.js';
 import { replaceFileExtension } from '../src/util/file-utilities.js';
+import Manifest from '../src/Manifest.js';
 
-const __dirname = import.meta.dirname;
-const dirTestTmp = path.join(__dirname, 'tmp');
-const dirScopeTmpPrefix = 'Manifest.test.js';
+import assert from 'node:assert';
+import { before, after, describe, it } from 'node:test';
+import { shortcutObjFromFileName, tmpDirForScope, tmpManifestYml, tmpSubdir, tmpExecutableFile } from './util/resource-utilities.js';
+
+const __filebasename = path.basename(import.meta.filename);
 
 const yamlToJsonExt = (fileName) => {
     return replaceFileExtension(fileName, ['.yml', '.yaml'], '.json');
 };
 
-let tmpDir,
-    tmpSubdirManifests,
-    tmpSubdirManRoot,
-    tmpSubdirManOutput,
-    tmpSubdirExecutables;
+let resourceDir,
+    resourceSubdirManifests,
+    resourceSubdirManRoot,
+    resourceSubdirManOutput,
+    resourceSubdirExecutables;
 
-let tmpManifestFileGenValid,
-    tmpManifestFileGenInvalid,
-    tmpManifestFileNonExistent,
-    tmpManifestFileEmpty,
-    tmpManifestFileNoNameAttr;
-let manifestGenValid,
-    manifestGenInvalid,
-    manifestNonExistent,
-    manifestEmpty,
-    manifestNoNameAttr;
+let resourceFileManOk,
+    resourceFileManBad,
+    resourceFileManNonExistent,
+    resourceFileManEmptyContents,
+    resourceFileManNoNameAttribute;
+    
+let resourceManifestOk,
+    resourceManifestBad,
+    resourceManifestNonExistent,
+    resourceManifestEmptyContents,
+    resourceManifestNoNameAttribute;
 
-let tmpFileValidExecExt,
-    tmpFileInvalidExecExt;
-
-function makeTmpSubdir(prefix) {
-    return tmp.dirSync({
-        keep: true,
-        tmpdir: dirTestTmp,
-        dir: tmpDir.name,
-        prefix: prefix
-    });
-}
-
-function makeTmpManifestYml(prefix = 'manifest') {
-    return tmp.fileSync({
-        keep: true,
-        tmpdir: dirTestTmp,
-        dir: tmpSubdirManifests.name,
-        prefix: prefix,
-        postfix: '.manifest.yml',
-    });
-}
+let resourceFileExecutableOk,
+    resourceFileExecutableBad;
 
 function setupFolders() {
-    tmpDir = tmp.dirSync({
-        keep: true,
-        tmpdir: dirTestTmp,
-        prefix: dirScopeTmpPrefix
-    });
-    tmpSubdirManifests = makeTmpSubdir('manifests');
-    tmpSubdirManRoot = makeTmpSubdir('root');
-    tmpSubdirManOutput = makeTmpSubdir('output');
-    tmpSubdirExecutables = makeTmpSubdir('executables');
+    resourceDir = tmpDirForScope(__filebasename);
+    resourceSubdirManifests = tmpSubdir(resourceDir.name, 'manifests');
+    resourceSubdirManRoot = tmpSubdir(resourceDir.name, 'root');
+    resourceSubdirManOutput = tmpSubdir(resourceDir.name, 'output');
+    resourceSubdirExecutables = tmpSubdir(resourceDir.name, 'executables');
     logDebug(`Test resource setup finished: Manifest.test.js folders`);
 }
 
 function teardownFolders() {
-    tmpSubdirExecutables.removeCallback();
-    tmpSubdirManOutput.removeCallback();
-    tmpSubdirManRoot.removeCallback();
-    tmpSubdirManifests.removeCallback();
-    tmpDir.removeCallback();
+    resourceSubdirExecutables.removeCallback();
+    resourceSubdirManOutput.removeCallback();
+    resourceSubdirManRoot.removeCallback();
+    resourceSubdirManifests.removeCallback();
+    resourceDir.removeCallback();
     logDebug(`Test resource teardown finished: Manifest.test.js folders`);
 }
 
-function setupFiles() {
-    tmpFileValidExecExt = tmp.fileSync({
-        keep: true,
-        tmpdir: dirTestTmp,
-        dir: tmpSubdirExecutables.name,
-        prefix: 'valid-exec',
-        postfix: '.exe'
-    });
-    tmpFileInvalidExecExt = tmp.fileSync({
-        keep: true,
-        tmpdir: dirTestTmp,
-        dir: tmpSubdirExecutables.name,
-        prefix: 'invalid-exec',
-        postfix: '.txt'
-    });
+function setupFiles() { // TODO Replace execs with a func from utils
+    resourceFileExecutableOk = tmpExecutableFile(true, 'valid-executable');
+    resourceFileExecutableBad = tmpExecutableFile(false, 'invalid-executable');
 
     logDebug(`Test resource setup finished: Manifest.test.js executable files`);
         
     {
-        tmpManifestFileGenValid = makeTmpManifestYml('generic-valid');
+        resourceFileManOk = tmpManifestYml('generic-valid', resourceSubdirManifests.name);
         
-        const root = tmpSubdirManRoot.name;
-        const output = path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileGenValid.name));
+        const root = resourceSubdirManRoot.name;
+        const output = path.join(resourceSubdirManOutput.name, yamlToJsonExt(resourceFileManOk.name));
         const object = {
             name: 'Some Valid Manifest',
             root: root,
             output: output,
-            entries: [{name: 'A Fake Game', exec: tmpFileValidExecExt.name}]
+            entries: [{name: 'A Fake Game', exec: resourceFileExecutableOk.name}]
         };
-        fs.writeFileSync(tmpManifestFileGenValid.name, yaml.stringify(object));
+        fs.writeFileSync(resourceFileManOk.name, yaml.stringify(object));
 
-        manifestGenValid = new Manifest(tmpManifestFileGenValid.name, object);
+        resourceManifestOk = new Manifest(resourceFileManOk.name, object);
     }
 
     {
-        tmpManifestFileGenInvalid = makeTmpManifestYml('generic-invalid');
+        resourceFileManBad = tmpManifestYml('generic-invalid', resourceSubdirManifests.name);
         const object = {
             name: 'Some Invalid Manifest',
             // root: `${tmpDirManRootDir.name}`,
             // output: `${path.join(tmpDirManOutput.name, replaceYamlExtensionWithJson(tmpFileGenInvalid.name))}`,
             entries: false
         };
-        fs.writeFileSync(tmpManifestFileGenInvalid.name, yaml.stringify(object));
+        fs.writeFileSync(resourceFileManBad.name, yaml.stringify(object));
         // manGenInvalid = new Manifest(tmpFileGenInvalid.name, content);
     }
 
     {
-        tmpManifestFileNonExistent = makeTmpManifestYml('non-existent');
-        const root = tmpSubdirManRoot.name,
-              output = path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileNonExistent.name)),
-              entries = [{name: 'A Fake Game', exec: tmpFileValidExecExt.name}];
-        const object = {
-            name: 'Some Non-Existent Manifest',
-            root: root,
-            output: output,
-            entries: entries
-        };
-        fs.writeFileSync(tmpManifestFileNonExistent.name, yaml.stringify(object));
-        manifestNonExistent = new Manifest(tmpManifestFileNonExistent.name, object);
-        tmpManifestFileNonExistent.removeCallback();
+        resourceFileManNonExistent = tmpManifestYml('non-existent', resourceSubdirManifests.name);
+        const root = resourceSubdirManRoot.name,
+              output = path.join(resourceSubdirManOutput.name, yamlToJsonExt(resourceFileManNonExistent.name)),
+              entries = shortcutObjFromFileName(resourceFileExecutableOk.name);
+        const object = {name: 'Some Non-Existent Manifest', root: root, output: output, entries: entries};
+        fs.writeFileSync(resourceFileManNonExistent.name, yaml.stringify(object));
+        resourceManifestNonExistent = new Manifest(resourceFileManNonExistent.name, object);
+        resourceFileManNonExistent.removeCallback();
     }
 
     {
-        tmpManifestFileEmpty = makeTmpManifestYml('empty');
-        fs.writeFileSync(tmpManifestFileEmpty.name, '');
+        resourceFileManEmptyContents = tmpManifestYml('empty', resourceSubdirManifests.name);
+        fs.writeFileSync(resourceFileManEmptyContents.name, '');
         // manEmpty = new Manifest(tmpFileEmpty.name, {});
     }
 
     {
-        tmpManifestFileNoNameAttr = makeTmpManifestYml('no-name-attribute');
-        const output = path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileNoNameAttr.name));
-        const content = {
-            root: `${tmpSubdirManRoot.name}`,
-            output: `${path.join(tmpSubdirManOutput.name, yamlToJsonExt(tmpManifestFileNoNameAttr.name))}`,
-            entries: [{name: 'A Fake Game', exec: tmpFileValidExecExt.name}]
-        };
-        fs.writeFileSync(tmpManifestFileNoNameAttr.name, yaml.stringify(content));
-        manifestNoNameAttr = new Manifest(tmpManifestFileNoNameAttr.name, content);
+        resourceFileManNoNameAttribute = tmpManifestYml('no-name-attribute', resourceSubdirManifests.name);
+        const root = resourceSubdirManRoot.name,
+              output = path.join(resourceSubdirManOutput.name, yamlToJsonExt(resourceFileManNoNameAttribute.name)),
+              entries = shortcutObjFromFileName(resourceFileExecutableOk.name);
+        const content = {root: root, output: output, entries: entries};
+        fs.writeFileSync(resourceFileManNoNameAttribute.name, yaml.stringify(content));
+        resourceManifestNoNameAttribute = new Manifest(resourceFileManNoNameAttribute.name, content);
     }
 
     logDebug(`Test resource setup finished: Manifest.test.js .manifest.yml files`);
 }
 
 function teardownFiles() {
-    tmpFileValidExecExt.removeCallback();
-    tmpFileInvalidExecExt.removeCallback();
+    resourceFileExecutableOk.removeCallback();
+    resourceFileExecutableBad.removeCallback();
     logDebug(`Test resource teardown finished: Manifest.test.js executable files`);
 
-    tmpManifestFileGenValid.removeCallback();
-    tmpManifestFileGenInvalid.removeCallback();
-    tmpManifestFileEmpty.removeCallback();
-    tmpManifestFileNoNameAttr.removeCallback();
+    resourceFileManOk.removeCallback();
+    resourceFileManBad.removeCallback();
+    resourceFileManEmptyContents.removeCallback();
+    resourceFileManNoNameAttribute.removeCallback();
     logDebug(`Test resource teardown finished: Manifest.test.js Manifest YAML files`);
 }
 
-function setup() {
+before(() => {
     setupFolders();
     setupFiles();
     console.log(`Test setup completed: Manifest.test.js`);
-}
-
-function teardown() {
-    teardownFiles();
-    teardownFolders();
-    console.log(`Test teardown completed: Manifest.test.js`);
-}
-
-before(() => {
-    setup();
 });
 
 after(() => {
-    teardown();
+    teardownFiles();
+    teardownFolders();
+    console.log(`Test teardown completed: Manifest.test.js`);
 });
 
 describe('Class: Manifest', () => {
@@ -212,8 +162,8 @@ describe('Class: Manifest', () => {
     describe('Method: getFileBasename()', () => {
 
         it("should, when instance constructed from existing manifest file, return a string not equal to the file's original path", () => {
-            const nameOfFile = manifestGenValid.getFileBasename();
-            assert.notStrictEqual(nameOfFile, manifestGenValid.filePath);
+            const nameOfFile = resourceManifestOk.getFileBasename();
+            assert.notStrictEqual(nameOfFile, resourceManifestOk.filePath);
         });
     
     });
@@ -221,12 +171,12 @@ describe('Class: Manifest', () => {
     describe('Method: hasNameAttribute()', () => {
 
         it('should, when instance constructed from valid manifest file, return true', () => {
-            const hasAttr = manifestGenValid.hasNameAttribute();
+            const hasAttr = resourceManifestOk.hasNameAttribute();
             assert.strictEqual(hasAttr, true);
         });
 
         it('should, when instance constructed from manifest that has no name attribute, return false', () => {
-            const hasAttr = manifestNoNameAttr.hasNameAttribute();
+            const hasAttr = resourceManifestNoNameAttribute.hasNameAttribute();
             assert.strictEqual(hasAttr, false);
         });
 
@@ -241,13 +191,13 @@ describe('Class: Manifest', () => {
     describe('Method: getName()', () => {
 
         it(`should, when instance constructed from valid manifest file, return string literal "Some Valid Manifest"`, () => {
-            const name = manifestGenValid.getName();
+            const name = resourceManifestOk.getName();
             assert.strictEqual(name, 'Some Valid Manifest');
         });
 
         it("should, when instance constructed from manifest that has no name attribute, return file's basename as a string", () => {
-            const name = manifestNoNameAttr.getName();
-            const expected = path.basename(manifestNoNameAttr.filePath);
+            const name = resourceManifestNoNameAttribute.getName();
+            const expected = path.basename(resourceManifestNoNameAttribute.filePath);
             assert.strictEqual(name, expected);
         });
 

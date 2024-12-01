@@ -92,9 +92,10 @@ class Manifest {
 
         // MARK: Parse shortcuts
         {
-            const sectionKeys = [object.shortcuts, object.entries, object.titles];
+            const keys = [object.shortcuts, object.entries, object.titles]
+                .filter(section => !section); // Filter out falsy sections
 
-            for (const sectionKey of sectionKeys) {
+            for (const sectionKey of keys.filter(section => !section)) {
                 if (!sectionKey) {
                     console.warn(`Non-truthy section key: ${sectionKey}`);
                     continue;
