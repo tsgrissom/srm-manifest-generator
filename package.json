@@ -18,7 +18,8 @@
     "pretest": "eslint .",
     "test": "node --test",
     "test:debug": "DEBUG=true && node --test && DEBUG=false",
-    "postinstall": "mkdir -p ./config/manifests && npm run build"
+    "postinstall:dirs": "mkdir ./config && mkdir ./config/manifest",
+    "postinstall": "npm run postinstall:dirs && npm run build"
   },
   "keywords": [
     "emulation",

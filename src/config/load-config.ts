@@ -4,21 +4,27 @@ import path from 'node:path';
 
 import yaml from 'yaml';
 
-// TODO Docs
-export const URL_EXAMPLE_CONFIG  = 'https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main/config/examples/example.config.yml',
-             PATH_EXAMPLE_CONFIG = path.join('config', 'examples', 'example.config.yml'),
-             //PATH_USER_CONFIG = PATH_EXAMPLE_CONFIG;
-             PATH_USER_CONFIG    = path.join('config', 'config.yml');
+const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
+const EXAMPLE_CONFIG_URL = 'https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main/config/example/example.config.yml';
+const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
 
+const USER_CONFIG_FILENAME = 'config.yml';
+const USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME) // PATH_EXAMPLE_CONFIG;
+
+/**
+ * 
+ * @returns 
+ */
 async function downloadExampleConfig() {
     return new Promise((resolve, reject) => {
-        https.get(URL_EXAMPLE_CONFIG, response => {
+        https.get(EXAMPLE_CONFIG_URL, response => {
             if (response.statusCode !== 200) {
-                return reject(new Error(`Failed to get file. Status code: ${response.statusCode}`));
+                return reject(new Error(`Failed to get . Status code: ${response.statusCode}`));
             }
 
-            const fileStreamExample = fs.createWriteStream(PATH_EXAMPLE_CONFIG);
-            const fileStreamUser = fs.createWriteStream(PATH_USER_CONFIG);
+            const fileStreamExample = fs.createWriteStream(EXAMPLE_CONFIG_PATH),
+                  fileStreamUser    = fs.createWriteStream(USER_CONFIG_PATH);
+
             response.pipe(fileStreamExample);
             response.pipe(fileStreamUser);
 
@@ -32,17 +38,17 @@ async function downloadExampleConfig() {
             };
 
             fileStreamExample.on('finish', () => {
-                console.log(`Finished restoring ${PATH_EXAMPLE_CONFIG} via GitHub download`);
+                console.log(`Finished restoring ${EXAMPLE_CONFIG_PATH} via GitHub download`);
                 onStreamFinish();
             });
             fileStreamUser.on('finish', () => {
-                console.log(`Finished copying latest version of example.config.yml to ${PATH_USER_CONFIG}`);
+                console.log(`Finished copying latest version of example.config.yml to ${USER_CONFIG_PATH}`);
                 onStreamFinish();
             });
 
             const onError = (err: Error) => {
-                fileStreamExample.close(() => fs.unlink(PATH_EXAMPLE_CONFIG, () => {}));
-                fileStreamUser.close(() => fs.unlink(PATH_USER_CONFIG, () => {}));
+                fileStreamExample.close(() => fs.unlink(EXAMPLE_CONFIG_PATH, () => {}));
+                fileStreamUser.close(() => fs.unlink(USER_CONFIG_PATH, () => {}));
                 reject(err);
             };
 
@@ -54,31 +60,31 @@ async function downloadExampleConfig() {
 
 async function copyExampleConfigToUserConfigPath() {
     try {
-        const exampleConfigFile = await fs.promises.readFile(PATH_EXAMPLE_CONFIG, 'utf8');
-        await fs.promises.writeFile(PATH_USER_CONFIG, exampleConfigFile, 'utf8');
-        console.log(`Default config copied to ${PATH_USER_CONFIG}`);
+        const exampleConfigFile = await fs.promises.readFile(EXAMPLE_CONFIG_PATH, 'utf8');
+        await fs.promises.writeFile(USER_CONFIG_PATH, exampleConfigFile, 'utf8');
+        console.log(`Default config copied to ${USER_CONFIG_PATH}`);
     } catch (err) {
-        console.error(`Failed to copy example config to ${PATH_USER_CONFIG}:`, err);
+        console.error(`Failed to copy example config to ${USER_CONFIG_PATH}:`, err);
     }
 }
 
-export async function loadDataFromUserConfig() {
+async function loadDataFromUserConfig() {
     let userConfigHandle;
     let exampleConfigHandle;
 
     try {
         // Check that user config.yml exists
-        userConfigHandle = await fs.promises.open(PATH_USER_CONFIG, 'r');
+        userConfigHandle = await fs.promises.open(USER_CONFIG_PATH, 'r');
     } catch {
         // If user config missing, check for example.config.yml
         try {
-            exampleConfigHandle = await fs.promises.open(PATH_EXAMPLE_CONFIG, 'r');
-            console.log(`SRM Manifest Generator is missing a ${PATH_USER_CONFIG}. Creating new default config based on example.config.yml...`);
+            exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');
+            console.log(`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}. Creating new default config based on example.config.yml...`);
             await copyExampleConfigToUserConfigPath();
         } catch {
             // If both missing
-            console.log(`SRM Manifest Generator is missing a ${PATH_USER_CONFIG}, but the example.config.yml has been deleted.`);
-            console.log(`Restoring ${PATH_EXAMPLE_CONFIG} with latest version from GitHub (URL below), then creating a new default config.yml based on example.config.yml...`);
+            console.log(`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}, but the example.config.yml has been deleted.`);
+            console.log(`Restoring ${EXAMPLE_CONFIG_PATH} with latest version from GitHub (URL below), then creating a new default config.yml based on example.config.yml...`);
             await downloadExampleConfig();
         }
     } finally {
@@ -90,8 +96,14 @@ export async function loadDataFromUserConfig() {
         }
     }
 
-    const configFile = await fs.promises.readFile(PATH_USER_CONFIG, 'utf8');
+    const configFile = await fs.promises.readFile(USER_CONFIG_PATH, 'utf8');
     const configData = yaml.parse(configFile);
 
     return configData;
 }
+
+export {
+    EXAMPLE_CONFIG_FILENAME, EXAMPLE_CONFIG_PATH, EXAMPLE_CONFIG_URL,
+    USER_CONFIG_FILENAME, USER_CONFIG_PATH,
+    loadDataFromUserConfig
+};

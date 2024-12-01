@@ -9,4 +9,4 @@ test/resource/tmp/
 .DS_Store
 # Ignore user configurations
 config/config.yml
-config/manifests/**
+config/manifest/**
