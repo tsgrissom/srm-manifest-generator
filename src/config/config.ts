@@ -123,7 +123,7 @@ async function validateManifestFileContents(manPath: string, object: object, con
         if (key === 'name' || key === 'sourceName') {
             keyAliasUsedForName = key;
             data.name = value;
-        } else if (key === 'root' || key === 'rootDirectory') {
+        } else if (key === 'root' || key === 'rootDir' || key === 'rootDirectory' || key === 'directory') {
             keyAliasUsedForRootDir = key;
             data.rootDirectory = value;
         } else if (key === 'output' || key === 'outputPath') {
@@ -160,9 +160,9 @@ async function validateManifestFileContents(manPath: string, object: object, con
         dlog(`  "${keyAliasUsedForOutput}"`);
 
     // Make sure required attributes are present
-    if (hasAttrRootDir) 
+    if (!hasAttrRootDir) 
         throw new Error(`Manifest is missing a root directory attribute ${manPathName}`);
-    if (hasAttrOutput)
+    if (!hasAttrOutput)
         throw new Error(`Manifest is missing an output directory attribute ${manPathName}`);
 
     return data;
