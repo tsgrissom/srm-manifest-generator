@@ -2,8 +2,8 @@
 
 import path from 'path';
 import tmp from 'tmp';
-const {DirResult, FileResult } = tmp;
-import { basenameWithoutExtensions, normalizeFileExtension } from '../../src/util/file-utilities.js';
+const { DirResult, FileResult } = tmp;
+import { basenameWithoutExtensions, normalizeFileExtension } from '../../src/utility/file.js';
 
 const __dirname = import.meta.dirname;
 
@@ -15,7 +15,7 @@ export const __dirtest = path.join(__dirname, '..');
 /**
  * The path to the project's test resource tmp files at `./test/resource`
  */
-export const __dirtmp = path.join(__dirtest, 'resource');
+export const __dirtmp = path.join(__dirtest, 'resource', 'tmp');
 
 /**
  * Creates a folder for current test within `test/resource` for storing

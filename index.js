@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import startApp from './src/app.js';
-import { logDebug } from './src/util/utilities.js';
+import { logDebug } from './src/utility/logging.js';
 
 try {
     await startApp();

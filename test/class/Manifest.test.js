@@ -4,13 +4,13 @@ import fs from 'node:fs';
 import tmp from 'tmp';
 import yaml from 'yaml';
 
-import { logDebug } from '../src/util/utilities.js';
-import { replaceFileExtension } from '../src/util/file-utilities.js';
-import Manifest from '../src/Manifest.js';
+import { logDebug } from '../../src/utility/logging.js';
+import { replaceFileExtension } from '../../src/utility/file.js';
+import Manifest from '../../src/class/Manifest.js';
 
 import assert from 'node:assert';
 import { before, after, describe, it } from 'node:test';
-import { shortcutObjFromFileName, tmpDirForScope, tmpManifestYml, tmpSubdir, tmpExecutableFile } from './util/resource-utilities.js';
+import { shortcutObjFromFileName, tmpDirForScope, tmpManifestYml, tmpSubdir, tmpExecutableFile } from '../resource/test-utilities.js';
 
 const __filebasename = path.basename(import.meta.filename);
 

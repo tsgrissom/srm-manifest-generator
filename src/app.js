@@ -2,8 +2,8 @@ import fs from 'node:fs';
 
 import chalk from 'chalk';
 
-import { stylePath } from './util/string-utilities.js';
-import { logDebugPlain, logDebugSectionWithData } from './util/utilities.js';
+import { stylePath } from './utility/string.js';
+import { logDebugPlain, logDebugSectionWithData } from './utility/logging.js';
 import userConfig from './config/config.js';
 
 async function writeManifestOutput(manifest) {

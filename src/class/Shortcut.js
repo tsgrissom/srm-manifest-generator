@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import chalk from 'chalk';
-import { basenameWithoutExtensions } from './util/file-utilities.js';
+import { basenameWithoutExtensions } from '../utility/file.js';
 import Manifest from './Manifest.js';
 
 class Shortcut {

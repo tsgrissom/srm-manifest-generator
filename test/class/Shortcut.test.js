@@ -5,15 +5,15 @@ import chalk from 'chalk';
 import tmp from 'tmp';
 import yaml from 'yaml';
 
-import { logDebugPlain } from '../src/util/utilities.js';
-import { basenameWithoutExtensions } from '../src/util/file-utilities.js';
-import Shortcut from '../src/Shortcut.js';
-import Manifest from '../src/Manifest.js';
+import { logDebugPlain } from '../../src/utility/logging.js';
+import { basenameWithoutExtensions } from '../../src/utility/file.js';
+import Shortcut from '../../src/class/Shortcut.js';
+import Manifest from '../../src/class/Manifest.js';
 
 import assert from 'node:assert';
 import { before, after, describe, it } from 'node:test';
-import { setOfFalsy } from './util/sample-values.js';
-import { tmpDirForScope, tmpManifestYml, tmpSubdir } from './util/resource-utilities.js';
+import { setOfFalsy } from '../resource/test-values.js';
+import { tmpDirForScope, tmpManifestYml, tmpSubdir } from '../resource/test-utilities.js';
 
 const __filebasename = path.basename(import.meta.filename);
 

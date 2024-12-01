@@ -7,8 +7,8 @@ config/manifests/**
 # Ignore user manifest outputs
 out/**
 output/**
-# Ignore test resource files
-test/resource/**
+# Ignore test resource temp files
+test/resource/tmp/**
 
 # FILES
 

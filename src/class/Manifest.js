@@ -1,7 +1,7 @@
 import path from 'node:path';
 
-import { logDebug } from './util/utilities.js';
-import { basenameWithoutExtensions } from './util/file-utilities.js';
+import { logDebug } from '../utility/logging.js';
+import { basenameWithoutExtensions } from '../utility/file.js';
 import Shortcut from './Shortcut.js';
 
 class Manifest {
@@ -124,7 +124,7 @@ class Manifest {
 
         this.shortcuts = parsedValues.shortcuts;
     }
-
+    
     // TODO jsdoc
     getOutputPath() {
         return this.outputPath;

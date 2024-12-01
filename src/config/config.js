@@ -4,9 +4,9 @@ import chalk from 'chalk';
 import yaml from 'yaml';
 
 import { PATH_USER_CONFIG, loadDataFromUserConfig as loadUserConfigData } from './load-config.js';
-import Manifest from '../Manifest.js';
-import { logDebugHeader, logDebugPlain, logDebugSectionWithData } from '../util/utilities.js';
-import { enabledDisabled } from '../util/string-utilities.js';
+import Manifest from '../class/Manifest.js';
+import { logDebugHeader, logDebugPlain, logDebugSectionWithData } from '../utility/logging.js';
+import { enabledDisabled } from '../utility/string.js';
 
 // MARK: HELPERS
 
@@ -109,6 +109,7 @@ async function createManifestInstance(filePath, contents) {
         throw new Error(`Unable to create Manifest instance from empty constructor arg filePath: "${filePath}"`);
 
     const object = yaml.parse(contents);
+    console.log(chalk.blue(JSON.stringify(object)));
     const instance = new Manifest(filePath, object);
     console.log(chalk.magenta('END OF CREATE MANIFEST INSTANCE'));
     return instance;
