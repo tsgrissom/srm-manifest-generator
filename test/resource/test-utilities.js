@@ -1,6 +1,6 @@
  
 
-import path from 'path';
+import path from 'node:path';
 import tmp from 'tmp';
 const { DirResult, FileResult } = tmp;
 import {

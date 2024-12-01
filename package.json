@@ -1,20 +1,24 @@
 {
   "name": "srm-manifest-generator",
   "version": "1.0.0",
-  "description": "Lints and transforms Steam ROM Manager manifests written in YAML into the supported JSON format",
-  "author": "tsgrissom",
+  "description": "Create Steam ROM Manager manual manifests from YAML documents",
+  "author": { 
+    "name": "tsgrissom",
+    "url": "https://github.com/tsgrissom/srm-manifest-generator"
+  },
   "license": "MIT",
   "type": "module",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "lint": "npx eslint .",
-    "clean": "npx rimraf --interactive --glob \"./dist\"",
-    "build": "tsc",
+    "lint": "eslint .",
+    "clean": "rimraf --glob \"./dist/**/*\"",
+    "build": "npm run clean && tsc",
     "start": "node --loader ts-node/esm ./src/app.ts",
     "start:debug": "node --debug --loader ts-node/esm ./src/app.ts",
+    "pretest": "eslint .",
     "test": "node --test",
     "test:debug": "DEBUG=true && node --test && DEBUG=false",
-    "pretest": "npx eslint ."
+    "postinstall": "mkdir -p ./config/manifests && npm run build"
   },
   "keywords": [
     "emulation",
@@ -24,16 +28,17 @@
   "packageManager": "pnpm@9.13.2+sha512.88c9c3864450350e65a33587ab801acf946d7c814ed1134da4a924f6df5a2120fd36b46aab68f7cd1d413149112d53c7db3a4136624cfd00ff1846a0c6cef48a",
   "dependencies": {
     "chalk": "^5.3.0",
+    "steamgriddb": "^2.2.0",
     "yaml": "^2.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
     "@types/node": "^22.10.1",
-    "@types/yaml": "^1.9.7",
     "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.14.0",
     "globals": "^15.11.0",
+    "rimraf": "^6.0.1",
     "tmp": "^0.2.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
