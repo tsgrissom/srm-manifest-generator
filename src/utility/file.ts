@@ -26,7 +26,7 @@ import path from 'node:path';
  * );
  */
 // TODO TEST Unit
-export function pathHasFileExtension(filePath, fileExt = '*') {
+export function pathHasFileExtension(filePath: string, fileExt: any = '*') {
     if (typeof filePath !== 'string')
         throw new TypeError(`Arg filePath must be a string: ${filePath}`);
     if (typeof fileExt !== 'string' && !Array.isArray(fileExt))
@@ -60,7 +60,7 @@ export function pathHasFileExtension(filePath, fileExt = '*') {
  * the beginning, with one added if they do not?
  * @returns The `fileName`, with a new file extension `replaceExt` if one in `findExt` was found.
  */
-export function replaceFileExtension(fileName, findExt, replaceExt, normalize = true) {
+export function replaceFileExtension(fileName: string, findExt: any, replaceExt: string, normalize: boolean = true) {
     if (!fileName || typeof fileName !== 'string')
         throw new TypeError(`Arg fileName must be a string: ${fileName}`);
     if (!findExt || (typeof findExt !== 'string' && !Array.isArray(findExt))) // TEST And make sure this doesn't have unexpected behavior
@@ -105,9 +105,9 @@ export function replaceFileExtension(fileName, findExt, replaceExt, normalize = 
 }
 
 // TODO TEST Unit
-export async function pathExists(filePath) {
+export async function pathExists(filePath: string) {
     try {
-        await fs.access(filePath);
+        await fs.promises.access(filePath);
         return true;
     } catch {
         return false;
@@ -122,7 +122,7 @@ export async function pathExists(filePath) {
  *      it is string literal `*`.
  * @returns The file extension in normalized form, with a period prepended to the input if it was missing.
  */
-export function normalizeFileExtension(extname, exclude = ['*']) {
+export function normalizeFileExtension(extname: string, exclude: any = ['*']) {
     if (typeof extname !== 'string')
         throw new Error(`Cannot normalize extension of non-string parameter fileExt: ${extname}`);
     
@@ -147,7 +147,7 @@ export function normalizeFileExtension(extname, exclude = ['*']) {
  * @returns {string} The final filename after being stripped of some selected extensions, if they were present.
  * @example // TODO Write example
  */
-export function basenameWithoutExtensions(fileName, extensionsToRemove, iterate = false) {
+export function basenameWithoutExtensions(fileName: string, extensionsToRemove: any, iterate: boolean = false) {
     // TODO Lint args
 
     if (typeof fileName !== 'string')

@@ -2,6 +2,18 @@ import { exec } from 'node:child_process';
 
 import { delimitedList } from './string.js';
 
+interface PlatformSearchProcessCommand {
+    command: string,
+    processName: string
+}
+
+interface PlatformSearchProcessCommandMap {
+    supportedPlatforms: string[],
+    settings: {
+        [key: string]: PlatformSearchProcessCommand;
+    }
+}
+
 // MARK: isProcessRunning
 
 /**
@@ -9,7 +21,7 @@ import { delimitedList } from './string.js';
  * process.platform-based multiplatform support. See example below for example
  * options object.
  * 
- * @param {object} platformOptions Indicates the commands for finding a process on a given system. See example.
+ * @param platformOptions Indicates the commands for finding a process on a given system. See example.
  * @returns {Promise} Promise which resolves to a boolean which indicates whether the given
  * process is running on the system.
  * @example
@@ -23,7 +35,7 @@ import { delimitedList } from './string.js';
         }
  * };
  */
-export async function isProcessRunning(platformOptions = null) {
+export async function isProcessRunning(platformOptions: PlatformSearchProcessCommandMap) : Promise<boolean> {
     const refJsdoc = 'Refer to the isProcessRunning jsdoc for an example of platformOptions.';
 
     // Lint platformOptions type
@@ -59,10 +71,10 @@ export async function isProcessRunning(platformOptions = null) {
         if (!section)
             throw new Error(`Arg ${sectionKeyName} was missing for a platform listed in platformOptions.supportedPlatforms: ${supportedPlatform}`);
 
-        if (!section.commandExec)
-            throw new Error(`Arg ${sectionKeyName} was missing required option "commandExec". ${refJsdoc}`);
-        if (!section.processSearchName)
-            throw new Error(`Arg ${sectionKeyName} was missing required option "processSearchName". ${refJsdoc}`);
+        if (!section.command)
+            throw new Error(`Arg ${sectionKeyName} was missing required option "command". ${refJsdoc}`);
+        if (!section.processName)
+            throw new Error(`Arg ${sectionKeyName} was missing required option "processName". ${refJsdoc}`);
     }
 
     const {platform} = process;
@@ -70,24 +82,24 @@ export async function isProcessRunning(platformOptions = null) {
     if (!supportedPlatforms.includes(platform))
         throw new Error(`Your platform (${platform}) is unsupported at the moment. Supported platforms: ${delimitedList(supportedPlatforms)}`);
 
-    const {commandExec, processSearchName} = platformOptions.settings[platform];
+    const {command, processName} = platformOptions.settings[platform];
 
     return new Promise((resolve, reject) => {
-        exec(commandExec, (err, stdout, stderr) => {
+        exec(command, (err, stdout, stderr) => {
             if (err) {
                 if (err.code === 1)
                     return resolve(false);
 
-                console.error(`Error executing ${commandExec}:`, err);
+                console.error(`Error executing ${command}:`, err);
                 return reject(err);
             }
 
             if (stderr) {
-                console.error(`Error in output from command "${commandExec}":`, stderr);
+                console.error(`Error in output from command "${command}":`, stderr);
                 return reject(new Error(stderr));
             }
 
-            const isRunning = stdout.toLowerCase().includes(processSearchName);
+            const isRunning = stdout.toLowerCase().includes(processName);
             resolve(isRunning);
         });
     });

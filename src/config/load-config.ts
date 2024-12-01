@@ -26,7 +26,7 @@ async function downloadExampleConfig() {
             const onStreamFinish = () => {
                 finishedStreams += 1;
                 if (finishedStreams === 2) {
-                    resolve();
+                    resolve(true);
                 }
             };
 
@@ -39,7 +39,7 @@ async function downloadExampleConfig() {
                 onStreamFinish();
             });
 
-            const onError = (err) => {
+            const onError = (err: Error) => {
                 fileStreamExample.close(() => fs.unlink(PATH_EXAMPLE_CONFIG, () => {}));
                 fileStreamUser.close(() => fs.unlink(PATH_USER_CONFIG, () => {}));
                 reject(err);

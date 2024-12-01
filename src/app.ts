@@ -3,10 +3,24 @@ import fs from 'node:fs';
 import chalk from 'chalk';
 
 import { stylePath } from './utility/string.js';
-import { logDebugPlain, logDebugSectionWithData } from './utility/logging.js';
+import { logDebug, logDebugSectionWithData } from './utility/logging.js';
 import userConfig from './config/config.js';
+import { Manifest } from './class/Manifest.js';
+import { Shortcut, ShortcutOutput } from './class/Shortcut.js';
 
-async function writeManifestOutput(manifest) {
+interface ManifestWriteOperationResults {
+    manifestIn: Manifest,
+    manifestOut: ShortcutOutput[],
+    shortcutStats: {
+        totalInFile: number,
+        enabled: number,
+        disabled: number,
+        skipped: number,
+        ok: number
+    }
+}
+
+async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOperationResults> {
     // const invalidShortcuts = [];
     const enabledShortcuts = manifest.getShortcuts().filter(shortcut => shortcut.isEnabled());
 
@@ -31,11 +45,11 @@ async function writeManifestOutput(manifest) {
                 const nTotal = manifest.getShortcuts().length,
                       nEnabled = enabledShortcuts.length;
 
-                const results = {
+                const results: ManifestWriteOperationResults = {
                     manifestIn: manifest,
                     manifestOut: output,
-                    stats: {
-                        total: nTotal,
+                    shortcutStats: {
+                        totalInFile: nTotal,
                         enabled: nEnabled,
                         disabled: nTotal - nEnabled,
                         // invalid: nInvalid // TODO
@@ -51,17 +65,17 @@ async function writeManifestOutput(manifest) {
     });
 }
 
-function printWriteResults(results) {
-    const { manifestIn, stats } = results;
+function printWriteResults(results: ManifestWriteOperationResults) {
+    const { manifestIn, shortcutStats } = results;
 
     const name = manifestIn.getName(),
           writePath = manifestIn.getWritePath();
 
-    const nTotal = stats.total,
-          nEnabled = stats.enabled,
-          nDisabled = stats.disabled,
-          nSkipped = stats.skipped,
-          nOk = stats.ok;
+    const nTotal = shortcutStats.totalInFile,
+          nEnabled = shortcutStats.enabled,
+          nDisabled = shortcutStats.disabled,
+          nSkipped = shortcutStats.skipped,
+          nOk = shortcutStats.ok;
 
     let okRatio = `${nOk}/${nTotal} shortcuts`;
 
@@ -79,11 +93,11 @@ function printWriteResults(results) {
             `Name: "${name}"`,
             `Input File Path: ${stylePath(manifestIn.filePath)}`,
             `Name From: ${manifestIn.getNameSource()}`,
-            `Value of Name Attribute: "${manifestIn.name}"`,
+            `Value of Name Attribute: "${manifestIn.data.name}"`,
             // `Fallback Name: "${manifestIn.}"`,
             `Output Path: ${stylePath(manifestIn.getOutputPath())}`,
             `Write File Path: ${stylePath(manifestIn.getWritePath())}`,
-            `Root Directory: ${stylePath(manifestIn.rootDirectory)}` // TODO Display validation here for paths
+            `Root Directory: ${stylePath(manifestIn.data.rootDirectory)}` // TODO Display validation here for paths
         );
 
         logDebugSectionWithData(
@@ -137,15 +151,15 @@ function printWriteResults(results) {
 
     console.log(builder);
 
-    logDebugPlain(`  - Source File Path: ${stylePath(manifestIn.getFilePath())}`);
-    logDebugPlain(`  - Write File Path: ${stylePath(writePath)}`);
+    logDebug(`  - Source File Path: ${stylePath(manifestIn.getFilePath())}`);
+    logDebug(`  - Write File Path: ${stylePath(writePath)}`);
 }
 
-async function processManifest(manifest) {
+async function processManifest(manifest: Manifest) {
     // TODO Additionally validate if write path is valid, make folders if missing
     // TODO If it's a file, write to the file, but if it's a folder, write the file inside of the folder, maybe based on the input file's name
     
-    const { name, shortcuts } = manifest;
+    const { name, shortcuts } = manifest.data;
 
     if (!Array.isArray(shortcuts))
         throw new Error(`Manifest (${manifest.getName()} requires a key "shortcuts" which is a list of paths, but the user config is set to a non-array type`);
@@ -157,7 +171,7 @@ async function processManifest(manifest) {
         const results = await writeManifestOutput(manifest);
         await printWriteResults(results);
     } catch (err) {
-        throw new Error(`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}):`, err);
+        throw new Error(`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}): ${err}`);
     }
 }
 
@@ -165,12 +179,12 @@ async function startApp() {
     const { manifests } = userConfig.search;
 
     for (const manifest of manifests) {
-        logDebugPlain(`  - "${manifest.getFilePath()}"`);
+        logDebug(`  - "${manifest.getFilePath()}"`);
 
         try {
             await processManifest(manifest);
         } catch (err) {
-            console.error(chalk.red(`Error processing manifest (${manifest.getFilePath()}): ${err.message}`));
+            console.error(chalk.red(`Error processing manifest (${manifest.getFilePath()}): ${err}`));
         }
     }
 }

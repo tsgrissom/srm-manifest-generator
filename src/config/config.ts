@@ -4,13 +4,13 @@ import chalk from 'chalk';
 import yaml from 'yaml';
 
 import { PATH_USER_CONFIG, loadDataFromUserConfig as loadUserConfigData } from './load-config.js';
-import Manifest from '../class/Manifest.js';
-import { logDebugHeader, logDebugPlain, logDebugSectionWithData } from '../utility/logging.js';
+import { Manifest } from '../class/Manifest.js';
+import { logDebug, logDebugSectionWithData } from '../utility/logging.js';
 import { enabledDisabled } from '../utility/string.js';
 
 // MARK: HELPERS
 
-function logConfigErrorAndExit(message, displayReadme = true) {
+function logConfigErrorAndExit(message: string, displayReadme: boolean = true) {
     console.error(chalk.red(`INVALID User Config: ${message}`));
     if (displayReadme) {
         console.log(chalk.red('See the project README: ') + chalk.red.underline('https://github.com/tsgrissom/srm-manifest-generator'));
@@ -18,18 +18,18 @@ function logConfigErrorAndExit(message, displayReadme = true) {
     process.exit();
 }
 
-function logConfigWarn(message, withColor = true) {
+function logConfigWarn(message: string, withColor: boolean = true) {
     let text = `WARN User Config: ${message}`;
     text = withColor ? chalk.yellow(text) : text;
     console.warn(text);
 }
 
-function logConfigStatus(message) {
+function logConfigStatus(message: string) {
     console.log(`User Config: ${message}`);
 }
 
-async function verifyManifestPath(filePath, scanDirectories, scanRecursively) {
-    logDebugHeader('Verifying Manifest Path');
+async function verifyManifestPath(filePath: string, scanDirectories: boolean, scanRecursively: boolean) {
+    logDebug('Verifying Manifest Path', true);
 
     try {
         await fs.promises.access(filePath).catch(() => {
@@ -37,9 +37,9 @@ async function verifyManifestPath(filePath, scanDirectories, scanRecursively) {
             return false;
         });
 
-        logDebugPlain(` > Given manifest file path exists: ${filePath}`);
-    } catch (err) {
-        throw new Error(`Error while checking if manifest path exists (Path: ${filePath}):`, err);
+        logDebug(` > Given manifest file path exists: ${filePath}`);
+    } catch (err: any) {
+        throw new Error(`Error while checking if manifest path exists (Path: ${filePath}):`);
     }
 
     try {
@@ -50,13 +50,13 @@ async function verifyManifestPath(filePath, scanDirectories, scanRecursively) {
         }
 
         if (stats.isFile()) { // Files are always accepted
-            logDebugPlain(` > Manifest path is a file: ${filePath}`);
+            logDebug(` > Manifest path is a file: ${filePath}`);
             // TODO: Make sure it's a supported filetype
             return true;
         } else if (stats.isDirectory()) { // Directories are accepted if enabled in config.yml, default true
-            logDebugPlain(` > Manifest path is a directory: ${filePath}`);
-            logDebugPlain(` > Scan Directories? ${enabledDisabled(scanDirectories)}`);
-            logDebugPlain(` > Scan Recursively? ${enabledDisabled(scanRecursively)}`);
+            logDebug(` > Manifest path is a directory: ${filePath}`);
+            logDebug(` > Scan Directories? ${enabledDisabled(scanDirectories)}`);
+            logDebug(` > Scan Recursively? ${enabledDisabled(scanRecursively)}`);
             
             if (!scanDirectories) {
                 logConfigWarn(`Config option "manifests" contains a path which points to a directory, but Scanning Directories is disabled by the config.yml. Skipping the following manifest path: "${filePath}"`);
@@ -67,8 +67,8 @@ async function verifyManifestPath(filePath, scanDirectories, scanRecursively) {
         } else {
             logConfigWarn(`Unsupported type at the given path was ignored: ${filePath}`);
         }
-    } catch (err) {
-        throw new Error(`Error while checking stat of manifest path (Path: ${filePath}):`, err);
+    } catch (err: any) {
+        throw new Error(`Error while checking stat of manifest path (Path: ${filePath}):`);
     }
 
     return true;
@@ -80,7 +80,7 @@ async function verifyManifestPath(filePath, scanDirectories, scanRecursively) {
  * @param {string} filePath The file path to find the manifest file at.
  * @returns {object} The YAML document parsed into JSON.
  */
-async function readManifestContents(filePath) {
+async function readManifestContents(filePath: string) {
     console.log(chalk.magenta('REACHED READ MANIFEST'));
 
     if (!filePath)
@@ -92,13 +92,13 @@ async function readManifestContents(filePath) {
         const data = await fs.promises.readFile(filePath, 'utf-8');
         console.log(chalk.magenta('END OF READ MANIFEST'));
         return data;
-    } catch (err) {
+    } catch (err: any) {
         console.log(chalk.magenta('END OF READ MANIFEST'));
         throw new Error(`Error reading or parsing file: ${err.message}`);
     }
 }
 
-async function createManifestInstance(filePath, contents) {
+async function createManifestInstance(filePath: string, fileContents: string) {
     // TODO Rewrite jsdoc to reflect removed fileName param
 
     console.log(chalk.magenta('REACHED CREATE MANIFEST INSTANCE'));
@@ -108,7 +108,7 @@ async function createManifestInstance(filePath, contents) {
     if (filePath.trim() === '')
         throw new Error(`Unable to create Manifest instance from empty constructor arg filePath: "${filePath}"`);
 
-    const object = yaml.parse(contents);
+    const object = yaml.parse(fileContents);
     console.log(chalk.blue(JSON.stringify(object)));
     const instance = new Manifest(filePath, object);
     console.log(chalk.magenta('END OF CREATE MANIFEST INSTANCE'));
@@ -117,8 +117,23 @@ async function createManifestInstance(filePath, contents) {
 
 // MARK: LOAD CONFIG
 
-const userConfig = {
-    search: {},
+interface UserConfig {
+    search: {
+        scanDirectories: boolean;
+        scanRecursively: boolean;
+        manifests: Manifest[];
+    },
+    output: {},
+    validation: {},
+    logging: {}
+}
+
+const userConfig: UserConfig = {
+    search: {
+        scanDirectories: true,
+        scanRecursively: false,
+        manifests: []
+    },
     output: {},
     validation: {},
     logging: {}
@@ -182,7 +197,7 @@ if (!userConfigData) {
     }
 
     userConfig.search.scanDirectories = scanDirectories;
-    userConfig.search.recursive = scanRecursively; // TODO Update to scanRecursively
+    userConfig.search.scanRecursively = scanRecursively; // TODO Update to scanRecursively
     userConfig.search.manifests = okManifests;
 
     const nOk = okManifests.length,
