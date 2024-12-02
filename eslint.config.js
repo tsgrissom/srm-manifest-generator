@@ -8,7 +8,10 @@ export default tslint.config(
     languageOptions: {
       globals: globals.node
     },
-    ignores: ['src/**/*.ts', 'test/**/*.ts']
+    ignores: ['src/**/*.ts', 'test/**/*.ts'],
+    rules: {
+      "no-constant-condition": "off",
+    }
   },
   tslint.configs.recommended,
   {

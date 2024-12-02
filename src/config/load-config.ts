@@ -10,6 +10,7 @@ import {
     USER_CONFIG_FILENAME,
     USER_CONFIG_PATH
  } from './config.js';
+import { clog } from '../utility/logging.js';
 
 /**
  * Attempts to download the example.config.yml from the project repository,
@@ -39,11 +40,11 @@ async function downloadExampleConfig() : Promise<boolean> {
             };
 
             fileStreamExample.on('finish', () => {
-                console.log(`Finished restoring ${EXAMPLE_CONFIG_PATH} via GitHub download`);
+                clog(`Finished restoring ${EXAMPLE_CONFIG_PATH} via GitHub download`);
                 onStreamFinish();
             });
             fileStreamUser.on('finish', () => {
-                console.log(`Finished copying latest version of ${EXAMPLE_CONFIG_FILENAME} to ${USER_CONFIG_PATH}`);
+                clog(`Finished copying latest version of ${EXAMPLE_CONFIG_FILENAME} to ${USER_CONFIG_PATH}`);
                 onStreamFinish();
             });
 
@@ -70,7 +71,7 @@ async function copyExampleConfigToUserConfigPath() : Promise<void> {
     try {
         const exampleConfigFile = await fs.promises.readFile(EXAMPLE_CONFIG_PATH, 'utf8');
         await fs.promises.writeFile(USER_CONFIG_PATH, exampleConfigFile, 'utf8');
-        console.log(`Default config copied to ${USER_CONFIG_PATH}`);
+        clog(`Default config copied to ${USER_CONFIG_PATH}`);
     } catch (err) {
         console.error(`Failed to copy example config to ${USER_CONFIG_PATH}:`, err);
     }
@@ -109,11 +110,11 @@ async function loadUserConfigData() {
     } catch { // User config is missing
         try { // Check if example config is in place, copy it to the user's config path if present
             exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');
-            console.log(`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}. Creating new default config based on ${EXAMPLE_CONFIG_FILENAME}...`);
+            clog(`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}. Creating new default config based on ${EXAMPLE_CONFIG_FILENAME}...`);
             await copyExampleConfigToUserConfigPath();
         } catch { // If both are missing, try to fetch the latest copy of the example config from repo
-            console.log(`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}, but the ${EXAMPLE_CONFIG_FILENAME} has been deleted.`);
-            console.log(`Restoring ${EXAMPLE_CONFIG_PATH} with latest version from GitHub (URL below), then creating a new default ${USER_CONFIG_FILENAME} based on ${EXAMPLE_CONFIG_FILENAME}...`);
+            clog(`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}, but the ${EXAMPLE_CONFIG_FILENAME} has been deleted.`);
+            clog(`Restoring ${EXAMPLE_CONFIG_PATH} with latest version from GitHub (URL below), then creating a new default ${USER_CONFIG_FILENAME} based on ${EXAMPLE_CONFIG_FILENAME}...`);
             await downloadExampleConfig();
         }
     } finally {

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import chalk from 'chalk';
 
 import { stylePath } from './utility/string.js';
-import { dlog, dlogSectionWithData } from './utility/logging.js';
+import { clog, dlog, dlogSectionWithData } from './utility/logging.js';
 import { Manifest } from './type/Manifest.js';
 import { ShortcutOutput } from './type/Shortcut.js';
 import { parseUserConfigData } from './config/config.js';
@@ -149,7 +149,7 @@ function printWriteResults(results: ManifestWriteOperationResults) {
         builder += `nothing ${strFromSource}`;
     }
 
-    console.log(builder);
+    clog(builder);
 
     dlog(`  - Source File Path: ${stylePath(manifestIn.getFilePath())}`);
     dlog(`  - Write File Path: ${stylePath(writePath)}`);
@@ -165,7 +165,7 @@ async function processManifest(manifest: Manifest) {
         throw new Error(`Manifest (${manifest.getName()} requires a key "shortcuts" which is a list of paths, but the user config is set to a non-array type`);
 
     if (shortcuts.length === 0)
-        console.log(chalk.yellow(`WARN: No top-level shortcuts value found in manifest: ${name}`));
+        clog(chalk.yellow(`WARN: No top-level shortcuts value found in manifest: ${name}`));
 
     await writeManifestOutput(manifest)
             .then(results => {

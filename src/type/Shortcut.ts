@@ -2,6 +2,7 @@ import path from 'node:path';
 
 import chalk from 'chalk';
 import { Manifest, ManifestData } from './Manifest.js';
+import { clog } from '../utility/logging.js';
 
 export interface ShortcutOutput {
     title: string,
@@ -39,10 +40,10 @@ export class Shortcut {
         this.data = data;
 
         if (process.argv.includes('--list-shortcuts')) {
-            console.log(chalk.blue('LOADED SHORTCUT'));
-            console.log(`Title: ${this.data.title}`);
-            console.log(`Target: ${this.data.target}`);
-            console.log(`Enabled: ${this.data.enabled}`);
+            clog(chalk.blue('LOADED SHORTCUT'));
+            clog(`Title: ${this.data.title}`);
+            clog(`Target: ${this.data.target}`);
+            clog(`Enabled: ${this.data.enabled}`);
         }
     }
 

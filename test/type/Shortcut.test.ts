@@ -70,14 +70,14 @@ before(() => {
     dlog(`Test Resources: ${__filebasename} Setup started`);
     setupFolders();
     setupFiles();
-    console.log(chalk.green('Test Resources: Setup completed'));
+    clog(chalk.green('Test Resources: Setup completed'));
 });
 
 after(() => {
     dlog(`Test Resources: ${__filebasename} Teardown started`);
     teardownFiles();
     teardownFolders();
-    console.log(chalk.green('Test Resources: Teardown completed'));
+    clog(chalk.green('Test Resources: Teardown completed'));
 });
 
 describe('Class: Shortcut', () => {
@@ -124,3 +124,7 @@ describe('Class: Shortcut', () => {
     });
 
 });
+
+function clog(arg0: string) {
+    throw new Error('Function not implemented.');
+}

@@ -42,8 +42,8 @@
     "start:yml": "echo \"Not implemented\"",
 
     "clean": "npm run clean:out && npm run clean:tmp",
-    "clean:out": "rimraf --glob \"./out/**/*\"",
-    "clean:tmp": "rimraf --glob \"./test/resource/tmp/**/*\"",
+    "clean:out": "rimraf -g -v \"./out/**/*\"",
+    "clean:tmp": "rimraf -g -v \"./test/resource/tmp/**/*\"",
 
     "prebuild": "npm run clean",
     "build": "npm run prebuild && npm run build:out && npm run postbuild",

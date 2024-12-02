@@ -162,13 +162,13 @@ function teardownFiles() {
 before(() => {
     setupDirs();
     setupFiles();
-    console.log(`Test setup completed: Manifest.test.js`);
+    clog(`Test setup completed: Manifest.test.js`);
 });
 
 after(() => {
     teardownFiles();
     teardownDirs();
-    console.log(`Test teardown completed: Manifest.test.js`);
+    clog(`Test teardown completed: Manifest.test.js`);
 });
 
 describe('Class: Manifest', () => {
@@ -231,3 +231,7 @@ describe('Class: Manifest', () => {
     });
 
 });
+
+function clog(arg0: string) {
+    throw new Error('Function not implemented.');
+}

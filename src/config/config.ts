@@ -4,7 +4,7 @@ import path from 'node:path';
 import chalk from 'chalk';
 import yaml from 'yaml';
 
-import { dlog, isDebugging } from '../utility/logging.js';
+import { clog, dlog, isDebugging } from '../utility/logging.js';
 import { delimitedList } from '../utility/string.js';
 import { boolFmt, checkCross, enabledDisabled } from '../utility/boolean.js';
 
@@ -21,23 +21,24 @@ const EXAMPLE_CONFIG_URL = `https://raw.githubusercontent.com/tsgrissom/srm-mani
 const USER_CONFIG_FILENAME = 'config.yml';
 const USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME) // PATH_EXAMPLE_CONFIG;
 
-const logConfigStatus = (message: string) => console.log(`User Config: ${message}`);
-const dlogConfigStatus = (message: string) => { if (isDebugging()) logConfigStatus(message) }
-const logConfigWarn = (message: string) => console.warn(chalk.yellow('User Config') + `: ${message}`);
-const logConfigInvalid = (message: string, withReadme: boolean = true) => {
+const clogConfigStatus = (message: string) => clog(`User Config: ${message}`);
+const clogConfigWarn = (message: string) => console.warn(chalk.yellow('User Config') + `: ${message}`);
+const clogConfigInvalid = (message: string, withReadme: boolean = true) => {
     console.error(chalk.red(`INVALID User Config: ${message}`));
     if (withReadme)
         console.error(chalk.redBright(`See the project README: `) + chalk.redBright.underline('https://github.com/tsgrissom/srm-manifest-generator'))
 }
 
+const dlogConfigStatus = (message: string) => { if (isDebugging()) clogConfigStatus(message) }
+
 // MARK: HELPERS
 
-async function validateManifestPathExists(manPath: string, config: ConfigData) : Promise<boolean> {
+async function validateManifestPathExists(manPath: string) : Promise<boolean> {
     const manPathName = `(Path: "${manPath}")`;
 
     try {
         await fs.promises.access(manPath).catch(() => {
-            logConfigWarn(`Manifest file path does not exist ${manPathName}`);
+            clogConfigWarn(`Manifest file path does not exist ${manPathName}`);
             return false;
         });
 
@@ -56,7 +57,7 @@ async function validateManifestPathIsSupportedFilesystemType(manPath: string, co
         const stats = await fs.promises.stat(manPath);
 
         if (!stats.isFile() && !stats.isDirectory())
-            logConfigWarn(`Unsupported filesystem type (Supported: File or Folder) was set as a manifest path in the user ${USER_CONFIG_FILENAME}.`);
+            clogConfigWarn(`Unsupported filesystem type (Supported: File or Folder) was set as a manifest path in the user ${USER_CONFIG_FILENAME}.`);
 
         const { scanDirectories, scanRecursively } = config.search;
 
@@ -69,13 +70,13 @@ async function validateManifestPathIsSupportedFilesystemType(manPath: string, co
             dlog(`- Scan Recursively? ${enabledDisabled(scanRecursively)}`);
 
             if (!scanDirectories) {
-                logConfigWarn(`Manifests file path list contains a path pointing to a directory, but scanning directories is disabled by the user's ${USER_CONFIG_FILENAME}. The following path will be skipped: ${manPath}`);
+                clogConfigWarn(`Manifests file path list contains a path pointing to a directory, but scanning directories is disabled by the user's ${USER_CONFIG_FILENAME}. The following path will be skipped: ${manPath}`);
                 return false;
             }
 
             return true;
         } else {
-            logConfigWarn(`Unsupported filesystem type at the given path was ignored ${manPathName}`);
+            clogConfigWarn(`Unsupported filesystem type at the given path was ignored ${manPathName}`);
         }
     } catch (err) {
         throw new Error(`Could not stat manifest path ${manPath}: ${err}`);
@@ -84,7 +85,7 @@ async function validateManifestPathIsSupportedFilesystemType(manPath: string, co
     return true;
 }
 
-async function readManifestFile(manPath: string, config: ConfigData) : Promise<Buffer<ArrayBufferLike>> {
+async function readManifestFile(manPath: string) : Promise<object> {
     dlog(`Reading Manfile > Starting ${manPath}`);
 
     if (!manPath)
@@ -102,8 +103,7 @@ async function readManifestFile(manPath: string, config: ConfigData) : Promise<B
     }
 }
 
-async function validateManifestFileContents(manPath: string, object: object, config: ConfigData) : Promise<ManifestData> {
-    const keys = Object.keys(object);
+async function validateManifestFileContents(manPath: string, object: object) : Promise<ManifestData> {
     const manPathName = `(Path: ${manPath})`;
 
     const data: ManifestData = {
@@ -168,10 +168,9 @@ async function validateManifestFileContents(manPath: string, object: object, con
         throw new Error(`Manifest is missing an output directory attribute ${manPathName}`);
 
     if (hasAttrShortcuts) {
-        console.log(`typeof shortcutsValue=${typeof shortcutValue}`);
-        console.log(`isArray=${Array.isArray(shortcutValue)}`);
+        // TODO Load shortcuts
 
-        
+        dlog(chalk.magenta('LOADING SOME SHORTCUTS FROM MANIFEST'));
     }
 
     return data;
@@ -183,32 +182,32 @@ async function makeManifestsArray(manPaths: string[], config: ConfigData) : Prom
     const okManifests: Manifest[] = [];
 
     if (manPaths.length === 0) {
-        logConfigStatus('Manifest paths list was empty. No manifests will be loaded or processed.');
+        clogConfigStatus('Manifest paths list was empty. No manifests will be loaded or processed.');
         return okManifests;
     }
 
     for (const [index, manPath] of manPaths.entries()) {
         const manPathName = `(Path: "${manPath}")`;
-        dlog(`Manifest Instance #${index} > Starting processing of manpath ${manPathName}`);
+        dlog(`Manifest Instance #${index} > Starting processing of manpath ${manPathName}`, true);
 
-        const exists = await validateManifestPathExists(manPath, config);
+        const exists = await validateManifestPathExists(manPath);
         const validFsType = await validateManifestPathIsSupportedFilesystemType(manPath, config);
         
         dlog(`Manpath exists? ${checkCross(exists)} (${manPath})`);
         dlog(`Manpath is a valid fs type? ${checkCross(validFsType)} ${manPathName}`);
 
         if (!exists) {
-            console.log(`Skipping manifest (Path: ${manPath})`);
+            clog(`Skipping manifest (Path: ${manPath})`);
             continue;
         }
 
-        const object = await readManifestFile(manPath, config);
-        const data = await validateManifestFileContents(manPath, object, config);        
+        const object = await readManifestFile(manPath);
+        const data = await validateManifestFileContents(manPath, object);        
         const instance = new Manifest(manPath, data);
 
         okManifests.push(instance);
 
-        dlog(`Manifest Instance #${index} > Completed processing of manpath ${manPathName}`);
+        dlog(`Manifest Instance #${index} > Completed processing of manpath ${manPathName}`, true);
     }
     
     return okManifests;
@@ -228,10 +227,11 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
         throw new Error(chalk.red('User Config "search" section must be a mapping, not a list (Expected object, Found array)'));
 
     const keyAliases: Record<string, string> = {
-        scanDirectories: 'directories',
-        scanRecursively: 'recursively',
-        manifests: 'sources'
+        directories: 'scanDirectories',
+        recursively: 'scanRecursively',
+        sources: 'manifests'
     }
+
     const resolveAlias = (key: string): string => {
         return keyAliases[key] || key;
     }
@@ -239,22 +239,24 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
     for (const [key, value] of Object.entries(section)) {
         const resolved = resolveAlias(key);
 
-        switch (key) { // TODO Switch to resolved
+        switch (resolved) {
             case 'scanDirectories': {
                 if (typeof value === 'boolean') {
                     userConfig.search.scanDirectories = value;
-                    dlogConfigStatus(`search.scanDirectories set=${boolFmt(value)}`);
+                    // dlogConfigStatus(`search.scanDirectories set=${boolFmt(value)}`);
+                    dlogConfigStatus(chalk.magenta(`search.scanDirectories set=${boolFmt(value)}`));
                 } else {
-                    logConfigInvalid(`Value of search.scanDirectories must be a boolean but was not: ${value}`);
+                    clogConfigInvalid(`Value of search.scanDirectories must be a boolean but was not: ${value}`);
                 }
                 break;
             }
             case 'scanRecursively': {
                 if (typeof value === 'boolean') {
                     userConfig.search.scanRecursively = value;
-                    dlogConfigStatus(`search.scanRecursively set=${boolFmt(value)}`);
+                    // dlogConfigStatus(`search.scanRecursively set=${boolFmt(value)}`);
+                    dlogConfigStatus(chalk.magenta(`search.scanRecursively set=${boolFmt(value)}`));
                 } else {
-                    logConfigInvalid(`Value of search.scanRecursively must be a boolean but was not: ${value}`);
+                    clogConfigInvalid(`Value of search.scanRecursively must be a boolean but was not: ${value}`);
                 }
                 break;
             }
@@ -263,27 +265,28 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                     const okManifests = await makeManifestsArray(value, userConfig);
 
                     userConfig.search.manifests = okManifests;
-                    dlogConfigStatus(`search.manifests set=${delimitedList(value)}`);
+                    // dlogConfigStatus(`search.manifests set=${delimitedList(value)}`);
+                    dlogConfigStatus(chalk.magenta(`search.manifests set=${delimitedList(value)}`));
                     
                     if (okManifests.length === 0) {
-                        console.log(chalk.yellow(`No manifest paths were loaded from the ${USER_CONFIG_FILENAME}`));
+                        clog(chalk.yellow(`No manifest paths were loaded from the ${USER_CONFIG_FILENAME}`));
                     } else if (okManifests.length > 0) {
-                        console.log(chalk.blue(`${okManifests.length} manifests were loaded from the ${USER_CONFIG_FILENAME}`));
+                        clog(chalk.blue(`${okManifests.length} manifests were loaded from the ${USER_CONFIG_FILENAME}`));
                     } 
 
                     
                 } else {
                     if (!Array.isArray(value)) {
-                        logConfigInvalid('Value of search.manifests must be array of strings but was not an array');
+                        clogConfigInvalid('Value of search.manifests must be array of strings but was not an array');
                     } else {
-                        logConfigInvalid('All entries of search.manifests must be a string but at least one was not');
+                        clogConfigInvalid('All entries of search.manifests must be a string but at least one was not');
                     }
                 }
                 break;
             }
             default: {
                 const unknownKey = `"search.${value}"`;
-                logConfigWarn(`Unknown ${USER_CONFIG_FILENAME} key was set at ${unknownKey}`);
+                clogConfigWarn(`Unknown ${USER_CONFIG_FILENAME} key was set at ${unknownKey}`);
             }
         }
     }
