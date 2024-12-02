@@ -5,7 +5,7 @@ import tmp, { DirResult, FileResult } from 'tmp';
 import yaml from 'yaml';
 
 import { dlog } from '../../src/utility/logging.js';
-import { replaceFileExtension } from '../../src/utility/file.js';
+import { replaceFileExtension } from '../../src/utility/path.js';
 import { Manifest, ManifestData } from '../../src/type/Manifest.js';
 
 import assert from 'node:assert';

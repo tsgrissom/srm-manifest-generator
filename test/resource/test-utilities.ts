@@ -2,7 +2,7 @@
 
 import path from 'node:path';
 import tmp, { DirResult, FileResult } from 'tmp';
-import { basenameWithoutExtensions, normalizeFileExtension } from '../../src/utility/file.js';
+import { basenameWithoutExtensions, normalizeFileExtension } from '../../src/utility/path.js';
 import { ShortcutData } from '../../src/type/Shortcut.js';
 
 const __dirname = import.meta.dirname;

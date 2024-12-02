@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { basenameWithoutExtensions } from '../utility/file.js';
+import { basenameWithoutExtensions } from '../utility/path.js';
 import { Shortcut } from './Shortcut.js';
 
 export interface ManifestData {

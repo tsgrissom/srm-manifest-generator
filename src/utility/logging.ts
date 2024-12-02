@@ -1,5 +1,12 @@
 import chalk from 'chalk';
 
+/**
+ * Prints a message to `stdout` in the console.
+ * @param message The things you want to display in the console.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const clog = (message?: any) => console.log(message);
+
 const getDebugPrefix = (withColor: boolean = true) : string => {
     const prefix = 'DEBUG: ';
     return withColor ? chalk.bgMagenta(prefix) : prefix;

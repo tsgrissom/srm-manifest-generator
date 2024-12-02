@@ -6,7 +6,7 @@ import tmp, { DirResult, FileResult } from 'tmp';
 import yaml from 'yaml';
 
 import { dlog } from '../../src/utility/logging.js';
-import { basenameWithoutExtensions } from '../../src/utility/file.js';
+import { basenameWithoutExtensions } from '../../src/utility/path.js';
 import { Shortcut } from '../../src/type/Shortcut.js';
 import { Manifest, ManifestData } from '../../src/type/Manifest.js';
 

@@ -6,6 +6,10 @@
 
 ## General TODO
 
+* Figure out how to get rid of Node loader experimental warning, perhaps by following their instructions
+* Figure out eslint ignore patterns so I can remove the manual one in package.json
+  * Try examing output of `npm run lint:config`
+* Implement unimplemented npm scripts, such as `lint:yaml`
 * Figure out what the TS entrypoint should be now
 * Review all new Error throws and change many to use TypeError
 * Review all function argument parsing for verbose messages

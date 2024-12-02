@@ -48,24 +48,24 @@ entries:
 
 ## Usage
 
-### Requirements:
+### Requirements
 
 * Steam
 * [Steam ROM Manager](https://steamgriddb.github.io/steam-rom-manager/)
 * Some non-Steam game or program you want to add to Steam with Steam ROM Manager (i.e. an executable on your filesystem you want in Steam)
 * Node.js
-* NPM should work just fine, though I used PNPM to develop this
 * A tiny bit of [YAML knowledge](https://www.tutorialspoint.com/yaml/yaml_basics.htm)
 
 ### Installation
 
 #### Quick Install (requires Git)
 
-1. Open Terminal and navigate to directory you wish to install this project to
+1. Open Terminal and navigate to directory you wish to install this project to.
 2. Execute the script below AND don't forget to follow the Configuration section below after!
+3. If you don't want to use `pnpm` make sure to change it to `npm`. It should work all the same.
 
 ```shell
-git clone git@github.com:tsgrissom/srm-manifest-generator.git && cd srm-manifest-generator && npm install
+git clone git@github.com:tsgrissom/srm-manifest-generator.git && cd srm-manifest-generator && pnpm install
 ```
 
 #### Manual Install

@@ -2,7 +2,7 @@ import path from 'node:path';
 import assert from 'node:assert';
 import { after, before, describe, it } from 'node:test';
 import { setOfNonBooleans, setOfNonStrings, setOfWhitespaceStrings, unionOfNonArraysAndNonStrings } from '../resource/test-values';
-import { basenameWithoutExtensions, normalizeFileExtension, pathHasFileExtension, replaceFileExtension } from '../../src/utility/file';
+import { basenameWithoutExtensions, normalizeFileExtension, pathHasFileExtension, replaceFileExtension } from '../../src/utility/path';
 
 function setup() {
     // TODO Some files for real file testing

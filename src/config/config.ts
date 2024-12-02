@@ -119,6 +119,8 @@ async function validateManifestFileContents(manPath: string, object: object, con
         keyAliasUsedForOutput = '',
         keyAliasUsedForShortcuts = '';
 
+    let shortcutValue;
+
     for (const [key, value] of Object.entries(object)) {
         if (key === 'name' || key === 'sourceName') {
             keyAliasUsedForName = key;
@@ -132,6 +134,7 @@ async function validateManifestFileContents(manPath: string, object: object, con
         } else if (key === 'shortcuts' || key === 'titles' || key === 'entries') {
             keyAliasUsedForShortcuts = key;
             data.shortcuts = []; // TODO Parse shortcuts sometime after this, requires Manifest instance
+            shortcutValue = value;
         }
     }
 
@@ -164,6 +167,13 @@ async function validateManifestFileContents(manPath: string, object: object, con
         throw new Error(`Manifest is missing a root directory attribute ${manPathName}`);
     if (!hasAttrOutput)
         throw new Error(`Manifest is missing an output directory attribute ${manPathName}`);
+
+    if (hasAttrShortcuts) {
+        console.log(`typeof shortcutsValue=${typeof shortcutValue}`);
+        console.log(`isArray=${Array.isArray(shortcutValue)}`);
+
+        
+    }
 
     return data;
 }
@@ -218,10 +228,6 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
     if (Array.isArray(section))
         throw new Error(chalk.red('User Config "search" section must be a mapping, not a list (Expected object, Found array)'));
 
-    for (const key of Object.keys(section)) {
-        console.log(`Key in search section: ${key}`);
-    }
-
     const keyAliases: Record<string, string> = {
         scanDirectories: 'directories',
         scanRecursively: 'recursively',
@@ -256,8 +262,17 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
             case `manifests`: {
                 if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
                     const okManifests = await makeManifestsArray(value, userConfig);
+
                     userConfig.search.manifests = okManifests;
-                    dlogConfigStatus(`search.manifests set=${delimitedList(value)}`)
+                    dlogConfigStatus(`search.manifests set=${delimitedList(value)}`);
+                    
+                    if (okManifests.length === 0) {
+                        console.log(chalk.yellow(`No manifest paths were loaded from the ${USER_CONFIG_FILENAME}`));
+                    } else if (okManifests.length > 0) {
+                        console.log(chalk.blue(`${okManifests.length} manifests were loaded from the ${USER_CONFIG_FILENAME}`));
+                    } 
+
+                    
                 } else {
                     if (!Array.isArray(value)) {
                         logConfigInvalid('Value of search.manifests must be array of strings but was not an array');
@@ -273,6 +288,8 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
             }
         }
     }
+
+
 
     return userConfig;
 }
@@ -313,13 +330,10 @@ async function parseUserConfigData() : Promise<ConfigData> {
 
     userConfig = await parseSearchSection(userConfigData, userConfig);
 
+
+
     return userConfig;
 }
-
-(async () => {
-    console.log(EXAMPLE_CONFIG_PATH);
-    await parseUserConfigData();
-})();
 
 export {
     EXAMPLE_CONFIG_FILENAME, EXAMPLE_CONFIG_PATH, EXAMPLE_CONFIG_URL,
