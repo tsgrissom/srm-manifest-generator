@@ -6,6 +6,8 @@
 
 ## General TODO
 
+* Implement verbose flag + env var
+* Implement no color flag + config option
 * Figure out how to get rid of Node loader experimental warning, perhaps by following their instructions
 * Figure out eslint ignore patterns so I can remove the manual one in package.json
   * Try examing output of `npm run lint:config`

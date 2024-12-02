@@ -5,10 +5,10 @@
   "keywords": ["Steam ROM Manager", "steam-rom-manager", "SteamROMManager", "SRM", "SteamGridDB", "Steam", "Steam Deck", "PC Gaming", "emulation", "YAML", "yml"],
   "author": { "name": "tsgrissom", "url": "https://github.com/tsgrissom" },
   "repository": "tsgrissom/srm-manifest-generator",
-  "license": "MIT",
   "bugs": "https://github.com/tsgrissom/srm-manifest-generator/issues",
   "readme": "https://github.com/tsgrissom/srm-manifest-generator/blob/main/README.md",
   "homepage": "https://github.com/tsgrissom/srm-manifest-generator/blob/main/README.md",
+  "license": "MIT",
   "os": ["win32", "darwin", "linux"],
   "type": "module",
   "main": "out/src/index.js",
@@ -26,11 +26,8 @@
     "lint:test": "eslint test",
     "lint:yaml": "echo \"Not implemented\"",
     "lint:config": "eslint --print-config ./src/index.ts",
-
     "lint:noignore": "eslint .",
     "lint:nowarn": "eslint --quiet src/",
-    "lint:fix": "eslint --fix src/",
-    "lint:fixdry": "eslint --fix-dry-run src/",
   
     "start": "npm run start:ts",
     "start:d": "npm run start:debug",
@@ -49,8 +46,9 @@
     "clean:tmp": "rimraf --glob \"./test/resource/tmp/**/*\"",
 
     "prebuild": "npm run clean",
-    "postbuild": "npm run lint:src",
     "build": "npm run prebuild && npm run build:out && npm run postbuild",
+    "postbuild": "npm run lint:src",
+
     "build:noclean": "npm run build:out && npm run postbuild",
     "build:nolint": "npm run prebuild && npm run build:out",
     "build:config": "echo \"Not implemented\"",

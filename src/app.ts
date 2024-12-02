@@ -4,7 +4,6 @@ import chalk from 'chalk';
 
 import { stylePath } from './utility/string.js';
 import { dlog, dlogSectionWithData } from './utility/logging.js';
-import { UserConfig } from './type/UserConfig.js';
 import { Manifest } from './type/Manifest.js';
 import { ShortcutOutput } from './type/Shortcut.js';
 import { parseUserConfigData } from './config/config.js';

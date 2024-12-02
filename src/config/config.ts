@@ -6,14 +6,13 @@ import yaml from 'yaml';
 
 import { dlog, isDebugging } from '../utility/logging.js';
 import { delimitedList } from '../utility/string.js';
-import { boolFmt, BoolFmtPreset, checkCross, enabledDisabled } from '../utility/boolean.js';
+import { boolFmt, checkCross, enabledDisabled } from '../utility/boolean.js';
 
 import { ConfigData } from '../type/ConfigData.js';
 import { UserConfig } from '../type/UserConfig.js';
 import { Manifest, ManifestData } from '../type/Manifest.js';
 
 import { loadUserConfigData } from './load-config.js';
-import { Shortcut } from '../type/Shortcut.js';
 
 const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
 const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
@@ -79,7 +78,7 @@ async function validateManifestPathIsSupportedFilesystemType(manPath: string, co
             logConfigWarn(`Unsupported filesystem type at the given path was ignored ${manPathName}`);
         }
     } catch (err) {
-        throw new Error(`Could not stat manifest path ${manPath}`);
+        throw new Error(`Could not stat manifest path ${manPath}: ${err}`);
     }
     
     return true;
@@ -181,7 +180,7 @@ async function validateManifestFileContents(manPath: string, object: object, con
 async function makeManifestsArray(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
     dlog('Creating Array of Manifest Instances', true);
     
-    let okManifests: Manifest[] = [];
+    const okManifests: Manifest[] = [];
 
     if (manPaths.length === 0) {
         logConfigStatus('Manifest paths list was empty. No manifests will be loaded or processed.');
@@ -293,6 +292,26 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
 
     return userConfig;
 }
+
+//     const nOk = okManifests.length,
+//           nAllPaths = allManifests.length;
+    
+//     let ctOk = `${nOk}/${nAllPaths}`;
+
+//     if (nOk === nAllPaths) {
+//         ctOk = chalk.green(ctOk);
+//     } else if (nOk < nAllPaths) {
+//         ctOk = chalk.red(ctOk);
+//     }
+
+//     logConfigStatus(`Loaded ${ctOk} configured manifest paths`);
+
+//     dlogSectionWithData(
+//         'User Config: Search section finished loading',
+//         `Scan Directories? ${enabledDisabled(scanDirectories)}`,
+//         `Scan Recursively? ${enabledDisabled(scanRecursively)}`,
+//         chalk.blueBright('Manifest Paths')
+//     );
 
 // MARK: PARSE START
 
