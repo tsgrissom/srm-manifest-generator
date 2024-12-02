@@ -1,4 +1,4 @@
-import Shortcut from './Shortcut.js';
+import Shortcut from '../shortcut/Shortcut.js'
 
 interface ManifestData {
     name: string,

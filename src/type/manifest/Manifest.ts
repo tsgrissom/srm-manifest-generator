@@ -1,7 +1,8 @@
 import path from 'node:path';
 
-import { basenameWithoutExtensions } from '../utility/path.js';
-import Shortcut from './Shortcut.js';
+import { basenameWithoutExtensions } from '../../utility/path.js';
+
+import Shortcut from '../shortcut/Shortcut.js';
 import ManifestData from './ManifestData.js';
 import ManifestNameSource from './ManifestNameSource.js';
 

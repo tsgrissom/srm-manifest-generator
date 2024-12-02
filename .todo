@@ -6,6 +6,7 @@
 
 ## General TODO
 
+* Telemetry
 * Implement verbose flag + env var
 * Implement no color flag + config option
 * Figure out how to get rid of Node loader experimental warning, perhaps by following their instructions
@@ -30,6 +31,26 @@
 * Support auto-kill Steam + launch Steam ROM Manager as opt-in
 * Figure out some mechanism for deleting old manifests left behind in the folder, or at least warning
 * Tell user how long it took
+
+## Config Options
+
+* Folder support for `search.manifests`
+* Impl `search.scanDirectories`
+* Impl `search.scanRecursively`
+* Impl `output.minify`
+* Impl `output.indentSpaces`
+* Impl `output.mode`
+  * Aliases for "spread": folder, directory
+  * Aliases for "combine": file
+* Impl `validate.filePaths`
+* Impl `validate.executables`
+* Impl `validate.validExecutableExtensions`
+* Impl `other.useColor`
+* Impl `other.debug`
+* Impl `other.verbose`
+* Impl `logs.enabled`
+* Impl `logs.output`
+* Impl `logs.format`
 
 ## Short-Term Feature Goals
 

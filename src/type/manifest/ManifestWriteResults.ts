@@ -1,5 +1,5 @@
 import Manifest from './Manifest.js';
-import ShortcutOutput from './ShortcutOutput.js';
+import ShortcutOutput from '../shortcut/ShortcutOutput.js';
 
 interface ManifestWriteResults {
     manifestIn: Manifest,

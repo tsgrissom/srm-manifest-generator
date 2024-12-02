@@ -1,83 +1,76 @@
 # EXAMPLE CONFIGURATION FILE
 #  - Important: Ensure your configuration file is named "config.yml" and resides in the "srm-manifest-generator/config/" folder
 
-# A list of file paths, each one pointing to a SRM Manifest Generator-compatible filetype
-# Make sure you create the "srm-manifest-generator/config/manifests" folder if you use the default location
-# REQUIRED? Yes
-# TODO: Maybe combine file + directory option, check if each listed path is a dir, and search it?
-manifests:
-  - "./config/manifests/some-manifest.yml"
-
-# Settings regarding how SRM Manifest Generator detects and searches for compatible Manifest Files
+# Options controlling how SRM Manifest Generator searches for compatible manifest files
 search:
   # A list of file paths, each one pointing to either:
   #  - A folder which should be scanned for Manifest Files (requires "search.scanDirectories" enabled)
   #  - A file which should be loaded as a Manifest File
-  # TODO: Add support for folders
   manifests:
     - "./config/manifests/some-manifest.yml"
     - "./config/manifests"
   # Unimplemented; If a directory is added to the "manifests" list, should SRM Manifest Generator examine the files inside it for Manifest Files?
-  #  - If "search.recursive" is disabled and this option is enabled, the search will only take place in this folder, ignoring any subdirectories it contains
+  #  - If "search.scanRecursively" is disabled and this option is enabled, the search will only take place in this folder, ignoring any subdirectories it contains
   # Default: true
-  # TODO: Implement
   scanDirectories: true
   # Unimplemented; If "scanDirectories" is enabled and a directory is added to the "manifests" list, should SRM Manifest Generator examine any subfolders for Manifest Files?
   #  - If "search.scanDirectories" is disabled, this option will have no effect
   # Default: false
-  # TODO: Implement
-  recursive: false
+  scanRecursively: false
 
-# Settings regarding the output files created by SRM Manifest Generator
+# Options controlling how output files are written to the filesystem
 output:
-  # Unimplemented; Should space characters in the names of generated manifest files be substituted with another symbol?
-  #  - To disable this feature, set this option to empty quotes ""
-  # Default: "-" 
-  # TODO: Implement
-  replaceSpaces: "-"
   # Unimplemented; Should output files be minified?
   # Default: true
-  # TODO: Implement
   minify: true
   # Unimplemented; If not minified, how many space characters should be used to indent output files?
   # Default: 2
-  # TODO: Implement
-  indentationSpaces: 2
-  # Unimplemented; Should a Manifest's contents be spread over multiple files inside a folder named after it ("folder" mode) or transformed into a single file
-  #  named after the Manifest ("file" mode, default)?
-  # Default: "file"
-  # Options: "file" or "folder"
-  # TODO: Implement
-  spreadMode: "file"
+  indentSpaces: 2
+  # Unimplemented; Should an output manifest's contents be spread over multiple files within a directory
+  #  which is named after it, or combined into a single file named after the manifest.
+  # Default: "combine"
+  # Options:
+  #  "spread" or "combine"
+  mode: "combine"
 
-# Settings regarding the validation of options the user submits to SRM Manifest Generator, such as checking if a given file path is valid
-validation:
+# Options for validating user inputs, such as whether file paths should be checked or not
+validate:
   # Unimplemented; Should file paths be validated?
   # Default: true
-  # TODO: Implement
-  validateFilePaths: true
-  # Unimplemented; Should executables be checked against the list of file extensions "acceptedExecutables" found below?
+  filePaths: true
+  # Unimplemented; Should executables be checked against the list of file extensions "validExecutableExtensions" found below?
   #  - If false, SRM Manifest Generator will not warn you of unknown/unsupported file extensions being passed to JSON Manifest files as executables
   # Default: true
-  # TODO: Implement
-  validateExecutables: true
+  executables: true
   # Unimplemented; A list of file extensions to accept as an executable file 
-  #  - If "validateExecutables" is disabled, this option will have no effect
-  # Default:
-  # ---
-  # acceptedExecutables:
-  #   - ".exe"
-  # ---
-  # TODO: Implement
-  acceptedExecutables:
+  #  - If "validate.executables" is disabled, this option will have no effect
+  # Default: ".exe"
+  executableExtensions:
     - ".exe"
-  
-# Settings regarding the logging of actions taken by SRM Manifest Generator to a specified logfile
-# TODO: Implement
-logging:
-  # Unimplemented; Should SRM Manifest Generator log its actions to a text file?
+
+# Options regarding miscellaneous behavior + appearance of SRM Manifest Generator
+other:
+  # Unimplemented; Should standard output include color (`true`) or should it be plain? (`false`)
   # Default: true
+  useColor: false
+  # Unimplemented; Should debugging be active without the need to pass a `--debug` flag or DEBUG
+  # environment variable?
+  debug: false
+  # Unimplemented; Should verbose mode be active without the need to pass a `--verbose` flag or a VERBOSE
+  # environment variable?
+  #  - If on, `other.debug` will be considered on as well, regardless of your other config options
+  verbose: false
+
+# Options for outputting process logs to logfiles
+logs:
+  # Unimplemented; Should the process log its status and actions to a text file?
   enabled: true
   # Unimplemented; Where should SRM Manifest Generator write its logs?
-  # Default: "./srm-manifest-generator.log"
-  outputFile: "./srm-manifest-generator.log"
+  # Default: "./"
+  #  - Output should be a directory. If it is a file, the logs will be concatenated together into one large logfile.
+  #  - If set to "", logfiles will be disabled as if `logs.enabled` was set to `false`.
+  output: "./logs"
+  # Unimplemented; What format should the filename of logfiles be?
+  # Default: "srmmg_YYYY-MM-DD_HH-MM-SS.log"
+  #  - Expects ISO 8601 format
+  format: "srmmg_YYYY-MM-DD_HH-MM-SS.log"

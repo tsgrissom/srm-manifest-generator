@@ -1,6 +1,3 @@
-import chalk from 'chalk';
-import { PathLike } from 'node:fs';
-
 // MARK: Fn capitalize
 // TODO jsdoc
 // TODO TEST Unit
@@ -62,19 +59,4 @@ export function delimitedList(items: string[], delimiter: string = ', ') {
     }
 
     return list;
-}
-
-export function stylePath(filePath: PathLike, valid: boolean = false) {
-    if (typeof filePath !== 'string')
-        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
-    if (typeof valid !== 'boolean')
-        throw new TypeError(`Arg valid must be a boolean: ${valid}`);
-
-    if (!filePath.startsWith('"'))
-        filePath = '"' + filePath;
-
-    if (!filePath.endsWith('"'))
-        filePath = filePath + '"';
-
-    return valid ? chalk.greenBright(filePath) : chalk.redBright(filePath);
 }

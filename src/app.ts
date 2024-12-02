@@ -1,18 +1,15 @@
 import fs from 'node:fs';
 
-import chalk from 'chalk';
+import clr from 'chalk';
 
 import { clog } from './utility/console.js';
 import { dlog, dlogDataSection } from './utility/debug.js';
-import { stylePath } from './utility/string.js';
+import { validatePath, stylePath } from './utility/path.js';
 
-import Manifest from './type/Manifest.js';
-import ManifestWriteOperationResults from './type/ManifestWriteResults.js';
-import ShortcutOutput  from './type/ShortcutOutput.js';
+import Manifest from './type/manifest/Manifest.js';
+import ManifestWriteOperationResults from './type/manifest/ManifestWriteResults.js';
 
 import { parseUserConfigData } from './config/config.js';
-
-
 
 async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOperationResults> {
     // const invalidShortcuts = [];
@@ -23,7 +20,7 @@ async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOp
     const contents = JSON.stringify(output);
 
     dlogDataSection(
-        chalk.bgCyanBright('MANIFEST WRITE OPERATION'),
+        clr.bgCyanBright('MANIFEST WRITE OPERATION'),
         '- ',
         `filePath: ${filePath}`,
         `enabled len: ${enabledShortcuts.length}`,
@@ -60,7 +57,7 @@ async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOp
     });
 }
 
-function printWriteResults(results: ManifestWriteOperationResults) {
+async function printWriteResults(results: ManifestWriteOperationResults) {
     const { manifestIn, shortcutStats } = results;
 
     const name = manifestIn.getName(),
@@ -107,9 +104,9 @@ function printWriteResults(results: ManifestWriteOperationResults) {
 
     const sbCheck = '\u2713 ';
     const sbXmark = '\u2715 ';
-    const pfxOk   = true ? chalk.greenBright.bold(sbCheck) : sbCheck; // TODO withColor check
-    const pfxFail = true ? chalk.redBright.bold(sbXmark) : sbXmark;
-    const pfxWarn = true ? chalk.yellowBright.bold('!') : '!';
+    const pfxOk   = true ? clr.greenBright.bold(sbCheck) : sbCheck; // TODO withColor check
+    const pfxFail = true ? clr.redBright.bold(sbXmark) : sbXmark;
+    const pfxWarn = true ? clr.yellowBright.bold('!') : '!';
 
     let wrotePrefix;
 
@@ -133,8 +130,8 @@ function printWriteResults(results: ManifestWriteOperationResults) {
 
     // TODO This all needs withColor
 
-    const strOkRatio = true ? chalk.magentaBright(okRatio) : okRatio;
-    const strFromSource = `from source ${true ? chalk.cyanBright(name) : name}`;
+    const strOkRatio = true ? clr.magentaBright(okRatio) : okRatio;
+    const strFromSource = `from source ${true ? clr.cyanBright(name) : name}`;
 
     let builder = `${wrotePrefix} Wrote `;
     if (nOk > 0) {
@@ -146,8 +143,11 @@ function printWriteResults(results: ManifestWriteOperationResults) {
 
     clog(builder);
 
-    dlog(`  - Source File Path: ${stylePath(manifestIn.getFilePath())}`);
-    dlog(`  - Write File Path: ${stylePath(writePath)}`);
+    const styledSourcePath = await validatePath(manifestIn.getFilePath());
+    const styledWritePath = await validatePath(writePath);
+        
+    dlog(`  - Source File Path: ${styledSourcePath}`);
+    dlog(`  - Write File Path: ${styledWritePath}`);
 }
 
 async function processManifest(manifest: Manifest) {
@@ -155,20 +155,21 @@ async function processManifest(manifest: Manifest) {
     // TODO If it's a file, write to the file, but if it's a folder, write the file inside of the folder, maybe based on the input file's name
     
     const { name, shortcuts } = manifest.data;
+    const manPath = manifest.filePath;
 
     if (!Array.isArray(shortcuts))
         throw new Error(`Manifest (${manifest.getName()} requires a key "shortcuts" which is a list of paths, but the user config is set to a non-array type`);
 
     if (shortcuts.length === 0)
-        clog(chalk.yellow(`WARN: No top-level shortcuts value found in manifest: ${name}`));
+        clog(clr.yellow(`WARN: No top-level shortcuts value found in manifest: ${name}`));
 
-    await writeManifestOutput(manifest)
-            .then(results => {
-                printWriteResults(results);
-            })
-            .catch(err => {
-                throw new Error(`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}): ${err}`);
-            });
+    try {
+        const writeResults = await writeManifestOutput(manifest);
+        clog(clr.green(`Manifest output has been written to ${manPath}`));
+        await printWriteResults(writeResults);
+    } catch (err) {
+        throw new Error(`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}): ${err}`);
+    }
 }
 
 async function startApp() {
@@ -181,7 +182,7 @@ async function startApp() {
         try {
             await processManifest(filePath);
         } catch (err) {
-            console.error(chalk.red(`Error processing manifest (${filePath.getFilePath()}): ${err}`));
+            console.error(clr.red(`Error processing manifest (${filePath.getFilePath()}): ${err}`));
         }
     }
 }

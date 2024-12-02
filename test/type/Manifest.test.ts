@@ -6,14 +6,13 @@ import yaml from 'yaml';
 
 import { dlog } from '../../src/utility/debug.js';
 import { replaceFileExtension } from '../../src/utility/path.js';
-import Manifest from '../../src/type/Manifest.js';
-import ManifestData from '../../src/type/ManifestData.js';
+
+import ManifestData from '../../src/type/manifest/ManifestData.js';
+import Manifest from '../../src/type/manifest/Manifest.js';
+import Shortcut from '../../src/type/shortcut/Shortcut.js';
 
 import assert from 'node:assert';
-import {
-    before, after,
-    describe, it 
-} from 'node:test';
+import { before, after, describe, it } from 'node:test';
 import { 
     shortcutObjFromFileName,
     tmpDirForScope,
@@ -21,8 +20,7 @@ import {
     tmpSubdir,
     tmpExecutableFile
 } from '../resource/test-utilities.js';
-import Shortcut from '../../src/type/Shortcut.js';
-import ShortcutData  from '../../src/type/ShortcutData.js';
+import { clog } from '../../src/utility/console.js';
 
 const __filebasename = path.basename(import.meta.filename);
 
@@ -46,9 +44,9 @@ let resourceFileManOk: FileResult,
     resourceFileManNoNameAttribute: FileResult;
     
 let resourceManifestOk: Manifest,
-    resourceManifestBad: Manifest,
-    resourceManifestEmptyContents: Manifest,
-    resourceManifestNonExistent: Manifest,
+    // resourceManifestBad: Manifest,
+    // resourceManifestEmptyContents: Manifest,
+    // resourceManifestNonExistent: Manifest,
     resourceManifestNoNameAttribute: Manifest;
 
 function setupDirs() {
@@ -124,7 +122,7 @@ function setupFiles() { // TODO Replace execs with a func from utils
 
         fs.writeFileSync(resourceFileManNonExistent.name, yaml.stringify(manData));
         
-        resourceManifestNonExistent = new Manifest(resourceFileManNonExistent.name, manData);
+        // resourceManifestNonExistent = new Manifest(resourceFileManNonExistent.name, manData);
         resourceFileManNonExistent.removeCallback();
     }
 
@@ -233,7 +231,3 @@ describe('Class: Manifest', () => {
     });
 
 });
-
-function clog(arg0: string) {
-    throw new Error('Function not implemented.');
-}

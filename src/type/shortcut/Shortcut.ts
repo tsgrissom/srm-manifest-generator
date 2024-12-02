@@ -1,11 +1,13 @@
 import path from 'node:path';
 
 import chalk from 'chalk';
-import { clog } from '../utility/console.js';
-import ManifestData from './ManifestData.js';
+
+import { clog } from '../../utility/console.js';
+
 import ShortcutData from './ShortcutData.js';
 import ShortcutOutput from './ShortcutOutput.js';
-import Manifest from './Manifest.js';
+import ManifestData from '../manifest/ManifestData.js';
+import Manifest from '../manifest/Manifest.js';
 
 // TODO jsdoc
 class Shortcut {

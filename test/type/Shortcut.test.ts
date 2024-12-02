@@ -7,14 +7,13 @@ import yaml from 'yaml';
 
 import { dlog } from '../../src/utility/debug.js';
 import { basenameWithoutExtensions } from '../../src/utility/path.js';
-import Shortcut from '../../src/type/Shortcut.js';
-import Manifest from '../../src/type/Manifest.js';
-import ManifestData from '../../src/type/ManifestData.js';
+import ManifestData from '../../src/type/manifest/ManifestData.js';
+import Manifest from '../../src/type/manifest/Manifest.js';
 
-import assert from 'node:assert';
 import { before, after, describe, it } from 'node:test';
 import { setOfFalsy } from '../resource/test-values.js';
 import { tmpDirForScope, tmpManifestYml, tmpSubdir } from '../resource/test-utilities.js';
+import { clog } from '../../src/utility/console.js';
 
 const __filebasename = path.basename(import.meta.filename);
 
@@ -125,7 +124,3 @@ describe('Class: Shortcut', () => {
     });
 
 });
-
-function clog(arg0: string) {
-    throw new Error('Function not implemented.');
-}

@@ -1,5 +1,10 @@
-import fs from 'node:fs';
+import fs, { PathLike } from 'node:fs';
 import path from 'node:path';
+
+import chalk from 'chalk';
+
+import ConfigData from '../type/config/ConfigData.js';
+import { clog } from './console.js';
 
 /**
  * Checks if a given file path has a file extension. When `fileExt` is set to *,
@@ -224,4 +229,42 @@ export function basenameWithoutExtensions(
     } while (removedExt);
 
     return newName;
+}
+
+/**
+ * 
+ * @param filePath 
+ * @param valid 
+ * @returns 
+ */
+export function stylePath(filePath: PathLike, valid: boolean = false) {
+    if (typeof filePath !== 'string')
+        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
+    if (typeof valid !== 'boolean')
+        throw new TypeError(`Arg valid must be a boolean: ${valid}`);
+
+    if (!filePath.startsWith('"'))
+        filePath = '"' + filePath;
+
+    if (!filePath.endsWith('"'))
+        filePath = filePath + '"';
+
+    return valid ? chalk.greenBright(filePath) : chalk.redBright(filePath);
+}
+
+export async function validatePath(filePath: PathLike, config?: ConfigData) {
+    if (typeof filePath !== 'string')
+        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
+    const shouldValidateFilePaths = config?.validate.filePaths ?? true;
+    
+    clog(chalk.red(`shouldValidateFilePaths=${shouldValidateFilePaths}`));
+
+    if (!shouldValidateFilePaths)
+        return chalk.yellow(filePath);
+
+    await fs.promises.access(filePath).catch(() => {
+        return chalk.red(filePath);
+    });
+
+    return chalk.green(filePath);
 }
