@@ -2,6 +2,44 @@ import { exec } from 'node:child_process';
 
 import { delimitedList } from './string.js';
 
+// MARK: doArgsInclude
+
+/**
+ * Checks if any one of the given values within `argsToFind` can
+ * also be found within the given `args`.
+ * 
+ * @param argsToSearch The arguments to search through, usually
+ *   `process.argv`, which is the default value.
+ * @param argsToFind The arguments to search for, any one of which
+ *   being present in the `args` 
+ * 
+ * @returns A `boolean` indicating if any of the `argsToFind` were
+ *   found within `argsToSearch`.
+ * 
+ * @example
+ * const debugFlags = ['-D', '--debug', '-v', '--verbose'];
+ * if (doArgsInclude(process.argv, ...debugFlags)) {
+ *      // Do your debugging 
+ * }
+ */
+// TEST Unit
+const doArgsInclude = (argsToSearch: string[] = process.argv, ...argsToFind: string[]) : boolean => {
+    if (argsToSearch === process.argv && argsToSearch.length <= 2)
+        return false;
+    if (argsToFind.length === 0)
+        return false;
+
+    for (const arg of argsToSearch) {
+        for (const argToFind of argsToFind) {
+            if (arg === argToFind)
+                return true;
+        }
+    }
+    return false;
+}
+
+// MARK: isProcessRunning
+
 interface PlatformSearchProcessCommand {
     command: string,
     processName: string
@@ -13,8 +51,6 @@ interface PlatformSearchProcessCommandMap {
         [key: string]: PlatformSearchProcessCommand;
     }
 }
-
-// MARK: isProcessRunning
 
 /**
  * Checks if a process is running on the system, with support for flexible Node
@@ -35,7 +71,7 @@ interface PlatformSearchProcessCommandMap {
         }
  * };
  */
-export async function isProcessRunning(platformOptions: PlatformSearchProcessCommandMap) : Promise<boolean> {
+async function isProcessRunning(platformOptions: PlatformSearchProcessCommandMap) : Promise<boolean> {
     const refJsdoc = 'Refer to the isProcessRunning jsdoc for an example of platformOptions.';
 
     // Lint platformOptions type
@@ -104,3 +140,5 @@ export async function isProcessRunning(platformOptions: PlatformSearchProcessCom
         });
     });
 }
+
+export { doArgsInclude, isProcessRunning };

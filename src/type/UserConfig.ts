@@ -1,5 +1,5 @@
-import { ConfigData } from './ConfigData';
-import { Manifest } from './Manifest.js';
+import ConfigData from './ConfigData.js';
+import Manifest from './Manifest.js';
 
 // TODO ExampleConfig
 

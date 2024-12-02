@@ -1,23 +1,18 @@
 import path from 'node:path';
 
 import chalk from 'chalk';
-import { Manifest, ManifestData } from './Manifest.js';
-import { clog } from '../utility/logging.js';
+import { clog } from '../utility/console.js';
+import ManifestData from './ManifestData.js';
+import ShortcutData from './ShortcutData.js';
+import ShortcutOutput from './ShortcutOutput.js';
+import Manifest from './Manifest.js';
 
-export interface ShortcutOutput {
-    title: string,
-    target: string
-}
+// TODO jsdoc
+class Shortcut {
 
-export interface ShortcutData extends ShortcutOutput {
-    title: string;
-    target: string;
-    enabled: boolean;
-}
-
-export class Shortcut {
-
+    // TODO jsdoc
     manifest: ManifestData;
+    // TODO jsdoc
     data: ShortcutData;
 
     constructor(manifest: ManifestData, data: ShortcutData) {
@@ -71,7 +66,7 @@ export class Shortcut {
     getFullTargetPath() : string {
         const rootDir = this.manifest.rootDirectory;
 
-        if (!rootDir)
+        if (!rootDir) // TODO Rewrite this error
             throw new Error(`Error while constructing full target path for Shortcut (${this.getTitle()}): Manifest (${this.manifest.name}) root directory was invalid`);
 
         return path.join(this.manifest.rootDirectory, this.getRelativeTargetPath());
@@ -95,3 +90,5 @@ export class Shortcut {
 
     }
 }
+
+export default Shortcut;

@@ -1,4 +1,6 @@
-import { Manifest } from './Manifest';
+import Manifest from './Manifest.js';
+
+// TODO jsdoc for everything
 
 interface ConfigData {
     search: {
@@ -22,4 +24,4 @@ interface ConfigData {
     }
 }
 
-export { ConfigData };
+export default ConfigData;

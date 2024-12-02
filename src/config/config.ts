@@ -4,15 +4,17 @@ import path from 'node:path';
 import chalk from 'chalk';
 import yaml from 'yaml';
 
-import { clog, dlog, isDebugging } from '../utility/logging.js';
+import { clog } from '../utility/console.js';
+import { dlog, isDebugActive } from '../utility/debug.js';
 import { delimitedList } from '../utility/string.js';
 import { boolFmt, checkCross, enabledDisabled } from '../utility/boolean.js';
 
-import { ConfigData } from '../type/ConfigData.js';
 import { UserConfig } from '../type/UserConfig.js';
-import { Manifest, ManifestData } from '../type/Manifest.js';
 
 import { loadUserConfigData } from './load-config.js';
+import ManifestData from '../type/ManifestData.js';
+import Manifest from '../type/Manifest.js';
+import ConfigData from '../type/ConfigData.js';
 
 const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
 const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
@@ -29,7 +31,7 @@ const clogConfigInvalid = (message: string, withReadme: boolean = true) => {
         console.error(chalk.redBright(`See the project README: `) + chalk.redBright.underline('https://github.com/tsgrissom/srm-manifest-generator'))
 }
 
-const dlogConfigStatus = (message: string) => { if (isDebugging()) clogConfigStatus(message) }
+const dlogConfigStatus = (message: string) => { if (isDebugActive()) clogConfigStatus(message) }
 
 // MARK: HELPERS
 
@@ -242,8 +244,9 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
         switch (resolved) {
             case 'scanDirectories': {
                 if (typeof value === 'boolean') {
+                    // TEST Make sure values still changing when using resolved as switch
                     userConfig.search.scanDirectories = value;
-                    // dlogConfigStatus(`search.scanDirectories set=${boolFmt(value)}`);
+                    // dlogConfigStatus(`search.scanDirectories set=${boolFmt(value)}`); 
                     dlogConfigStatus(chalk.magenta(`search.scanDirectories set=${boolFmt(value)}`));
                 } else {
                     clogConfigInvalid(`Value of search.scanDirectories must be a boolean but was not: ${value}`);
@@ -273,8 +276,6 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                     } else if (okManifests.length > 0) {
                         clog(chalk.blue(`${okManifests.length} manifests were loaded from the ${USER_CONFIG_FILENAME}`));
                     } 
-
-                    
                 } else {
                     if (!Array.isArray(value)) {
                         clogConfigInvalid('Value of search.manifests must be array of strings but was not an array');
@@ -351,8 +352,7 @@ async function parseUserConfigData() : Promise<ConfigData> {
     let userConfig = new UserConfig();
 
     userConfig = await parseSearchSection(userConfigData, userConfig);
-
-
+    // TODO Process other sections
 
     return userConfig;
 }

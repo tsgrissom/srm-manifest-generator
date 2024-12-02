@@ -10,7 +10,7 @@ import {
     USER_CONFIG_FILENAME,
     USER_CONFIG_PATH
  } from './config.js';
-import { clog } from '../utility/logging.js';
+import { clog } from '../utility/console.js';
 
 /**
  * Attempts to download the example.config.yml from the project repository,

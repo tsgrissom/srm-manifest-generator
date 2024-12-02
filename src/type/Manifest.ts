@@ -1,29 +1,24 @@
 import path from 'node:path';
 
 import { basenameWithoutExtensions } from '../utility/path.js';
-import { Shortcut } from './Shortcut.js';
+import Shortcut from './Shortcut.js';
+import ManifestData from './ManifestData.js';
+import ManifestNameSource from './ManifestNameSource.js';
 
-export interface ManifestData {
-    name: string,
-    rootDirectory: string,
-    outputPath: string,
-    shortcuts: Shortcut[]
-}
+// TODO getName by ManifestNameSource
 
-export enum ManifestNameSource {
-    Attribute,
-    Filename
-}
+// TODO jsdoc
+class Manifest {
 
-export class Manifest {
-
+    // TODO jsdoc
     filePath: string;
+    // TODO jsdoc
     data: ManifestData;
 
     /**
      * Constructs a new Manifest instance.
-     * @param {string} filePath The filepath of this Manifest's source file. Not read in the constructor, but used as a fallback name if name attribute is not set inside the file.
-     * @param {object} data The object to parse into a Manifest instance.
+     * @param filePath The filepath of this Manifest's source file. Not read in the constructor, but used as a fallback name if name attribute is not set inside the file.
+     * @param data The object to parse into a Manifest instance.
      */
     constructor(filePath: string, data: ManifestData) {
         if (typeof(filePath) !== 'string')
@@ -53,10 +48,12 @@ export class Manifest {
         return this.data.rootDirectory;
     }
 
+    // TODO jsdoc
     getFilePath() : string {
         return this.filePath;
     }
 
+    // TODO jsdoc
     getFileBasename() : string {
         return path.basename(this.filePath);
     }
@@ -112,3 +109,5 @@ export class Manifest {
         return this.data.shortcuts;
     }
 }
+
+export default Manifest;

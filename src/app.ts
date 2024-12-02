@@ -2,23 +2,17 @@ import fs from 'node:fs';
 
 import chalk from 'chalk';
 
+import { clog } from './utility/console.js';
+import { dlog, dlogDataSection } from './utility/debug.js';
 import { stylePath } from './utility/string.js';
-import { clog, dlog, dlogSectionWithData } from './utility/logging.js';
-import { Manifest } from './type/Manifest.js';
-import { ShortcutOutput } from './type/Shortcut.js';
+
+import Manifest from './type/Manifest.js';
+import ManifestWriteOperationResults from './type/ManifestWriteResults.js';
+import ShortcutOutput  from './type/ShortcutOutput.js';
+
 import { parseUserConfigData } from './config/config.js';
 
-interface ManifestWriteOperationResults {
-    manifestIn: Manifest,
-    manifestOut: ShortcutOutput[],
-    shortcutStats: {
-        totalInFile: number,
-        enabled: number,
-        disabled: number,
-        skipped: number,
-        ok: number
-    }
-}
+
 
 async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOperationResults> {
     // const invalidShortcuts = [];
@@ -28,8 +22,9 @@ async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOp
     const output = enabledShortcuts.map(shortcut => shortcut.getWritableObject());
     const contents = JSON.stringify(output);
 
-    dlogSectionWithData(
-        'MANIFEST WRITE OPERATION',
+    dlogDataSection(
+        chalk.bgCyanBright('MANIFEST WRITE OPERATION'),
+        '- ',
         `filePath: ${filePath}`,
         `enabled len: ${enabledShortcuts.length}`,
         `output: ${output}`,
@@ -88,7 +83,7 @@ function printWriteResults(results: ManifestWriteOperationResults) {
         if (nOk > 1)
             header += ` to file ${writePath}`;
 
-        dlogSectionWithData(
+        dlogDataSection(
             header,
             `Name: "${name}"`,
             `Input File Path: ${stylePath(manifestIn.filePath)}`,
@@ -100,7 +95,7 @@ function printWriteResults(results: ManifestWriteOperationResults) {
             `Root Directory: ${stylePath(manifestIn.data.rootDirectory)}` // TODO Display validation here for paths
         );
 
-        dlogSectionWithData(
+        dlogDataSection(
             'Number of Shortcuts',
             `Total in File: ${nTotal}`,
             `Written: ${nOk}`,

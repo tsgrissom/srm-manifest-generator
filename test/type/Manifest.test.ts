@@ -1,12 +1,13 @@
 import path from 'node:path';
 import fs from 'node:fs';
 
-import tmp, { DirResult, FileResult } from 'tmp';
+import { DirResult, FileResult } from 'tmp';
 import yaml from 'yaml';
 
-import { dlog } from '../../src/utility/logging.js';
+import { dlog } from '../../src/utility/debug.js';
 import { replaceFileExtension } from '../../src/utility/path.js';
-import { Manifest, ManifestData } from '../../src/type/Manifest.js';
+import Manifest from '../../src/type/Manifest.js';
+import ManifestData from '../../src/type/ManifestData.js';
 
 import assert from 'node:assert';
 import {
@@ -20,7 +21,8 @@ import {
     tmpSubdir,
     tmpExecutableFile
 } from '../resource/test-utilities.js';
-import { Shortcut, ShortcutData } from '../../src/type/Shortcut.js';
+import Shortcut from '../../src/type/Shortcut.js';
+import ShortcutData  from '../../src/type/ShortcutData.js';
 
 const __filebasename = path.basename(import.meta.filename);
 
