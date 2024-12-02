@@ -13,9 +13,14 @@ import { boolFmt } from '../utility/boolean.js';
 
 import { UserConfig } from '../type/config/UserConfig.js';
 
-import { loadUserConfigData } from './load.js';
-import { makeManifestsArray } from './parse.js';
+import { loadUserConfigData } from './load-data.js';
+import { makeManifests } from './parse/user-data.js';
 import ConfigData from '../type/config/ConfigData.js';
+import parseSearchSection from './parse/section-search.js';
+import parseValidateSection from './parse/section-validate.js';
+import parseOutputSection from './parse/section-output.js';
+import parseOtherSection from './parse/section-other.js';
+import parseLogsSection from './parse/section-logs.js';
 
 export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
 export const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
@@ -85,7 +90,7 @@ async function loadData() : Promise<object> {
     }
 }
 
-export async function parseUserConfigData() : Promise<ConfigData> {
+async function parseUserConfigData() : Promise<ConfigData> {
     const userConfigData = await loadData();
 
     if (!userConfigData) {
@@ -116,122 +121,4 @@ export async function parseUserConfigData() : Promise<ConfigData> {
     return userConfig;
 }
 
-// MARK: LOAD SECTIONS
-
-// -------------------
-
-// MARK: Search
-
-async function parseSearchSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes('search'))
-        throw new Error(clr.red('User Config is missing required section "search"'));
-
-    const section = (data as Record<string, unknown>)['search'];
-    
-    if (typeof section !== 'object' || section === null)
-        throw new Error(clr.red('User Config "search" section is not a valid object'));
-    if (Array.isArray(section))
-        throw new Error(clr.red('User Config "search" section must be a mapping, not a list (Expected object, Found array)'));
-
-    const keyAliases: Record<string, string> = {
-        directories: 'scanDirectories',
-        recursively: 'scanRecursively',
-        sources: 'manifests'
-    }
-
-    const resolveAlias = (key: string): string => {
-        return keyAliases[key] || key;
-    }
-
-    for (const [key, value] of Object.entries(section)) {
-        const resolved = resolveAlias(key);
-
-        switch (resolved) {
-            case 'scanDirectories': {
-                if (typeof value === 'boolean') {
-                    // TEST Make sure values still changing when using resolved as switch
-                    userConfig.search.scanDirectories = value;
-                    dlogConfValueLoaded('search.scanDirectories', value)
-                    // dlogConfInfo(chalk.magenta(`search.scanDirectories set=${boolFmt(manPaths)}`));
-                } else {
-                    clogConfBad(`Value of search.scanDirectories must be a boolean but was not: ${value}`);
-                }
-                break;
-            }
-            case 'scanRecursively': {
-                if (typeof value === 'boolean') {
-                    userConfig.search.scanRecursively = value;
-                    // dlogConfigStatus(`search.scanRecursively set=${boolFmt(value)}`);
-                    dlogConfInfo(clr.magenta(`search.scanRecursively set=${boolFmt(value)}`));
-                } else {
-                    clogConfBad(`Value of search.scanRecursively must be a boolean but was not: ${value}`);
-                }
-                break;
-            }
-            case `manifests`: {
-                if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
-                    const okManifests = await makeManifestsArray(value, userConfig);
-
-                    userConfig.search.manifests = okManifests;
-                    dlogConfInfo(`search.manifests set=${delimitedList(value)}`);
-                    dlogConfInfo(clr.magenta(`search.manifests set=${delimitedList(value)}`));
-                    
-                    if (okManifests.length === 0) {
-                        clog(clr.yellow(`No manifest paths were loaded from the ${USER_CONFIG_FILENAME}`));
-                    } else if (okManifests.length > 0) {
-                        clog(clr.blue(`${okManifests.length} manifests were loaded from the ${USER_CONFIG_FILENAME}`));
-                    } 
-                } else {
-                    if (!Array.isArray(value)) {
-                        clogConfBad('Value of search.manifests must be array of strings but was not an array');
-                    } else {
-                        clogConfBad('All entries of search.manifests must be a string but at least one was not');
-                    }
-                }
-                break;
-            }
-            default: {
-                const unknownKey = `"search.${value}"`;
-                clogConfWarn(`Unknown ${USER_CONFIG_FILENAME} key was set at ${unknownKey}`);
-            }
-        }
-    }
-
-
-
-    return userConfig;
-}
-
-
-// MARK: Output
-async function parseOutputSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes('output'))
-        throw new Error(clr.red('User Config is missing required section "search"'));
-
-    return userConfig;
-}
-
-// MARK: Validate
-async function parseValidateSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes('validate'))
-        throw new Error(clr.red('User Config is missing required section "search"'));
-    
-
-    return userConfig;
-}
-
-// MARK: Other
-async function parseOtherSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes('search'))
-        throw new Error(clr.red('User Config is missing required section "search"'));
-
-    return userConfig;
-}
-
-// MARK: Logs
-async function parseLogsSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes('logs'))
-        throw new Error(clr.red('User Config is missing required section "search"'));
-
-    return userConfig;
-}
+export default parseUserConfigData;

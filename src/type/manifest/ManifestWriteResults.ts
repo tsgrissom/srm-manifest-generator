@@ -4,7 +4,7 @@ import ShortcutOutput from '../shortcut/ShortcutOutput.js';
 interface ManifestWriteResults {
     manifestIn: Manifest,
     manifestOut: ShortcutOutput[],
-    shortcutStats: {
+    stats: {
         totalInFile: number,
         enabled: number,
         disabled: number,

@@ -3,17 +3,56 @@ import fs from 'node:fs';
 import clr from 'chalk';
 import yaml from 'yaml';
 
-import ConfigData from '../type/config/ConfigData.js';
-import { dlog } from '../utility/debug.js';
-import { clogConfInfo, clogConfWarn, USER_CONFIG_FILENAME } from './config.js';
-import { checkCross, enabledDisabled } from '../utility/boolean.js';
-import { clog } from '../utility/console.js';
-import Manifest from '../type/manifest/Manifest.js';
-import ManifestData from '../type/manifest/ManifestData.js';
+import { clog } from '../../utility/console.js';
+import { clogConfInfo, clogConfWarn, USER_CONFIG_FILENAME } from '../config.js';
+import { dlog } from '../../utility/debug.js';
+import { checkCross, enabledDisabled } from '../../utility/boolean.js';
+
+import ConfigData from '../../type/config/ConfigData.js';
+import Manifest from '../../type/manifest/Manifest.js';
+import ManifestData from '../../type/manifest/ManifestData.js';
 
 const fmtManPath = (manPath: string) => `(Path: "${manPath}")`;
 
-async function validateManifestPathExists(filePath: string) : Promise<boolean> {
+async function makeManifests(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
+    dlog('Creating Array of Manifest Instances', true);
+    
+    const okManifests: Manifest[] = [];
+
+    if (manPaths.length === 0) {
+        clogConfInfo('Manifest paths list was empty. No manifests will be loaded or processed.');
+        return okManifests;
+    }
+
+    for (const [index, manPath] of manPaths.entries()) {
+        const id = index+1;
+        const pathName = fmtManPath(manPath);
+        dlog(`Manifest Instance #${id} > Starting processing of manpath ${pathName}`, true);
+
+        const exists = await checkManPathExists(manPath);
+        const validFsType = await checkManPathIsSupportedFsType(manPath, config);
+        
+        dlog(`Manpath exists? ${checkCross(exists)} (${manPath})`);
+        dlog(`Manpath is a valid fs type? ${checkCross(validFsType)} ${pathName}`);
+
+        if (!exists) {
+            clog(`Skipping manifest (Path: ${manPath})`);
+            continue;
+        }
+
+        const object = await readManifestFile(manPath);
+        const data = await validateManifestFileContents(manPath, object);        
+        const instance = new Manifest(manPath, data);
+
+        okManifests.push(instance);
+
+        dlog(`Manifest Instance #${id} > Completed processing of manpath ${pathName}`, true);
+    }
+    
+    return okManifests;
+}
+
+async function checkManPathExists(filePath: string) : Promise<boolean> {
     const pathName = fmtManPath(filePath);
 
     try {
@@ -30,7 +69,7 @@ async function validateManifestPathExists(filePath: string) : Promise<boolean> {
     return true;
 }
 
-async function validateManifestPathIsSupportedFilesystemType(manPath: string, config: ConfigData) : Promise<boolean> {
+async function checkManPathIsSupportedFsType(manPath: string, config: ConfigData) : Promise<boolean> {
     const pathName = fmtManPath(manPath);
 
     try {
@@ -160,42 +199,4 @@ async function validateManifestFileContents(manPath: string, object: object) : P
     return data;
 }
 
-async function makeManifests(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
-    dlog('Creating Array of Manifest Instances', true);
-    
-    const okManifests: Manifest[] = [];
-
-    if (manPaths.length === 0) {
-        clogConfInfo('Manifest paths list was empty. No manifests will be loaded or processed.');
-        return okManifests;
-    }
-
-    for (const [index, manPath] of manPaths.entries()) {
-        const id = index+1;
-        const pathName = fmtManPath(manPath);
-        dlog(`Manifest Instance #${id} > Starting processing of manpath ${pathName}`, true);
-
-        const exists = await validateManifestPathExists(manPath);
-        const validFsType = await validateManifestPathIsSupportedFilesystemType(manPath, config);
-        
-        dlog(`Manpath exists? ${checkCross(exists)} (${manPath})`);
-        dlog(`Manpath is a valid fs type? ${checkCross(validFsType)} ${pathName}`);
-
-        if (!exists) {
-            clog(`Skipping manifest (Path: ${manPath})`);
-            continue;
-        }
-
-        const object = await readManifestFile(manPath);
-        const data = await validateManifestFileContents(manPath, object);        
-        const instance = new Manifest(manPath, data);
-
-        okManifests.push(instance);
-
-        dlog(`Manifest Instance #${id} > Completed processing of manpath ${pathName}`, true);
-    }
-    
-    return okManifests;
-}
-
-export { makeManifests as makeManifestsArray };
+export { makeManifests };

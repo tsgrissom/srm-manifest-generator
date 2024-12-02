@@ -1,4 +1,4 @@
-import fs from 'node:fs';
+import fs from 'fs/promises';
 
 import clr from 'chalk';
 
@@ -9,7 +9,7 @@ import { validatePath, stylePath } from './utility/path.js';
 import Manifest from './type/manifest/Manifest.js';
 import ManifestWriteOperationResults from './type/manifest/ManifestWriteResults.js';
 
-import { parseUserConfigData } from './config/config.js';
+import parseUserConfigData from './config/config.js';
 
 async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOperationResults> {
     // const invalidShortcuts = [];
@@ -17,7 +17,7 @@ async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOp
 
     const filePath = manifest.getWritePath();
     const output = enabledShortcuts.map(shortcut => shortcut.getWritableObject());
-    const contents = JSON.stringify(output);
+    const object = JSON.stringify(output);
 
     dlogDataSection(
         clr.bgCyanBright('MANIFEST WRITE OPERATION'),
@@ -26,48 +26,31 @@ async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOp
         `enabled len: ${enabledShortcuts.length}`,
         `output: ${output}`,
         `output len: ${output.length}`,
-        `contents: ${contents}`
+        `contents: ${object}`
     );
 
-    return new Promise((resolve, reject) => {
-        fs.writeFile(filePath, contents, 'utf-8', err => {
-            if (err) {
-                reject(err);
-            } else {
-                const nTotal = manifest.getShortcuts().length,
-                      nEnabled = enabledShortcuts.length;
+    const nTotal   = manifest.getShortcuts().length,
+          nEnabled = enabledShortcuts.length;
 
-                const results: ManifestWriteOperationResults = {
-                    manifestIn: manifest,
-                    manifestOut: output,
-                    shortcutStats: {
-                        totalInFile: nTotal,
-                        enabled: nEnabled,
-                        disabled: nTotal - nEnabled,
-                        // invalid: nInvalid // TODO
-                        // skipped: nInvalid + nDisabled // TODO
-                        skipped: nTotal - nEnabled,
-                        ok: output.length
-                    }
-                };
-
-                resolve(results);
-            }
-        });
-    });
+    try {
+        await fs.writeFile(filePath, object, 'utf-8');
+        return { manifestIn: manifest, manifestOut: output, stats: { totalInFile: nTotal, enabled: nEnabled, disabled: nTotal - nEnabled, skipped: nTotal - nEnabled, ok: output.length }};
+    } catch (err) {
+        throw new Error(`Failed to write manifest to output file (Name: ${manifest.getName()}): ${err}`);
+    }
 }
 
 async function printWriteResults(results: ManifestWriteOperationResults) {
-    const { manifestIn, shortcutStats } = results;
+    const { manifestIn, stats: stats } = results;
 
     const name = manifestIn.getName(),
           writePath = manifestIn.getWritePath();
 
-    const nTotal = shortcutStats.totalInFile,
-          nEnabled = shortcutStats.enabled,
-          nDisabled = shortcutStats.disabled,
-          nSkipped = shortcutStats.skipped,
-          nOk = shortcutStats.ok;
+    const nTotal = stats.totalInFile,
+          nEnabled = stats.enabled,
+          nDisabled = stats.disabled,
+          nSkipped = stats.skipped,
+          nOk = stats.ok;
 
     let okRatio = `${nOk}/${nTotal} shortcuts`;
 
