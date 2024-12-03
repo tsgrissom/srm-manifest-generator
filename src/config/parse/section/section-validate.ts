@@ -1,6 +1,6 @@
 import clr from 'chalk';
 
-import { UserConfig } from '../../type/config/UserConfig.js';
+import UserConfig from '../../../type/config/UserConfig.js';
 
 async function parseValidateSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
     if (!Object.keys(data).includes('validate'))

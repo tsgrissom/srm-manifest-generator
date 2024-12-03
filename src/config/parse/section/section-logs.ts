@@ -1,6 +1,6 @@
 import clr from 'chalk';
 
-import { UserConfig } from '../../type/config/UserConfig';
+import UserConfig from '../../../type/config/UserConfig.js';
 
 async function parseLogsSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
     if (!Object.keys(data).includes('logs'))

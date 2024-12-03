@@ -8,19 +8,17 @@ import clr from 'chalk';
 
 import { clog } from '../utility/console.js';
 import { isDebugActive } from '../utility/debug.js';
-import { delimitedList } from '../utility/string.js';
-import { boolFmt } from '../utility/boolean.js';
+import { fmtBool } from '../utility/boolean.js';
 
-import { UserConfig } from '../type/config/UserConfig.js';
+import UserConfig from '../type/config/UserConfig.js';
 
 import { loadUserConfigData } from './load-data.js';
-import { makeManifests } from './parse/user-data.js';
 import ConfigData from '../type/config/ConfigData.js';
-import parseSearchSection from './parse/section-search.js';
-import parseValidateSection from './parse/section-validate.js';
-import parseOutputSection from './parse/section-output.js';
-import parseOtherSection from './parse/section-other.js';
-import parseLogsSection from './parse/section-logs.js';
+import parseSearchSection from './parse/section/section-search.js';
+import parseValidateSection from './parse/section/section-validate.js';
+import parseOutputSection from './parse/section/section-output.js';
+import parseOtherSection from './parse/section/section-other.js';
+import parseLogsSection from './parse/section/section-logs.js';
 
 export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
 export const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
@@ -53,7 +51,7 @@ export const dlogConfValueLoaded = (key: string, value?: any) => {
     if (typeof value === 'string')
         fmtValue = value !== '' ? `"${value}"` : '';
     else if (typeof value === 'boolean')
-        fmtValue = boolFmt(value);
+        fmtValue = fmtBool(value);
 
     clogConfSucc(`Value of "${key}" set=${fmtValue}`);
 }

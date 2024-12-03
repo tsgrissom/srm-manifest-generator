@@ -1,137 +1,11 @@
-import fs from 'fs/promises';
-
 import clr from 'chalk';
 
 import { clog } from './utility/console.js';
-import { dlog, dlogDataSection } from './utility/debug.js';
-import { validatePath, stylePath } from './utility/path.js';
+import { dlog } from './utility/debug.js';
 
 import Manifest from './type/manifest/Manifest.js';
-import ManifestWriteOperationResults from './type/manifest/ManifestWriteResults.js';
 
 import parseUserConfigData from './config/config.js';
-
-async function writeManifestOutput(manifest: Manifest) : Promise<ManifestWriteOperationResults> {
-    // const invalidShortcuts = [];
-    const enabledShortcuts = manifest.getShortcuts().filter(shortcut => shortcut.isEnabled());
-
-    const filePath = manifest.getWritePath();
-    const output = enabledShortcuts.map(shortcut => shortcut.getWritableObject());
-    const object = JSON.stringify(output);
-
-    dlogDataSection(
-        clr.bgCyanBright('MANIFEST WRITE OPERATION'),
-        '- ',
-        `filePath: ${filePath}`,
-        `enabled len: ${enabledShortcuts.length}`,
-        `output: ${output}`,
-        `output len: ${output.length}`,
-        `contents: ${object}`
-    );
-
-    const nTotal   = manifest.getShortcuts().length,
-          nEnabled = enabledShortcuts.length;
-
-    try {
-        await fs.writeFile(filePath, object, 'utf-8');
-        return { manifestIn: manifest, manifestOut: output, stats: { totalInFile: nTotal, enabled: nEnabled, disabled: nTotal - nEnabled, skipped: nTotal - nEnabled, ok: output.length }};
-    } catch (err) {
-        throw new Error(`Failed to write manifest to output file (Name: ${manifest.getName()}): ${err}`);
-    }
-}
-
-async function printWriteResults(results: ManifestWriteOperationResults) {
-    const { manifestIn, stats: stats } = results;
-
-    const name = manifestIn.getName(),
-          writePath = manifestIn.getWritePath();
-
-    const nTotal = stats.totalInFile,
-          nEnabled = stats.enabled,
-          nDisabled = stats.disabled,
-          nSkipped = stats.skipped,
-          nOk = stats.ok;
-
-    let okRatio = `${nOk}/${nTotal} shortcuts`;
-
-    if (nTotal !== 1)
-        okRatio += 's';
-    
-    // Debug info
-    {
-        let header = `Wrote ${okRatio} from source "${name}"`;
-        if (nOk > 1)
-            header += ` to file ${writePath}`;
-
-        dlogDataSection(
-            header,
-            `Name: "${name}"`,
-            `Input File Path: ${stylePath(manifestIn.filePath)}`,
-            `Name From: ${manifestIn.getNameSource()}`,
-            `Value of Name Attribute: "${manifestIn.data.name}"`,
-            // `Fallback Name: "${manifestIn.}"`,
-            `Output Path: ${stylePath(manifestIn.getOutputPath())}`,
-            `Write File Path: ${stylePath(manifestIn.getWritePath())}`,
-            `Root Directory: ${stylePath(manifestIn.data.rootDirectory)}` // TODO Display validation here for paths
-        );
-
-        dlogDataSection(
-            'Number of Shortcuts',
-            `Total in File: ${nTotal}`,
-            `Written: ${nOk}`,
-            `Enabled: ${nEnabled}`,
-            `Disabled: ${nDisabled}`,
-            `Skipped: ${nSkipped}`
-        );
-    }
-
-    const sbCheck = '\u2713 ';
-    const sbXmark = '\u2715 ';
-    const pfxOk   = true ? clr.greenBright.bold(sbCheck) : sbCheck; // TODO withColor check
-    const pfxFail = true ? clr.redBright.bold(sbXmark) : sbXmark;
-    const pfxWarn = true ? clr.yellowBright.bold('!') : '!';
-
-    let wrotePrefix;
-
-    if (nOk > 0) { // At least one shortcut was ok
-        if (nOk === nTotal) { // 100% success
-            wrotePrefix = pfxOk;
-        } else { // Success between 0-100%
-            if (nOk === (nTotal - nDisabled)) {
-                wrotePrefix = pfxOk;
-            } else { // TEST This condition
-                wrotePrefix = pfxWarn;
-            }
-        }
-    } else { // All shortcuts might have failed
-        if (nOk === nTotal) { // Success because there were no shortcuts
-            wrotePrefix = pfxOk;
-        } else { // All shortcuts have failed
-            wrotePrefix = pfxFail;
-        }
-    }
-
-    // TODO This all needs withColor
-
-    const strOkRatio = true ? clr.magentaBright(okRatio) : okRatio;
-    const strFromSource = `from source ${true ? clr.cyanBright(name) : name}`;
-
-    let builder = `${wrotePrefix} Wrote `;
-    if (nOk > 0) {
-        builder += `${strOkRatio} `;
-        builder += strFromSource;
-    } else {
-        builder += `nothing ${strFromSource}`;
-    }
-
-    clog(builder);
-
-    const styledSourcePath = await validatePath(manifestIn.getFilePath());
-    const styledWritePath = await validatePath(writePath);
-        
-    dlog(`  - Source File Path: ${styledSourcePath}`);
-    dlog(`  - Write File Path: ${styledWritePath}`);
-}
 
 async function processManifest(manifest: Manifest) {
     // TODO Additionally validate if write path is valid, make folders if missing
@@ -146,10 +20,12 @@ async function processManifest(manifest: Manifest) {
     if (shortcuts.length === 0)
         clog(clr.yellow(`WARN: No top-level shortcuts value found in manifest: ${name}`));
 
+    // TODO Move much of this logic elsewhere so these things can be triggered on demand
+
     try {
-        const writeResults = await writeManifestOutput(manifest);
-        clog(clr.green(`Manifest output has been written to ${manPath}`));
-        await printWriteResults(writeResults);
+        const writeResults = await manifest.writeToOutput();
+        await manifest.logWriteResults(writeResults);
+        clog(clr.green(`Manifest output has been written to ${manPath}`)); // TODO Better message
     } catch (err) {
         throw new Error(`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}): ${err}`);
     }
@@ -163,7 +39,7 @@ async function startApp() {
         dlog(`  - "${filePath.getFilePath()}"`);
 
         try {
-            await processManifest(filePath);
+            await processManifest(filePath); // TODO This doesn't need to always happen automatically
         } catch (err) {
             console.error(clr.red(`Error processing manifest (${filePath.getFilePath()}): ${err}`));
         }

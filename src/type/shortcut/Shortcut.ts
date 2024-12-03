@@ -1,11 +1,11 @@
 import path from 'node:path';
 
-import chalk from 'chalk';
+import clr from 'chalk';
 
 import { clog } from '../../utility/console.js';
 
 import ShortcutData from './ShortcutData.js';
-import ShortcutOutput from './ShortcutOutput.js';
+import ShortcutExportData from './ShortcutExportData.js';
 import ManifestData from '../manifest/ManifestData.js';
 import Manifest from '../manifest/Manifest.js';
 
@@ -37,7 +37,7 @@ class Shortcut {
         this.data = data;
 
         if (process.argv.includes('--list-shortcuts')) {
-            clog(chalk.blue('LOADED SHORTCUT'));
+            clog(clr.blue('LOADED SHORTCUT'));
             clog(`Title: ${this.data.title}`);
             clog(`Target: ${this.data.target}`);
             clog(`Enabled: ${this.data.enabled}`);
@@ -48,9 +48,9 @@ class Shortcut {
      * Maps the Shortcut instance's attributes to a JavaScript object
      * which is compatible for writing to a JSON manifest for Steam
      * ROM Manager.
-     * @returns {object} The JSON designed for handling by Steam ROM Manager.
+     * @returns The JSON designed for handling by Steam ROM Manager.
      */
-    getWritableObject() : ShortcutOutput {
+    public getExportData() : ShortcutExportData {
         return {
             title: this.getTitle(),
             target: this.getFullTargetPath()

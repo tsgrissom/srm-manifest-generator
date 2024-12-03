@@ -1,15 +1,15 @@
 import Manifest from './Manifest.js';
-import ShortcutOutput from '../shortcut/ShortcutOutput.js';
+import ShortcutExportData from '../shortcut/ShortcutExportData.js';
 
 interface ManifestWriteResults {
-    manifestIn: Manifest,
-    manifestOut: ShortcutOutput[],
+    inputManifest: Manifest,
+    outputManifest: ShortcutExportData[],
     stats: {
-        totalInFile: number,
-        enabled: number,
-        disabled: number,
-        skipped: number,
-        ok: number
+        nTotal: number,
+        nEnabled: number,
+        nDisabled: number,
+        nSkipped: number,
+        nOk: number
     }
 }
 

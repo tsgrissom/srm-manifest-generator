@@ -1,8 +1,6 @@
 import ConfigData from './ConfigData.js';
 import Manifest from '../manifest/Manifest.js';
 
-// TODO ExampleConfig
-
 class UserConfig implements ConfigData {
     search: { manifests: Manifest[]; scanDirectories: boolean; scanRecursively: boolean; };
     output: { minify: boolean; indentSpaces: number; mode: string; };
@@ -45,4 +43,4 @@ class UserConfig implements ConfigData {
     }
 }
 
-export { UserConfig };
+export default UserConfig;

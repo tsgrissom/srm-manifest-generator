@@ -12,10 +12,10 @@ import ConfigData from '../../type/config/ConfigData.js';
 import Manifest from '../../type/manifest/Manifest.js';
 import ManifestData from '../../type/manifest/ManifestData.js';
 
-const fmtManPath = (manPath: string) => `(Path: "${manPath}")`;
+const fmtManPath = (manPath: string) => `(Path: "${clr.underline(manPath)}")`;
 
 async function makeManifests(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
-    dlog('Creating Array of Manifest Instances', true);
+    dlog(clr.underline('CREATING MAN INSTANCES'));
     
     const okManifests: Manifest[] = [];
 
@@ -27,16 +27,16 @@ async function makeManifests(manPaths: string[], config: ConfigData) : Promise<M
     for (const [index, manPath] of manPaths.entries()) {
         const id = index+1;
         const pathName = fmtManPath(manPath);
-        dlog(`Manifest Instance #${id} > Starting processing of manpath ${pathName}`, true);
+        dlog(`Manifest Instance #${id} > Began processing of manpath ${pathName}`, true);
 
-        const exists = await checkManPathExists(manPath);
-        const validFsType = await checkManPathIsSupportedFsType(manPath, config);
+        const exists   = await checkManPathExists(manPath);
+        const okFsType = await checkManPathIsSupportedFsType(manPath, config);
         
-        dlog(`Manpath exists? ${checkCross(exists)} (${manPath})`);
-        dlog(`Manpath is a valid fs type? ${checkCross(validFsType)} ${pathName}`);
+        dlog(` ${checkCross(exists)} Manpath exists (${manPath})`);
+        dlog(` ${checkCross(okFsType)} Manpath is a valid fs type ${pathName}`);
 
         if (!exists) {
-            clog(`Skipping manifest (Path: ${manPath})`);
+            clog(` > Skipping manifest (Path: ${manPath})`);
             continue;
         }
 
@@ -46,7 +46,7 @@ async function makeManifests(manPaths: string[], config: ConfigData) : Promise<M
 
         okManifests.push(instance);
 
-        dlog(`Manifest Instance #${id} > Completed processing of manpath ${pathName}`, true);
+        dlog(`Manifest Instance #${id} > Finished processing of manpath ${pathName}`, true);
     }
     
     return okManifests;
@@ -168,18 +168,18 @@ async function validateManifestFileContents(manPath: string, object: object) : P
     
     // Debug prints
     dlog(`> Manpath: ${manPath}`);
-    dlog(`- Has Optional Name Attribute? ${checkCross(hasAttrName)}`);
+    dlog(` ${checkCross(hasAttrName)} Has Optional Name Attribute`);
     if (wasAttrNameAnAlias)
-        dlog(`  "${keyAliasUsedForName}"`);
-    dlog(`- Has Optional Shortcuts Attribute? ${checkCross(hasAttrShortcuts)}`);
+        dlog(` - Alias used: "${keyAliasUsedForName}"`);
+    dlog(` ${checkCross(hasAttrShortcuts)} Has Optional Shortcuts Attribute`);
     if (wasAttrShortcutsAnAlias)
-        dlog(`  "${keyAliasUsedForShortcuts}"`);
-    dlog(`- Has Required Root Dir Attribute? ${checkCross(hasAttrRootDir)}`);
+        dlog(` - Alias used: "${keyAliasUsedForShortcuts}"`);
+    dlog(` ${checkCross(hasAttrRootDir)} Has Required Root Dir Attribute`);
     if (wasAttrRootDirAnAlias)
-        dlog(`  "${keyAliasUsedForRootDir}"`);
-    dlog(`- Has Required Output Attribute? ${checkCross(hasAttrOutput)}`);
+        dlog(` - Alias used: "${keyAliasUsedForRootDir}"`);
+    dlog(` ${checkCross(hasAttrOutput)} Has Required Output Attribute`);
     if (wasAttrOutputAnAlias)
-        dlog(`  "${keyAliasUsedForOutput}"`);
+        dlog(` - Alias used: "${keyAliasUsedForOutput}"`);
 
     // Make sure required attributes are present
     if (!hasAttrRootDir) 

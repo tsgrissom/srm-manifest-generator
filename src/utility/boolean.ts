@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import clr from 'chalk';
 import { capitalize as strCapitalize } from './string.js';
 
 // TODO Benchmark is it faster to store four string values: trueLowerStr trueUpperStr falseLowerStr and falseUpperStr or current?
@@ -45,7 +45,7 @@ const BoolFmtPreset: Record<string, BoolFmtOptions> = {
  * Formats a given `boolean` into a prettier string with context-dependent
  * formatting as well as options for color-coding and auto-capitalization.
  * 
- * This is the abstract version of my boolean formatter. See {@link boolFmt} for
+ * This is the abstract version of my boolean formatter. See {@link fmtBool} for
  * a version with extensible options mappings ({@link BoolFmtOptions}) as well as
  * presets ({@link BoolFmtPreset}).
  * 
@@ -69,17 +69,17 @@ function formattedBoolean(
     let str = b ? trueStr : falseStr;
     if (capitalize) str = strCapitalize(str);
     if (!color) return str;
-    return b ? chalk.greenBright(str) : chalk.redBright(str);
+    return b ? clr.greenBright(str) : clr.redBright(str);
 }
 
 // TODO jsdoc
-const boolFmt = (b: boolean, options: BoolFmtOptions = BoolFmtPreset.TrueFalse) => formattedBoolean(b, options.color, options.capitalize, options.trueStr, options.falseStr);
-const yesNo = (b: boolean) : string => boolFmt(b, BoolFmtPreset.YesNo);
-const enabledDisabled = (b: boolean) : string => boolFmt(b, BoolFmtPreset.EnabledDisabled);
-const checkCross = (b: boolean) : string => boolFmt(b, BoolFmtPreset.CheckCross);
+const fmtBool = (b: boolean, options: BoolFmtOptions = BoolFmtPreset.TrueFalse) => formattedBoolean(b, options.color, options.capitalize, options.trueStr, options.falseStr);
+const yesNo = (b: boolean) : string => fmtBool(b, BoolFmtPreset.YesNo);
+const enabledDisabled = (b: boolean) : string => fmtBool(b, BoolFmtPreset.EnabledDisabled);
+const checkCross = (b: boolean) : string => fmtBool(b, BoolFmtPreset.CheckCross);
 
 export {
     formattedBoolean,
-    boolFmt, BoolFmtOptions, BoolFmtPreset,
+    fmtBool, BoolFmtOptions, BoolFmtPreset,
     yesNo, enabledDisabled, checkCross
 }

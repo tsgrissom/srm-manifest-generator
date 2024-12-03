@@ -1,7 +1,7 @@
 import fs, { PathLike } from 'node:fs';
 import path from 'node:path';
 
-import chalk from 'chalk';
+import clr from 'chalk';
 
 import ConfigData from '../type/config/ConfigData.js';
 import { clog } from './console.js';
@@ -116,16 +116,6 @@ export function replaceFileExtension(
     return fileName;
 }
 
-// TODO TEST Unit
-export async function pathExists(filePath: string) {
-    try {
-        await fs.promises.access(filePath);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
 /**
  * Normalizes a file extension name by prepending a period to it if needed.
  * 
@@ -232,39 +222,86 @@ export function basenameWithoutExtensions(
 }
 
 /**
+ * Formats a given filepath to a better version for console.
+ * Options available are to apply underline and/or apply
+ * quotations, both of which are enabled by default.
  * 
- * @param filePath 
- * @param valid 
- * @returns 
+ * @param filePath The filepath to format.
+ * @param useUnderline Whether to apply underline formatting
+ *  to the given filepath.
+ * @param useQuotes Whether to apply quotation marks to the
+ *  the given filepath if it not surrounded by them already.
+ * @returns The formatted filepath with the options applied.
  */
-export function stylePath(filePath: PathLike, valid: boolean = false) {
-    if (typeof filePath !== 'string')
-        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
-    if (typeof valid !== 'boolean')
-        throw new TypeError(`Arg valid must be a boolean: ${valid}`);
-
-    if (!filePath.startsWith('"'))
-        filePath = '"' + filePath;
-
-    if (!filePath.endsWith('"'))
-        filePath = filePath + '"';
-
-    return valid ? chalk.greenBright(filePath) : chalk.redBright(filePath);
+export async function fmtPath(
+    filePath: PathLike,
+    useUnderline = true,
+    useQuotes = true
+) {
+    
 }
 
-export async function validatePath(filePath: PathLike, config?: ConfigData) {
+/**
+ * Styles the given path according to if it is accessible or not.
+ * If the path is accessible, a green checkmark prefix is applied.
+ * Otherwise, a red x-mark prefix is applied.
+ * 
+ * * This function uses `fs.access` to determine if the path is
+ *   accessible or not
+ * * This means that if the user does not have permissions to
+ *   access the file, it will appear with the red x-mark, even
+ *   if the path exists in the system
+ * 
+ * @param filePath The filepath to check for accessibility.
+ * @returns A Promise which unwraps to a `boolean` value if
+ *  resolved, which represents whether `filePath` was accessible
+ *  or not.
+ */
+export async function stylePath( // TODO Update jsdoc
+    filePath: PathLike,
+    config?: ConfigData,
+    usePrefix = true,
+    useColor = true,
+    useUnderline = true,
+    useQuotes = true
+) : Promise<string> {
+
     if (typeof filePath !== 'string')
         throw new TypeError(`Arg filePath must be a string: ${filePath}`);
+
     const shouldValidateFilePaths = config?.validate.filePaths ?? true;
-    
-    clog(chalk.red(`shouldValidateFilePaths=${shouldValidateFilePaths}`));
 
     if (!shouldValidateFilePaths)
-        return chalk.yellow(filePath);
+        return filePath;
 
-    await fs.promises.access(filePath).catch(() => {
-        return chalk.red(filePath);
-    });
+    const sbCheck = '\u2713';
+    const sbXmark = '\u2715'; // TODO Move to its own string function
+    const pfxOk   = '(' + (useColor ? clr.green(sbCheck) : sbCheck) + ') ';
+    const pfxBad  = '(' + (useColor ? clr.red(sbXmark) : sbXmark) + ') ';
+    // TODO Replace with wrap utility function
 
-    return chalk.green(filePath);
+    // TODO Replace with quote utility function
+    if (useQuotes && !filePath.startsWith('"'))
+        filePath = '"' + filePath;
+    if (useQuotes && !filePath.endsWith('"'))
+        filePath = filePath + '"';
+    if (useUnderline)
+        filePath = clr.underline(filePath);
+
+    const accessible = await isPathAccessible(filePath);
+    const prefix = usePrefix ? (accessible ? pfxOk : pfxBad) : ' ';
+
+    if (useUnderline) filePath = clr.underline(filePath);
+
+    return prefix + filePath;
+}
+
+// TODO TEST Unit
+export async function isPathAccessible(filePath: string) : Promise<boolean> {
+    try {
+        await fs.promises.access(filePath);
+        return true;
+    } catch {
+        return false;
+    }
 }

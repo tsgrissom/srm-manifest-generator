@@ -1,12 +1,6 @@
 import assert from 'node:assert';
 import { describe, it } from 'node:test';
-import { capitalize, countString, delimitedList } from '../../src/utility/string';
-
-// import {
-//     capitalize,
-//     countString,
-//     delimitedList
-// } from '../../dist/utility/string.js';
+import { capitalize, delimitedList, describeQuantity } from '../../src/utility/string';
 
 
 describe('Function: capitalize', () => {
@@ -22,13 +16,13 @@ describe('Function: capitalize', () => {
 
 });
 
-describe('Function: countString', () => {
+describe('Function: quantityString', () => {
 
     it.skip('should, when passed a non-number argument to number of things parameter, throw an error', async (t) => {
         const values = ['Some string', true, false, 'true', '2'];
         for (const value of values) {
             await t.test(`Subtest for input=${value}`, () => {
-                // assert.throws(() => countString(value));
+                // assert.throws(() => quantityString(value));
             });
         }
     });

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import chalk from 'chalk';
+import clr from 'chalk';
 import tmp, { DirResult, FileResult } from 'tmp';
 import yaml from 'yaml';
 
@@ -70,14 +70,14 @@ before(() => {
     dlog(`Test Resources: ${__filebasename} Setup started`);
     setupFolders();
     setupFiles();
-    clog(chalk.green('Test Resources: Setup completed'));
+    clog(clr.green('Test Resources: Setup completed'));
 });
 
 after(() => {
     dlog(`Test Resources: ${__filebasename} Teardown started`);
     teardownFiles();
     teardownFolders();
-    clog(chalk.green('Test Resources: Teardown completed'));
+    clog(clr.green('Test Resources: Teardown completed'));
 });
 
 describe('Class: Shortcut', () => {
