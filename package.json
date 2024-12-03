@@ -28,16 +28,11 @@
     "lint:config": "eslint --print-config ./src/index.ts",
     "lint:noignore": "eslint .",
     "lint:nowarn": "eslint --quiet src/",
-  
-    "start": "npm run start:ts",
+
+    "start": "tsx --env-file=.env/debug.env ./src/index.ts",
     "start:d": "npm run start:debug",
-    "start:debug": "node --env-file=.env/debug.env --loader ts-node/esm ./src/index.ts",
-    "start:ts": "node --loader ts-node/esm ./src/index.ts",
-    "start:tsv": "node --env-file=.env/verbose.env --loader ts-node/esm ./src/index.ts",
-    "start:tsd": "node --env-file=.env/debug.env --loader ts-node/esm ./src/index.ts",
-    "start:js": "npm run build && node .",
-    "start:jsd": "npm run build:out && node --env-file=.env/debug.env .",
-    "start:jsv": "npm run build:out && node --env-file=.env/verbose.env .",
+    "start:debug": "tsx --env-file=.env/debug.env ./src/index.ts",
+    "start:loader": "node --loader ts-node/esm ./src/index.ts",
     "start:yaml": "echo \"Not implemented\"",
     "start:yml": "echo \"Not implemented\"",
 

@@ -1,16 +1,25 @@
-const SYMBOL_CHECKMARK_LIGHT = '\u2713';
-const SYMBOL_CHECKMARK_HEAVY = '\u2714';
-const SYMBOL_XMARK_LIGHT = '\u2715';
-const SYMBOL_XMARK_HEAVY = '\u2716';
-const SYMBOL_ARROW_CURVE_DOWN_RIGHT = String.fromCodePoint(0x10551);
+import clr from 'chalk';
 
-console.log(SYMBOL_ARROW_CURVE_DOWN_RIGHT);
+export const SYMB_CHECKMARK_SM = '\u2713';
+export const SYMB_CHECKMARK_LG = '\u2714';
+export const SYMB_XMARK_SM     = '\u2715';
+export const SYMB_XMARK_LG     = '\u2716';
+
+export const SYMB_OK_SM  = clr.greenBright(SYMB_CHECKMARK_SM);
+export const SYMB_OK_LG  = clr.greenBright(SYMB_CHECKMARK_LG);
+export const SYMB_ERR_SM = clr.redBright(SYMB_XMARK_SM);
+export const SYMB_ERR_LG = clr.redBright(SYMB_XMARK_LG);
+
+// console.log(`ok sm: ${SYMB_OK_SM}`)
+// console.log(`ok lg: ${SYMB_OK_LG}`)
+// console.log(`err sm: ${SYMB_ERR_SM}`)
+// console.log(`err lg: ${SYMB_ERR_LG}`)
 
 // MARK: capitalize
 
 // TODO jsdoc
 // TODO TEST Unit
-function capitalize(str: string) {
+export function capitalize(str: string) {
     if (str.trim() === '') return str;
     
     const firstLetter = str.substring(0, 1);
@@ -40,7 +49,7 @@ function capitalize(str: string) {
  *  to be inferred if absent or empty.
  * @returns A `string` containing the created quantity description.
  */
-function describeQuantity(n: number, singular: string, plural?: string) {
+export function describeQuantity(n: number, singular: string, plural?: string) {
     if (typeof(n) !== 'number')
         throw new TypeError(`Arg n must be a number: ${n}`);
 
@@ -72,7 +81,7 @@ function describeQuantity(n: number, singular: string, plural?: string) {
 // MARK: delimitedList
 // TODO jsdoc
 // TODO TEST Unit
-function delimitedList(items: string[], delimiter: string = ', ') : string {
+export function delimitedList(items: string[], delimiter: string = ', ') : string {
     if (!items)
         throw new Error(`Cannot create delimited list from given items: ${items}`);
     if (!delimiter)
@@ -119,10 +128,4 @@ function isDoubleQuoted() {
 
 function isQuoted() {
 
-}
-
-export {
-    capitalize, describeQuantity, delimitedList,
-    SYMBOL_CHECKMARK_LIGHT, SYMBOL_CHECKMARK_HEAVY,
-    SYMBOL_XMARK_LIGHT, SYMBOL_XMARK_HEAVY
 }

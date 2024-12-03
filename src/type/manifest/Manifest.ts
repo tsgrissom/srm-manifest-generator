@@ -4,7 +4,7 @@ import path from 'node:path';
 import clr from 'chalk';
 
 import { dlog, dlogDataSection } from '../../utility/debug.js';
-import { basenameWithoutExtensions, isPathAccessible, stylePath } from '../../utility/path.js';
+import { basenameWithoutExtensions, isPathAccessible, fmtPathWithExistsTag } from '../../utility/path.js';
 
 import ManifestData from './ManifestData.js';
 import ManifestNameSource from './ManifestNameSource.js';
@@ -186,13 +186,13 @@ class Manifest {
             dlogDataSection(
                 header,
                 `Name: "${name}"`,
-                `Input File Path: ${stylePath(inputManifest.filePath)}`,
+                `Input File Path: ${fmtPathWithExistsTag(inputManifest.filePath)}`,
                 `Name From: ${inputManifest.getNameSource()}`,
                 `Value of Name Attribute: "${inputManifest.data.name}"`,
                 // `Fallback Name: "${manifestIn.}"`,
-                `Output Path: ${stylePath(inputManifest.getOutputPath())}`,
-                `Write File Path: ${stylePath(inputManifest.getWritePath())}`,
-                `Root Directory: ${stylePath(inputManifest.data.rootDirectory)}` // TODO Display validation here for paths
+                `Output Path: ${fmtPathWithExistsTag(inputManifest.getOutputPath())}`,
+                `Write File Path: ${fmtPathWithExistsTag(inputManifest.getWritePath())}`,
+                `Root Directory: ${fmtPathWithExistsTag(inputManifest.data.rootDirectory)}` // TODO Display validation here for paths
             );
 
             dlogDataSection(
@@ -246,8 +246,8 @@ class Manifest {
 
         clog(builder);
 
-        const styledSourcePath = await stylePath(inputManifest.getFilePath());
-        const styledWritePath  = await stylePath(writePath);
+        const styledSourcePath = await fmtPathWithExistsTag(inputManifest.getFilePath());
+        const styledWritePath  = await fmtPathWithExistsTag(writePath);
 
         dlog(`  - Source File Path: ${styledSourcePath}`);
         dlog(`  - Write File Path: ${styledWritePath}`);

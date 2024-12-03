@@ -4,6 +4,9 @@ import https from 'node:https';
 import yaml from 'yaml';
 
 import {
+    clogConfInfo,
+    clogConfOk,
+    dlogConfInfo,
     EXAMPLE_CONFIG_FILENAME,
     EXAMPLE_CONFIG_PATH,
     EXAMPLE_CONFIG_URL,
@@ -11,6 +14,8 @@ import {
     USER_CONFIG_PATH
  } from './config.js';
 import { clog } from '../utility/console.js';
+import chalk from 'chalk';
+import { fmtPathAsTag, fmtPathWithExistsTag } from '../utility/path.js';
 
 /**
  * Attempts to download the example.config.yml from the project repository,
@@ -19,6 +24,11 @@ import { clog } from '../utility/console.js';
  *   unhandled errors occur.
  */
 async function downloadExampleConfig() : Promise<boolean> {
+    try {
+        await fs.promises.access(EXAMPLE_CONFIG_PATH);
+        throw new Error(chalk.red(`downloadExampleConfig was invoked but ${EXAMPLE_CONFIG_PATH} already exists`));
+    } catch { /* empty */ }
+
     return new Promise((resolve, reject) => {
         https.get(EXAMPLE_CONFIG_URL, response => {
             if (response.statusCode !== 200)
@@ -69,6 +79,16 @@ async function downloadExampleConfig() : Promise<boolean> {
  */
 async function copyExampleConfigToUserConfigPath() : Promise<void> {
     try {
+        await fs.promises.access(USER_CONFIG_PATH);
+        throw new Error(chalk.red(`copyExampleConfigToUserConfigPath was invoked but ${USER_CONFIG_PATH} already exists`));
+    } catch { /* empty */ }
+
+    if (alreadyExists) {
+        console.error(chalk.red(`copyExampleConfigToUserConfigPath was invoked but ${USER_CONFIG_PATH} already exists. Cancelling.`));
+        return;
+    }
+
+    try {
         const exampleConfigFile = await fs.promises.readFile(EXAMPLE_CONFIG_PATH, 'utf8');
         await fs.promises.writeFile(USER_CONFIG_PATH, exampleConfigFile, 'utf8');
         clog(`Default config copied to ${USER_CONFIG_PATH}`);
@@ -102,11 +122,23 @@ async function copyExampleConfigToUserConfigPath() : Promise<void> {
  *   exhausted or unhandled errors occur.
  */
 async function loadUserConfigData() {
-    let userConfigHandle;
     let exampleConfigHandle;
+    let userConfigHandle;
+
+    const tagExampleConfPath = fmtPathAsTag(EXAMPLE_CONFIG_PATH);
+    const tagUserConfPath = fmtPathAsTag(USER_CONFIG_PATH);
+
+    try {
+        exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');
+        dlogConfInfo(`Example config exists ${tagExampleConfPath}`);
+    } catch {
+        // TODO Allow disabling this in the config
+        clogConfInfo(`Example config was missing at it's typical location ${tagExampleConfPath}`)
+    }
 
     try { // Check that user config file exists
         userConfigHandle = await fs.promises.open(USER_CONFIG_PATH, 'r');
+        dlogConfInfo(`User config was opened successfully ${tagUserConfPath}`);
     } catch { // User config is missing
         try { // Check if example config is in place, copy it to the user's config path if present
             exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');

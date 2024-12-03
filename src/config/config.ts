@@ -19,6 +19,7 @@ import parseValidateSection from './parse/section/section-validate.js';
 import parseOutputSection from './parse/section/section-output.js';
 import parseOtherSection from './parse/section/section-other.js';
 import parseLogsSection from './parse/section/section-logs.js';
+import { SYMB_OK_LG } from '../utility/string.js';
 
 export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
 export const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
@@ -28,10 +29,13 @@ export const README_URL = 'https://github.com/tsgrissom/srm-manifest-generator';
 
 export const USER_CONFIG_FILENAME = 'config.yml';
 export const USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME) // PATH_EXAMPLE_CONFIG;
-export const USER_CONFIG_PFX = 'User Config';
+export const USER_CONFIG_PFX = ' > Config';
 
 export const clogConfInfo = (msg?: any) => clog(USER_CONFIG_PFX + `: ${msg}`);
-export const clogConfOk   = (msg?: any) => clog(clr.green(USER_CONFIG_PFX) + `: ${msg}`);
+export const clogConfOk   = (msg?: any) => {
+
+    clog(USER_CONFIG_PFX + ` ` + SYMB_OK_LG + ` ${msg}`);
+}
 export const clogConfSucc = (msg?: any) => clog(clr.green(USER_CONFIG_PFX) + `: ${msg}`);
 export const clogConfWarn = (msg?: any) => console.warn(clr.yellow(USER_CONFIG_PFX) + `: ${msg}`);
 export const clogConfErr  = (msg?: any) => console.error(clr.red(USER_CONFIG_PFX) + `: ${msg}`);

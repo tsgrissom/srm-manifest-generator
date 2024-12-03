@@ -233,12 +233,23 @@ export function basenameWithoutExtensions(
  *  the given filepath if it not surrounded by them already.
  * @returns The formatted filepath with the options applied.
  */
-export async function fmtPath(
-    filePath: PathLike,
+export function fmtPath( // FIXME Quote check doesn't seem to work
+    filePath: string,
     useUnderline = true,
     useQuotes = true
 ) {
-    
+    if (typeof filePath !== 'string')
+        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
+
+    // TODO Replace with quote utility function
+    if (useQuotes && !filePath.startsWith('"'))
+        filePath = '"' + filePath;
+    if (useQuotes && !filePath.endsWith('"'))
+        filePath = filePath + '"'
+    if (useUnderline)
+        filePath = clr.underline(filePath);
+
+    return filePath;
 }
 
 /**
@@ -257,17 +268,16 @@ export async function fmtPath(
  *  resolved, which represents whether `filePath` was accessible
  *  or not.
  */
-export async function stylePath( // TODO Update jsdoc
-    filePath: PathLike,
+export async function fmtPathWithExistsTag( // TODO Update jsdoc
+    filePath: string,
     config?: ConfigData,
     usePrefix = true,
     useColor = true,
     useUnderline = true,
     useQuotes = true
 ) : Promise<string> {
-
     if (typeof filePath !== 'string')
-        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
+        throw new TypeError(`Arg filePath must be a string: ${filePath}`);    
 
     const shouldValidateFilePaths = config?.validate.filePaths ?? true;
 
@@ -280,20 +290,28 @@ export async function stylePath( // TODO Update jsdoc
     const pfxBad  = '(' + (useColor ? clr.red(sbXmark) : sbXmark) + ') ';
     // TODO Replace with wrap utility function
 
-    // TODO Replace with quote utility function
-    if (useQuotes && !filePath.startsWith('"'))
-        filePath = '"' + filePath;
-    if (useQuotes && !filePath.endsWith('"'))
-        filePath = filePath + '"';
-    if (useUnderline)
-        filePath = clr.underline(filePath);
+    if (useUnderline || useQuotes)
+        filePath = fmtPath(filePath, useUnderline, useQuotes);
 
     const accessible = await isPathAccessible(filePath);
     const prefix = usePrefix ? (accessible ? pfxOk : pfxBad) : ' ';
 
-    if (useUnderline) filePath = clr.underline(filePath);
-
     return prefix + filePath;
+}
+
+export function fmtPathAsTag(
+    filePath: string,
+    useUnderline = true,
+    useQuotes = true,
+    innerPrefix = 'Path'
+) : string {
+    if (typeof filePath !== 'string')
+        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
+    
+    if (useUnderline || useQuotes)
+        filePath = fmtPath(filePath, useUnderline, useQuotes);
+
+    return '(' + innerPrefix + ': ' + filePath + ')';    
 }
 
 // TODO TEST Unit
