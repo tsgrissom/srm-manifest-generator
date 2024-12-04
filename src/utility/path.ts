@@ -159,7 +159,7 @@ export function normalizeFileExtension(
  * @param {*} extsToRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
  * @param {boolean} iterate Should the basename be iteraviley modified until all of the listed extensions are gone?
  * 
- * @returns {string} The final filename after being stripped of some selected extensions, if they were present.
+ * @returns The final filename after being stripped of some selected extensions, if they were present.
  * 
  * @example // TODO Write example
  */
@@ -193,6 +193,7 @@ export function basenameWithoutExtensions(
 
             if (!extFound || extFound === '')
                 return newName;
+            // TODO Check each iteration and make sure there's still a string with content
 
             if (extToRemove === '*' || extToRemove === extFound.toLowerCase()) {
                 return path.basename(newName, extFound);

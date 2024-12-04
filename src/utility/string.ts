@@ -8,13 +8,9 @@ export const SYMB_XMARK_LG     = '\u2716';
 
 export const SYMB_OK_SM  = clr.greenBright(SYMB_CHECKMARK_SM);
 export const SYMB_OK_LG  = clr.greenBright(SYMB_CHECKMARK_LG);
+export const SYMB_WARN   = clr.yellowBright.bold('\u26A0')
 export const SYMB_ERR_SM = clr.redBright(SYMB_XMARK_SM);
 export const SYMB_ERR_LG = clr.redBright(SYMB_XMARK_LG);
-
-// console.log(`ok sm: ${SYMB_OK_SM}`)
-// console.log(`ok lg: ${SYMB_OK_LG}`)
-// console.log(`err sm: ${SYMB_ERR_SM}`)
-// console.log(`err lg: ${SYMB_ERR_LG}`)
 
 // MARK: capitalize
 
@@ -266,7 +262,7 @@ function doubleQuote(s: string, force = false) : string {
     return s;
 }
 
-function quote(s: string, useSingleQuotes = false, force = false) : string {
+export function quote(s: string, useSingleQuotes = false, force = false) : string {
     if ((isDoubleQuoted(s) || (isSingleQuoted(s) && useSingleQuotes)) && !force)
         return s;
     return wrap(s, useSingleQuotes ? `'` : `"`, force);

@@ -19,7 +19,7 @@ import parseValidateSection from './parse/section/section-validate.js';
 import parseOutputSection from './parse/section/section-output.js';
 import parseOtherSection from './parse/section/section-other.js';
 import parseLogsSection from './parse/section/section-logs.js';
-import { SYMB_ERR_LG, SYMB_OK_LG } from '../utility/string.js';
+import { SYMB_ERR_LG, SYMB_OK_LG, SYMB_OK_SM, SYMB_WARN } from '../utility/string.js';
 
 export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
 export const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
@@ -32,15 +32,17 @@ export const USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME) // PAT
 export const USER_CONFIG_PFX = 'Config';
 
 export const clogConfInfo = (msg?: any) =>
-    clog(` > ` + USER_CONFIG_PFX + `: ${msg}`);
+    clog(`User Config: ` + msg);
+    // clog(` > ` + USER_CONFIG_PFX + `: ${msg}`);
 export const clogConfOk   = (msg?: any) =>
     clog(` > ` + USER_CONFIG_PFX + ` ` + SYMB_OK_LG + ` ${msg}`);
-export const clogConfSucc = (msg?: any) =>
-    clog(` ` + SYMB_OK_LG + ` ` + USER_CONFIG_PFX + `: ${msg}`);
+export const clogConfSucc = (emphasis: boolean, msg?: any) =>
+    clog(` ` + (emphasis ? SYMB_OK_LG : SYMB_OK_SM) + ` ` + USER_CONFIG_PFX + `: ${msg}`);
 export const clogConfBad2 = (msg?: any) =>
     clog(` ` + SYMB_ERR_LG + ` ` + USER_CONFIG_PFX + `: ${msg}`);
 export const clogConfWarn = (msg?: any) =>
-    console.warn(clr.yellow(USER_CONFIG_PFX) + `: ${msg}`);
+    console.warn(` ` + SYMB_WARN + ` ` + USER_CONFIG_PFX + `: ${msg}`);
+    // console.warn(clr.yellow(USER_CONFIG_PFX) + `: ${msg}`);
 export const clogConfErr  = (msg?: any) =>
     console.error(clr.red(USER_CONFIG_PFX) + `: ${msg}`);
 export const clogConfInvalid = (msg: string) => {
@@ -60,7 +62,7 @@ export const dlogConfValueLoaded = (key: string, value?: any) => {
     else if (typeof value === 'boolean')
         fmtValue = fmtBool(value);
 
-    clogConfSucc(`Value of "${key}" set=${fmtValue}`);
+    clogConfSucc(false, `Value of "${key}" set=${fmtValue}`);
 }
 
 // TODO Put this back where it belongs

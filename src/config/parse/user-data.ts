@@ -11,29 +11,29 @@ import { checkCross, enabledDisabled } from '../../utility/boolean.js';
 import ConfigData from '../../type/config/ConfigData.js';
 import Manifest from '../../type/manifest/Manifest.js';
 import ManifestData from '../../type/manifest/ManifestData.js';
-
-const fmtManPath = (manPath: string) => `(Path: "${clr.underline(manPath)}")`;
+import { SYMB_CHECKMARK_LG, SYMB_XMARK_LG } from '../../utility/string.js';
+import { fmtPath, fmtPathAsTag } from '../../utility/path.js';
 
 async function makeManifests(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
-    dlog(clr.underline('CREATING MAN INSTANCES'));
+    dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
     
     const okManifests: Manifest[] = [];
 
     if (manPaths.length === 0) {
-        clogConfInfo('Manifest paths list was empty. No manifests will be loaded or processed.');
+        clogConfInfo(` ${SYMB_XMARK_LG} Manifest paths list was empty. No manifests will be loaded or processed.`);
         return okManifests;
     }
 
     for (const [index, manPath] of manPaths.entries()) {
         const id = index+1;
-        const pathName = fmtManPath(manPath);
-        dlog(`Manifest Instance #${id} > Began processing of manpath ${pathName}`, true);
+        const pathTag = fmtPathAsTag(manPath);
+        dlog(` > Manifest #${id} > Began processing of manifest file ${pathTag}`);
 
-        const exists   = await checkManPathExists(manPath);
-        const okFsType = await checkManPathIsSupportedFsType(manPath, config);
+        const exists   = await validateManifestPathExists(manPath);
+        const okFsType = await validateManifestPathIsSupportedFilesystemType(manPath, config);
         
-        dlog(` ${checkCross(exists)} Manpath exists (${manPath})`);
-        dlog(` ${checkCross(okFsType)} Manpath is a valid fs type ${pathName}`);
+        dlog(` ${checkCross(exists)} Path exists (${manPath})`);
+        dlog(` ${checkCross(okFsType)} Path is a supported filesystem type ${pathTag}`);
 
         if (!exists) {
             clog(` > Skipping manifest (Path: ${manPath})`);
@@ -46,22 +46,19 @@ async function makeManifests(manPaths: string[], config: ConfigData) : Promise<M
 
         okManifests.push(instance);
 
-        dlog(`Manifest Instance #${id} > Finished processing of manpath ${pathName}`, true);
+        dlog(` ${SYMB_CHECKMARK_LG} Manifest #${id}: Finished processing of manifest file ${fmtPathAsTag(pathTag)}`);
     }
     
     return okManifests;
 }
 
-async function checkManPathExists(filePath: string) : Promise<boolean> {
-    const pathName = fmtManPath(filePath);
+async function validateManifestPathExists(filePath: string) : Promise<boolean> {
+    const pathTag = fmtPath(filePath);
 
     try {
         await fs.promises.access(filePath).catch(() => {
-            clogConfWarn(`Manifest file path does not exist ${pathName}`);
             return false;
         });
-
-        dlog(`Manifest file path exists ${pathName}`);
     } catch (err) {
         throw new Error(`Error while validating manifest path existence (Path: ${filePath}): ${err}`);
     }
@@ -69,11 +66,11 @@ async function checkManPathExists(filePath: string) : Promise<boolean> {
     return true;
 }
 
-async function checkManPathIsSupportedFsType(manPath: string, config: ConfigData) : Promise<boolean> {
-    const pathName = fmtManPath(manPath);
+async function validateManifestPathIsSupportedFilesystemType(filePath: string, config: ConfigData) : Promise<boolean> {
+    const pathTag = fmtPathAsTag(filePath);
 
     try {
-        const stats = await fs.promises.stat(manPath);
+        const stats = await fs.promises.stat(filePath);
 
         if (!stats.isFile() && !stats.isDirectory())
             clogConfWarn(`Unsupported filesystem type (Supported: File or Folder) was set as a manifest path in the user ${USER_CONFIG_FILENAME}.`);
@@ -81,31 +78,31 @@ async function checkManPathIsSupportedFsType(manPath: string, config: ConfigData
         const { scanDirectories, scanRecursively } = config.search;
 
         if (stats.isFile()) {
-            dlog(`Manpath is a file ${pathName}`);
+            dlog(`Manpath is a file ${pathTag}`);
             return true;
         } else if (stats.isDirectory()) {
-            dlog(`> Manpath is a directory ${pathName}`);
+            dlog(`> Manpath is a directory ${pathTag}`);
             dlog(`- Scan Directories? ${enabledDisabled(scanDirectories)}`);
             dlog(`- Scan Recursively? ${enabledDisabled(scanRecursively)}`);
 
             if (!scanDirectories) {
-                clogConfWarn(`Manifests file path list contains a path pointing to a directory, but scanning directories is disabled by the user's ${USER_CONFIG_FILENAME}. The following path will be skipped: ${manPath}`);
+                clogConfWarn(`Manifests file path list contains a path pointing to a directory, but scanning directories is disabled by the user's ${USER_CONFIG_FILENAME}. The following path will be skipped: ${filePath}`);
                 return false;
             }
 
             return true;
         } else {
-            clogConfWarn(`Unsupported filesystem type at the given path was ignored ${pathName}`);
+            clogConfWarn(`Unsupported filesystem type at the given path was ignored ${pathTag}`);
         }
     } catch (err) {
-        throw new Error(`Could not stat manifest path ${manPath}: ${err}`);
+        throw new Error(`Could not stat manifest path ${filePath}: ${err}`);
     }
     
     return true;
 }
 
 async function readManifestFile(manPath: string) : Promise<object> {
-    const pathName = fmtManPath(manPath);
+    const pathTag = fmtPathAsTag(manPath);
     
     dlog(`Reading Manfile > Starting ${manPath}`);
 
@@ -120,12 +117,12 @@ async function readManifestFile(manPath: string) : Promise<object> {
         dlog(`Reading Manfile > Finished ${manPath}`);
         return object;
     } catch (err) {
-        throw new Error(`Unable to read manifest file at manpath ${pathName}: ${err}`);
+        throw new Error(`Unable to read manifest file at manpath ${pathTag}: ${err}`);
     }
 }
 
 async function validateManifestFileContents(manPath: string, object: object) : Promise<ManifestData> {
-    const pathName = fmtManPath(manPath);
+    const pathTag = fmtPathAsTag(manPath);
     const data: ManifestData = {
         name: '',
         rootDirectory: '',
@@ -183,9 +180,9 @@ async function validateManifestFileContents(manPath: string, object: object) : P
 
     // Make sure required attributes are present
     if (!hasAttrRootDir) 
-        throw new Error(`Manifest is missing a root directory attribute ${pathName}`);
+        throw new Error(`Manifest is missing a root directory attribute ${pathTag}`);
     if (!hasAttrOutput)
-        throw new Error(`Manifest is missing an output directory attribute ${pathName}`);
+        throw new Error(`Manifest is missing an output directory attribute ${pathTag}`);
 
     const instance = new Manifest(manPath, data);
 

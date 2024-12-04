@@ -28,7 +28,7 @@ class Manifest {
     data: ManifestData;
 
     /**
-     * Constructs a new Manifest instance.
+     * Constructs a new Manifest instance. 
      * @param filePath The filepath of this Manifest's source file. Not read in the constructor, but used as a fallback name if name attribute is not set inside the file.
      * @param data The object to parse into a Manifest instance.
      */
@@ -88,13 +88,16 @@ class Manifest {
         return this.data.name;
     }
 
+
     /**
-     * Determine where Manifest#getName retrieves its name from.
-     * If there is a valid "name" attribute in the JSON, the value of it will be used
-     * and the returned value of this function will be `Manifest.NameSource.ATTRIBUTE`.
-     * Otherwise, the fallback filename provided in the constructor will be used and
-     * the returned value of this function will be `Manifest.NameSource.FILENAME`;
-     * @returns {Manifest.NameSource} Either `ATTRIBUTE` or `FILENAME`.
+     * Determine where the Manifest instance should retrieve its name from. First,
+     * this function checks for a valid name attribute in the Manifest's source
+     * file ({@link ManifestNameSource.Attribute}.) If that doesn't work, it
+     * will fallback to using the filename of the source file, removing all
+     * extensions from it using {@link basenameWithoutExtensions} iteraviley.
+     *  
+     * @returns An enum representing the potential sources
+     *  of a manifest's name.
      */
     public getNameSource() : ManifestNameSource {
         if (this.hasNameAttribute()) {
@@ -102,6 +105,20 @@ class Manifest {
         } else {
             return ManifestNameSource.Filename;
         }
+    }
+
+    /**
+     * Get the string representation of the Manifest instance's {@link ManifestNameSource}
+     * @returns A `string` representing the value of {@link getNameSource},
+     *  which is a {@link ManifestNameSource}.
+     */
+    public getNameSourceAsString() : string {
+        switch (this.getNameSource()) {
+            case ManifestNameSource.Attribute:
+                return 'Attribute'
+            case ManifestNameSource.Filename:
+                return 'Filename'
+        };
     }
 
     public getName() : string {
@@ -190,6 +207,7 @@ class Manifest {
     public async logWriteResults(results: ManifestWriteResults) {
         const { manifest, stats } = results;
         const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } = stats;
+        const isEmpty = nOk === 0 && nEnabled === 0;
 
         const name = manifest.getName(),
               writePath = manifest.getWritePath();
@@ -259,22 +277,26 @@ class Manifest {
 
         const strOkRatio = true ? clr.magentaBright(okRatio) : okRatio;
         const strFromSource = `from source ${true ? clr.cyanBright(name) : name}`;
+        const emptyAddendum = `(No shortcuts were found)`;
 
         let builder = `${wrotePrefix} Wrote `;
         if (nOk > 0) {
             builder += `${strOkRatio} `;
             builder += strFromSource;
         } else {
-            builder += `nothing ${strFromSource}`;
+            builder += 'nothing ' + strFromSource;
         }
 
+        if (isEmpty)
+            builder += ' ' + emptyAddendum;
+
         clog(builder);
-
-        const styledSourcePath = await fmtPathWithExistsTag(manifest.getFilePath());
-        const styledWritePath  = await fmtPathWithExistsTag(writePath);
-
-        dlog(`  - Source File Path: ${styledSourcePath}`);
-        dlog(`  - Write File Path: ${styledWritePath}`);
+        
+        if (isEmpty) {
+            dlog(`  - Source File: ${fmtPath(manifest.getFilePath())}`);
+            dlog(`  - Output Path: ${fmtPath(manifest.getOutputPath())}`);
+            dlog(`  - File Written To: ${fmtPath(manifest.getWritePath())}`);
+        }
     }
 }
 

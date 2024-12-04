@@ -2,7 +2,7 @@ import clr from 'chalk';
 
 import { fmtBool } from '../../../utility/boolean.js';
 import { clog } from '../../../utility/console.js';
-import { delimitedList } from '../../../utility/string.js';
+import { delimitedList, quote } from '../../../utility/string.js';
 
 import { dlogConfValueLoaded, clogConfInvalid, dlogConfInfo, clogConfWarn } from '../../config.js';
 import { USER_CONFIG_FILENAME } from '../../load-data.js';
@@ -17,23 +17,18 @@ const keyAliases: YamlKeyAliases = {
     sources:     'manifests'
 }
 
-const resolveKey = (aliasRecord: YamlKeyAliases, key: string) =>
-    resolveKeyFromAlias(keyAliases, key);
-
 async function parseSearchSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
     if (!Object.keys(data).includes('search'))
-        throw new Error(clr.red('User Config is missing required section "search"'));
+        throw new Error(clr.red(`User ${USER_CONFIG_FILENAME} is missing required section "search"`));
 
     const section = (data as Record<string, unknown>)['search'];
     
     if (typeof section !== 'object' || section === null)
-        throw new Error(clr.red('User Config "search" section is not a valid object'));
+        throw new Error(clr.red('User Config "search" section is not a valid mapping'));
     if (Array.isArray(section))
-        throw new Error(clr.red('User Config "search" section must be a mapping, not a list (Expected object, Found array)'));
+        throw new Error(clr.red('User Config "search" section must be a mapping, not a list'));
 
-    const resolveAlias = (key: string): string => {
-        return keyAliases[key] || key;
-    }
+    const resolveAlias = (key: string) : string => resolveKeyFromAlias(keyAliases, key);
 
     for (const [key, value] of Object.entries(section)) {
         const resolved = resolveAlias(key);
@@ -44,7 +39,6 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                     // TEST Make sure values still changing when using resolved as switch
                     userConfig.search.scanDirectories = value;
                     dlogConfValueLoaded('search.scanDirectories', value)
-                    // dlogConfInfo(chalk.magenta(`search.scanDirectories set=${fmtBool(manPaths)}`));
                 } else {
                     clogConfInvalid(`Value of search.scanDirectories must be a boolean but was not: ${value}`);
                 }
@@ -53,8 +47,7 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
             case 'scanRecursively': {
                 if (typeof value === 'boolean') {
                     userConfig.search.scanRecursively = value;
-                    // dlogConfigStatus(`search.scanRecursively set=${fmtBool(value)}`);
-                    dlogConfInfo(clr.magenta(`search.scanRecursively set=${fmtBool(value)}`));
+                    dlogConfValueLoaded('search.scanRecursively', value);
                 } else {
                     clogConfInvalid(`Value of search.scanRecursively must be a boolean but was not: ${value}`);
                 }
@@ -66,7 +59,6 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
 
                     userConfig.search.manifests = okManifests;
                     dlogConfInfo(`search.manifests set=${delimitedList(value)}`);
-                    dlogConfInfo(clr.magenta(`search.manifests set=${delimitedList(value)}`));
                     
                     if (okManifests.length === 0) {
                         clog(clr.yellow(`No manifest paths were loaded from the ${USER_CONFIG_FILENAME}`));
@@ -83,8 +75,8 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                 break;
             }
             default: {
-                const unknownKey = `"search.${value}"`;
-                clogConfWarn(`Unknown ${USER_CONFIG_FILENAME} key was set at ${unknownKey}`);
+                const unknown = quote(`search.${key}`);
+                clogConfWarn(`Unknown key set at ${unknown}`);
             }
         }
     }
