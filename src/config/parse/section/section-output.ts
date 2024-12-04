@@ -1,13 +1,10 @@
-import clr from 'chalk';
-
 import UserConfig from '../../../type/config/UserConfig.js';
 import chalk from 'chalk';
 import { dlog } from '../../../utility/debug.js';
 import { USER_CONFIG_FILENAME } from '../../load-data.js';
-import { resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
+import { clogConfWarn, dlogConfValueLoaded, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
 import { clog } from '../../../utility/console.js';
-import { quote, SB_ERR_LG, SB_ERR_SM } from '../../../utility/string.js';
-import { clogConfWarn, dlogConfValueLoaded } from '../../config.js';
+import { quote, SB_ERR_LG, SB_ERR_SM, SB_WARN } from '../../../utility/string.js';
 
 const keyAliases: YamlKeyAliases = {
     minify: 'minify',
@@ -18,17 +15,20 @@ const keyAliases: YamlKeyAliases = {
 }
 
 async function parseOutputSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes('output'))
-        dlog(chalk.yellow(`User ${USER_CONFIG_FILENAME} is missing optional section "output"`));
+    if (!Object.keys(data).includes('output')) {
+        dlog(`${SB_WARN} User ${USER_CONFIG_FILENAME} is missing optional section "output"`);
+        return userConfig;
+    }
 
     const section = (data as Record<string, unknown>)['output'];
 
     if (typeof section !== 'object' || section === null) {
-        clog(` ${SB_ERR_LG} User ${USER_CONFIG_FILENAME} "output" section is not a valid mapping`);
+        clog(`${SB_ERR_LG} User ${USER_CONFIG_FILENAME} key "output" should be a section, but was a ${typeof section}`);
         return userConfig;
     }
     if (Array.isArray(section)) {
         clog(` ${SB_ERR_LG} User ${USER_CONFIG_FILENAME} "output" section must be a mapping, not a list`);
+        clog(`${SB_ERR_LG} User ${USER_CONFIG_FILENAME}`)
         return userConfig;
     }
     

@@ -4,9 +4,6 @@ import https from 'node:https';
 import yaml from 'yaml';
 
 import {
-    clogConfInfo,
-    clogConfOk,
-    dlogConfInfo,
     EXAMPLE_CONFIG_FILENAME,
     EXAMPLE_CONFIG_PATH,
     EXAMPLE_CONFIG_URL,
@@ -15,8 +12,9 @@ import {
  } from './config.js';
 import { clog } from '../utility/console.js';
 import chalk from 'chalk';
-import { fmtPath, fmtPathAsTag, fmtPathWithExistsPrefix } from '../utility/path.js';
+import { fmtPath, fmtPathAsTag } from '../utility/path.js';
 import { SB_ERR_LG, SB_OK_LG } from '../utility/string.js';
+import { dlogConfInfo, clogConfInfo } from '../utility/config.js';
 
 /**
  * Attempts to download the example.config.yml from the project repository,

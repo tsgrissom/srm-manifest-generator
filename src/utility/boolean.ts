@@ -69,7 +69,7 @@ function formattedBoolean(
     let str = b ? trueStr : falseStr;
     if (capitalize) str = strCapitalize(str);
     if (!color) return str;
-    return b ? clr.greenBright(str) : clr.redBright(str);
+    return b ? clr.green(str) : clr.red(str);
 }
 
 // TODO jsdoc

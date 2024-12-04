@@ -4,8 +4,7 @@ import { dlog } from '../../../utility/debug.js';
 import { USER_CONFIG_FILENAME } from '../../load-data.js';
 import { clog } from '../../../utility/console.js';
 import { quote, SB_ERR_LG, SB_ERR_SM } from '../../../utility/string.js';
-import { resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
-import { clogConfWarn, dlogConfValueLoaded } from '../../config.js';
+import { clogConfWarn, dlogConfValueLoaded, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
 
 const keyAliases: YamlKeyAliases = {
     filePaths: 'filePaths',

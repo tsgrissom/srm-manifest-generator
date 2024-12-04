@@ -1,13 +1,12 @@
 import clr from 'chalk';
 
-import UserConfig from '../../../type/config/UserConfig.js';
-import { resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
-import { USER_CONFIG_FILENAME } from '../../load-data.js';
-import { dlog } from '../../../utility/debug.js';
-import chalk from 'chalk';
+import { clogConfWarn, dlogConfValueLoaded, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
 import { clog } from '../../../utility/console.js';
+import { dlog } from '../../../utility/debug.js';
 import { quote, SB_ERR_LG, SB_ERR_SM } from '../../../utility/string.js';
-import { clogConfWarn, dlogConfValueLoaded } from '../../config.js';
+import { USER_CONFIG_FILENAME } from '../../load-data.js';
+
+import UserConfig from '../../../type/config/UserConfig.js';
 
 const keyAliases: YamlKeyAliases = {
     useColor: 'useColor',
@@ -19,7 +18,7 @@ const keyAliases: YamlKeyAliases = {
 
 async function parseOtherSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
     if (!Object.keys(data).includes('other')) {
-        dlog(chalk.yellow(`User ${USER_CONFIG_FILENAME} is missing optional section "other"`));
+        dlog(clr.yellow(`User ${USER_CONFIG_FILENAME} is missing optional section "other"`));
     }
 
     const section = (data as Record<string, unknown>)['other'];

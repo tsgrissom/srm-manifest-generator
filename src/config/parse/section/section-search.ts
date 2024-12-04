@@ -1,14 +1,18 @@
 import clr from 'chalk';
 
-import { fmtBool } from '../../../utility/boolean.js';
 import { clog } from '../../../utility/console.js';
-import { delimitedList, quote, SB_ERR_LG, SB_ERR_SM, SB_OK_LG, SB_WARN } from '../../../utility/string.js';
+import { quote, SB_ERR_LG, SB_ERR_SM, SB_OK_LG, SB_WARN } from '../../../utility/string.js';
 
-import { dlogConfValueLoaded, clogConfInvalid, dlogConfInfo, clogConfWarn } from '../../config.js';
 import { USER_CONFIG_FILENAME } from '../../load-data.js';
 import { makeManifests } from '../user-data.js';
 
-import { resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
+import {
+    clogConfInvalid,
+    clogConfWarn,
+    dlogConfValueLoaded,
+    resolveKeyFromAlias,
+    YamlKeyAliases
+} from '../../../utility/config.js';
 import UserConfig from '../../../type/config/UserConfig.js';
 
 const keyAliases: YamlKeyAliases = {

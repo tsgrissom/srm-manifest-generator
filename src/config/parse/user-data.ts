@@ -3,16 +3,17 @@ import fs from 'node:fs';
 import clr from 'chalk';
 import yaml from 'yaml';
 
+import { checkCross } from '../../utility/boolean.js';
+import { clogConfInfo, clogConfWarn } from '../../utility/config.js';
 import { clog } from '../../utility/console.js';
-import { clogConfInfo, clogConfWarn, USER_CONFIG_FILENAME } from '../config.js';
+import { USER_CONFIG_FILENAME } from '../config.js';
 import { dlog } from '../../utility/debug.js';
-import { checkCross, enabledDisabled } from '../../utility/boolean.js';
+import { fmtPath, fmtPathAsTag } from '../../utility/path.js';
+import { SB_OK_LG, SB_WARN } from '../../utility/string.js';
 
 import ConfigData from '../../type/config/ConfigData.js';
 import Manifest from '../../type/manifest/Manifest.js';
 import ManifestData from '../../type/manifest/ManifestData.js';
-import { fmtPath, fmtPathAsTag } from '../../utility/path.js';
-import { SB_OK_LG, SB_WARN } from '../../utility/string.js';
 
 async function makeManifests(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
     dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
