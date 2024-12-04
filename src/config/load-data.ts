@@ -1,7 +1,14 @@
 import fs from 'node:fs';
 import https from 'node:https';
 
+import chalk from 'chalk';
 import yaml from 'yaml';
+
+
+import { clog } from '../utility/console';
+import { fmtPath, fmtPathAsTag } from '../utility/path';
+import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../utility/symbols';
+import { dlogConfInfo, clogConfInfo } from '../utility/config';
 
 import {
     EXAMPLE_CONFIG_FILENAME,
@@ -9,12 +16,7 @@ import {
     EXAMPLE_CONFIG_URL,
     USER_CONFIG_FILENAME,
     USER_CONFIG_PATH
- } from './config.js';
-import { clog } from '../utility/console.js';
-import chalk from 'chalk';
-import { fmtPath, fmtPathAsTag } from '../utility/path.js';
-import { SB_ERR_LG, SB_OK_LG } from '../utility/string.js';
-import { dlogConfInfo, clogConfInfo } from '../utility/config.js';
+ } from './config';
 
 /**
  * Attempts to download the example.config.yml from the project repository,
@@ -49,11 +51,11 @@ async function downloadExampleConfig() : Promise<boolean> {
             };
 
             fileStreamExample.on('finish', () => {
-                clog(` ${SB_OK_LG} Restored "${EXAMPLE_CONFIG_FILENAME}" from GitHub ${fmtPathAsTag(EXAMPLE_CONFIG_PATH)}`);
+                clog(`${SB_OK_LG} Restored "${EXAMPLE_CONFIG_FILENAME}" from GitHub ${fmtPathAsTag(EXAMPLE_CONFIG_PATH)}`);
                 onStreamFinish();
             });
             fileStreamUser.on('finish', () => {
-                clog(` ${SB_OK_LG} Copied "${EXAMPLE_CONFIG_FILENAME}" to ${fmtPath(USER_CONFIG_PATH)}`);
+                clog(`${SB_OK_LG} Copied "${EXAMPLE_CONFIG_FILENAME}" to ${fmtPath(USER_CONFIG_PATH)}`);
                 onStreamFinish();
             });
 
@@ -82,12 +84,11 @@ async function copyExampleConfigToUserConfigPath() : Promise<void> {
         throw new Error(chalk.red(`copyExampleConfigToUserConfigPath was invoked but ${USER_CONFIG_PATH} already exists`));
     } catch { /* empty */ }
 
-    try {
-        const exampleConfigFile = await fs.promises.readFile(EXAMPLE_CONFIG_PATH, 'utf8');
+    try { const exampleConfigFile = await fs.promises.readFile(EXAMPLE_CONFIG_PATH, 'utf8');
         await fs.promises.writeFile(USER_CONFIG_PATH, exampleConfigFile, 'utf8');
-        clog(` ${SB_OK_LG} Default config copied to ${USER_CONFIG_PATH}`);
+        clog(`${SB_OK_LG} Default config copied to ${USER_CONFIG_PATH}`);
     } catch (err) {
-        console.error(`Failed to copy example config to ${USER_CONFIG_PATH}:`, err);
+        console.error(`${SB_ERR_LG} Failed to copy example config to ${USER_CONFIG_PATH}:`, err);
     }
 }
 
@@ -124,10 +125,10 @@ async function loadUserConfigData() {
 
     try {
         exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');
-        dlogConfInfo(`Example config exists ${tagExampleConfPath}`);
+        dlogConfInfo(`${SB_OK_LG} Example config exists ${tagExampleConfPath}`);
     } catch {
         // TODO Allow disabling this in the config
-        clogConfInfo(`Example config was missing from its typical location ${tagExampleConfPath}`);
+        clogConfInfo(`${SB_WARN} Example config was missing from its typical location ${tagExampleConfPath}`);
         await downloadExampleConfig();
     }
 

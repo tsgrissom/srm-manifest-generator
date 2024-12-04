@@ -1,10 +1,11 @@
-import UserConfig from '../../../type/config/UserConfig.js';
+import UserConfig from '../../../type/config/UserConfig';
 import clr from 'chalk';
-import { dlog } from '../../../utility/debug.js';
-import { USER_CONFIG_FILENAME } from '../../load-data.js';
-import { clog } from '../../../utility/console.js';
-import { quote, SB_ERR_SM, SB_ERR_LG } from '../../../utility/string.js';
-import { clogConfWarn, dlogConfValueLoaded, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
+import { dlog } from '../../../utility/debug';
+import { USER_CONFIG_FILENAME } from '../../load-data';
+import { clog } from '../../../utility/console';
+import { quote } from '../../../utility/string';
+import { SB_ERR_SM, SB_ERR_LG } from '../../../utility/symbols';
+import { clogConfWarn, dlogConfValueLoaded, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config';
 
 const keyAliases: YamlKeyAliases = {
     enabled: 'enabled',

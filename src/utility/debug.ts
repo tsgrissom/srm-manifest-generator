@@ -4,6 +4,7 @@ import color from 'chalk';
 
 import { doArgsInclude } from './misc.js';
 import { clog } from './console.js';
+import chalk from 'chalk';
 
 const FLAGS_DEBUG   = ['-D', '--debug', '--debugging'],
       FLAGS_VERBOSE = ['-v', '--verbose'];
@@ -90,24 +91,24 @@ const getDebugPrefix = (useColor = true) => `${useColor ? color.bgMagenta('DEBUG
 const dlog = (...lines: any[]) => isDebugActive() && lines.forEach(e => clog(e));
 
 /**
- * Logs a message to standard output if debugging is active, which
- * occurs if the current process or environment is debugging.
+ * If debugging is active, logs an emphasized header message styled
+ * with magenta color and underline formatting.
  * 
  * See: {@link isDebugActive}
  * 
  * @param header The primary message and body of the header.
- * @param usePfx Whether to apply the debug prefix to the header.
- * * Default: true
- * @param useColor Whether to add color to the header prefix. Does not
- *   affect color applied in the primary message.
- * * Default: true
+ * @param newlineBefore Whether to log a newline immediately
+ *  before loggin the header to visually separate the output.
+ * * Default: false
  */
-const dlogHeader = (header: string, usePfx = true, useColor = true) => {
-    if (!header || (typeof header === 'string' && header.trim() === '')) {
+const dlogHeader = (header: string, newlineBefore = false) => {
+    if (!header || (typeof header === 'string' && header.trim() === ''))
         return;
-    } else {
-        dlog((usePfx ? getDebugPrefix(useColor) : '') + ' ' + header);
-    }
+
+    if (newlineBefore)
+        dlog('');
+
+    dlog(chalk.magenta.underline(header));
 }
 
 /**

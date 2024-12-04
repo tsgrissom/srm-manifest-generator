@@ -1,10 +1,10 @@
-import UserConfig from '../../../type/config/UserConfig.js';
+import UserConfig from '../../../type/config/UserConfig';
 import chalk from 'chalk';
-import { dlog } from '../../../utility/debug.js';
-import { USER_CONFIG_FILENAME } from '../../load-data.js';
-import { clogConfWarn, dlogConfValueLoaded, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
-import { clog } from '../../../utility/console.js';
-import { quote, SB_ERR_LG, SB_ERR_SM, SB_WARN } from '../../../utility/string.js';
+import { dlog } from '../../../utility/debug';
+import { clogConfValueWrongType, clogConfWarn, dlogConfMissingOptionalSection, dlogConfSectionStart, dlogConfSectionOk, dlogConfValueLoaded, joinPathKey, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config';
+import { clog } from '../../../utility/console';
+import { quote } from '../../../utility/string';
+import { SB_ERR_LG, SB_ERR_SM, SB_OK_LG } from '../../../utility/symbols'
 
 const keyAliases: YamlKeyAliases = {
     minify: 'minify',
@@ -15,25 +15,31 @@ const keyAliases: YamlKeyAliases = {
 }
 
 async function parseOutputSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes('output')) {
-        dlog(`${SB_WARN} User ${USER_CONFIG_FILENAME} is missing optional section "output"`);
+    const sectionKey = 'output';
+    
+    if (!Object.keys(data).includes(sectionKey)) {
+        dlogConfMissingOptionalSection(sectionKey);
         return userConfig;
     }
 
-    const section = (data as Record<string, unknown>)['output'];
+    const section = (data as Record<string, unknown>)[sectionKey];
 
     if (typeof section !== 'object' || section === null) {
-        clog(`${SB_ERR_LG} User ${USER_CONFIG_FILENAME} key "output" should be a section, but was a ${typeof section}`);
+        clog(`${SB_ERR_LG} Skipped section "output": Value of "output" should be a section but was a ${typeof section}`);
         return userConfig;
     }
+
     if (Array.isArray(section)) {
-        clog(` ${SB_ERR_LG} User ${USER_CONFIG_FILENAME} "output" section must be a mapping, not a list`);
-        clog(`${SB_ERR_LG} User ${USER_CONFIG_FILENAME}`)
+        clog(`${SB_ERR_LG} Skipped section: "output": Value of "output" should be a section but was an array`);
         return userConfig;
     }
+
+    dlogConfSectionStart('output');
     
     for (const [key, value] of Object.entries(section)) {
         const resolved = resolveKeyFromAlias(keyAliases, key);
+        const fullAliasKey = joinPathKey('output', key);
+        const fullRealKey  = joinPathKey('output')
 
         switch (resolved) {
             case 'minify': {
@@ -58,7 +64,7 @@ async function parseOutputSection(data: object, userConfig: UserConfig) : Promis
             }
             case 'mode': {
                 if (typeof value !== 'string') {
-                    clog(` ${SB_ERR_SM} Value of key "output.mode" must be a string but was not: ${value}`);
+                    clogConfValueWrongType('output.mode', 'string', value);
                     break;
                 }
 
@@ -72,6 +78,9 @@ async function parseOutputSection(data: object, userConfig: UserConfig) : Promis
             }
         }
     }
+
+    dlog(`${SB_OK_LG} ` + chalk.underline(`Loaded: Config section "output"`));
+    dlogConfSectionOk('output');
 
     return userConfig;
 }

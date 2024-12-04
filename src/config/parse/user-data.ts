@@ -3,17 +3,17 @@ import fs from 'node:fs';
 import clr from 'chalk';
 import yaml from 'yaml';
 
-import { checkCross } from '../../utility/boolean.js';
-import { clogConfInfo, clogConfWarn } from '../../utility/config.js';
-import { clog } from '../../utility/console.js';
-import { USER_CONFIG_FILENAME } from '../config.js';
-import { dlog } from '../../utility/debug.js';
-import { fmtPath, fmtPathAsTag } from '../../utility/path.js';
-import { SB_OK_LG, SB_WARN } from '../../utility/string.js';
+import { checkCross } from '../../utility/boolean';
+import { clogConfInfo, clogConfWarn } from '../../utility/config';
+import { clog } from '../../utility/console';
+import { USER_CONFIG_FILENAME } from '../config';
+import { dlog, dlogHeader } from '../../utility/debug';
+import { fmtPath, fmtPathAsTag } from '../../utility/path';
+import { SB_OK_LG, SB_WARN } from '../../utility/symbols';
 
-import ConfigData from '../../type/config/ConfigData.js';
-import Manifest from '../../type/manifest/Manifest.js';
-import ManifestData from '../../type/manifest/ManifestData.js';
+import ConfigData from '../../type/config/ConfigData';
+import Manifest from '../../type/manifest/Manifest';
+import ManifestData from '../../type/manifest/ManifestData';
 
 async function makeManifests(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
     dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
@@ -184,7 +184,7 @@ async function validateManifestFileContents(manPath: string, object: object) : P
     if (hasAttrShortcuts) {
         // TODO Load shortcuts
 
-        dlog(clr.magentaBright.underline(`LOADING SHORTCUTS FROM MANIFEST: ${instance.getName()}`));
+        dlogHeader(`LOADING SHORTCUTS FROM MANIFEST: ${instance.getName()}`);
 
         
     }

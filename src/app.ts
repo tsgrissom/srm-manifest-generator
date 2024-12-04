@@ -1,13 +1,13 @@
 import clr from 'chalk';
 
-import { clog } from './utility/console.js';
-import { dlog } from './utility/debug.js';
+import { clog } from './utility/console';
+import { dlog } from './utility/debug';
 
-import Manifest from './type/manifest/Manifest.js';
+import Manifest from './type/manifest/Manifest';
 
-import parseUserConfigData from './config/config.js';
-import { fmtPath } from './utility/path.js';
-import { SB_OK_LG } from './utility/string.js';
+import parseUserConfigData from './config/config';
+import { fmtPath } from './utility/path';
+import { SB_OK_LG } from './utility/symbols';
 
 async function processManifest(manifest: Manifest) {
     // TODO Additionally validate if write path is valid, make folders if missing

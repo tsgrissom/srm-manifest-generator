@@ -1,19 +1,19 @@
 import clr from 'chalk';
 
-import { clog } from '../../../utility/console.js';
-import { quote, SB_ERR_LG, SB_ERR_SM, SB_OK_LG, SB_WARN } from '../../../utility/string.js';
+import { clog } from '../../../utility/console';
+import { quote } from '../../../utility/string';
+import { SB_ERR_LG, SB_ERR_SM, SB_OK_LG, SB_WARN } from '../../../utility/symbols'
 
-import { USER_CONFIG_FILENAME } from '../../load-data.js';
-import { makeManifests } from '../user-data.js';
+import { USER_CONFIG_FILENAME } from '../../load-data';
+import { makeManifests } from '../user-data';
 
 import {
-    clogConfInvalid,
     clogConfWarn,
     dlogConfValueLoaded,
     resolveKeyFromAlias,
     YamlKeyAliases
-} from '../../../utility/config.js';
-import UserConfig from '../../../type/config/UserConfig.js';
+} from '../../../utility/config';
+import UserConfig from '../../../type/config/UserConfig';
 
 const keyAliases: YamlKeyAliases = {
     directories: 'scanDirectories',
@@ -100,9 +100,9 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                     } 
                 } else {
                     if (!Array.isArray(value)) {
-                        clogConfInvalid('Value of search.manifests must be array of strings but was not an array');
+                        clog(` ${SB_ERR_LG} Value of config key "search.manifests" must be an array of strings but was not an array`);
                     } else {
-                        clogConfInvalid('All entries of search.manifests must be a string but at least one was not');
+                        clog(` ${SB_ERR_LG} Values inside array value of key "search.manifests" must all be strings, but at least one was a non-string`);
                     }
                 }
                 break;

@@ -1,12 +1,13 @@
 import clr from 'chalk';
 
-import { clogConfWarn, dlogConfValueLoaded, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config.js';
-import { clog } from '../../../utility/console.js';
-import { dlog } from '../../../utility/debug.js';
-import { quote, SB_ERR_LG, SB_ERR_SM } from '../../../utility/string.js';
-import { USER_CONFIG_FILENAME } from '../../load-data.js';
+import { clogConfWarn, dlogConfValueLoaded, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config';
+import { clog } from '../../../utility/console';
+import { dlog } from '../../../utility/debug';
+import { quote } from '../../../utility/string';
+import { SB_ERR_LG, SB_ERR_SM } from '../../../utility/symbols';
+import { USER_CONFIG_FILENAME } from '../../load-data';
 
-import UserConfig from '../../../type/config/UserConfig.js';
+import UserConfig from '../../../type/config/UserConfig';
 
 const keyAliases: YamlKeyAliases = {
     useColor: 'useColor',

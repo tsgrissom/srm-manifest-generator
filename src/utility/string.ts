@@ -1,33 +1,50 @@
-import clr from 'chalk';
-import { isDebugActive } from './debug.js';
-
-export const UNICODE_CHECK_SM = '\u2713',
-             UNICODE_CHECK_LG = '\u2714',
-             UNICODE_XMARK_SM = '\u2715',
-             UNICODE_XMARK_LG = '\u2716',
-             UNICODE_WARN     = '\u26A0';
-
-export const SB_OK_SM  = clr.greenBright(UNICODE_CHECK_SM);
-export const SB_OK_LG  = clr.greenBright(UNICODE_CHECK_LG);
-export const SB_WARN   = clr.yellowBright(UNICODE_WARN)
-export const SB_ERR_SM = clr.redBright(UNICODE_XMARK_SM);
-export const SB_ERR_LG = clr.redBright(UNICODE_XMARK_LG);
+import { isDebugActive } from './debug';
 
 // MARK: capitalize
 
 // TODO jsdoc
-// TODO TEST Unit
-export function capitalize(str: string) {
-    if (str.trim() === '') return str;
-    
-    const firstLetter = str.substring(0, 1);
-    const restOfStr   = str.substring(1, str.length);
+// TEST Unit
+export const capitalize = (s: string) : string => {
+    if (s.trim() === '' || s.length < 1) return s;
 
-    return firstLetter.toUpperCase() + restOfStr;
+    const firstChar = s.substring(0,1);
+
+    if (s.length === 1) {
+        return firstChar.toUpperCase();
+    } else {
+        const theRest = s.substring(1, s.length);
+        return firstChar.toUpperCase() + theRest;
+    }
 }
 
-function isCapitalized() {
-    // TODO
+// TODO jsdoc
+// TEST Unit
+export const isCapitalized = (s: string) : boolean => {
+    if (s.trim() === '') return false;
+    const firstChar = s.substring(0, 1);
+    return firstChar.toLowerCase() !== firstChar;
+}   
+
+/**
+ * Attempts to infer an English indefinite article for a
+ * given noun based on the first letter of the given
+ * argument: Either "a" or "an".
+ * 
+ * If your noun is an edge case where its first letter is
+ * a consonant but has a vowel sound, don't use this method
+ * and try to hardcode a solution.
+ * 
+ * @param noun The noun to attempt inference of the
+ *  correct English article from.
+ * @returns One of either string literal: `"a"` or `"an"`.
+ */
+// TEST Unit
+export const indefiniteArticleFor = (noun: string) : string => {
+    if (noun.trim() === '') return '';
+    const startsWithVowel = ['a','e','i','o','u']
+        .includes(noun.substring(0, 1).toLowerCase());
+
+    return startsWithVowel ? 'an' : 'a';
 }
 
 // MARK: describeQuantity

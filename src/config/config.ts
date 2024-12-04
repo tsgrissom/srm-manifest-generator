@@ -1,45 +1,53 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// Disabled for special config clog and dlog functions
-
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import clr from 'chalk';
 
-import { clog } from '../utility/console.js';
-import { dlog, isDebugActive } from '../utility/debug.js';
-import { fmtBool } from '../utility/boolean.js';
+import { dlogHeader } from '../utility/debug';
 
-import UserConfig from '../type/config/UserConfig.js';
+import ConfigData from '../type/config/ConfigData';
+import UserConfig from '../type/config/UserConfig';
 
-import { loadUserConfigData } from './load-data.js';
-import ConfigData from '../type/config/ConfigData.js';
-import parseSearchSection from './parse/section/section-search.js';
-import parseValidateSection from './parse/section/section-validate.js';
-import parseOutputSection from './parse/section/section-output.js';
-import parseOtherSection from './parse/section/section-other.js';
-import parseLogsSection from './parse/section/section-logs.js';
-import { quote, SB_ERR_LG, SB_OK_LG, SB_OK_SM, SB_WARN } from '../utility/string.js';
+import { loadUserConfigData } from './load-data';
+import parseSearchSection from './parse/section/section-search';
+import parseValidateSection from './parse/section/section-validate';
+import parseOutputSection from './parse/section/section-output';
+import parseOtherSection from './parse/section/section-other';
+import parseLogsSection from './parse/section/section-logs';
 
-export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
-export const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
-export const EXAMPLE_CONFIG_URL = `https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main${EXAMPLE_CONFIG_PATH}`;
+export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml',
+             EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME),
+             EXAMPLE_CONFIG_URL = `https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main${EXAMPLE_CONFIG_PATH}`;
+            // TODO How can I get this last one dynamically?
 
-export const README_URL = 'https://github.com/tsgrissom/srm-manifest-generator'; // TODO Get from package.json
-
-export const USER_CONFIG_FILENAME = 'config.yml';
-export const USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME) // PATH_EXAMPLE_CONFIG;
-export const USER_CONFIG_PFX = 'Config';
-export const USER_CONFIG_ATTRIBUTION = `User ${USER_CONFIG_FILENAME}`;
+export const USER_CONFIG_FILENAME = 'config.yml',
+             USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME),
+             USER_CONFIG_PFX = 'Config',
+             USER_CONFIG_ATTRIBUTION = `User ${USER_CONFIG_FILENAME}`;
 
 // MARK: LOAD + PARSE
+
+const logUrlToExampleConf = () => {
+    const urlStyled = clr.redBright.underline(EXAMPLE_CONFIG_URL);
+    console.error(`For an example config, please see: ${urlStyled}`);
+}
+
+const logConfErrMalformed = (msg: string) => {
+    console.error(`User ${clr.redBright(USER_CONFIG_FILENAME)} is malformed: ${msg}`);
+    logUrlToExampleConf();
+}
+
+const logConfGenericLoadErr = (msg: string) => {
+    console.error(clr.red(msg));
+    logUrlToExampleConf();
+}
 
 async function loadData() : Promise<object> {
     try {
         const data = await loadUserConfigData();
         return data;
     } catch (err) {
-        throw new Error(`Error loading user config data: ${err}`);
+        throw new Error(`Failed to load user config data: ${err}`);
     }
 }
 
@@ -47,23 +55,33 @@ async function parseUserConfigData() : Promise<ConfigData> {
     const userConfigData = await loadData();
 
     if (!userConfigData) {
+        const userConfName = clr.redBright(USER_CONFIG_FILENAME);
+
+        // TODO Test and see how this looks
         try {
-            await fs.promises.access(USER_CONFIG_PATH);
-            throw new Error(`Your ${USER_CONFIG_FILENAME} cannot be empty.`);
+            await fs.access(USER_CONFIG_PATH);
+            logConfGenericLoadErr(`Your ${userConfName} cannot be empty.`);
         } catch {
-            throw new Error(`You must create a ${USER_CONFIG_FILENAME} to use SRM Manifest Generator`)
+            logConfGenericLoadErr(`You must create a ${userConfName} to use SRM Manifest Generator.`);
         }
+
+        process.exit();
     }
 
-    if (typeof userConfigData !== 'object' || Array.isArray(userConfigData)) {
-        console.error(clr.red(`
-            User Config is malformed: Expected parsed data to be of type object, but was actually an array or other non-object.
-            For an example config, please see: ${EXAMPLE_CONFIG_URL}
-        `));
-        throw new Error(`User ${USER_CONFIG_FILENAME} is invalid`);
-    }  
+    const isObject = typeof userConfigData === 'object';
+    const isArray  = Array.isArray(userConfigData);
 
-    dlog(clr.magenta.underline('LOADING USER CONFIG'));
+    if (!isObject || isArray) {
+        if (!isObject) {
+            logConfErrMalformed(`Expected file contents to be of type object, but was actually a ${typeof userConfigData}`);
+        } else if (isArray) {
+            logConfErrMalformed(`Expected file contents to be of type object, but was actually an array.`);
+        }
+
+        process.exit();
+    }
+
+    dlogHeader('LOADING USER CONFIG')
 
     let userConfig = new UserConfig();
 

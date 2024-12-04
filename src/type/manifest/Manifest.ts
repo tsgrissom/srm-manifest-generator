@@ -3,26 +3,32 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { dlog, dlogDataSection } from '../../utility/debug.js';
+import { clog } from '../../utility/console';
+import { dlog, dlogDataSection } from '../../utility/debug';
 import {
     basenameWithoutExtensions,
-    fmtPathWithExistsPrefix,
     fmtPathAsTag,
     fmtPath,
     fmtPathWithExistsAndName
-} from '../../utility/path.js';
-import { clog } from '../../utility/console.js';
-import { quote, SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_CHECK_LG, UNICODE_WARN, UNICODE_XMARK_LG } from '../../utility/string.js';
+} from '../../utility/path';
+import { quote } from '../../utility/string';
+import {
+    SB_ERR_LG,
+    SB_OK_LG,
+    SB_WARN,
+    UNICODE_CHECK_LG,
+    UNICODE_WARN,
+    UNICODE_XMARK_LG
+} from '../../utility/symbols';
 
-import ManifestData from './ManifestData.js';
-import ManifestNameSource from './ManifestNameSource.js';
-import ManifestWriteResults from './ManifestWriteResults.js';
+import ManifestData from './ManifestData';
+import ManifestNameSource from './ManifestNameSource';
+import ManifestWriteResults from './ManifestWriteResults';
 
-import Shortcut from '../shortcut/Shortcut.js';
-import ShortcutExportData from '../shortcut/ShortcutExportData.js';
-import EmptyManifestWriteResults from './ManifestEmptyWriteResults.js';
-import ConfigData from '../config/ConfigData.js';
-import UserConfig from '../config/UserConfig.js';
+import Shortcut from '../shortcut/Shortcut';
+import ShortcutExportData from '../shortcut/ShortcutExportData';
+import EmptyManifestWriteResults from './ManifestEmptyWriteResults';
+import UserConfig from '../config/UserConfig';
 
 // TODO getName by ManifestNameSource
 
