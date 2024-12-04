@@ -6,6 +6,8 @@ import { dlog } from './utility/debug.js';
 import Manifest from './type/manifest/Manifest.js';
 
 import parseUserConfigData from './config/config.js';
+import { fmtPath } from './utility/path.js';
+import { SB_OK_LG } from './utility/string.js';
 
 async function processManifest(manifest: Manifest) {
     // TODO Additionally validate if write path is valid, make folders if missing
@@ -22,7 +24,7 @@ async function processManifest(manifest: Manifest) {
     try {
         const writeResults = await manifest.writeToOutput();
         await manifest.logWriteResults(writeResults);
-        clog(clr.green(`Manifest output has been written to ${manPath}`)); // TODO Better message
+        clog(` ${SB_OK_LG} Manifest output has been written to ${fmtPath(manPath)}`);
     } catch (err) {
         throw new Error(`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}): ${err}`);
     }

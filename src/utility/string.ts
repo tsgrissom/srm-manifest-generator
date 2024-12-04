@@ -1,16 +1,17 @@
 import clr from 'chalk';
-import { isDebugActive } from './debug';
+import { isDebugActive } from './debug.js';
 
-export const SYMB_CHECKMARK_SM = '\u2713';
-export const SYMB_CHECKMARK_LG = '\u2714';
-export const SYMB_XMARK_SM     = '\u2715';
-export const SYMB_XMARK_LG     = '\u2716';
+export const UNICODE_CHECK_SM = '\u2713',
+             UNICODE_CHECK_LG = '\u2714',
+             UNICODE_XMARK_SM = '\u2715',
+             UNICODE_XMARK_LG = '\u2716',
+             UNICODE_WARN     = '\u26A0';
 
-export const SYMB_OK_SM  = clr.greenBright(SYMB_CHECKMARK_SM);
-export const SYMB_OK_LG  = clr.greenBright(SYMB_CHECKMARK_LG);
-export const SYMB_WARN   = clr.yellowBright.bold('\u26A0')
-export const SYMB_ERR_SM = clr.redBright(SYMB_XMARK_SM);
-export const SYMB_ERR_LG = clr.redBright(SYMB_XMARK_LG);
+export const SB_OK_SM  = clr.greenBright(UNICODE_CHECK_SM);
+export const SB_OK_LG  = clr.greenBright(UNICODE_CHECK_LG);
+export const SB_WARN   = clr.yellowBright(UNICODE_WARN)
+export const SB_ERR_SM = clr.redBright(UNICODE_XMARK_SM);
+export const SB_ERR_LG = clr.redBright(UNICODE_XMARK_LG);
 
 // MARK: capitalize
 

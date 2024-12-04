@@ -6,7 +6,7 @@ import { USER_CONFIG_FILENAME } from '../../load-data.js';
 import { dlog } from '../../../utility/debug.js';
 import chalk from 'chalk';
 import { clog } from '../../../utility/console.js';
-import { quote, SYMB_ERR_LG, SYMB_ERR_SM } from '../../../utility/string.js';
+import { quote, SB_ERR_LG, SB_ERR_SM } from '../../../utility/string.js';
 import { clogConfWarn, dlogConfValueLoaded } from '../../config.js';
 
 const keyAliases: YamlKeyAliases = {
@@ -25,23 +25,21 @@ async function parseOtherSection(data: object, userConfig: UserConfig) : Promise
     const section = (data as Record<string, unknown>)['other'];
 
     if (typeof section !== 'object' || section === null) {
-        clog(` ${SYMB_ERR_LG} User ${USER_CONFIG_FILENAME} "other" section is not a valid mapping`);
+        clog(` ${SB_ERR_LG} User ${USER_CONFIG_FILENAME} "other" section is not a valid mapping`);
         return userConfig;
     }
     if (Array.isArray(section)) {
-        clog(` ${SYMB_ERR_LG} User ${USER_CONFIG_FILENAME} "other" section must be a mapping, not a list`);
+        clog(` ${SB_ERR_LG} User ${USER_CONFIG_FILENAME} "other" section must be a mapping, not a list`);
         return userConfig;
     }
 
-    const resolveAlias = (key: string) : string => resolveKeyFromAlias(keyAliases, key);
-
     for (const [key, value] of Object.entries(section)) {
-        const resolved = resolveAlias(key);
+        const resolved = resolveKeyFromAlias(keyAliases, key);
 
         switch (resolved) {
             case 'debug': {
                 if (typeof value !== 'boolean') {
-                    clog(` ${SYMB_ERR_SM} Value of key "other.debug" must be a boolean but was not: ${value}`);
+                    clog(` ${SB_ERR_SM} Value of key "other.debug" must be a boolean but was not: ${value}`);
                     break;
                 }
 
@@ -51,7 +49,7 @@ async function parseOtherSection(data: object, userConfig: UserConfig) : Promise
             }
             case 'useColor': {
                 if (typeof value !== 'boolean') {
-                    clog(` ${SYMB_ERR_SM} Value of key "other.useColor" must be a boolean but was not: ${value}`);
+                    clog(` ${SB_ERR_SM} Value of key "other.useColor" must be a boolean but was not: ${value}`);
                     break;
                 }
                 
@@ -61,7 +59,7 @@ async function parseOtherSection(data: object, userConfig: UserConfig) : Promise
             }
             case 'verbose': {
                 if (typeof value !== 'boolean') {
-                    clog(` ${SYMB_ERR_SM} Value of key "other.verbose" must be a boolean but was not: ${value}`);
+                    clog(` ${SB_ERR_SM} Value of key "other.verbose" must be a boolean but was not: ${value}`);
                     break;
                 }
                 

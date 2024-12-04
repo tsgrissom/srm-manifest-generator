@@ -11,8 +11,8 @@ import { checkCross, enabledDisabled } from '../../utility/boolean.js';
 import ConfigData from '../../type/config/ConfigData.js';
 import Manifest from '../../type/manifest/Manifest.js';
 import ManifestData from '../../type/manifest/ManifestData.js';
-import { SYMB_CHECKMARK_LG, SYMB_XMARK_LG } from '../../utility/string.js';
 import { fmtPath, fmtPathAsTag } from '../../utility/path.js';
+import { SB_OK_LG, SB_WARN } from '../../utility/string.js';
 
 async function makeManifests(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
     dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
@@ -20,14 +20,14 @@ async function makeManifests(manPaths: string[], config: ConfigData) : Promise<M
     const okManifests: Manifest[] = [];
 
     if (manPaths.length === 0) {
-        clogConfInfo(` ${SYMB_XMARK_LG} Manifest paths list was empty. No manifests will be loaded or processed.`);
+        clogConfInfo(` ${SB_WARN} Manifest paths list was empty. No manifests will be loaded or processed.`);
         return okManifests;
     }
 
     for (const [index, manPath] of manPaths.entries()) {
         const id = index+1;
         const pathTag = fmtPathAsTag(manPath);
-        dlog(` > Manifest #${id} > Began processing of manifest file ${pathTag}`);
+        dlog(` > MANIFEST #${id}: Began validating manifest file ${pathTag}`);
 
         const exists   = await validateManifestPathExists(manPath);
         const okFsType = await validateManifestPathIsSupportedFilesystemType(manPath, config);
@@ -46,7 +46,7 @@ async function makeManifests(manPaths: string[], config: ConfigData) : Promise<M
 
         okManifests.push(instance);
 
-        dlog(` ${SYMB_CHECKMARK_LG} Manifest #${id}: Finished processing of manifest file ${fmtPathAsTag(pathTag)}`);
+        dlog(` ${SB_OK_LG} MANIFEST #${id}: Finished validation of manifest path ${fmtPathAsTag(pathTag)}`);
     }
     
     return okManifests;
@@ -78,13 +78,8 @@ async function validateManifestPathIsSupportedFilesystemType(filePath: string, c
         const { scanDirectories, scanRecursively } = config.search;
 
         if (stats.isFile()) {
-            dlog(`Manpath is a file ${pathTag}`);
             return true;
         } else if (stats.isDirectory()) {
-            dlog(`> Manpath is a directory ${pathTag}`);
-            dlog(`- Scan Directories? ${enabledDisabled(scanDirectories)}`);
-            dlog(`- Scan Recursively? ${enabledDisabled(scanRecursively)}`);
-
             if (!scanDirectories) {
                 clogConfWarn(`Manifests file path list contains a path pointing to a directory, but scanning directories is disabled by the user's ${USER_CONFIG_FILENAME}. The following path will be skipped: ${filePath}`);
                 return false;
@@ -103,8 +98,6 @@ async function validateManifestPathIsSupportedFilesystemType(filePath: string, c
 
 async function readManifestFile(manPath: string) : Promise<object> {
     const pathTag = fmtPathAsTag(manPath);
-    
-    dlog(`Reading Manfile > Starting ${manPath}`);
 
     if (!manPath)
         throw new Error(`Required arg manPath was invalid ${manPath}`);
@@ -114,7 +107,6 @@ async function readManifestFile(manPath: string) : Promise<object> {
     try {
         const contents = await fs.promises.readFile(manPath, 'utf-8');
         const object = yaml.parse(contents);
-        dlog(`Reading Manfile > Finished ${manPath}`);
         return object;
     } catch (err) {
         throw new Error(`Unable to read manifest file at manpath ${pathTag}: ${err}`);
@@ -154,6 +146,8 @@ async function validateManifestFileContents(manPath: string, object: object) : P
         }
     }
 
+    // TODO REWRITE
+
     const hasAttrName = keyAliasUsedForName !== '',
           hasAttrRootDir = keyAliasUsedForRootDir !== '',
           hasAttrOutput = keyAliasUsedForOutput !== '',
@@ -164,8 +158,8 @@ async function validateManifestFileContents(manPath: string, object: object) : P
           wasAttrShortcutsAnAlias = keyAliasUsedForName !== '' && keyAliasUsedForName !== 'shortcuts';
     
     // Debug prints
-    dlog(`> Manpath: ${manPath}`);
-    dlog(` ${checkCross(hasAttrName)} Has Optional Name Attribute`);
+    dlog(`MANIFEST FILE: ${fmtPath(manPath)}`);
+    dlog(` ${checkCross(hasAttrName)} Has Optional Name Attribute`); // TODO checkWarn
     if (wasAttrNameAnAlias)
         dlog(` - Alias used: "${keyAliasUsedForName}"`);
     dlog(` ${checkCross(hasAttrShortcuts)} Has Optional Shortcuts Attribute`);
@@ -189,8 +183,9 @@ async function validateManifestFileContents(manPath: string, object: object) : P
     if (hasAttrShortcuts) {
         // TODO Load shortcuts
 
-        dlog(clr.magenta(`LOADING SOME SHORTCUTS FROM MANIFEST: ${instance.getName()}`));
+        dlog(clr.magentaBright.underline(`LOADING SHORTCUTS FROM MANIFEST: ${instance.getName()}`));
 
+        
     }
 
     return data;

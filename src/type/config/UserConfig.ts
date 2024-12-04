@@ -38,9 +38,9 @@ class UserConfig implements ConfigData {
 
     // TODO constructor arg which sets options based on a given ConfigData? then falls back on the defaults?
     
-    getManifestPaths() : string[] {
-        return this.search.manifests.map(man => man.filePath);
-    }
+    public getManifestPaths = () : string[] => this.search.manifests.map(man => man.filePath);
+
+    public isColorEnabled = () => this.other.useColor;
 }
 
 export default UserConfig;

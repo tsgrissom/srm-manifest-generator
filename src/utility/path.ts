@@ -1,10 +1,10 @@
-import fs, { PathLike } from 'node:fs';
+import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import clr from 'chalk';
 
 import ConfigData from '../type/config/ConfigData.js';
-import { clog } from './console.js';
+import { SB_ERR_SM, SB_OK_SM } from './string.js';
 
 /**
  * Checks if a given file path has a file extension. When `fileExt` is set to *,
@@ -16,10 +16,10 @@ import { clog } from './console.js';
  * file extensions so the function returns true if any of the given extensions are
  * found.
  * 
- * @param {string} filePath The filepath to check for the given extensions.
- * @param {*} fileExt String or array of strings indicating which extensions to search for. Set to
+ * @param filePath The filepath to check for the given extensions.
+ * @param fileExt String or array of strings indicating which extensions to search for. Set to
  * "*" or keep at default value to return true for the presence of any extension.
- * @returns {boolean} Whether the given file extensions were found for the given filepath.
+ * @returns Whether the given file extensions were found for the given filepath.
  * 
  * @example
  * // Checking for JSON extensions
@@ -59,10 +59,10 @@ export function pathHasFileExtension(filePath: string, fileExt: string | string[
 /**
  * Within the given `fileName`, replaces the `findExt` with `replaceExt` if they are found.
  * 
- * @param {string} fileName The filename you want to find and replace the extension of.
- * @param {Array} findExt The extensions you want to replace if found.
- * @param {string} replaceExt The new extension to append to `fileName`.
- * @param {boolean} normalize Default: `true`. Should extensions be checked to ensure they have a period at
+ * @param fileName The filename you want to find and replace the extension of.
+ * @param findExt The extensions you want to replace if found.
+ * @param replaceExt The new extension to append to `fileName`.
+ * @param normalize Default: `true`. Should extensions be checked to ensure they have a period at
  * the beginning, with one added if they do not?
  * 
  * @returns The `fileName`, with a new file extension `replaceExt` if one in `findExt` was found.
@@ -119,8 +119,8 @@ export function replaceFileExtension(
 /**
  * Normalizes a file extension name by prepending a period to it if needed.
  * 
- * @param {string} extname The file extension to normalize.
- * @param {*} excludeExts A string or string array which decides which extension names should be ignored.
+ * @param extname The file extension to normalize.
+ * @param excludeExts A string or string array which decides which extension names should be ignored.
  * * Default is `*` which does not mean "ignore all file extensions", but to avoid prepending the extname if
  *   it is string literal `*`.
  * 
@@ -155,9 +155,9 @@ export function normalizeFileExtension(
  * Gets a file's basename with selected extensions removed.
  * If `iterate` is enabled, this process will be repeated until none of the extensions are present.
  * 
- * @param {string} fileName The filename to remove the extensions from. 
- * @param {*} extsToRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
- * @param {boolean} iterate Should the basename be iteraviley modified until all of the listed extensions are gone?
+ * @param fileName The filename to remove the extensions from. 
+ * @param extsToRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
+ * @param iterate Should the basename be iteraviley modified until all of the listed extensions are gone?
  * 
  * @returns The final filename after being stripped of some selected extensions, if they were present.
  * 
@@ -269,35 +269,70 @@ export function fmtPath( // FIXME Quote check doesn't seem to work
  *  resolved, which represents whether `filePath` was accessible
  *  or not.
  */
-export async function fmtPathWithExistsTag( // TODO Update jsdoc
+export async function fmtPathWithExistsPrefix( // TODO Update jsdoc
     filePath: string,
     config?: ConfigData,
     usePrefix = true,
-    useColor = true,
+    useSimplePrefix = true,
     useUnderline = true,
     useQuotes = true
 ) : Promise<string> {
     if (typeof filePath !== 'string')
         throw new TypeError(`Arg filePath must be a string: ${filePath}`);    
 
-    const shouldValidateFilePaths = config?.validate.filePaths ?? true;
-
-    if (!shouldValidateFilePaths)
+    if (useUnderline || useQuotes)
+        filePath = fmtPath(filePath, useUnderline, useQuotes);
+    if (!(config?.validate.filePaths ?? true))
         return filePath;
 
-    const sbCheck = '\u2713';
-    const sbXmark = '\u2715'; // TODO Move to its own string function
-    const pfxOk   = '(' + (useColor ? clr.green(sbCheck) : sbCheck) + ') ';
-    const pfxBad  = '(' + (useColor ? clr.red(sbXmark) : sbXmark) + ') ';
-    // TODO Replace with wrap utility function
+    let prefixOk  = '',
+        prefixErr = '';
+    if (usePrefix) {
+        prefixOk =  useSimplePrefix ? SB_OK_SM  + ' ' : '(' + SB_OK_SM  + ') ';
+        prefixErr = useSimplePrefix ? SB_ERR_SM + ' ' : '(' + SB_ERR_SM + ') ';
+    }
+
+    const accessible = await isPathAccessible(filePath);
+    const prefix = usePrefix ? (accessible ? prefixOk : prefixErr) : ' ';
+
+    return prefix + filePath;
+}
+
+export function fmtPathWithName(
+    filePath: string,
+    nickname: string,
+    useUnderline = true,
+    useQuotes = true
+) : string {
+    if (typeof filePath !== 'string')
+        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
 
     if (useUnderline || useQuotes)
         filePath = fmtPath(filePath, useUnderline, useQuotes);
 
-    const accessible = await isPathAccessible(filePath);
-    const prefix = usePrefix ? (accessible ? pfxOk : pfxBad) : ' ';
+    return nickname + ': ' + filePath;
+}
 
-    return prefix + filePath;
+export async function fmtPathWithExistsAndName(
+    filePath: string,
+    nickname: string,
+    config?: ConfigData,
+    linePrefix = '',
+    useUnderline = true,
+    useQuotes = true
+) : Promise<string> {
+    if (typeof filePath !== 'string')
+        throw new TypeError(`Arg filePath must be a string: ${filePath}`);
+
+    if (useUnderline || useQuotes)
+        filePath = fmtPath(filePath, useUnderline, useQuotes);
+    if (!(config?.validate.filePaths ?? true))
+        return filePath;
+
+    const accessible = await isPathAccessible(filePath);
+    const prefix = accessible ? SB_OK_SM : SB_ERR_SM;
+
+    return linePrefix + prefix + ' ' + nickname + ': ' + filePath;
 }
 
 export function fmtPathAsTag(
@@ -318,7 +353,7 @@ export function fmtPathAsTag(
 // TODO TEST Unit
 export async function isPathAccessible(filePath: string) : Promise<boolean> {
     try {
-        await fs.promises.access(filePath);
+        await fs.access(filePath);
         return true;
     } catch {
         return false;

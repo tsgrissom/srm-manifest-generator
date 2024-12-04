@@ -4,7 +4,15 @@ import path from 'node:path';
 import clr from 'chalk';
 
 import { dlog, dlogDataSection } from '../../utility/debug.js';
-import { basenameWithoutExtensions, isPathAccessible, fmtPathWithExistsTag, fmtPathAsTag, fmtPath } from '../../utility/path.js';
+import {
+    basenameWithoutExtensions,
+    fmtPathWithExistsPrefix,
+    fmtPathAsTag,
+    fmtPath,
+    fmtPathWithExistsAndName
+} from '../../utility/path.js';
+import { clog } from '../../utility/console.js';
+import { quote, SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_CHECK_LG, UNICODE_WARN, UNICODE_XMARK_LG } from '../../utility/string.js';
 
 import ManifestData from './ManifestData.js';
 import ManifestNameSource from './ManifestNameSource.js';
@@ -12,10 +20,9 @@ import ManifestWriteResults from './ManifestWriteResults.js';
 
 import Shortcut from '../shortcut/Shortcut.js';
 import ShortcutExportData from '../shortcut/ShortcutExportData.js';
-import { clog } from '../../utility/console.js';
-import chalk from 'chalk';
-import { SYMB_CHECKMARK_LG } from '../../utility/string.js';
 import EmptyManifestWriteResults from './ManifestEmptyWriteResults.js';
+import ConfigData from '../config/ConfigData.js';
+import UserConfig from '../config/UserConfig.js';
 
 // TODO getName by ManifestNameSource
 
@@ -159,15 +166,15 @@ class Manifest {
         // TODO Calculate invalid
 
         if (nOk === 0) {
-            const SYMB_WARN = chalk.yellow('\u26A0'); // TODO Move to string utils if it looks good
-            clog(` ${SYMB_WARN} Skipping Manifest because it has no enabled, valid shortcuts`);
+            clog(`${SB_WARN} Skipped Manifest ${quote(this.getName())} because it had no shortcuts which were enabled and valid`);
+            // TODO Verbose print more info here
             return new EmptyManifestWriteResults(this);
         }
 
         try {
             await fs.writeFile(writePath, writeData);
             dlog(
-                ` ${SYMB_CHECKMARK_LG} Wrote Manifest to file ${fmtPathAsTag(this.filePath)}`,
+                ` ${SB_OK_LG} Wrote Manifest to file ${fmtPathAsTag(this.filePath)}`,
                 ` > Source File: ${fmtPath(this.filePath)}`,
                 ` > Output Path: ${fmtPath(this.getOutputPath())}`,
                 ` > File Written To: ${fmtPath(writePath)}`
@@ -190,107 +197,101 @@ class Manifest {
         }
     }
 
-    private async dlogWriteOperation(results: ManifestWriteResults) {
-        const { stats } = results;
-        dlogDataSection(
-            clr.bgCyanBright('MANIFEST WRITE OPERATION'),
-            '- ',
-            `Source File: ${this.filePath}`,
-            `Total #: ${stats.nTotal}`,
-            `# of Enabled: ${stats.nEnabled}`,
-            `# of Disabled: ${stats.nDisabled}`,
-            `# of Skipped: ${stats.nSkipped}`,
-            `# of Written: ${stats.nOk}`,
-        );
-    }
+    private calculatePrefixForResults(results: ManifestWriteResults, config?: UserConfig) {
+        const { nTotal, nOk, nDisabled } = results.stats;
+        const useColor = config?.isColorEnabled() ?? true;
 
-    public async logWriteResults(results: ManifestWriteResults) {
-        const { manifest, stats } = results;
-        const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } = stats;
-        const isEmpty = nOk === 0 && nEnabled === 0;
+        const ok   = useColor ? SB_OK_LG  : UNICODE_CHECK_LG; // TODO withColor check
+        const err  = useColor ? SB_ERR_LG : UNICODE_XMARK_LG;
+        const warn = useColor ? SB_WARN   : UNICODE_WARN;
 
-        const name = manifest.getName(),
-              writePath = manifest.getWritePath();
-
-        let okRatio = `${stats.nOk}/${stats.nTotal} shortcuts`;
-
-        if (nTotal !== 1)
-            okRatio += 's';
-
-        // Debug info
-        {
-            let header = `Wrote ${okRatio} from source "${name}"`;
-            if (nOk > 1)
-                header += ` to file ${writePath}`;
-
-            dlogDataSection(
-                header,
-                `Name: "${name}"`,
-                `Input File Path: ${fmtPathWithExistsTag(manifest.filePath)}`,
-                `Name From: ${manifest.getNameSource()}`,
-                `Value of Name Attribute: "${manifest.data.name}"`,
-                `Fallback Name: "${manifest.getFallbackName()}"`,
-                `Output Path: ${fmtPathWithExistsTag(manifest.getOutputPath())}`,
-                `Write File Path: ${fmtPathWithExistsTag(manifest.getWritePath())}`,
-                `Root Directory: ${fmtPathWithExistsTag(manifest.data.rootDirectory)}` // TODO Display validation here for paths
-            );
-
-            dlogDataSection(
-                'Number of Shortcuts',
-                `Total #: ${nTotal}`,
-                `# Written: ${nOk}`,
-                `# Enabled: ${nEnabled}`,
-                `# Disabled: ${nDisabled}`,
-                `# Valid: ${nValid}`,
-                `# Invalid: ${nInvalid}`,
-                `# Skipped: ${nSkipped}`
-            );
-        }
-
-        const sbCheck = '\u2713 ';
-        const sbXmark = '\u2715 ';
-        const pfxOk = true ? clr.greenBright.bold(sbCheck) : sbCheck; // TODO withColor check
-        const pfxFail = true ? clr.redBright.bold(sbXmark) : sbXmark;
-        const pfxWarn = true ? clr.yellowBright.bold('!') : '!';
-
-        let wrotePrefix;
+        let prefix;
 
         if (nOk > 0) { // At least one shortcut was ok
             if (nOk === nTotal) { // 100% success
-                wrotePrefix = pfxOk;
+                prefix = ok;
             } else { // Success between 0-100%
                 if (nOk === (nTotal - nDisabled)) {
-                    wrotePrefix = pfxOk;
+                    prefix = ok;
                 } else { // TEST This condition
-                    wrotePrefix = pfxWarn;
+                    prefix = warn;
                 }
             }
         } else { // All shortcuts might have failed
             if (nOk === nTotal) { // Success because there were no shortcuts
-                wrotePrefix = pfxOk;
+                prefix = ok;
             } else { // All shortcuts have failed
-                wrotePrefix = pfxFail;
+                prefix = err;
             }
         }
 
-        // TODO This all needs withColor
+        return prefix;
+    }
 
-        const strOkRatio = true ? clr.magentaBright(okRatio) : okRatio;
-        const strFromSource = `from source ${true ? clr.cyanBright(name) : name}`;
+    private async dlogWriteResults(results: ManifestWriteResults) {
+        const { manifest: man } = results;
+        const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } = results.stats;
+
+        const name = quote(man.getName());
+        const sourceFilePath = await fmtPathWithExistsAndName(man.filePath, 'Source File Path');
+        const outputPath = await fmtPathWithExistsAndName(man.getOutputPath(), 'Output Path');
+        const writeFilePath = await fmtPathWithExistsAndName(man.getWritePath(), 'Write File Path');
+        const rootDirectory = await fmtPathWithExistsAndName(man.data.rootDirectory, 'Root Directory');
+
+        console.log('');
+        dlogDataSection(
+            clr.magentaBright.underline(`MANIFEST ${name} > Write Operation`),
+            ` > `,
+            `Name: ${name}`,
+            `Name From: ${man.getNameSourceAsString()}`,
+            `Value of Name Attribute: ${quote(man.getNameAttribute())}`,
+            `Fallback Name: ${quote(man.getFallbackName())}`,
+            sourceFilePath, outputPath, writeFilePath, rootDirectory
+        );
+
+        dlogDataSection(
+            clr.magentaBright.underline(`MANIFEST ${name} > Numbers`),
+            ` - `,
+            `# Total: ${nTotal}`,
+            `# Written: ${nOk}`,
+            `# Enabled: ${nEnabled}`,
+            `# Disabled: ${nDisabled}`,
+            `# Valid: ${nValid}`,
+            `# Invalid: ${nInvalid}`,
+            `# Skipped: ${nSkipped}`
+        );
+    }
+
+    public async logWriteResults(results: ManifestWriteResults, config?: UserConfig) {
+        this.dlogWriteResults(results);
+
+        const { manifest, stats } = results;
+        const { nTotal, nOk, nEnabled } = stats;
+        const isEmpty = nOk === 0 && nEnabled === 0;
+        const useColor = config?.isColorEnabled() ?? true;
+
+        const name = quote(manifest.getName());
+
+        let okRatio = `${stats.nOk}/${stats.nTotal} shortcut`;
+        if (nTotal > 1) okRatio += 's';
+        okRatio = useColor ? clr.magentaBright(okRatio) : okRatio;
+
+        const sourceName = useColor ? clr.cyanBright(name) : name;
+        const fromSource = 'from source ' + sourceName;
         const emptyAddendum = `(No shortcuts were found)`;
+        const prefix = this.calculatePrefixForResults(results, config);
 
-        let builder = `${wrotePrefix} Wrote `;
+        let header = `${prefix} Wrote `;
         if (nOk > 0) {
-            builder += `${strOkRatio} `;
-            builder += strFromSource;
+            header += okRatio + ' ' + fromSource;
         } else {
-            builder += 'nothing ' + strFromSource;
+            header += 'nothing ' + fromSource;
         }
 
         if (isEmpty)
-            builder += ' ' + emptyAddendum;
+            header += ' ' + emptyAddendum;
 
-        clog(builder);
+        clog(header);
         
         if (isEmpty) {
             dlog(`  - Source File: ${fmtPath(manifest.getFilePath())}`);

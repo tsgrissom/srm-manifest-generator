@@ -102,11 +102,11 @@ const dlog = (...lines: any[]) => isDebugActive() && lines.forEach(e => clog(e))
  *   affect color applied in the primary message.
  * * Default: true
  */
-const dlogHeader = (header?: any, usePfx = true, useColor = true) => {
+const dlogHeader = (header: string, usePfx = true, useColor = true) => {
     if (!header || (typeof header === 'string' && header.trim() === '')) {
         return;
     } else {
-        dlog(usePfx ? getDebugPrefix(useColor) : '' + ' ' + header);
+        dlog((usePfx ? getDebugPrefix(useColor) : '') + ' ' + header);
     }
 }
 
@@ -127,9 +127,9 @@ const dlogList = (linePfx = ' - ', ...lines: any[]) => lines.forEach(e => dlog(l
  * @param linePfx The prefix to apply to each line.
  * @param lines The lines you want to log to `stdout`.
  */
-const dlogDataSection = (header?: any, linePfx = ' > ', ...lines: any[]) => {
-    dlogHeader(header);
-    dlogList(linePfx, lines);
+const dlogDataSection = (header: string, linePfx = ' > ', ...lines: any[]) => {
+    dlog(header);
+    dlogList(linePfx, ...lines);
 }
 
 export {

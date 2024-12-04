@@ -19,7 +19,7 @@ import parseValidateSection from './parse/section/section-validate.js';
 import parseOutputSection from './parse/section/section-output.js';
 import parseOtherSection from './parse/section/section-other.js';
 import parseLogsSection from './parse/section/section-logs.js';
-import { SYMB_ERR_LG, SYMB_OK_LG, SYMB_OK_SM, SYMB_WARN } from '../utility/string.js';
+import { SB_ERR_LG, SB_OK_LG, SB_OK_SM, SB_WARN } from '../utility/string.js';
 
 export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml';
 export const EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME);
@@ -35,13 +35,13 @@ export const clogConfInfo = (msg?: any) =>
     clog(`User Config: ` + msg);
     // clog(` > ` + USER_CONFIG_PFX + `: ${msg}`);
 export const clogConfOk   = (msg?: any) =>
-    clog(` > ` + USER_CONFIG_PFX + ` ` + SYMB_OK_LG + ` ${msg}`);
+    clog(` > ` + USER_CONFIG_PFX + ` ` + SB_OK_LG + ` ${msg}`);
 export const clogConfSucc = (emphasis: boolean, msg?: any) =>
-    clog(` ` + (emphasis ? SYMB_OK_LG : SYMB_OK_SM) + ` ` + USER_CONFIG_PFX + `: ${msg}`);
+    clog(` ` + (emphasis ? SB_OK_LG : SB_OK_SM) + ` ` + USER_CONFIG_PFX + `: ${msg}`);
 export const clogConfBad2 = (msg?: any) =>
-    clog(` ` + SYMB_ERR_LG + ` ` + USER_CONFIG_PFX + `: ${msg}`);
+    clog(` ` + SB_ERR_LG + ` ` + USER_CONFIG_PFX + `: ${msg}`);
 export const clogConfWarn = (msg?: any) =>
-    console.warn(` ` + SYMB_WARN + ` ` + USER_CONFIG_PFX + `: ${msg}`);
+    console.warn(` ` + SB_WARN + ` ` + USER_CONFIG_PFX + `: ${msg}`);
     // console.warn(clr.yellow(USER_CONFIG_PFX) + `: ${msg}`);
 export const clogConfErr  = (msg?: any) =>
     console.error(clr.red(USER_CONFIG_PFX) + `: ${msg}`);
