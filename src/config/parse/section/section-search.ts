@@ -4,7 +4,7 @@ import { fmtBool } from '../../../utility/boolean.js';
 import { clog } from '../../../utility/console.js';
 import { delimitedList } from '../../../utility/string.js';
 
-import { dlogConfValueLoaded, clogConfBad, dlogConfInfo, clogConfWarn } from '../../config.js';
+import { dlogConfValueLoaded, clogConfInvalid, dlogConfInfo, clogConfWarn } from '../../config.js';
 import { USER_CONFIG_FILENAME } from '../../load-data.js';
 import { makeManifests } from '../user-data.js';
 
@@ -46,7 +46,7 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                     dlogConfValueLoaded('search.scanDirectories', value)
                     // dlogConfInfo(chalk.magenta(`search.scanDirectories set=${fmtBool(manPaths)}`));
                 } else {
-                    clogConfBad(`Value of search.scanDirectories must be a boolean but was not: ${value}`);
+                    clogConfInvalid(`Value of search.scanDirectories must be a boolean but was not: ${value}`);
                 }
                 break;
             }
@@ -56,7 +56,7 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                     // dlogConfigStatus(`search.scanRecursively set=${fmtBool(value)}`);
                     dlogConfInfo(clr.magenta(`search.scanRecursively set=${fmtBool(value)}`));
                 } else {
-                    clogConfBad(`Value of search.scanRecursively must be a boolean but was not: ${value}`);
+                    clogConfInvalid(`Value of search.scanRecursively must be a boolean but was not: ${value}`);
                 }
                 break;
             }
@@ -75,9 +75,9 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                     } 
                 } else {
                     if (!Array.isArray(value)) {
-                        clogConfBad('Value of search.manifests must be array of strings but was not an array');
+                        clogConfInvalid('Value of search.manifests must be array of strings but was not an array');
                     } else {
-                        clogConfBad('All entries of search.manifests must be a string but at least one was not');
+                        clogConfInvalid('All entries of search.manifests must be a string but at least one was not');
                     }
                 }
                 break;

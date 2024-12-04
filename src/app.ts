@@ -17,9 +17,6 @@ async function processManifest(manifest: Manifest) {
     if (!Array.isArray(shortcuts))
         throw new Error(`Manifest (${manifest.getName()} requires a key "shortcuts" which is a list of paths, but the user config is set to a non-array type`);
 
-    if (shortcuts.length === 0)
-        clog(clr.yellow(`WARN: No top-level shortcuts value found in manifest: ${name}`));
-
     // TODO Move much of this logic elsewhere so these things can be triggered on demand
 
     try {

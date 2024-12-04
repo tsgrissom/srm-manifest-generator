@@ -15,7 +15,8 @@ import {
  } from './config.js';
 import { clog } from '../utility/console.js';
 import chalk from 'chalk';
-import { fmtPathAsTag, fmtPathWithExistsTag } from '../utility/path.js';
+import { fmtPath, fmtPathAsTag, fmtPathWithExistsTag } from '../utility/path.js';
+import { SYMB_ERR_LG, SYMB_OK_LG } from '../utility/string.js';
 
 /**
  * Attempts to download the example.config.yml from the project repository,
@@ -32,7 +33,7 @@ async function downloadExampleConfig() : Promise<boolean> {
     return new Promise((resolve, reject) => {
         https.get(EXAMPLE_CONFIG_URL, response => {
             if (response.statusCode !== 200)
-                return reject(new Error(`Failed to get . Status code: ${response.statusCode}`));
+                return reject(new Error(`Failed to grab "${EXAMPLE_CONFIG_FILENAME}" from ${fmtPath(EXAMPLE_CONFIG_URL)}". Status code: ${response.statusCode}`));
 
             const fileStreamExample = fs.createWriteStream(EXAMPLE_CONFIG_PATH),
                   fileStreamUser    = fs.createWriteStream(USER_CONFIG_PATH);
@@ -50,11 +51,11 @@ async function downloadExampleConfig() : Promise<boolean> {
             };
 
             fileStreamExample.on('finish', () => {
-                clog(`Finished restoring ${EXAMPLE_CONFIG_PATH} via GitHub download`);
+                clog(` ${SYMB_OK_LG} Restored "${EXAMPLE_CONFIG_FILENAME}" from GitHub ${fmtPathAsTag(EXAMPLE_CONFIG_PATH)}`);
                 onStreamFinish();
             });
             fileStreamUser.on('finish', () => {
-                clog(`Finished copying latest version of ${EXAMPLE_CONFIG_FILENAME} to ${USER_CONFIG_PATH}`);
+                clog(` ${SYMB_OK_LG} Copied "${EXAMPLE_CONFIG_FILENAME}" to ${fmtPath(USER_CONFIG_PATH)}`);
                 onStreamFinish();
             });
 
@@ -83,15 +84,10 @@ async function copyExampleConfigToUserConfigPath() : Promise<void> {
         throw new Error(chalk.red(`copyExampleConfigToUserConfigPath was invoked but ${USER_CONFIG_PATH} already exists`));
     } catch { /* empty */ }
 
-    if (alreadyExists) {
-        console.error(chalk.red(`copyExampleConfigToUserConfigPath was invoked but ${USER_CONFIG_PATH} already exists. Cancelling.`));
-        return;
-    }
-
     try {
         const exampleConfigFile = await fs.promises.readFile(EXAMPLE_CONFIG_PATH, 'utf8');
         await fs.promises.writeFile(USER_CONFIG_PATH, exampleConfigFile, 'utf8');
-        clog(`Default config copied to ${USER_CONFIG_PATH}`);
+        clog(` ${SYMB_OK_LG} Default config copied to ${USER_CONFIG_PATH}`);
     } catch (err) {
         console.error(`Failed to copy example config to ${USER_CONFIG_PATH}:`, err);
     }
@@ -133,7 +129,8 @@ async function loadUserConfigData() {
         dlogConfInfo(`Example config exists ${tagExampleConfPath}`);
     } catch {
         // TODO Allow disabling this in the config
-        clogConfInfo(`Example config was missing at it's typical location ${tagExampleConfPath}`)
+        clogConfInfo(`Example config was missing from its typical location ${tagExampleConfPath}`);
+        await downloadExampleConfig();
     }
 
     try { // Check that user config file exists
@@ -142,7 +139,8 @@ async function loadUserConfigData() {
     } catch { // User config is missing
         try { // Check if example config is in place, copy it to the user's config path if present
             exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');
-            clog(`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}. Creating new default config based on ${EXAMPLE_CONFIG_FILENAME}...`);
+            clog(` ${SYMB_ERR_LG} No "${USER_CONFIG_FILENAME}" was found at the expected path. Some configuration is required for SRM Manifest Generator to function.`);
+            clog(` ... Attempting to create a new default config based on ${EXAMPLE_CONFIG_FILENAME}`);
             await copyExampleConfigToUserConfigPath();
         } catch { // If both are missing, try to fetch the latest copy of the example config from repo
             clog(`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}, but the ${EXAMPLE_CONFIG_FILENAME} has been deleted.`);

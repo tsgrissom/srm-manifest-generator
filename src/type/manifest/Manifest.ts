@@ -4,7 +4,7 @@ import path from 'node:path';
 import clr from 'chalk';
 
 import { dlog, dlogDataSection } from '../../utility/debug.js';
-import { basenameWithoutExtensions, isPathAccessible, fmtPathWithExistsTag } from '../../utility/path.js';
+import { basenameWithoutExtensions, isPathAccessible, fmtPathWithExistsTag, fmtPathAsTag, fmtPath } from '../../utility/path.js';
 
 import ManifestData from './ManifestData.js';
 import ManifestNameSource from './ManifestNameSource.js';
@@ -13,6 +13,9 @@ import ManifestWriteResults from './ManifestWriteResults.js';
 import Shortcut from '../shortcut/Shortcut.js';
 import ShortcutExportData from '../shortcut/ShortcutExportData.js';
 import { clog } from '../../utility/console.js';
+import chalk from 'chalk';
+import { SYMB_CHECKMARK_LG } from '../../utility/string.js';
+import EmptyManifestWriteResults from './ManifestEmptyWriteResults.js';
 
 // TODO getName by ManifestNameSource
 
@@ -125,23 +128,42 @@ class Manifest {
     }
 
     public async writeToOutput() : Promise<ManifestWriteResults> {
-        const output = this.getEnabledShortcuts().map(sc => sc.getExportData());
+        const exportData = this.getExportData();
+        const writeData = JSON.stringify(exportData);
+        const writePath = this.getWritePath();
 
         const nTotal = this.getShortcuts().length,
               nEnabled = this.getEnabledShortcuts().length,
               nDisabled = nTotal - nEnabled,
               nSkipped = 0,
-              nOk = output.length;
+              nInvalid = 0,
+              nOk = exportData.length;
+
+        // TODO Calculate invalid
+
+        if (nOk === 0) {
+            const SYMB_WARN = chalk.yellow('\u26A0'); // TODO Move to string utils if it looks good
+            clog(` ${SYMB_WARN} Skipping Manifest because it has no enabled, valid shortcuts`);
+            return new EmptyManifestWriteResults(this);
+        }
 
         try {
-            await fs.writeFile(this.filePath, JSON.stringify(output));
+            await fs.writeFile(writePath, writeData);
+            dlog(
+                ` ${SYMB_CHECKMARK_LG} Wrote Manifest to file ${fmtPathAsTag(this.filePath)}`,
+                ` > Source File: ${fmtPath(this.filePath)}`,
+                ` > Output Path: ${fmtPath(this.getOutputPath())}`,
+                ` > File Written To: ${fmtPath(writePath)}`
+            );
             return {
-                inputManifest: this,
-                outputManifest: output,
+                manifest: this,
+                outputData: exportData,
                 stats: {
                     nTotal: nTotal,
                     nEnabled: nEnabled,
                     nDisabled: nDisabled,
+                    nInvalid: 0,
+                    nValid: nEnabled - nInvalid,
                     nSkipped: nSkipped,
                     nOk: nOk
                 }
@@ -166,11 +188,11 @@ class Manifest {
     }
 
     public async logWriteResults(results: ManifestWriteResults) {
-        const { inputManifest, stats } = results;
-        const { nTotal, nOk, nEnabled, nDisabled, nSkipped } = stats;
+        const { manifest, stats } = results;
+        const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } = stats;
 
-        const name = inputManifest.getName(),
-              writePath = inputManifest.getWritePath();
+        const name = manifest.getName(),
+              writePath = manifest.getWritePath();
 
         let okRatio = `${stats.nOk}/${stats.nTotal} shortcuts`;
 
@@ -186,13 +208,13 @@ class Manifest {
             dlogDataSection(
                 header,
                 `Name: "${name}"`,
-                `Input File Path: ${fmtPathWithExistsTag(inputManifest.filePath)}`,
-                `Name From: ${inputManifest.getNameSource()}`,
-                `Value of Name Attribute: "${inputManifest.data.name}"`,
-                // `Fallback Name: "${manifestIn.}"`,
-                `Output Path: ${fmtPathWithExistsTag(inputManifest.getOutputPath())}`,
-                `Write File Path: ${fmtPathWithExistsTag(inputManifest.getWritePath())}`,
-                `Root Directory: ${fmtPathWithExistsTag(inputManifest.data.rootDirectory)}` // TODO Display validation here for paths
+                `Input File Path: ${fmtPathWithExistsTag(manifest.filePath)}`,
+                `Name From: ${manifest.getNameSource()}`,
+                `Value of Name Attribute: "${manifest.data.name}"`,
+                `Fallback Name: "${manifest.getFallbackName()}"`,
+                `Output Path: ${fmtPathWithExistsTag(manifest.getOutputPath())}`,
+                `Write File Path: ${fmtPathWithExistsTag(manifest.getWritePath())}`,
+                `Root Directory: ${fmtPathWithExistsTag(manifest.data.rootDirectory)}` // TODO Display validation here for paths
             );
 
             dlogDataSection(
@@ -201,6 +223,8 @@ class Manifest {
                 `# Written: ${nOk}`,
                 `# Enabled: ${nEnabled}`,
                 `# Disabled: ${nDisabled}`,
+                `# Valid: ${nValid}`,
+                `# Invalid: ${nInvalid}`,
                 `# Skipped: ${nSkipped}`
             );
         }
@@ -246,7 +270,7 @@ class Manifest {
 
         clog(builder);
 
-        const styledSourcePath = await fmtPathWithExistsTag(inputManifest.getFilePath());
+        const styledSourcePath = await fmtPathWithExistsTag(manifest.getFilePath());
         const styledWritePath  = await fmtPathWithExistsTag(writePath);
 
         dlog(`  - Source File Path: ${styledSourcePath}`);
