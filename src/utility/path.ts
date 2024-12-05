@@ -347,7 +347,11 @@ export function fmtPathAsTag(
     if (useUnderline || useQuotes)
         filePath = fmtPath(filePath, useUnderline, useQuotes);
 
-    return '(' + innerPrefix + ': ' + filePath + ')';    
+    innerPrefix = innerPrefix !== ''
+        ? (innerPrefix + ': ')
+        : ''
+
+    return '(' + innerPrefix + filePath + ')';    
 }
 
 // TODO TEST Unit

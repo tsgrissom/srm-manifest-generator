@@ -5,17 +5,24 @@ import { clog } from '../../../utility/console';
 import { quote } from '../../../utility/string';
 import { SB_ERR_LG, SB_ERR_SM } from '../../../utility/symbols';
 import {
-    clogConfWarn,
-    dlogConfValueLoaded,
+    clogConfigWarn,
+    dlogConfigSectionOk,
+    dlogConfigWarnOptionalSectionSkippedWrongType,
+    dlogConfigSectionStart,
+    dlogConfigValueLoaded,
+    dlogConfigWarnMissingOptionalSection,
     resolveKeyFromAlias,
-    YamlKeyAliases
+    clogConfigValueWrongType,
+    clogConfigValueUnknown
 } from '../../../utility/config';
 
 import UserConfig from '../../../type/config/UserConfig';
 
 import { USER_CONFIG_FILENAME } from '../../load-data';
+import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
 
-const keyAliases: YamlKeyAliases = {
+const sectionKey = 'validate';
+const keyAliases: ConfigKeyAliases = {
     filePaths: 'filePaths',
     paths: 'filePaths',
     executables: 'executables',
@@ -25,48 +32,48 @@ const keyAliases: YamlKeyAliases = {
 }
 
 async function parseValidateSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes('validate'))
-        dlog(clr.yellow(`User ${USER_CONFIG_FILENAME} is missing optional section "validate"`));
+    if (!Object.keys(data).includes(sectionKey)) {
+        dlogConfigWarnMissingOptionalSection(sectionKey);
+        return userConfig;
+    }
     
-    const section = (data as Record<string, unknown>)['validate'];
+    const section = (data as Record<string, unknown>)[sectionKey];
 
-    if (typeof section !== 'object' || section === null) {
-        clog(` ${SB_ERR_LG} User ${USER_CONFIG_FILENAME} "validate" section is not a valid mapping`);
+    if (typeof section !== 'object' || Array.isArray(section) || section === null) {
+        dlogConfigWarnOptionalSectionSkippedWrongType(sectionKey, 'section', section);
         return userConfig;
     }
-    
-    if (Array.isArray(section)) {
-        clog(` ${SB_ERR_LG} User ${USER_CONFIG_FILENAME} "validate" section must be a mapping, not a list`);
-        return userConfig;
-    }
+
+    dlogConfigSectionStart(sectionKey);
     
     for (const [key, value] of Object.entries(section)) {
-        const resolved = resolveKeyFromAlias(keyAliases, key);
+        const resolved = resolveKeyFromAlias(keyAliases, key, sectionKey);
+        const { fullGivenKey, resolvedKey } = resolved;
 
-        switch (resolved) {
+        switch (resolvedKey) {
             case 'filePaths': {
                 if (typeof value !== 'boolean') {
-                    clog(` ${SB_ERR_SM} Value of key "validate.filePaths" must be a boolean but was not: ${value}`);
+                    clogConfigValueWrongType(fullGivenKey, 'boolean', value);
                     break;
                 }
 
                 userConfig.validate.filePaths = value;
-                dlogConfValueLoaded('validate.filePaths', value);
+                dlogConfigValueLoaded(resolved, value);
                 break;
             }
             case 'executables': {
                 if (typeof value !== 'boolean') {
-                    clog(` ${SB_ERR_SM} Value of key "validate.executables" must be a boolean but was not: ${value}`);
+                    clogConfigValueWrongType(fullGivenKey, 'boolean', value);
                     break;
                 }
 
                 userConfig.validate.executables = value;
-                dlogConfValueLoaded('validate.executables', value);
+                dlogConfigValueLoaded(resolved, value);
                 break;
             }
             case 'executableExtensions': {
                 if (typeof value !== 'object' || (!Array.isArray(value) && typeof value !== 'string')) {
-                    clog(` ${SB_ERR_SM} Value of key "validate.executableExtensions" must be a string or array of strings but was not: ${value}`);
+                    clogConfigValueWrongType(fullGivenKey, 'string or array of strings', value); // TOOD Check each entry inside array too
                     break;
                 }
 
@@ -77,20 +84,19 @@ async function parseValidateSection(data: object, userConfig: UserConfig) : Prom
                 else if (typeof value === 'object' && Array.isArray(value))
                     normalized = value;
                 else
-                    throw new TypeError(`Unexpected: Could not convert config value "validate.executableExtensions" into an array`);
+                    throw new TypeError(`Unexpected: Could not convert config value ${quote(fullGivenKey)} into an array`);
 
                 userConfig.validate.executableExtensions = normalized;
-                dlogConfValueLoaded('validate.executableExtensions', normalized);
+                dlogConfigValueLoaded(resolved, value);
                 break;
             }
             default: {
-                const unknown = quote(`validate.${key}`);
-                clogConfWarn(`Unknown key set at ${unknown}`);
+                clogConfigValueUnknown(fullGivenKey);
             }
         }
     }
 
-    // TODO
+    dlogConfigSectionOk(sectionKey);
     
     return userConfig;
 }

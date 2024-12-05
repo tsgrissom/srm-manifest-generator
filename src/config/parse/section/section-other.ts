@@ -1,15 +1,11 @@
-import clr from 'chalk';
-
-import { clogConfWarn, dlogConfValueLoaded, resolveKeyFromAlias, YamlKeyAliases } from '../../../utility/config';
-import { clog } from '../../../utility/console';
-import { dlog } from '../../../utility/debug';
-import { quote } from '../../../utility/string';
-import { SB_ERR_LG, SB_ERR_SM } from '../../../utility/symbols';
-import { USER_CONFIG_FILENAME } from '../../load-data';
+import { clogConfigValueWrongType, clogConfigWarn, dlogConfigSectionOk, dlogConfigWarnOptionalSectionSkippedWrongType, dlogConfigValueLoaded, dlogConfigWarnMissingOptionalSection, dlogConfigSectionStart, resolveKeyFromAlias, clogConfigValueUnknown } from '../../../utility/config';
 
 import UserConfig from '../../../type/config/UserConfig';
+import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
+import { quote } from '../../../utility/string';
 
-const keyAliases: YamlKeyAliases = {
+const sectionKey = 'other';
+const keyAliases: ConfigKeyAliases = {
     useColor: 'useColor',
     debug: 'debug',
     debugging: 'debug',
@@ -18,61 +14,62 @@ const keyAliases: YamlKeyAliases = {
 }
 
 async function parseOtherSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes('other')) {
-        dlog(clr.yellow(`User ${USER_CONFIG_FILENAME} is missing optional section "other"`));
-    }
-
-    const section = (data as Record<string, unknown>)['other'];
-
-    if (typeof section !== 'object' || section === null) {
-        clog(` ${SB_ERR_LG} User ${USER_CONFIG_FILENAME} "other" section is not a valid mapping`);
+    if (!Object.keys(data).includes(sectionKey)) {
+        dlogConfigWarnMissingOptionalSection(sectionKey);
         return userConfig;
     }
-    if (Array.isArray(section)) {
-        clog(` ${SB_ERR_LG} User ${USER_CONFIG_FILENAME} "other" section must be a mapping, not a list`);
+
+    const section = (data as Record<string, unknown>)[sectionKey];
+
+    if (typeof section !== 'object' || Array.isArray(section) || section === null) {
+        dlogConfigWarnOptionalSectionSkippedWrongType(sectionKey, 'section', section);
         return userConfig;
     }
+
+    dlogConfigSectionStart(sectionKey);
 
     for (const [key, value] of Object.entries(section)) {
-        const resolved = resolveKeyFromAlias(keyAliases, key);
+        const resolved = resolveKeyFromAlias(keyAliases, key, sectionKey);
+        const { givenKey, fullGivenKey, resolvedKey, fullResolvedKey } = resolved;
 
-        switch (resolved) {
+        switch (resolvedKey) {
             case 'debug': {
                 if (typeof value !== 'boolean') {
-                    clog(` ${SB_ERR_SM} Value of key "other.debug" must be a boolean but was not: ${value}`);
+                    clogConfigValueWrongType(fullGivenKey, 'boolean', value);
                     break;
                 }
 
                 userConfig.other.debug = value;
-                dlogConfValueLoaded('other.debug', value);
+                dlogConfigValueLoaded(resolved, value);
                 break;
             }
             case 'useColor': {
                 if (typeof value !== 'boolean') {
-                    clog(` ${SB_ERR_SM} Value of key "other.useColor" must be a boolean but was not: ${value}`);
+                    clogConfigValueWrongType(fullGivenKey, 'boolean', value);
                     break;
                 }
                 
                 userConfig.other.useColor = value;
-                dlogConfValueLoaded('other.useColor', value);
+                dlogConfigValueLoaded(resolved, value);
                 break;
             }
             case 'verbose': {
                 if (typeof value !== 'boolean') {
-                    clog(` ${SB_ERR_SM} Value of key "other.verbose" must be a boolean but was not: ${value}`);
+                    clogConfigValueWrongType(fullGivenKey, 'boolean', value);
                     break;
                 }
                 
                 userConfig.other.verbose = value;
-                dlogConfValueLoaded('other.verbose', value);
+                dlogConfigValueLoaded(resolved, value);
                 break;
             }
             default: {
-                const unknown = quote(`other.${key}`);
-                clogConfWarn(`Unknown key set at ${unknown}`);
+                clogConfigValueUnknown(fullGivenKey);
             }
         }
     }
+
+    dlogConfigSectionOk(sectionKey);
 
     return userConfig;
 }

@@ -4,7 +4,7 @@ import clr from 'chalk';
 import yaml from 'yaml';
 
 import { checkCross } from '../../utility/boolean';
-import { clogConfInfo, clogConfWarn } from '../../utility/config';
+import { clogConfigWarn } from '../../utility/config';
 import { clog } from '../../utility/console';
 import { USER_CONFIG_FILENAME } from '../config';
 import { dlog, dlogHeader } from '../../utility/debug';
@@ -21,7 +21,7 @@ async function makeManifests(manPaths: string[], config: ConfigData) : Promise<M
     const okManifests: Manifest[] = [];
 
     if (manPaths.length === 0) {
-        clogConfInfo(` ${SB_WARN} Manifest paths list was empty. No manifests will be loaded or processed.`);
+        clog(`${SB_WARN} User ${USER_CONFIG_FILENAME} manifest paths was empty. No manifests will be loaded or processed.`);
         return okManifests;
     }
 
@@ -61,7 +61,7 @@ async function validateManifestPathExists(filePath: string) : Promise<boolean> {
             return false;
         });
     } catch (err) {
-        throw new Error(`Error while validating manifest path existence (Path: ${filePath}): ${err}`);
+        throw new Error(`Error while validating manifest path existence ${pathTag}: ${err}`);
     }
 
     return true;
@@ -74,7 +74,7 @@ async function validateManifestPathIsSupportedFilesystemType(filePath: string, c
         const stats = await fs.promises.stat(filePath);
 
         if (!stats.isFile() && !stats.isDirectory())
-            clogConfWarn(`Unsupported filesystem type (Supported: File or Folder) was set as a manifest path in the user ${USER_CONFIG_FILENAME}.`);
+            clogConfigWarn(`Unsupported filesystem type (Supported: File or Folder) was set as a manifest path in the user ${USER_CONFIG_FILENAME}.`);
 
         const { scanDirectories, scanRecursively } = config.search;
 
@@ -82,13 +82,13 @@ async function validateManifestPathIsSupportedFilesystemType(filePath: string, c
             return true;
         } else if (stats.isDirectory()) {
             if (!scanDirectories) {
-                clogConfWarn(`Manifests file path list contains a path pointing to a directory, but scanning directories is disabled by the user's ${USER_CONFIG_FILENAME}. The following path will be skipped: ${filePath}`);
+                clogConfigWarn(`Manifests file path list contains a path pointing to a directory, but scanning directories is disabled by the user's ${USER_CONFIG_FILENAME}. The following path will be skipped: ${filePath}`);
                 return false;
             }
 
             return true;
         } else {
-            clogConfWarn(`Unsupported filesystem type at the given path was ignored ${pathTag}`);
+            clogConfigWarn(`Unsupported filesystem type at the given path was ignored ${pathTag}`);
         }
     } catch (err) {
         throw new Error(`Could not stat manifest path ${filePath}: ${err}`);

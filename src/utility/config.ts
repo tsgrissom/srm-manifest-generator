@@ -2,73 +2,137 @@
 
 import clr from 'chalk';
 
-import { fmtBool } from './boolean';
+import { checkCross, fmtBool } from './boolean';
 import { clog } from './console';
 import { dlog, isDebugActive } from './debug';
-import { quote } from './string';
+import { getTypeDisplayName, indefiniteArticleFor, quote } from './string';
 import {
-    SB_OK_LG,
-    SB_OK_SM,
-    SB_ERR_LG,
+    SB_OK_LG, SB_OK_SM,
+    SB_ERR_SM, SB_ERR_LG,
     SB_WARN,
     UNICODE_ARRW_RIGHT,
-    SB_ERR_SM
 } from './symbols';
 
-import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_PFX } from '../config/config';
+import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME, USER_CONFIG_PFX } from '../config/config';
+import ConfigKeyAliases from '../type/config/ConfigKeyAliases';
+import ConfigKeyPair from '../type/config/ConfigKeyPair';
 
 // MARK: Utility
 
-export type YamlKeyAliases = Record<string, string>;
-
-export function resolveKeyFromAlias(aliases: YamlKeyAliases, key: string) : string {
-    return aliases[key] || key;
+/**
+ * Resolves a {@link ConfigKeyPair} from the {@link givenKey} by searching the
+ * {@link keyAliases} for a matching alias.
+ * 
+ * @param keyAliases The map of alias to reference values for a given config section.
+ * @param givenKey The key the user actually gave in an iteration over a section's
+ *  contents.
+ * @param sectionFullKey The full key that is being searched within for a given context.
+ *  By default this value is empty, which represents top-level key searches. However,
+ *  if used to search within levels which are any deeper, giving this value is important
+ *  so the secondary full key values are inferred correctly automatically.
+ * @returns A {@link ConfigKeyPair} containing the {@link ConfigKeyPair.resolvedKey}
+ *  as well as the {@link givenKey} as {@link ConfigKeyPair.givenKey}.
+ * @example
+ */
+// TODO Example
+// TODO Write TEST
+export const resolveKeyFromAlias = (
+    keyAliases: ConfigKeyAliases,
+    givenKey: string,
+    sectionFullKey: string | null
+) : ConfigKeyPair => {
+    const upperKey = sectionFullKey === null ? '' : sectionFullKey;
+    return {
+        givenKey: givenKey,
+        resolvedKey: keyAliases[givenKey] || givenKey,
+        fullGivenKey: joinPathKeys(upperKey, givenKey),
+        fullResolvedKey: joinPathKeys(upperKey, givenKey)
+    }
 }
 
-export function joinPathKey(...keys: string[]) {
-    return keys.join('.');
+/**
+ * Joins a series of YAML path keys with '.' characters
+ * in order to constructor a full key to a section, value,
+ * etc.
+ * 
+ * * If a key starts or ends with a '.' character, it will
+ *   be ignored. Keys containing '.' inside will not be ignored
+ *   because those might be multi-leveled keys themselves.
+ * * If a key is empty or consists of only whitespace, it
+ *   will be ignored
+ * * Therefore, it's important to **check the returned value**
+ *   for emptiness because an empty string could be returned
+ * 
+ * @param keys The keys to join.
+ * @returns The resulting joined key which points to a
+ *  value which is found deeper than the top level of the
+ *  document.
+ */
+// TODO jsdoc + example
+// TODO Write TEST
+export const joinPathKeys = (...keys: string[]) => {
+    return keys.filter(k => !k.startsWith('.'))
+               .filter(k => !k.endsWith('.'))
+               .filter(k => k.trim() !== '')
+               .join('.');
 }
 
 // MARK: General Logs
 
-export const clogConfInfo = (msg?: any) =>
-    clog(` > ` + USER_CONFIG_PFX + `: ` + msg);
+export const clogConfigSucc = (emphasis: boolean, msg?: any) =>
+    clog(`  ` + (emphasis ? SB_OK_LG : SB_OK_SM) + ` ${msg}`); // TODO Support changing whitespace prefix?
 
-export const clogConfOk   = (msg?: any) =>
-    clog(` > ` + USER_CONFIG_PFX + ` ` + SB_OK_LG + ` ${msg}`);
-
-export const clogConfSucc = (emphasis: boolean, msg?: any) =>
-    clog(`  ` + (emphasis ? SB_OK_LG : SB_OK_SM) + ` ${msg}`);
-
-export const clogConfBad2 = (msg?: any) =>
-    clog(` ` + SB_ERR_LG + ` ` + USER_CONFIG_PFX + `: ${msg}`);
-
-export const clogConfWarn = (msg?: any) =>
-    console.warn(` ` + SB_WARN + ` ` + USER_CONFIG_PFX + `: ${msg}`);
+export const clogConfigWarn = (msg: string) =>
+    console.warn(` ${SB_WARN} ${USER_CONFIG_ATTRIBUTION}: ${msg}`);
 // TODO Check out where these old styles are used and replace
-export const clogConfErr  = (msg?: any) =>
-    console.error(clr.red(USER_CONFIG_PFX) + `: ${msg}`);
 
-export const dlogConfInfo = (msg?: any) =>
-    isDebugActive() && clogConfInfo(msg); 
-
-export const dlogConfSectionStart = (sectionKey: string) => {
-    dlog(UNICODE_ARRW_RIGHT + clr.underline(`Loading: Config section "${sectionKey}"`))
+export const clogConfigFatalErr = (msg: string) => {
+    const errUserAttribution = clr.red(`User `) + clr.redBright(USER_CONFIG_FILENAME);
+    console.error(`${SB_ERR_LG} ${errUserAttribution} ` + clr.red(msg));
 }
 
 // MARK: Section Logging
 
-export const dlogConfMissingOptionalSection = (sectionKey: string) =>
-    dlog(`${SB_WARN} ${USER_CONFIG_ATTRIBUTION} is missing optional section ${quote(sectionKey)}`);
-
-export const dlogConfSkippedSection = (sectionKey: string, reason: string) =>
-    dlog(`${SB_ERR_LG} Skipped config section ${quote(sectionKey)}: ${reason}`);
-
-export const dlogConfSkippedSectionWrongType = (sectionKey: string) => {
-
+export const dlogConfigSectionStart = (sectionKey: string) => {
+    dlog(UNICODE_ARRW_RIGHT + clr.underline(`Loading: Config section "${sectionKey}"`))
 }
 
-export const dlogConfSectionOk = (sectionKey: string) =>
+export const clogConfigFatalErrMissingRequiredSection = (sectionKey: string) =>
+    clogConfigFatalErr(`is missing required required section ${clr.redBright(quote(sectionKey))}.`)
+
+export const clogConfigFatalErrRequiredSectionWrongType = (sectionKey: string, expectedType: string, value?: any) => {
+    const typeOfValue = getTypeDisplayName(value);
+    const articleActualType = indefiniteArticleFor(typeOfValue);
+    const articleExpectedType = indefiniteArticleFor(expectedType);
+
+    const msg = `has an invalid required section: Value of ${clr.redBright(quote(sectionKey))} should be ${articleExpectedType} ${expectedType} but was ${articleActualType} ${typeOfValue}`;
+    clogConfigFatalErr(msg);
+}
+
+export const dlogConfigWarnMissingOptionalSection = (sectionKey: string) =>
+    dlog(`${SB_WARN} ${USER_CONFIG_ATTRIBUTION} is missing optional section ${quote(sectionKey)}`);
+
+export const dlogConfigWarnOptionalSectionSkipped = (sectionKey: string, reason: string) =>
+    dlog(`${SB_ERR_LG} Skipped section ${quote(sectionKey)}: ${reason}`);
+
+/*
+ * TODO jsdoc
+ * TODO: Write TEST cases:
+ * - expectedType="string" and value=42 -> "should be a string but was a number"
+ * - expectedType="mapping" and value=[1,2,3] -> "should be a mapping but was an array"
+ * - expectedType="object" and value = {} -> "should be an object but was an object"
+ */
+export const dlogConfigWarnOptionalSectionSkippedWrongType = (sectionKey: string, expectedType: string, value?: any) => {
+    // Various terms used to describe an object when it is serialized to JSON or YAML
+    const typeOfValue = getTypeDisplayName(value);
+    const articleActualType = indefiniteArticleFor(typeOfValue);
+    const articleExpectedType = indefiniteArticleFor(expectedType);
+
+    const msg = `Value of ${quote(sectionKey)} should be ${articleExpectedType} ${expectedType} but was ${articleActualType} ${typeOfValue}`;
+    dlogConfigWarnOptionalSectionSkipped(sectionKey, msg);
+}
+
+export const dlogConfigSectionOk = (sectionKey: string) =>
     console.log(SB_OK_LG + ` ` + clr.underline(`Loaded: Config section "${sectionKey}"`));
 
 const fmtValueForLoadedLog = (value?: any) : string => {
@@ -84,15 +148,28 @@ const fmtValueForLoadedLog = (value?: any) : string => {
     return fmtValue;
 }
 
-export const dlogConfValueLoaded = (key: string, value?: any) =>
-    dlog(`  ${SB_OK_SM} Value loaded ${quote(key)} (${fmtValueForLoadedLog(value)})`);
+export const dlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any) => {
+    const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
+    const usedAlias = givenKey !== resolvedKey;
+    dlog(`  ${SB_OK_SM} Value loaded ${quote(fullGivenKey)} (${fmtValueForLoadedLog(value)})`);
+    // TODO Make the below verbose logs
+    dlog(`    > Alias used? ${checkCross(usedAlias)}`)
+    if (usedAlias) {
+        dlog(`    > Alias: ${quote(givenKey)}`);
+        dlog(`    > Actual: ${quote(resolvedKey)}`);
+    }
+}
 
-export const clogConfValueErr = (key: string, msg: string) =>
+export const clogConfigValueUnknown = (fullGivenKey: string) => {
+    clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
+}
+
+export const clogConfigValueErr = (key: string, msg: string) =>
     clog(`  ${SB_ERR_SM} Value of key ${quote(key)} ${msg}`);
 
-export const clogConfValueWrongType = (key: string, desiredType: string, value?: any, displayValue = true) => {
+export const clogConfigValueWrongType = (key: string, expectedType: string, value?: any, displayValue = true) => {
     const valuef = fmtValueForLoadedLog(value);
-    let msg = `must be a ${desiredType} but was`
+    let msg = `must be a ${expectedType} but was`
 
     if (value === undefined) msg += ` not`;
     else msg += ` a ${typeof value}`
@@ -100,5 +177,5 @@ export const clogConfValueWrongType = (key: string, desiredType: string, value?:
     if (displayValue)
         msg += ` (Value: ${valuef})`;
 
-    clogConfValueErr(key, `${msg}`)
+    clogConfigValueErr(key, `${msg}`)
 }

@@ -7,8 +7,7 @@ import yaml from 'yaml';
 
 import { clog } from '../utility/console';
 import { fmtPath, fmtPathAsTag } from '../utility/path';
-import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../utility/symbols';
-import { dlogConfInfo, clogConfInfo } from '../utility/config';
+import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../utility/symbols';
 
 import {
     EXAMPLE_CONFIG_FILENAME,
@@ -17,6 +16,8 @@ import {
     USER_CONFIG_FILENAME,
     USER_CONFIG_PATH
  } from './config';
+import { quote } from '../utility/string';
+import { dlog } from '../utility/debug';
 
 /**
  * Attempts to download the example.config.yml from the project repository,
@@ -49,7 +50,7 @@ async function downloadExampleConfig() : Promise<boolean> {
                     resolve(true);
                 }
             };
-
+            
             fileStreamExample.on('finish', () => {
                 clog(`${SB_OK_LG} Restored "${EXAMPLE_CONFIG_FILENAME}" from GitHub ${fmtPathAsTag(EXAMPLE_CONFIG_PATH)}`);
                 onStreamFinish();
@@ -86,7 +87,7 @@ async function copyExampleConfigToUserConfigPath() : Promise<void> {
 
     try { const exampleConfigFile = await fs.promises.readFile(EXAMPLE_CONFIG_PATH, 'utf8');
         await fs.promises.writeFile(USER_CONFIG_PATH, exampleConfigFile, 'utf8');
-        clog(`${SB_OK_LG} Default config copied to ${USER_CONFIG_PATH}`);
+        clog(`${SB_OK_LG} Example config copied to ${fmtPath(USER_CONFIG_PATH)}`);
     } catch (err) {
         console.error(`${SB_ERR_LG} Failed to copy example config to ${USER_CONFIG_PATH}:`, err);
     }
@@ -125,16 +126,25 @@ async function loadUserConfigData() {
 
     try {
         exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');
-        dlogConfInfo(`${SB_OK_LG} Example config exists ${tagExampleConfPath}`);
+        dlog(`${SB_OK_LG} Example config exists ${tagExampleConfPath}`)
     } catch {
         // TODO Allow disabling this in the config
-        clogConfInfo(`${SB_WARN} Example config was missing from its typical location ${tagExampleConfPath}`);
+        // TODO Maybe take input from user?
+        clog(
+            `${SB_WARN} Example config was missing from its typical location ${tagExampleConfPath}`,
+            `${chalk.yellowBright(UNICODE_ARRW_RIGHT)}A new copy of the ${quote(EXAMPLE_CONFIG_FILENAME)} will be downloaded from GitHub...`,
+            `  > URL: ${fmtPath(EXAMPLE_CONFIG_URL)}`,
+            `  > Downloading To: ${fmtPath(EXAMPLE_CONFIG_PATH)}`,
+            `  > Then Copying To: ${fmtPath(USER_CONFIG_PATH)}`
+        );
+        
         await downloadExampleConfig();
     }
 
     try { // Check that user config file exists
         userConfigHandle = await fs.promises.open(USER_CONFIG_PATH, 'r');
-        dlogConfInfo(`User config was opened successfully ${tagUserConfPath}`);
+        // TODO Make verbose
+        dlog(`${SB_OK_LG} User config was opened successfully ${tagUserConfPath}`);
     } catch { // User config is missing
         try { // Check if example config is in place, copy it to the user's config path if present
             exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');

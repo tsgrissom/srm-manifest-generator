@@ -1,6 +1,6 @@
-import { isDebugActive } from './debug';
+import { isDebugActive } from './debug'; 
 
-// MARK: capitalize
+// MARK: GRAMMATICAL
 
 // TODO jsdoc
 // TEST Unit
@@ -23,7 +23,7 @@ export const isCapitalized = (s: string) : boolean => {
     if (s.trim() === '') return false;
     const firstChar = s.substring(0, 1);
     return firstChar.toLowerCase() !== firstChar;
-}   
+}  
 
 /**
  * Attempts to infer an English indefinite article for a
@@ -46,8 +46,6 @@ export const indefiniteArticleFor = (noun: string) : string => {
 
     return startsWithVowel ? 'an' : 'a';
 }
-
-// MARK: describeQuantity
 
 // TODO TEST Unit
 /**
@@ -97,7 +95,6 @@ export function describeQuantity(n: number, singular: string, plural?: string) {
     return `${n} ${form}`;
 };
 
-// MARK: delimitedList
 // TODO jsdoc
 // TODO TEST Unit
 export function delimitedList(items: string[], delimiter: string = ', ') : string {
@@ -137,7 +134,7 @@ function multilineList() {
     // TODO
 }
 
-// MARK: Wrapping
+// MARK: WRAPPING
 
 // TODO TEST Whole section
 
@@ -153,46 +150,6 @@ function multilineList() {
  */
 function isWrapped(s: string, sequence: string) : boolean {
     return s.startsWith(sequence) && s.endsWith(sequence);
-}
-
-/**
- * Checks if a given string is wrapped in single quotes (the `'` character.)
- * @param s The string which will be searched at its start and end
- *  for the presence of the `'` character.
- * @returns A `boolean` indicating whether or not the `'` character
- *  was found at the start and end of the string {@link s}.
- */
-function isSingleQuoted(s: string) : boolean {
-    return isWrapped(s, `'`);
-}
-
-/**
- * Checks if a given string is wrapped in quotation marks (double quotes.)
- * @param s The string which will be searched at its start and end
- *  for the presence of the `"` character.
- * @returns A `boolean` indicating whether or not the `"` character
- *  was found at the start and end of the string `s`.
- */
-function isDoubleQuoted(s: string) : boolean {
-    return isWrapped(s, `"`);
-}
-
-/**
- * Checks if a given string is quoted, i.e. wrapped in quotation marks.
- * By default, the only accepted quotation marks are double-quote
- * characters `"`.
- * @param s The string which will be checked at its start and end
- *  for the presence of an acceptable quotation mark character.
- * @param acceptSingleQuotes Whether single quote characters (`'`)
- *  should be accepted if present. Otherwise, if left to default,
- *  only double-quote characters will be accepted (`"`).
- * @returns A `boolean` indicating whether or not an acceptable
- *  quotation mark character was found at the start and end of the
- *  string {@link s}.
- */
-function isQuoted(s: string, acceptSingleQuotes = false) : boolean {
-    const isSingle = isSingleQuoted(s);
-    return (acceptSingleQuotes && isSingle) ? isSingle : isDoubleQuoted(s);
 }
 
 /**
@@ -269,6 +226,48 @@ function unwrap(s: string, sequence: string, removePartialWrap = false) : string
     return s;
 }
 
+// MARK: QUOTING
+
+/**
+ * Checks if a given string is wrapped in single quotes (the `'` character.)
+ * @param s The string which will be searched at its start and end
+ *  for the presence of the `'` character.
+ * @returns A `boolean` indicating whether or not the `'` character
+ *  was found at the start and end of the string {@link s}.
+ */
+function isSingleQuoted(s: string) : boolean {
+    return isWrapped(s, `'`);
+}
+
+/**
+ * Checks if a given string is wrapped in quotation marks (double quotes.)
+ * @param s The string which will be searched at its start and end
+ *  for the presence of the `"` character.
+ * @returns A `boolean` indicating whether or not the `"` character
+ *  was found at the start and end of the string `s`.
+ */
+function isDoubleQuoted(s: string) : boolean {
+    return isWrapped(s, `"`);
+}
+
+/**
+ * Checks if a given string is quoted, i.e. wrapped in quotation marks.
+ * By default, the only accepted quotation marks are double-quote
+ * characters `"`.
+ * @param s The string which will be checked at its start and end
+ *  for the presence of an acceptable quotation mark character.
+ * @param acceptSingleQuotes Whether single quote characters (`'`)
+ *  should be accepted if present. Otherwise, if left to default,
+ *  only double-quote characters will be accepted (`"`).
+ * @returns A `boolean` indicating whether or not an acceptable
+ *  quotation mark character was found at the start and end of the
+ *  string {@link s}.
+ */
+function isQuoted(s: string, acceptSingleQuotes = false) : boolean {
+    const isSingle = isSingleQuoted(s);
+    return (acceptSingleQuotes && isSingle) ? isSingle : isDoubleQuoted(s);
+}
+
 function singleQuote(s: string, force = false) : string {
     // TODO
     return s;
@@ -292,3 +291,22 @@ function unquote(s: string, useSingleQuotes = false) : string {
     else if (isDoubleQuoted(s)) return unwrap(s, `"`);
     return s;
 }
+
+// MARK: MISCELLANEOUS
+
+/**
+ * Checks the type of the given value and returns a display name
+ * which differentiates between objects and arrays, the latter
+ * of which are described as type `object` by `typeof`.
+ * 
+ * * Essentially, returns the output of typeof with the addition
+ *   of an `array` type name.
+ * 
+ * @param value The value to type check for an array-inclusive
+ *  type display name `string`.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getTypeDisplayName = (value?: any) : string => 
+    Array.isArray(value)
+        ? 'array'
+        : `${typeof value}`;
