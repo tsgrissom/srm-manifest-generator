@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import clr from 'chalk';
 
 import { checkCross, fmtBool } from './boolean';
 import { clog } from './console';
-import { dlog, isDebugActive } from './debug';
+import { dlog } from './debug';
 import { getTypeDisplayName, indefiniteArticleFor, quote } from './string';
 import {
     SB_OK_LG, SB_OK_SM,
@@ -13,7 +11,7 @@ import {
     UNICODE_ARRW_RIGHT,
 } from './symbols';
 
-import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME, USER_CONFIG_PFX } from '../config/config';
+import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME } from '../config/config';
 import ConfigKeyAliases from '../type/config/ConfigKeyAliases';
 import ConfigKeyPair from '../type/config/ConfigKeyPair';
 

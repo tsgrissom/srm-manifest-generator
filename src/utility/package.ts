@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-export async function getPackageJson() {
+export const getPackageJson = async () => {
     try {
         const packagePath = path.resolve(process.cwd(), 'package.json');
         const packageJson = JSON.parse(await fs.readFile(packagePath, 'utf-8'));
@@ -12,12 +12,10 @@ export async function getPackageJson() {
     }
 }
 
-export async function getPackageJsonAttribute(key: string) {
+export const getPackageJsonAttribute = async (key: string) => {
     const contents = await getPackageJson();
-    return contents['key'];
+    return contents[key];
 }
 
-export async function getReadmeUrl() {
-    const contents = await getPackageJson();
-    return contents['readme'];
-}
+export const getReadmeUrl = async () =>
+    getPackageJsonAttribute('readme');

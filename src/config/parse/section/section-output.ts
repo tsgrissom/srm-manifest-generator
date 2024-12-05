@@ -38,7 +38,7 @@ async function parseOutputSection(data: object, userConfig: UserConfig) : Promis
     
     for (const [key, value] of Object.entries(section)) {
         const resolved = resolveKeyFromAlias(keyAliases, key, sectionKey);
-        const { givenKey, fullGivenKey, resolvedKey, fullResolvedKey } = resolved;
+        const {  fullGivenKey, resolvedKey } = resolved;
 
         switch (resolvedKey) {
             case 'minify': {

@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { argv, env } from 'node:process';
-import color from 'chalk';
 
-import { doArgsInclude } from './misc.js';
-import { clog } from './console.js';
-import chalk from 'chalk';
+import clr from 'chalk';
+
+import { doArgsInclude } from './misc';
+import { clog } from './console';
 
 const FLAGS_DEBUG   = ['-D', '--debug', '--debugging'],
       FLAGS_VERBOSE = ['-v', '--verbose'];
@@ -99,7 +98,7 @@ const dlogHeader = (header: string, newlineBefore = false) => {
     if (newlineBefore)
         dlog('');
 
-    dlog(chalk.magenta.underline(header));
+    dlog(clr.magenta.underline(header));
 }
 
 /**
