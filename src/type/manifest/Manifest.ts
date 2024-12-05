@@ -165,11 +165,11 @@ class Manifest implements ManifestData {
         return this.getEnabledShortcuts().map(each => each.getExportData());
     }
 
+    public getExportString() : string {
+        return JSON.stringify(this.getExportData());
+    }
+
     public async writeToOutput() : Promise<ManifestWriteResults> {
-        const enabledShortcuts = this.getEnabledShortcuts();
-        for (const sc of enabledShortcuts) {
-            clog(chalk.bgRed('enabled'), `${sc.title}`, sc.target)
-        }
         const exportData = this.getExportData();
         const writeData = JSON.stringify(exportData);
         const writePath = this.getWritePath();
@@ -184,7 +184,7 @@ class Manifest implements ManifestData {
         // TODO Calculate invalid
 
         if (nOk === 0) {
-            clog(`${SB_WARN} Skipped Manifest ${quote(this.getName())} because it had no shortcuts which were enabled and valid`);
+            clog(`${SB_WARN} Skipped Manifest ${quote(this.getName())}: No shortcuts which were both enabled and valid`);
             // TODO Verbose print more info here
             return new EmptyManifestWriteResults(this);
         }

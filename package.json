@@ -2,14 +2,33 @@
   "name": "srm-manifest-generator",
   "version": "1.0.1",
   "description": "Create manifests for Steam ROM Manager's manual parsers from simple and maintainable YAML syntax",
-  "keywords": ["Steam ROM Manager", "steam-rom-manager", "SteamROMManager", "SRM", "SteamGridDB", "Steam", "Steam Deck", "PC Gaming", "emulation", "YAML", "yml"],
-  "author": { "name": "tsgrissom", "url": "https://github.com/tsgrissom" },
+  "keywords": [
+    "Steam ROM Manager",
+    "steam-rom-manager",
+    "SteamROMManager",
+    "SRM",
+    "SteamGridDB",
+    "Steam",
+    "Steam Deck",
+    "PC Gaming",
+    "emulation",
+    "YAML",
+    "yml"
+  ],
+  "author": {
+    "name": "tsgrissom",
+    "url": "https://github.com/tsgrissom"
+  },
   "repository": "tsgrissom/srm-manifest-generator",
   "bugs": "https://github.com/tsgrissom/srm-manifest-generator/issues",
   "readme": "https://github.com/tsgrissom/srm-manifest-generator/blob/main/README.md",
   "homepage": "https://github.com/tsgrissom/srm-manifest-generator/blob/main/README.md",
   "license": "MIT",
-  "os": ["win32", "darwin", "linux"],
+  "os": [
+    "win32",
+    "darwin",
+    "linux"
+  ],
   "type": "module",
   "main": "out/src/index.js",
   "bin": {
@@ -18,7 +37,6 @@
   "scripts": {
     "postinstall:dirs": "mkdir ./out && mkdir -p ./config/manifest",
     "postinstall": "npm run postinstall:dirs && npm run build:src",
-
     "lint": "eslint . --ignore-pattern \"out/**\" --ignore-pattern \"test/**\"",
     "lint:all": "eslint .",
     "lint:out": "eslint out",
@@ -28,27 +46,24 @@
     "lint:config": "eslint --print-config ./src/index.ts",
     "lint:noignore": "eslint .",
     "lint:nowarn": "eslint --quiet src/",
-
-    "start": "tsx --env-file=.env/debug.env ./src/index.ts",
+    "start": "tsx ./src/index.ts",
     "start:d": "npm run start:debug",
+    "start:v": "npm run start:verbose",
     "start:debug": "tsx --env-file=.env/debug.env ./src/index.ts",
+    "start:verbose": "tsx --env-file=.env/verbose.env ./src/index.ts",
     "start:loader": "node --loader ts-node/esm ./src/index.ts",
     "start:yaml": "echo \"Not implemented\"",
     "start:yml": "echo \"Not implemented\"",
-
     "clean": "npm run clean:out && npm run clean:tmp",
     "clean:out": "rimraf -g -v \"./out/**/*\"",
     "clean:tmp": "rimraf -g -v \"./test/resource/tmp/**/*\"",
-
     "prebuild": "npm run clean",
     "build": "npm run prebuild && npm run build:out && npm run postbuild",
     "postbuild": "npm run lint:src",
-
     "build:noclean": "npm run build:out && npm run postbuild",
     "build:nolint": "npm run prebuild && npm run build:out",
     "build:config": "echo \"Not implemented\"",
     "build:out": "tsc --project ./tsconfig.json",
-    
     "pretest": "npm run clean:tmp",
     "test": "node --test",
     "test:debug": "node --test --env-file=.env/debug.env"
@@ -67,6 +82,7 @@
     "@typescript-eslint/parser": "^8.16.0",
     "eslint": "^9.14.0",
     "globals": "^15.11.0",
+    "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
     "tmp": "^0.2.3",
     "ts-node": "^10.9.2",

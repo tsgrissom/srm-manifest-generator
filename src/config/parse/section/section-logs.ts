@@ -14,11 +14,9 @@ import UserConfig from '../../../type/config/UserConfig';
 
 const sectionKey = 'logs';
 const keyAliases: ConfigKeyAliases = {
-    enabled: 'enabled',
-    output: 'output',
+    enable: 'enabled',
     outputPath: 'output',
-    outputFile: 'output',
-    format: 'format'
+    outputFile: 'output'
 }
 
 async function parseLogsSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {

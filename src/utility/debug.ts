@@ -72,15 +72,6 @@ const isDebugActive = (isVerboseCountedAsDebugging = true) =>
     isEnvDebug() || isProcessDebugging() || (isVerboseCountedAsDebugging && isVerbose());
 
 /**
- * Creates a styled debug prefix with eye-catching background color
- * to emphasize the beginning of an important debug line, or the
- * start of a debug print across multiple lines.
- * @param useColor Whether to apply color to the header prefix.
- * @returns The header prefix string.
- */
-const getDebugPrefix = (useColor = true) => `${useColor ? color.bgMagenta('DEBUG:') : 'DEBUG:'} `;
-
-/**
  * Logs messages to standard output if debugging is active, which
  * occurs if the current process or environment is debugging.
  * 

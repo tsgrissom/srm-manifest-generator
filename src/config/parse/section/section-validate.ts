@@ -1,11 +1,5 @@
-import clr from 'chalk';
-
-import { dlog } from '../../../utility/debug';
-import { clog } from '../../../utility/console';
 import { quote } from '../../../utility/string';
-import { SB_ERR_LG, SB_ERR_SM } from '../../../utility/symbols';
 import {
-    clogConfigWarn,
     dlogConfigSectionOk,
     dlogConfigWarnOptionalSectionSkippedWrongType,
     dlogConfigSectionStart,
@@ -17,8 +11,6 @@ import {
 } from '../../../utility/config';
 
 import UserConfig from '../../../type/config/UserConfig';
-
-import { USER_CONFIG_FILENAME } from '../../load-data';
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
 
 const sectionKey = 'validate';

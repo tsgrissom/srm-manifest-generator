@@ -1,9 +1,5 @@
-import chalk from 'chalk';
-
-import { dlog } from '../../../utility/debug';
 import {
     clogConfigValueWrongType,
-    clogConfigWarn,
     dlogConfigWarnMissingOptionalSection,
     dlogConfigSectionStart,
     dlogConfigSectionOk,
@@ -12,19 +8,17 @@ import {
     dlogConfigWarnOptionalSectionSkippedWrongType,
     clogConfigValueUnknown
 } from '../../../utility/config';
-import { quote } from '../../../utility/string';
 
 import UserConfig from '../../../type/config/UserConfig';
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
 
 const sectionKey = 'output';
 const keyAliases: ConfigKeyAliases = {
-    minify: 'minify',
-    indentSpaces: 'indentSpaces',
+    minification: 'minify',
     indentationSpaces: 'indentSpaces',
     indentLevel: 'indentSpaces',
-    mode: 'mode',
-    outputMode: 'mode'
+    outputMode: 'mode',
+    spreadMode: 'mode'
 }
 
 async function parseOutputSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
