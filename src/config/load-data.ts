@@ -61,8 +61,16 @@ async function downloadExampleConfig() : Promise<boolean> {
             });
 
             const onError = (err: Error) => {
-                fileStreamExample.close(() => fs.unlink(EXAMPLE_CONFIG_PATH, () => {}));
-                fileStreamUser.close(() => fs.unlink(USER_CONFIG_PATH, () => {}));
+                fileStreamExample.close(() => fs.unlink(EXAMPLE_CONFIG_PATH, (err) => {
+                    if (err) {
+                        console.error(`Something went wrong while closing file handle for ${EXAMPLE_CONFIG_FILENAME}:`, err?.message);
+                    }
+                }));
+                fileStreamUser.close(() => fs.unlink(USER_CONFIG_PATH, (err) => {
+                    if (err) {
+                        console.error(`Something went wrong while closing file handle for ${USER_CONFIG_FILENAME}:`, err?.message);
+                    }
+                }));
                 reject(err);
             };
 

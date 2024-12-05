@@ -13,11 +13,12 @@ export default ts.config(
       sourceType: 'module'
     },
     files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['out/**/*.js', 'dist/**/*.js'],
+    ignores: ['out/**/*.js', 'dist/**/*.js', 'bin/**/*.js'],
     plugins: {
       ts
     },
     rules: {
+      'no-undef': 'off',
       'no-unused-vars': 'off',
       '@typescript-eslint/curly': 'off',
       '@typescript-eslint/no-unused-vars': 'warn',

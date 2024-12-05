@@ -3,8 +3,9 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import ConfigData from '../type/config/ConfigData';
 import { SB_OK_SM, SB_ERR_SM } from './symbols';
+
+import ConfigData from '../type/config/ConfigData';
 
 /**
  * Checks if a given file path has a file extension. When `fileExt` is set to *,
@@ -175,7 +176,7 @@ export function normalizeFileExtension(
 export function basenameWithoutExtensions(
 	fileName: string,
 	extsToRemove: string | string[],
-	iterate: boolean = false
+	iterate = false
 ): string {
 	if (typeof fileName !== 'string')
 		throw new TypeError(`Arg "fileName" must be a string: ${fileName}`);

@@ -4,7 +4,7 @@ import path from 'node:path';
 import clr from 'chalk';
 
 import { clog } from '../../utility/console';
-import { dlog, dlogDataSection, dlogHeader } from '../../utility/debug';
+import { dlog, dlogDataSection } from '../../utility/debug';
 import {
 	basenameWithoutExtensions,
 	fmtPathAsTag,
@@ -29,7 +29,6 @@ import Shortcut from '../shortcut/Shortcut';
 import ShortcutExportData from '../shortcut/ShortcutExportData';
 import EmptyManifestWriteResults from './ManifestEmptyWriteResults';
 import UserConfig from '../config/UserConfig';
-import chalk from 'chalk';
 
 // TODO getName by ManifestNameSource
 

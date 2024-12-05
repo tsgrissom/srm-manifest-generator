@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /**
  * Logs messages to standard output.
  * @param messages The messages you want to log to `stdout`.
