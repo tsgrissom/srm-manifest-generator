@@ -1,21 +1,20 @@
 import {
-	dlogConfigSectionOk,
-	dlogConfigValueLoaded,
-	dlogConfigSectionStart,
-	resolveKeyFromAlias,
 	clogConfigFatalErrMissingRequiredSection,
 	clogConfigFatalErrRequiredSectionWrongType,
-	clogConfigValueWrongType,
 	clogConfigKeyUnknown,
-	clogConfigWarn
+	clogConfigValueWrongType,
+	dlogConfigSectionOk,
+	dlogConfigSectionStart,
+	dlogConfigValueLoaded,
+	resolveKeyFromAlias
 } from '../../../utility/config';
 import { clog } from '../../../utility/console';
-import { SB_ERR_LG, SB_ERR_SM, SB_WARN } from '../../../utility/symbols';
-
-import UserConfig from '../../../type/config/UserConfig';
-import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
-import makeManifests from '../manifests';
 import { quote } from '../../../utility/string';
+import { SB_ERR_SM, SB_WARN } from '../../../utility/symbols';
+
+import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
+import UserConfig from '../../../type/config/UserConfig';
+import makeManifests from '../manifests';
 
 const sectionKey = 'search';
 const keyAliases: ConfigKeyAliases = {
@@ -70,7 +69,17 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 			case `manifests`: {
 				// TODO Maybe load manifests later, elsewhere
 				// Maybe here we can just validate paths if needed, then have makeManifests in the UserConfig on demand?
-				if (!Array.isArray(value) || !value.every(item => typeof item === 'string')) {
+				if (!value) {
+					console.log(
+						`${SB_WARN} No manifest paths were provided at config key ${quote(fullResolvedKey)} so no manifests were loaded`
+					);
+					break;
+				}
+
+				if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
+					config.search.manifests = await makeManifests(value, config);
+					dlogConfigValueLoaded(resolved, value);
+				} else {
 					if (!Array.isArray(value)) {
 						clogConfigValueWrongType(fullGivenKey, 'array of strings', value); // TODO Probably want a custom print here
 					} else {
@@ -80,15 +89,6 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 					}
 				}
 
-				if (!value) {
-					console.log(
-						`${SB_WARN} No manifest paths were provided at config key ${quote(fullResolvedKey)} so no manifests were loaded`
-					);
-					break;
-				}
-
-				config.search.manifests = await makeManifests(value, config);
-				dlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {

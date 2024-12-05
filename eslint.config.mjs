@@ -3,17 +3,22 @@ import js from '@eslint/js';
 import ts from 'typescript-eslint';
 
 export default ts.config(
+  {
+    // config with just ignores is the replacement for `.eslintignore`
+    ignores: ['*.config.mjs', 'dist/**/*.js', 'out/**/*.js']
+  },
   js.configs.recommended,
-  ts.configs.stylistic,
-  
+  ts.configs.recommendedTypeChecked,
   {
     languageOptions: {
       ecmaVersion: 'latest',
       globals: globals.node,
-      sourceType: 'module'
+      sourceType: 'module',
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname
+      }
     },
-    files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['out/**/*.js', 'dist/**/*.js', 'bin/**/*.js'],
     plugins: {
       ts
     },

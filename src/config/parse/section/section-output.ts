@@ -1,18 +1,18 @@
 import {
-	clogConfigValueWrongType,
-	dlogConfigWarnMissingOptionalSection,
-	dlogConfigSectionStart,
-	dlogConfigSectionOk,
-	dlogConfigValueLoaded,
-	resolveKeyFromAlias,
-	dlogConfigWarnOptionalSectionSkippedWrongType,
 	clogConfigKeyUnknown,
-	clogConfigValueUnknown
+	clogConfigValueUnknown,
+	clogConfigValueWrongType,
+	dlogConfigSectionOk,
+	dlogConfigSectionStart,
+	dlogConfigValueLoaded,
+	dlogConfigWarnMissingOptionalSection,
+	dlogConfigWarnOptionalSectionSkippedWrongType,
+	resolveKeyFromAlias
 } from '../../../utility/config';
 
-import UserConfig from '../../../type/config/UserConfig';
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
 import OutputMode from '../../../type/config/OutputMode';
+import UserConfig from '../../../type/config/UserConfig';
 
 const sectionKey = 'output';
 const keyAliases: ConfigKeyAliases = {
@@ -23,7 +23,7 @@ const keyAliases: ConfigKeyAliases = {
 	spreadMode: 'mode'
 };
 
-async function parseOutputSection(data: object, config: UserConfig): Promise<UserConfig> {
+function parseOutputSection(data: object, config: UserConfig): UserConfig {
 	if (!Object.keys(data).includes(sectionKey)) {
 		dlogConfigWarnMissingOptionalSection(sectionKey);
 		return config;
@@ -40,7 +40,7 @@ async function parseOutputSection(data: object, config: UserConfig): Promise<Use
 
 	for (const [key, value] of Object.entries(section)) {
 		const resolved = resolveKeyFromAlias(keyAliases, key, sectionKey);
-		const { givenKey, fullGivenKey, resolvedKey, fullResolvedKey } = resolved;
+		const { fullGivenKey, resolvedKey } = resolved;
 
 		switch (resolvedKey) {
 			case 'minify': {

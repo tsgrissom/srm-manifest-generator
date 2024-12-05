@@ -1,11 +1,11 @@
 import {
-	clogConfigValueWrongType,
 	clogConfigKeyUnknown,
+	clogConfigValueWrongType,
 	dlogConfigSectionOk,
-	dlogConfigValueLoaded,
 	dlogConfigSectionStart,
-	dlogConfigWarnOptionalSectionSkippedWrongType,
+	dlogConfigValueLoaded,
 	dlogConfigWarnMissingOptionalSection,
+	dlogConfigWarnOptionalSectionSkippedWrongType,
 	resolveKeyFromAlias
 } from '../../../utility/config';
 
@@ -21,7 +21,7 @@ const keyAliases: ConfigKeyAliases = {
 	format: 'nameFormat'
 };
 
-async function parseLogsSection(data: object, config: UserConfig): Promise<UserConfig> {
+function parseLogsSection(data: object, config: UserConfig): UserConfig {
 	if (!Object.keys(data).includes(sectionKey)) {
 		dlogConfigWarnMissingOptionalSection(sectionKey);
 		return config;

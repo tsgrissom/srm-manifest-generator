@@ -1,16 +1,16 @@
 import {
+	clogConfigKeyUnknown,
 	clogConfigValueWrongType,
 	dlogConfigSectionOk,
-	dlogConfigWarnOptionalSectionSkippedWrongType,
+	dlogConfigSectionStart,
 	dlogConfigValueLoaded,
 	dlogConfigWarnMissingOptionalSection,
-	dlogConfigSectionStart,
-	resolveKeyFromAlias,
-	clogConfigKeyUnknown
+	dlogConfigWarnOptionalSectionSkippedWrongType,
+	resolveKeyFromAlias
 } from '../../../utility/config';
 
-import UserConfig from '../../../type/config/UserConfig';
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
+import UserConfig from '../../../type/config/UserConfig';
 
 const sectionKey = 'other';
 const keyAliases: ConfigKeyAliases = {
@@ -21,7 +21,7 @@ const keyAliases: ConfigKeyAliases = {
 	verbosity: 'verbose'
 };
 
-async function parseOtherSection(data: object, config: UserConfig): Promise<UserConfig> {
+function parseOtherSection(data: object, config: UserConfig): UserConfig {
 	if (!Object.keys(data).includes(sectionKey)) {
 		dlogConfigWarnMissingOptionalSection(sectionKey);
 		return config;

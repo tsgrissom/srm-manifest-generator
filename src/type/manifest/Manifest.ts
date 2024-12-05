@@ -7,8 +7,8 @@ import { clog } from '../../utility/console';
 import { dlog, dlogDataSection } from '../../utility/debug';
 import {
 	basenameWithoutExtensions,
-	fmtPathAsTag,
 	fmtPath,
+	fmtPathAsTag,
 	fmtPathWithExistsAndName
 } from '../../utility/path';
 import { quote } from '../../utility/string';
@@ -25,10 +25,10 @@ import ManifestData from './ManifestData';
 import ManifestNameSource from './ManifestNameSource';
 import ManifestWriteResults from './ManifestWriteResults';
 
+import UserConfig from '../config/UserConfig';
 import Shortcut from '../shortcut/Shortcut';
 import ShortcutExportData from '../shortcut/ShortcutExportData';
 import EmptyManifestWriteResults from './ManifestEmptyWriteResults';
-import UserConfig from '../config/UserConfig';
 
 // TODO getName by ManifestNameSource
 
@@ -48,11 +48,6 @@ class Manifest implements ManifestData {
 	 * @param data The object to parse into a Manifest instance.
 	 */
 	constructor(filePath: string, data: ManifestData) {
-		if (typeof filePath !== 'string')
-			throw new Error(`Required arg "filePath" is not a string (${filePath})`);
-		if (typeof data !== 'object') throw new Error(`Required arg "object" is not an object (${data})`);
-		if (!data) throw new Error('Required arg "data" is invalid');
-
 		this.filePath = filePath;
 		this.sourceName = data.sourceName;
 		this.baseDirectory = data.baseDirectory;
@@ -285,7 +280,7 @@ class Manifest implements ManifestData {
 	}
 
 	public async logWriteResults(results: ManifestWriteResults, config?: UserConfig) {
-		this.dlogWriteResults(results);
+		await this.dlogWriteResults(results);
 
 		const { manifest, stats } = results;
 		const { nTotal, nOk, nEnabled } = stats;

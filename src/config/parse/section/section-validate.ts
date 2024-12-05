@@ -1,17 +1,17 @@
-import { quote } from '../../../utility/string';
 import {
+	clogConfigKeyUnknown,
+	clogConfigValueWrongType,
 	dlogConfigSectionOk,
-	dlogConfigWarnOptionalSectionSkippedWrongType,
 	dlogConfigSectionStart,
 	dlogConfigValueLoaded,
 	dlogConfigWarnMissingOptionalSection,
-	resolveKeyFromAlias,
-	clogConfigValueWrongType,
-	clogConfigKeyUnknown
+	dlogConfigWarnOptionalSectionSkippedWrongType,
+	resolveKeyFromAlias
 } from '../../../utility/config';
+import { quote } from '../../../utility/string';
 
-import UserConfig from '../../../type/config/UserConfig';
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
+import UserConfig from '../../../type/config/UserConfig';
 
 const sectionKey = 'validate';
 const keyAliases: ConfigKeyAliases = {
@@ -31,7 +31,7 @@ const keyAliases: ConfigKeyAliases = {
 	unknownKeys: 'unknownConfigKeys'
 };
 
-async function parseValidateSection(data: object, config: UserConfig): Promise<UserConfig> {
+function parseValidateSection(data: object, config: UserConfig): UserConfig {
 	if (!Object.keys(data).includes(sectionKey)) {
 		dlogConfigWarnMissingOptionalSection(sectionKey);
 		return config;
@@ -89,12 +89,19 @@ async function parseValidateSection(data: object, config: UserConfig): Promise<U
 
 				let normalized: string[];
 
-				if (typeof value === 'string') normalized = [value];
-				else if (typeof value === 'object' && Array.isArray(value)) normalized = value;
-				else
+				if (typeof value === 'string') {
+					normalized = [value];
+				} else if (
+					typeof value === 'object' &&
+					Array.isArray(value) &&
+					value.every(each => typeof each === 'string')
+				) {
+					normalized = value;
+				} else {
 					throw new TypeError(
 						`Unexpected: Could not convert config value ${quote(fullGivenKey)} into an array`
 					);
+				}
 
 				config.validate.executableExtensions = normalized;
 				dlogConfigValueLoaded(resolved, value);
