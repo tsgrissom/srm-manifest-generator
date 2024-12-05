@@ -1,9 +1,16 @@
-import UserConfig from '../../../type/config/UserConfig';
-import { clog } from '../../../utility/console';
-import { quote } from '../../../utility/string';
-import { SB_ERR_SM, SB_ERR_LG } from '../../../utility/symbols';
-import { clogConfigWarn, dlogConfigSectionOk, dlogConfigValueLoaded, dlogConfigSectionStart, resolveKeyFromAlias, dlogConfigWarnOptionalSectionSkippedWrongType, dlogConfigWarnMissingOptionalSection, clogConfigValueWrongType, clogConfigValueUnknown } from '../../../utility/config';
+import {
+    clogConfigValueWrongType,
+    clogConfigValueUnknown,
+    dlogConfigSectionOk,
+    dlogConfigValueLoaded,
+    dlogConfigSectionStart,
+    dlogConfigWarnOptionalSectionSkippedWrongType,
+    dlogConfigWarnMissingOptionalSection,
+    resolveKeyFromAlias
+} from '../../../utility/config';
+
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
+import UserConfig from '../../../type/config/UserConfig';
 
 const sectionKey = 'logs';
 const keyAliases: ConfigKeyAliases = {

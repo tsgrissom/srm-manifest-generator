@@ -8,14 +8,19 @@ import ShortcutData from './ShortcutData.js';
 import ShortcutExportData from './ShortcutExportData.js';
 import ManifestData from '../manifest/ManifestData.js';
 import Manifest from '../manifest/Manifest.js';
+import { isDebugActive } from '../../utility/debug.js';
+import { quote } from '../../utility/string.js';
+import { fmtBool } from '../../utility/boolean.js';
 
 // TODO jsdoc
-class Shortcut {
+class Shortcut implements ShortcutData {
 
     // TODO jsdoc
     manifest: ManifestData;
-    // TODO jsdoc
-    data: ShortcutData;
+    
+    title: string;
+    target: string;
+    enabled: boolean;
 
     constructor(manifest: ManifestData, data: ShortcutData) {
         // TODO Accept config in constructor, check validity of executable
@@ -34,13 +39,15 @@ class Shortcut {
             throw new TypeError(`Constructor arg "object" must be an object, not an array: ${data}`);
 
         this.manifest = manifest;
-        this.data = data;
+        this.title = data.title;
+        this.target = data.target;
+        this.enabled = data.enabled;
 
-        if (process.argv.includes('--list-shortcuts')) {
-            clog(clr.blue('LOADED SHORTCUT'));
-            clog(`Title: ${this.data.title}`);
-            clog(`Target: ${this.data.target}`);
-            clog(`Enabled: ${this.data.enabled}`);
+        if (process.argv.includes('--list-shortcuts') || isDebugActive()) { // TODO Take off debug, move to verbose once shortcuts are working
+            clog(clr.blue.underline(`LOADED SHORTCUT: ${quote(this.title)}`));
+            clog(` Title: ${quote(this.title)}`);
+            clog(` Target: ${quote(this.target)}`);
+            clog(` Enabled: ${fmtBool(this.enabled)}`);
         }
     }
 
@@ -58,11 +65,11 @@ class Shortcut {
     }
 
     getTitle() : string {
-        return this.data.title;
+        return this.title;
     }
 
     getRelativeTargetPath() : string {
-        return this.data.target;
+        return this.target;
     }
 
     getFullTargetPath() : string {
@@ -75,7 +82,7 @@ class Shortcut {
     }
 
     isEnabled() : boolean {
-        return !this.data.enabled;
+        return !this.enabled;
     }
 
     isDisabled() : boolean {

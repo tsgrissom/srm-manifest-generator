@@ -19,6 +19,8 @@ import {
 } from '../../../utility/config';
 import UserConfig from '../../../type/config/UserConfig';
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
+import ConfigKeyPair from '../../../type/config/ConfigKeyPair';
+import Manifest from '../../../type/manifest/Manifest';
 
 const sectionKey = 'search';
 const keyAliases: ConfigKeyAliases = {
@@ -68,49 +70,9 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                 break;
             }
             case `manifests`: {
-                // TODO Check for rewrite
-                if (Array.isArray(value) && value.every((item) => typeof item === 'string')) {
-                    const okManifests = await makeManifests(value, userConfig);
-
-                    userConfig.search.manifests = okManifests;
-                    dlogConfigValueLoaded(resolved, value);
-                    
-                    const nAll = value.length;
-                    const nOk  = okManifests.length;
-                    const ratio = `(${nOk}/${nAll})`;
-
-                    // TODO Isolate below
-
-                    if (nOk === 0) {
-                        const postfix = nAll > 0 ? clr.red(ratio) : '';
-                        clog(`${SB_ERR_LG} No manifest paths were loaded from the ${USER_CONFIG_FILENAME} ${postfix}`);
-                        // TODO Debug log here
-                    } else if (okManifests.length > 0) {
-                        // clog(clr.blue(`${okManifests.length} manifests were loaded from the ${USER_CONFIG_FILENAME}`));
-                        
-                        let prefix = '',
-                            blob = '',
-                            postfix = '';
-                        if (nAll === nOk) {
-                            if (nAll > 0) {
-                                prefix = SB_OK_LG;
-                                blob = 'All configured manifest paths were loaded';
-                                postfix = clr.greenBright(ratio);
-                            } else if (nAll === 0) {
-                                prefix = SB_ERR_LG;
-                                blob = 'None of the configured manifest paths were loaded';
-                            }
-                        } else if (nAll > nOk) {
-                            prefix = SB_WARN;
-                            blob = 'Some but not all configured manifest paths were loaded';
-                            postfix = clr.yellowBright(ratio);
-                        } else {
-                            throw new Error(`Unexpected: nAll < nOk`);
-                        }
-
-                        clog(`${prefix} ${blob} ${postfix}`);
-                    } 
-                } else {
+                // TODO Maybe load manifests later, elsewhere
+                // Maybe here we can just validate paths if needed, then have makeManifests in the UserConfig on demand?
+                if (!Array.isArray(value) || !value.every((item) => typeof item === 'string')) {
                     if (!Array.isArray(value)) {
                         clogConfigValueWrongType(fullGivenKey, 'array of strings', value); // TODO Probably want a custom print here
                         // clog(` ${SB_ERR_LG} Value of config key "search.manifests" must be an array of strings but was not an array`);
@@ -119,6 +81,14 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
                         clog(` ${SB_ERR_LG} Values inside array value of key "search.manifests" must all be strings, but at least one was a non-string`);
                     }
                 }
+
+                userConfig.search.manifests = await makeManifests(value, userConfig);
+                dlogConfigValueLoaded(resolved, value);
+
+                for (const manifest of userConfig.search.manifests) {
+                    
+                }
+
                 break;
             }
             default: {

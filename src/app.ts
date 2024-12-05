@@ -1,7 +1,7 @@
 import clr from 'chalk';
 
 import { clog } from './utility/console';
-import { dlog } from './utility/debug';
+import { dlog, dlogHeader } from './utility/debug';
 
 import Manifest from './type/manifest/Manifest';
 
@@ -13,8 +13,7 @@ async function processManifest(manifest: Manifest) {
     // TODO Additionally validate if write path is valid, make folders if missing
     // TODO If it's a file, write to the file, but if it's a folder, write the file inside of the folder, maybe based on the input file's name
     
-    const { name, shortcuts } = manifest.data;
-    const manPath = manifest.filePath;
+    const { filePath, shortcuts } = manifest;
 
     if (!Array.isArray(shortcuts))
         throw new Error(`Manifest (${manifest.getName()} requires a key "shortcuts" which is a list of paths, but the user config is set to a non-array type`);
@@ -24,7 +23,6 @@ async function processManifest(manifest: Manifest) {
     try {
         const writeResults = await manifest.writeToOutput();
         await manifest.logWriteResults(writeResults);
-        clog(` ${SB_OK_LG} Manifest output has been written to ${fmtPath(manPath)}`);
     } catch (err) {
         throw new Error(`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}): ${err}`);
     }

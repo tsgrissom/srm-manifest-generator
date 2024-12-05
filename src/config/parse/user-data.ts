@@ -9,11 +9,14 @@ import { clog } from '../../utility/console';
 import { USER_CONFIG_FILENAME } from '../config';
 import { dlog, dlogHeader } from '../../utility/debug';
 import { fmtPath, fmtPathAsTag } from '../../utility/path';
-import { SB_OK_LG, SB_WARN } from '../../utility/symbols';
+import { SB_ERR_LG, SB_ERR_SM, SB_OK_LG, SB_WARN } from '../../utility/symbols';
 
 import ConfigData from '../../type/config/ConfigData';
 import Manifest from '../../type/manifest/Manifest';
 import ManifestData from '../../type/manifest/ManifestData';
+import { quote } from '../../utility/string';
+import Shortcut from '../../type/shortcut/Shortcut';
+import ShortcutData from '../../type/shortcut/ShortcutData';
 
 async function makeManifests(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
     dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
@@ -49,8 +52,47 @@ async function makeManifests(manPaths: string[], config: ConfigData) : Promise<M
 
         dlog(` ${SB_OK_LG} MANIFEST #${id}: Finished validation of manifest path ${fmtPathAsTag(pathTag)}`);
     }
+
+    clogLoadedManifests(manPaths, okManifests);
     
     return okManifests;
+}
+
+function clogLoadedManifests(manifestPaths: string[], okManifests: Manifest[], ) {
+    const nAll = manifestPaths.length;
+    const nOk = okManifests.length;
+    const ratio = `${nOk}/${nAll}`;
+
+    // TODO Isolate below
+
+    if (nOk <= 0) {
+        const postfix = nAll > 0 ? clr.red(ratio) : '';
+        clog(`${SB_ERR_LG} No manifest paths were loaded from the ${USER_CONFIG_FILENAME} ${postfix}`);
+        // TODO Debug log here
+        return;
+    }
+
+    let prefix = '',
+        blob = '',
+        postfix = '';
+    if (nAll === nOk) {
+        if (nAll > 0) {
+            prefix = SB_OK_LG;
+            blob = 'All configured manifest paths were loaded';
+            postfix = clr.greenBright(ratio);
+        } else if (nAll === 0) {
+            prefix = SB_ERR_LG;
+            blob = 'None of the configured manifest paths were loaded';
+        }
+    } else if (nAll > nOk) {
+        prefix = SB_WARN;
+        blob = 'Some but not all configured manifest paths were loaded';
+        postfix = clr.yellowBright(ratio);
+    } else {
+        throw new Error(`Unexpected: nAll < nOk`);
+    }
+
+    clog(`${prefix} ${blob} (${postfix})`);
 }
 
 async function validateManifestPathExists(filePath: string) : Promise<boolean> {
@@ -128,7 +170,7 @@ async function validateManifestFileContents(manPath: string, object: object) : P
         keyAliasUsedForOutput = '',
         keyAliasUsedForShortcuts = '';
 
-    let shortcutValue;
+    let shortcutsValue: object[] = [];
 
     for (const [key, value] of Object.entries(object)) {
         if (key === 'name' || key === 'sourceName') {
@@ -143,7 +185,7 @@ async function validateManifestFileContents(manPath: string, object: object) : P
         } else if (key === 'shortcuts' || key === 'titles' || key === 'entries') {
             keyAliasUsedForShortcuts = key;
             data.shortcuts = []; // TODO Parse shortcuts sometime after this, requires Manifest instance
-            shortcutValue = value;
+            shortcutsValue = value;
         }
     }
 
@@ -175,7 +217,7 @@ async function validateManifestFileContents(manPath: string, object: object) : P
 
     // Make sure required attributes are present
     if (!hasAttrRootDir) 
-        throw new Error(`Manifest is missing a root directory attribute ${pathTag}`);
+        throw new Error(`Manifest is missing a root directory attribute ${pathTag}`); // TODO Make these errors land better, skip that one manifest + process remaining
     if (!hasAttrOutput)
         throw new Error(`Manifest is missing an output directory attribute ${pathTag}`);
 
@@ -184,12 +226,57 @@ async function validateManifestFileContents(manPath: string, object: object) : P
     if (hasAttrShortcuts) {
         // TODO Load shortcuts
 
-        dlogHeader(`LOADING SHORTCUTS FROM MANIFEST: ${instance.getName()}`);
-
-        
+        data.shortcuts = await loadManifestShortcuts(instance, shortcutsValue);
     }
 
     return data;
+}
+
+function hasRequiredFields(obj: object) : obj is Shortcut {
+    return Object.prototype.hasOwnProperty.call(obj, 'title') && Object.prototype.hasOwnProperty.call(obj, 'target');
+}
+
+async function loadManifestShortcuts(manifest: Manifest, shortcutsValue: object[]) : Promise<Shortcut[]> {
+    dlogHeader(`MANIFEST ${quote(manifest.getName())} > ${clr.cyanBright('Load Shortcuts')}`);
+
+    if (shortcutsValue.length === 0) {
+        dlog(`  ${SB_WARN} Shortcuts value was empty so no shortcuts were added to the Manifest`);
+        return [];
+    }
+
+    const okShortcuts: Shortcut[] = [];
+
+    for (const [index, shortcutValue] of shortcutsValue.entries()) {
+        const id = index+1;
+        
+        dlog(clr.cyanBright.underline(`SHORTCUT #${id} > Processing`));
+
+        const hasRequired = hasRequiredFields(shortcutValue);
+        dlog(`  ${checkCross(hasRequired)} Has required fields?`);
+        if (!hasRequired) {
+            dlog(`  Skipping Shortcut #${id}`);
+            continue;
+        }
+
+        const shortcut = await makeShortcut(manifest, shortcutValue);        
+        dlog(`${SB_OK_LG} Shortcut created: ${quote(shortcut.title)}`);
+    }
+
+    return okShortcuts;
+}
+
+async function makeShortcut(manifestData: ManifestData, obj: object) {
+    const shortcutData: ShortcutData = {
+        title: 'Testing!',
+        target: '',
+        enabled: true
+    };
+
+    for (const [key, value] of Object.entries(obj)) {
+        dlog(` - ${key}: ${value}`);
+    }
+
+    return new Shortcut(manifestData, shortcutData);
 }
 
 export { makeManifests };

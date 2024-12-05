@@ -4,7 +4,7 @@ import path from 'node:path';
 import clr from 'chalk';
 
 import { clog } from '../../utility/console';
-import { dlog, dlogDataSection } from '../../utility/debug';
+import { dlog, dlogDataSection, dlogHeader } from '../../utility/debug';
 import {
     basenameWithoutExtensions,
     fmtPathAsTag,
@@ -29,16 +29,20 @@ import Shortcut from '../shortcut/Shortcut';
 import ShortcutExportData from '../shortcut/ShortcutExportData';
 import EmptyManifestWriteResults from './ManifestEmptyWriteResults';
 import UserConfig from '../config/UserConfig';
+import chalk from 'chalk';
 
 // TODO getName by ManifestNameSource
 
 // TODO jsdoc
-class Manifest {
+class Manifest implements ManifestData {
 
     // TODO jsdoc
     filePath: string;
-    // TODO jsdoc
-    data: ManifestData;
+    
+    name: string;
+    rootDirectory: string;
+    outputPath: string;
+    shortcuts: Shortcut[];
 
     /**
      * Constructs a new Manifest instance. 
@@ -47,29 +51,33 @@ class Manifest {
      */
     constructor(filePath: string, data: ManifestData) {
         if (typeof(filePath) !== 'string')
-            throw new Error(`Failed to create instance of Manifest class: Required arg "filePath" in constructor is not a string (${filePath})`);
+            throw new Error(`Required arg "filePath" is not a string (${filePath})`);
         if (typeof(data) !== 'object')
-            throw new Error(`Failed to create instance of Manifest class: Required arg "object" in constructor is not an object (${data})`);
+            throw new Error(`Required arg "object" is not an object (${data})`);
+        if (!data)
+            throw new Error('Required arg "data" is invalid');
 
         this.filePath = filePath;
-        this.data = data;
-
-        if (!data)
-            throw new Error('Failed to create instance of Manifest class: Required arg "object" in constructor is invalid');
+        this.name = data.name;
+        this.rootDirectory = data.rootDirectory;
+        this.outputPath = data.outputPath;
+        this.shortcuts = [];
+        // TODO Fill shortcuts
     }
+    
     
     // MARK: Paths
 
     getOutputPath() : string {
-        return this.data.outputPath;
+        return this.outputPath;
     }
 
     getWritePath() : string {
-        return this.data.outputPath;
+        return this.outputPath;
     }
 
     getRootDirectory() : string {
-        return this.data.rootDirectory;
+        return this.rootDirectory;
     }
 
     getFilePath() : string {
@@ -87,18 +95,18 @@ class Manifest {
     }
 
     hasNameAttribute() : boolean {
-        if (!this.data.name)
+        if (!this.name)
             return false;
 
-        return this.data.name.trim() !== '';
+        return this.name.trim() !== '';
     }
 
     // TODO jsdoc
     getNameAttribute() : string {
-        if (!this.data.name || this.data.name.trim() === '')
+        if (!this.name || this.name.trim() === '')
             return '';
 
-        return this.data.name;
+        return this.name;
     }
 
 
@@ -146,7 +154,7 @@ class Manifest {
     // MARK: Shortcuts
 
     public getShortcuts() : Shortcut[] {
-        return this.data.shortcuts;
+        return this.shortcuts;
     }
 
     public getEnabledShortcuts() : Shortcut[] {
@@ -242,7 +250,7 @@ class Manifest {
         const sourceFilePath = await fmtPathWithExistsAndName(man.filePath, 'Source File Path');
         const outputPath = await fmtPathWithExistsAndName(man.getOutputPath(), 'Output Path');
         const writeFilePath = await fmtPathWithExistsAndName(man.getWritePath(), 'Write File Path');
-        const rootDirectory = await fmtPathWithExistsAndName(man.data.rootDirectory, 'Root Directory');
+        const rootDirectory = await fmtPathWithExistsAndName(man.rootDirectory, 'Root Directory');
 
         console.log('');
         dlogDataSection(
