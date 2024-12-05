@@ -6,7 +6,7 @@ import {
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigSectionStart,
 	resolveKeyFromAlias,
-	clogConfigValueUnknown
+	clogConfigKeyUnknown
 } from '../../../utility/config';
 
 import UserConfig from '../../../type/config/UserConfig';
@@ -21,28 +21,17 @@ const keyAliases: ConfigKeyAliases = {
 	verbosity: 'verbose'
 };
 
-async function parseOtherSection(
-	data: object,
-	userConfig: UserConfig
-): Promise<UserConfig> {
+async function parseOtherSection(data: object, config: UserConfig): Promise<UserConfig> {
 	if (!Object.keys(data).includes(sectionKey)) {
 		dlogConfigWarnMissingOptionalSection(sectionKey);
-		return userConfig;
+		return config;
 	}
 
 	const section = (data as Record<string, unknown>)[sectionKey];
 
-	if (
-		typeof section !== 'object' ||
-		Array.isArray(section) ||
-		section === null
-	) {
-		dlogConfigWarnOptionalSectionSkippedWrongType(
-			sectionKey,
-			'section',
-			section
-		);
-		return userConfig;
+	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
+		dlogConfigWarnOptionalSectionSkippedWrongType(sectionKey, 'section', section);
+		return config;
 	}
 
 	dlogConfigSectionStart(sectionKey);
@@ -58,7 +47,7 @@ async function parseOtherSection(
 					break;
 				}
 
-				userConfig.other.debug = value;
+				config.other.debug = value;
 				dlogConfigValueLoaded(resolved, value);
 				break;
 			}
@@ -68,7 +57,7 @@ async function parseOtherSection(
 					break;
 				}
 
-				userConfig.other.useColor = value;
+				config.other.useColor = value;
 				dlogConfigValueLoaded(resolved, value);
 				break;
 			}
@@ -78,19 +67,19 @@ async function parseOtherSection(
 					break;
 				}
 
-				userConfig.other.verbose = value;
+				config.other.verbose = value;
 				dlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {
-				clogConfigValueUnknown(fullGivenKey);
+				clogConfigKeyUnknown(fullGivenKey, config);
 			}
 		}
 	}
 
 	dlogConfigSectionOk(sectionKey);
 
-	return userConfig;
+	return config;
 }
 
 export default parseOtherSection;

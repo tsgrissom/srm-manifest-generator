@@ -40,10 +40,9 @@ export const isCapitalized = (s: string): boolean => {
  */
 // TEST Unit
 export const indefiniteArticleFor = (noun: string): string => {
+	noun = `${noun}`;
 	if (noun.trim() === '') return '';
-	const startsWithVowel = ['a', 'e', 'i', 'o', 'u'].includes(
-		noun.substring(0, 1).toLowerCase()
-	);
+	const startsWithVowel = ['a', 'e', 'i', 'o', 'u'].includes(noun.substring(0, 1).toLowerCase());
 
 	return startsWithVowel ? 'an' : 'a';
 };
@@ -68,11 +67,9 @@ export const indefiniteArticleFor = (noun: string): string => {
  * @returns A `string` containing the created quantity description.
  */
 export function describeQuantity(n: number, singular: string, plural?: string) {
-	if (typeof n !== 'number')
-		throw new TypeError(`Arg n must be a number: ${n}`);
+	if (typeof n !== 'number') throw new TypeError(`Arg n must be a number: ${n}`);
 
-	if (singular.trim() === '')
-		throw new Error(`Arg singular must be a non-empty string: ${singular}`);
+	if (singular.trim() === '') throw new Error(`Arg singular must be a non-empty string: ${singular}`);
 	if (plural === undefined || plural.trim() === '') plural = '';
 
 	if (!plural) {
@@ -97,14 +94,8 @@ export function describeQuantity(n: number, singular: string, plural?: string) {
 // TODO jsdoc
 // TODO TEST Unit
 export function delimitedList(items: string[], delimiter = ', '): string {
-	if (!items)
-		throw new Error(
-			`Cannot create delimited list from given items: ${items}`
-		);
-	if (!delimiter)
-		throw new Error(
-			`Cannot create delimited list using given delimiter: ${delimiter}`
-		);
+	if (!items) throw new Error(`Cannot create delimited list from given items: ${items}`);
+	if (!delimiter) throw new Error(`Cannot create delimited list using given delimiter: ${delimiter}`);
 
 	if (!Array.isArray(items)) {
 		if (typeof items === 'string') {
@@ -123,9 +114,7 @@ export function delimitedList(items: string[], delimiter = ', '): string {
 
 	for (const [index, entry] of items.entries()) {
 		if (typeof entry !== 'string')
-			throw new Error(
-				`Element ${index} of given array is a non-string type: ${entry}`
-			);
+			throw new Error(`Element ${index} of given array is a non-string type: ${entry}`);
 
 		list += entry;
 
@@ -171,12 +160,7 @@ function isWrapped(s: string, sequence: string): boolean {
  * @returns The resulting `string`, which will be wrapped in the sequence if it
  *  was not already present.
  */
-function wrap(
-	s: string,
-	sequence: string,
-	force = false,
-	fixPartialWrap = false
-): string {
+function wrap(s: string, sequence: string, force = false, fixPartialWrap = false): string {
 	const doWrap = () => sequence + s + sequence;
 
 	if (force) return doWrap();
@@ -230,11 +214,7 @@ function wrap(
  *  string {@link s}
  * @returns
  */
-function unwrap(
-	s: string,
-	sequence: string,
-	removePartialWrap = false
-): string {
+function unwrap(s: string, sequence: string, removePartialWrap = false): string {
 	if (!isWrapped(s, sequence)) return s;
 
 	// TODO
@@ -295,13 +275,8 @@ function doubleQuote(s: string, force = false): string {
 	return s;
 }
 
-export function quote(
-	s: string,
-	useSingleQuotes = false,
-	force = false
-): string {
-	if ((isDoubleQuoted(s) || (isSingleQuoted(s) && useSingleQuotes)) && !force)
-		return s;
+export function quote(s: string, useSingleQuotes = false, force = false): string {
+	if ((isDoubleQuoted(s) || (isSingleQuoted(s) && useSingleQuotes)) && !force) return s;
 	return wrap(s, useSingleQuotes ? `'` : `"`, force);
 }
 

@@ -6,19 +6,19 @@ import clr from 'chalk';
 import { clog } from '../../utility/console';
 import { dlog, dlogDataSection, dlogHeader } from '../../utility/debug';
 import {
-    basenameWithoutExtensions,
-    fmtPathAsTag,
-    fmtPath,
-    fmtPathWithExistsAndName
+	basenameWithoutExtensions,
+	fmtPathAsTag,
+	fmtPath,
+	fmtPathWithExistsAndName
 } from '../../utility/path';
 import { quote } from '../../utility/string';
 import {
-    SB_ERR_LG,
-    SB_OK_LG,
-    SB_WARN,
-    UNICODE_CHECK_LG,
-    UNICODE_WARN,
-    UNICODE_XMARK_LG
+	SB_ERR_LG,
+	SB_OK_LG,
+	SB_WARN,
+	UNICODE_CHECK_LG,
+	UNICODE_WARN,
+	UNICODE_XMARK_LG
 } from '../../utility/symbols';
 
 import ManifestData from './ManifestData';
@@ -35,288 +35,292 @@ import chalk from 'chalk';
 
 // TODO jsdoc
 class Manifest implements ManifestData {
+	// TODO jsdoc
+	filePath: string;
 
-    // TODO jsdoc
-    filePath: string;
-    
-    sourceName: string;
-    baseDirectory: string;
-    outputPath: string;
-    shortcuts: Shortcut[];
+	sourceName: string;
+	baseDirectory: string;
+	outputPath: string;
+	shortcuts: Shortcut[];
 
-    /**
-     * Constructs a new Manifest instance. 
-     * @param filePath The filepath of this Manifest's source file. Not read in the constructor, but used as a fallback name if name attribute is not set inside the file.
-     * @param data The object to parse into a Manifest instance.
-     */
-    constructor(filePath: string, data: ManifestData) {
-        if (typeof(filePath) !== 'string')
-            throw new Error(`Required arg "filePath" is not a string (${filePath})`);
-        if (typeof(data) !== 'object')
-            throw new Error(`Required arg "object" is not an object (${data})`);
-        if (!data)
-            throw new Error('Required arg "data" is invalid');
+	/**
+	 * Constructs a new Manifest instance.
+	 * @param filePath The filepath of this Manifest's source file. Not read in the constructor, but used as a fallback name if name attribute is not set inside the file.
+	 * @param data The object to parse into a Manifest instance.
+	 */
+	constructor(filePath: string, data: ManifestData) {
+		if (typeof filePath !== 'string')
+			throw new Error(`Required arg "filePath" is not a string (${filePath})`);
+		if (typeof data !== 'object') throw new Error(`Required arg "object" is not an object (${data})`);
+		if (!data) throw new Error('Required arg "data" is invalid');
 
-        this.filePath = filePath;
-        this.sourceName = data.sourceName;
-        this.baseDirectory = data.baseDirectory;
-        this.outputPath = data.outputPath;
-        this.shortcuts = data.shortcuts;
-        // TODO Fill shortcuts
-    }
-    
-    
-    // MARK: Paths
+		this.filePath = filePath;
+		this.sourceName = data.sourceName;
+		this.baseDirectory = data.baseDirectory;
+		this.outputPath = data.outputPath;
+		this.shortcuts = data.shortcuts;
+		// TODO Fill shortcuts
+	}
 
-    getOutputPath() : string {
-        return this.outputPath;
-    }
+	// MARK: Paths
 
-    getWritePath() : string {
-        return this.outputPath;
-    }
+	getOutputPath(): string {
+		return this.outputPath;
+	}
 
-    getRootDirectory() : string {
-        return this.baseDirectory;
-    }
+	getWritePath(): string {
+		return this.outputPath;
+	}
 
-    getFilePath() : string {
-        return this.filePath;
-    }
+	getRootDirectory(): string {
+		return this.baseDirectory;
+	}
 
-    // MARK: Names
+	getFilePath(): string {
+		return this.filePath;
+	}
 
-    getFileBasename() : string {
-        return path.basename(this.filePath);
-    }
+	// MARK: Names
 
-    getFallbackName() : string {
-        return basenameWithoutExtensions(this.filePath, ['.yml', '.yaml', '.manifest', '.example'], true);
-    }
+	getFileBasename(): string {
+		return path.basename(this.filePath);
+	}
 
-    hasNameAttribute() : boolean {
-        if (!this.sourceName)
-            return false;
+	getFallbackName(): string {
+		return basenameWithoutExtensions(this.filePath, ['.yml', '.yaml', '.manifest', '.example'], true);
+	}
 
-        return this.sourceName.trim() !== '';
-    }
+	hasNameAttribute(): boolean {
+		if (!this.sourceName) return false;
 
-    // TODO jsdoc
-    getNameAttribute() : string {
-        if (!this.sourceName || this.sourceName.trim() === '')
-            return '';
+		return this.sourceName.trim() !== '';
+	}
 
-        return this.sourceName;
-    }
+	// TODO jsdoc
+	getNameAttribute(): string {
+		if (!this.sourceName || this.sourceName.trim() === '') return '';
 
+		return this.sourceName;
+	}
 
-    /**
-     * Determine where the Manifest instance should retrieve its name from. First,
-     * this function checks for a valid name attribute in the Manifest's source
-     * file ({@link ManifestNameSource.Attribute}.) If that doesn't work, it
-     * will fallback to using the filename of the source file, removing all
-     * extensions from it using {@link basenameWithoutExtensions} iteraviley.
-     *  
-     * @returns An enum representing the potential sources
-     *  of a manifest's name.
-     */
-    public getNameSource() : ManifestNameSource {
-        if (this.hasNameAttribute()) {
-            return ManifestNameSource.Attribute;
-        } else {
-            return ManifestNameSource.Filename;
-        }
-    }
+	/**
+	 * Determine where the Manifest instance should retrieve its name from. First,
+	 * this function checks for a valid name attribute in the Manifest's source
+	 * file ({@link ManifestNameSource.Attribute}.) If that doesn't work, it
+	 * will fallback to using the filename of the source file, removing all
+	 * extensions from it using {@link basenameWithoutExtensions} iteraviley.
+	 *
+	 * @returns An enum representing the potential sources
+	 *  of a manifest's name.
+	 */
+	public getNameSource(): ManifestNameSource {
+		if (this.hasNameAttribute()) {
+			return ManifestNameSource.Attribute;
+		} else {
+			return ManifestNameSource.Filename;
+		}
+	}
 
-    /**
-     * Get the string representation of the Manifest instance's {@link ManifestNameSource}
-     * @returns A `string` representing the value of {@link getNameSource},
-     *  which is a {@link ManifestNameSource}.
-     */
-    public getNameSourceAsString() : string {
-        switch (this.getNameSource()) {
-            case ManifestNameSource.Attribute:
-                return 'Attribute'
-            case ManifestNameSource.Filename:
-                return 'Filename'
-        };
-    }
+	/**
+	 * Get the string representation of the Manifest instance's {@link ManifestNameSource}
+	 * @returns A `string` representing the value of {@link getNameSource},
+	 *  which is a {@link ManifestNameSource}.
+	 */
+	public getNameSourceAsString(): string {
+		switch (this.getNameSource()) {
+			case ManifestNameSource.Attribute:
+				return 'Attribute';
+			case ManifestNameSource.Filename:
+				return 'Filename';
+		}
+	}
 
-    public getName() : string {
-        switch (this.getNameSource()) {
-            case ManifestNameSource.Attribute:
-                return this.getNameAttribute();
-            case ManifestNameSource.Filename:
-                return this.getFallbackName();
-        }
-    }
-    
-    // MARK: Shortcuts
+	public getName(): string {
+		switch (this.getNameSource()) {
+			case ManifestNameSource.Attribute:
+				return this.getNameAttribute();
+			case ManifestNameSource.Filename:
+				return this.getFallbackName();
+		}
+	}
 
-    public getShortcuts() : Shortcut[] {
-        return this.shortcuts;
-    }
+	// MARK: Shortcuts
 
-    public getEnabledShortcuts() : Shortcut[] {
-        return this.getShortcuts().filter(each => each.isEnabled());
-    }
+	public getShortcuts(): Shortcut[] {
+		return this.shortcuts;
+	}
 
-    public getExportData() : ShortcutExportData[] {
-        return this.getEnabledShortcuts().map(each => each.getExportData());
-    }
+	public getEnabledShortcuts(): Shortcut[] {
+		return this.getShortcuts().filter(each => each.isEnabled());
+	}
 
-    public getExportString() : string {
-        return JSON.stringify(this.getExportData());
-    }
+	public getExportData(): ShortcutExportData[] {
+		return this.getEnabledShortcuts().map(each => each.getExportData(this));
+	}
 
-    public async writeToOutput() : Promise<ManifestWriteResults> {
-        const exportData = this.getExportData();
-        const writeData = JSON.stringify(exportData);
-        const writePath = this.getWritePath();
+	public getExportString(): string {
+		return JSON.stringify(this.getExportData());
+	}
 
-        const nTotal = this.getShortcuts().length,
-              nEnabled = this.getEnabledShortcuts().length,
-              nDisabled = nTotal - nEnabled,
-              nSkipped = 0,
-              nInvalid = 0,
-              nOk = exportData.length;
+	public async writeToOutput(): Promise<ManifestWriteResults> {
+		const exportData = this.getExportData();
+		const writeData = JSON.stringify(exportData);
+		const writePath = this.getWritePath();
 
-        // TODO Calculate invalid
+		const nTotal = this.getShortcuts().length,
+			nEnabled = this.getEnabledShortcuts().length,
+			nDisabled = nTotal - nEnabled,
+			nSkipped = 0,
+			nInvalid = 0,
+			nOk = exportData.length;
 
-        if (nOk === 0) {
-            clog(`${SB_WARN} Skipped Manifest ${quote(this.getName())}: No shortcuts which were both enabled and valid`);
-            // TODO Verbose print more info here
-            return new EmptyManifestWriteResults(this);
-        }
+		// TODO Calculate invalid
 
-        try {
-            await fs.writeFile(writePath, writeData);
-            dlog(
-                ` ${SB_OK_LG} Wrote Manifest to file ${fmtPathAsTag(this.filePath)}`,
-                ` > Source File: ${fmtPath(this.filePath)}`,
-                ` > Output Path: ${fmtPath(this.getOutputPath())}`,
-                ` > File Written To: ${fmtPath(writePath)}`
-            );
-            return {
-                manifest: this,
-                outputData: exportData,
-                stats: {
-                    nTotal: nTotal,
-                    nEnabled: nEnabled,
-                    nDisabled: nDisabled,
-                    nInvalid: 0,
-                    nValid: nEnabled - nInvalid,
-                    nSkipped: nSkipped,
-                    nOk: nOk
-                }
-            };
-        } catch (err) {
-            throw new Error(`Failed to write manifest to output file (Name: ${this.getName()}): ${err}`);
-        }
-    }
+		if (nOk === 0) {
+			clog(
+				`${SB_WARN} Skipped Manifest ${quote(this.getName())}: No shortcuts which were both enabled and valid`
+			);
+			// TODO Verbose print more info here
+			return new EmptyManifestWriteResults(this);
+		}
 
-    private calculatePrefixForResults(results: ManifestWriteResults, config?: UserConfig) {
-        const { nTotal, nOk, nDisabled } = results.stats;
-        const useColor = config?.isColorEnabled() ?? true;
+		try {
+			await fs.writeFile(writePath, writeData);
+			dlog(
+				` ${SB_OK_LG} Wrote Manifest to file ${fmtPathAsTag(this.filePath)}`,
+				` > Source File: ${fmtPath(this.filePath)}`,
+				` > Output Path: ${fmtPath(this.getOutputPath())}`,
+				` > File Written To: ${fmtPath(writePath)}`
+			);
+			return {
+				manifest: this,
+				outputData: exportData,
+				stats: {
+					nTotal: nTotal,
+					nEnabled: nEnabled,
+					nDisabled: nDisabled,
+					nInvalid: 0,
+					nValid: nEnabled - nInvalid,
+					nSkipped: nSkipped,
+					nOk: nOk
+				}
+			};
+		} catch (err) {
+			throw new Error(`Failed to write manifest to output file (Name: ${this.getName()}): ${err}`);
+		}
+	}
 
-        const ok   = useColor ? SB_OK_LG  : UNICODE_CHECK_LG; // TODO withColor check
-        const err  = useColor ? SB_ERR_LG : UNICODE_XMARK_LG;
-        const warn = useColor ? SB_WARN   : UNICODE_WARN;
+	private calculatePrefixForResults(results: ManifestWriteResults, config?: UserConfig) {
+		const { nTotal, nOk, nDisabled } = results.stats;
+		const useColor = config?.shouldUseColor() ?? true;
 
-        let prefix;
+		const ok = useColor ? SB_OK_LG : UNICODE_CHECK_LG; // TODO withColor check
+		const err = useColor ? SB_ERR_LG : UNICODE_XMARK_LG;
+		const warn = useColor ? SB_WARN : UNICODE_WARN;
 
-        if (nOk > 0) { // At least one shortcut was ok
-            if (nOk === nTotal) { // 100% success
-                prefix = ok;
-            } else { // Success between 0-100%
-                if (nOk === (nTotal - nDisabled)) {
-                    prefix = ok;
-                } else { // TEST This condition
-                    prefix = warn;
-                }
-            }
-        } else { // All shortcuts might have failed
-            if (nOk === nTotal) { // Success because there were no shortcuts
-                prefix = ok;
-            } else { // All shortcuts have failed
-                prefix = err;
-            }
-        }
+		let prefix;
 
-        return prefix;
-    }
+		if (nOk > 0) {
+			// At least one shortcut was ok
+			if (nOk === nTotal) {
+				// 100% success
+				prefix = ok;
+			} else {
+				// Success between 0-100%
+				if (nOk === nTotal - nDisabled) {
+					prefix = ok;
+				} else {
+					// TEST This condition
+					prefix = warn;
+				}
+			}
+		} else {
+			// All shortcuts might have failed
+			if (nOk === nTotal) {
+				// Success because there were no shortcuts
+				prefix = ok;
+			} else {
+				// All shortcuts have failed
+				prefix = err;
+			}
+		}
 
-    private async dlogWriteResults(results: ManifestWriteResults) {
-        const { manifest: man } = results;
-        const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } = results.stats;
+		return prefix;
+	}
 
-        const name = quote(man.getName());
-        const sourceFilePath = await fmtPathWithExistsAndName(man.filePath, 'Source File Path');
-        const outputPath = await fmtPathWithExistsAndName(man.getOutputPath(), 'Output Path');
-        const writeFilePath = await fmtPathWithExistsAndName(man.getWritePath(), 'Write File Path');
-        const rootDirectory = await fmtPathWithExistsAndName(man.baseDirectory, 'Root Directory');
+	private async dlogWriteResults(results: ManifestWriteResults) {
+		const { manifest: man } = results;
+		const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } = results.stats;
 
-        console.log('');
-        dlogDataSection(
-            clr.magentaBright.underline(`MANIFEST ${name} > Write Operation`),
-            ` > `,
-            `Name: ${name}`,
-            `Name From: ${man.getNameSourceAsString()}`,
-            `Value of Name Attribute: ${quote(man.getNameAttribute())}`,
-            `Fallback Name: ${quote(man.getFallbackName())}`,
-            sourceFilePath, outputPath, writeFilePath, rootDirectory
-        );
+		const name = quote(man.getName());
+		const sourceFilePath = await fmtPathWithExistsAndName(man.filePath, 'Source File Path');
+		const outputPath = await fmtPathWithExistsAndName(man.getOutputPath(), 'Output Path');
+		const writeFilePath = await fmtPathWithExistsAndName(man.getWritePath(), 'Write File Path');
+		const rootDirectory = await fmtPathWithExistsAndName(man.baseDirectory, 'Root Directory');
 
-        dlogDataSection(
-            clr.magentaBright.underline(`MANIFEST ${name} > Numbers`),
-            ` - `,
-            `# Total: ${nTotal}`,
-            `# Written: ${nOk}`,
-            `# Enabled: ${nEnabled}`,
-            `# Disabled: ${nDisabled}`,
-            `# Valid: ${nValid}`,
-            `# Invalid: ${nInvalid}`,
-            `# Skipped: ${nSkipped}`
-        );
-    }
+		console.log('');
+		dlogDataSection(
+			clr.magentaBright.underline(`MANIFEST ${name} > Write Operation`),
+			` > `,
+			`Name: ${name}`,
+			`Name From: ${man.getNameSourceAsString()}`,
+			`Value of Name Attribute: ${quote(man.getNameAttribute())}`,
+			`Fallback Name: ${quote(man.getFallbackName())}`,
+			sourceFilePath,
+			outputPath,
+			writeFilePath,
+			rootDirectory
+		);
 
-    public async logWriteResults(results: ManifestWriteResults, config?: UserConfig) {
-        this.dlogWriteResults(results);
+		dlogDataSection(
+			clr.magentaBright.underline(`MANIFEST ${name} > Numbers`),
+			` - `,
+			`# Total: ${nTotal}`,
+			`# Written: ${nOk}`,
+			`# Enabled: ${nEnabled}`,
+			`# Disabled: ${nDisabled}`,
+			`# Valid: ${nValid}`,
+			`# Invalid: ${nInvalid}`,
+			`# Skipped: ${nSkipped}`
+		);
+	}
 
-        const { manifest, stats } = results;
-        const { nTotal, nOk, nEnabled } = stats;
-        const isEmpty = nOk === 0 && nEnabled === 0;
-        const useColor = config?.isColorEnabled() ?? true;
+	public async logWriteResults(results: ManifestWriteResults, config?: UserConfig) {
+		this.dlogWriteResults(results);
 
-        const name = quote(manifest.getName());
+		const { manifest, stats } = results;
+		const { nTotal, nOk, nEnabled } = stats;
+		const isEmpty = nOk === 0 && nEnabled === 0;
+		const useColor = config?.shouldUseColor() ?? true;
 
-        let okRatio = `${stats.nOk}/${stats.nTotal} shortcut`;
-        if (nTotal > 1) okRatio += 's';
-        okRatio = useColor ? clr.magentaBright(okRatio) : okRatio;
+		const name = quote(manifest.getName());
 
-        const sourceName = useColor ? clr.cyanBright(name) : name;
-        const fromSource = 'from source ' + sourceName;
-        const emptyAddendum = `(No shortcuts were found)`;
-        const prefix = this.calculatePrefixForResults(results, config);
+		let okRatio = `${stats.nOk}/${stats.nTotal} shortcut`;
+		if (nTotal > 1) okRatio += 's';
+		okRatio = useColor ? clr.magentaBright(okRatio) : okRatio;
 
-        let header = `${prefix} Wrote `;
-        if (nOk > 0) {
-            header += okRatio + ' ' + fromSource;
-        } else {
-            header += 'nothing ' + fromSource;
-        }
+		const sourceName = useColor ? clr.cyanBright(name) : name;
+		const fromSource = 'from source ' + sourceName;
+		const emptyAddendum = `(No shortcuts were found)`;
+		const prefix = this.calculatePrefixForResults(results, config);
 
-        if (isEmpty)
-            header += ' ' + emptyAddendum;
+		let header = `${prefix} Wrote `;
+		if (nOk > 0) {
+			header += okRatio + ' ' + fromSource;
+		} else {
+			header += 'nothing ' + fromSource;
+		}
 
-        clog(header);
-        
-        if (isEmpty) {
-            dlog(`  - Source File: ${fmtPath(manifest.getFilePath())}`);
-            dlog(`  - Output Path: ${fmtPath(manifest.getOutputPath())}`);
-            dlog(`  - File Written To: ${fmtPath(manifest.getWritePath())}`);
-        }
-    }
+		if (isEmpty) header += ' ' + emptyAddendum;
+
+		clog(header);
+
+		if (isEmpty) {
+			dlog(`  - Source File: ${fmtPath(manifest.getFilePath())}`);
+			dlog(`  - Output Path: ${fmtPath(manifest.getOutputPath())}`);
+			dlog(`  - File Written To: ${fmtPath(manifest.getWritePath())}`);
+		}
+	}
 }
 
 export default Manifest;

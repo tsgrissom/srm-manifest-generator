@@ -6,14 +6,16 @@ import {
 	clogConfigFatalErrMissingRequiredSection,
 	clogConfigFatalErrRequiredSectionWrongType,
 	clogConfigValueWrongType,
-	clogConfigValueUnknown
+	clogConfigKeyUnknown,
+	clogConfigWarn
 } from '../../../utility/config';
 import { clog } from '../../../utility/console';
-import { SB_ERR_LG } from '../../../utility/symbols';
+import { SB_ERR_LG, SB_ERR_SM, SB_WARN } from '../../../utility/symbols';
 
 import UserConfig from '../../../type/config/UserConfig';
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
 import makeManifests from '../manifests';
+import { quote } from '../../../utility/string';
 
 const sectionKey = 'search';
 const keyAliases: ConfigKeyAliases = {
@@ -25,10 +27,7 @@ const keyAliases: ConfigKeyAliases = {
 	sources: 'manifests'
 };
 
-async function parseSearchSection(
-	data: object,
-	userConfig: UserConfig
-): Promise<UserConfig> {
+async function parseSearchSection(data: object, config: UserConfig): Promise<UserConfig> {
 	if (!Object.keys(data).includes(sectionKey)) {
 		clogConfigFatalErrMissingRequiredSection(sectionKey);
 		process.exit();
@@ -36,16 +35,8 @@ async function parseSearchSection(
 
 	const section = (data as Record<string, unknown>)[sectionKey];
 
-	if (
-		typeof section !== 'object' ||
-		Array.isArray(section) ||
-		section === null
-	) {
-		clogConfigFatalErrRequiredSectionWrongType(
-			sectionKey,
-			'section',
-			section
-		);
+	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
+		clogConfigFatalErrRequiredSectionWrongType(sectionKey, 'section', section);
 		process.exit();
 	}
 
@@ -53,7 +44,7 @@ async function parseSearchSection(
 
 	for (const [key, value] of Object.entries(section)) {
 		const resolved = resolveKeyFromAlias(keyAliases, key, sectionKey);
-		const { fullGivenKey, resolvedKey } = resolved;
+		const { fullGivenKey, resolvedKey, fullResolvedKey } = resolved;
 
 		switch (resolvedKey) {
 			case 'scanDirectories': {
@@ -62,7 +53,7 @@ async function parseSearchSection(
 					break;
 				}
 
-				userConfig.search.scanDirectories = value;
+				config.search.scanDirectories = value;
 				dlogConfigValueLoaded(resolved, value);
 				break;
 			}
@@ -72,52 +63,43 @@ async function parseSearchSection(
 					break;
 				}
 
-				userConfig.search.scanRecursively = value;
+				config.search.scanRecursively = value;
 				dlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case `manifests`: {
 				// TODO Maybe load manifests later, elsewhere
 				// Maybe here we can just validate paths if needed, then have makeManifests in the UserConfig on demand?
-				if (
-					!Array.isArray(value) ||
-					!value.every(item => typeof item === 'string')
-				) {
+				if (!Array.isArray(value) || !value.every(item => typeof item === 'string')) {
 					if (!Array.isArray(value)) {
-						clogConfigValueWrongType(
-							fullGivenKey,
-							'array of strings',
-							value
-						); // TODO Probably want a custom print here
-						// clog(` ${SB_ERR_LG} Value of config key "search.manifests" must be an array of strings but was not an array`);
+						clogConfigValueWrongType(fullGivenKey, 'array of strings', value); // TODO Probably want a custom print here
 					} else {
-						clogConfigValueWrongType(
-							fullGivenKey,
-							'array of strings',
-							value
-						);
 						clog(
-							` ${SB_ERR_LG} Values inside array value of key "search.manifests" must all be strings, but at least one was a non-string`
+							`   ${SB_ERR_SM} Values inside array value of key ${quote(fullResolvedKey)} must all be strings, but at least one was a non-string`
 						);
 					}
 				}
 
-				userConfig.search.manifests = await makeManifests(
-					value,
-					userConfig
-				);
+				if (!value) {
+					console.log(
+						`${SB_WARN} No manifest paths were provided at config key ${quote(fullResolvedKey)} so no manifests were loaded`
+					);
+					break;
+				}
+
+				config.search.manifests = await makeManifests(value, config);
 				dlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {
-				clogConfigValueUnknown(fullGivenKey);
+				clogConfigKeyUnknown(fullGivenKey, config);
 			}
 		}
 	}
 
 	dlogConfigSectionOk(sectionKey);
 
-	return userConfig;
+	return config;
 }
 
 export default parseSearchSection;

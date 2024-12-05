@@ -47,6 +47,10 @@ validate:
   # Default: ".exe"
   executableExtensions:
     - ".exe"
+  # Should the console warn users of unknown config keys across its manifests, shortcuts, and other config
+  #  files?
+  # Default: true
+  unknownConfigKeys: true
 
 # Options regarding miscellaneous behavior + appearance of SRM Manifest Generator
 other:

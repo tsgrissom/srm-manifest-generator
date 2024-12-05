@@ -9,20 +9,21 @@ import { quote } from '../../utility/string.js';
 import ShortcutData from './ShortcutData.js';
 import ShortcutExportData from './ShortcutExportData.js';
 import ManifestData from '../manifest/ManifestData.js';
+import { SB_WARN } from '../../utility/symbols.js';
+import UserConfig from '../config/UserConfig.js';
 
 // TODO jsdoc
 class Shortcut implements ShortcutData {
-	// TODO jsdoc
-	manifest: ManifestData;
+	config?: UserConfig;
 
 	title: string;
 	target: string;
 	enabled: boolean;
 
-	constructor(manifest: ManifestData, data: ShortcutData) {
+	constructor(data: ShortcutData, config?: UserConfig) {
 		// TODO Accept config in constructor, check validity of executable
 
-		this.manifest = manifest;
+		this.config = config;
 		this.title = data.title;
 		this.target = data.target;
 		this.enabled = data.enabled;
@@ -39,48 +40,52 @@ class Shortcut implements ShortcutData {
 	 * Maps the Shortcut instance's attributes to a JavaScript object
 	 * which is compatible for writing to a JSON manifest for Steam
 	 * ROM Manager.
+	 * @param manifest The Manifest data to con
 	 * @returns The JSON designed for handling by Steam ROM Manager.
 	 */
-	public getExportData(): ShortcutExportData {
+	public getExportData(manifest: ManifestData): ShortcutExportData {
 		return {
-			title: this.getTitle(),
-			target: this.getFullTargetPath()
+			title: this.title,
+			target: this.getFullTargetPath(manifest)
 		};
 	}
 
-	public getExportString(): string {
-		return JSON.stringify(this.getExportData());
+	/**
+	 * Returns a stringified JSON object for the individual
+	 * Shortcut instance.
+	 * This format is compatible with Steam ROM Manager.
+	 * @returns A `string` resulting from {@link JSON.stringify} which
+	 *  can be written to the filesystem.
+	 */
+	public getExportString(manifest: ManifestData): string {
+		return JSON.stringify(this.getExportData(manifest));
 	}
 
-	getTitle(): string {
-		return this.title;
+	public isTargetPathAbsolute(): boolean {
+		return path.isAbsolute(this.target);
 	}
 
-	getRelativeTargetPath(): string {
-		return this.target;
-	}
+	public getFullTargetPath(manifest: ManifestData): string {
+		const baseDirectory = manifest.baseDirectory;
+		const targetPath = this.target;
 
-	getFullTargetPath(): string {
-		const rootDir = this.manifest.baseDirectory;
+		// TODO Absolute path support
 
-		if (!rootDir)
-			// TODO Rewrite this error
-			throw new Error(
-				`Error while constructing full target path for Shortcut (${this.getTitle()}): Manifest (${this.manifest.sourceName}) root directory was invalid`
+		if (!baseDirectory) {
+			console.error(
+				`${SB_WARN} Could not construct full target path for Shortcut (${quote(this.title)}): Given Manifest's base directory is invalid`
 			);
+		}
 
-		return path.join(
-			this.manifest.baseDirectory,
-			this.getRelativeTargetPath()
-		);
+		return path.join(manifest.baseDirectory, targetPath);
 	}
 
-	isEnabled(): boolean {
+	public isEnabled(): boolean {
 		return this.enabled;
 	}
 
-	isDisabled(): boolean {
-		return !this.isEnabled();
+	public isDisabled(): boolean {
+		return !this.enabled;
 	}
 }
 

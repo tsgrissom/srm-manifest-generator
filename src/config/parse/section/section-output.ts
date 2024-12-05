@@ -1,85 +1,95 @@
 import {
-    clogConfigValueWrongType,
-    dlogConfigWarnMissingOptionalSection,
-    dlogConfigSectionStart,
-    dlogConfigSectionOk,
-    dlogConfigValueLoaded,
-    resolveKeyFromAlias,
-    dlogConfigWarnOptionalSectionSkippedWrongType,
-    clogConfigValueUnknown
+	clogConfigValueWrongType,
+	dlogConfigWarnMissingOptionalSection,
+	dlogConfigSectionStart,
+	dlogConfigSectionOk,
+	dlogConfigValueLoaded,
+	resolveKeyFromAlias,
+	dlogConfigWarnOptionalSectionSkippedWrongType,
+	clogConfigKeyUnknown,
+	clogConfigValueUnknown
 } from '../../../utility/config';
 
 import UserConfig from '../../../type/config/UserConfig';
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
+import OutputMode from '../../../type/config/OutputMode';
 
 const sectionKey = 'output';
 const keyAliases: ConfigKeyAliases = {
-    minification: 'minify',
-    indentationSpaces: 'indentSpaces',
-    indentLevel: 'indentSpaces',
-    outputMode: 'mode',
-    spreadMode: 'mode'
-}
+	minification: 'minify',
+	indentationSpaces: 'indentSpaces',
+	indentLevel: 'indentSpaces',
+	outputMode: 'mode',
+	spreadMode: 'mode'
+};
 
-async function parseOutputSection(data: object, userConfig: UserConfig) : Promise<UserConfig> {
-    if (!Object.keys(data).includes(sectionKey)) {
-        dlogConfigWarnMissingOptionalSection(sectionKey);
-        return userConfig;
-    }
+async function parseOutputSection(data: object, config: UserConfig): Promise<UserConfig> {
+	if (!Object.keys(data).includes(sectionKey)) {
+		dlogConfigWarnMissingOptionalSection(sectionKey);
+		return config;
+	}
 
-    const section = (data as Record<string, unknown>)[sectionKey];
+	const section = (data as Record<string, unknown>)[sectionKey];
 
-    if (typeof section !== 'object' || Array.isArray(section) || section === null) {
-        dlogConfigWarnOptionalSectionSkippedWrongType(sectionKey, 'section', section);
-        return userConfig;
-    }
+	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
+		dlogConfigWarnOptionalSectionSkippedWrongType(sectionKey, 'section', section);
+		return config;
+	}
 
-    dlogConfigSectionStart(sectionKey);
-    
-    for (const [key, value] of Object.entries(section)) {
-        const resolved = resolveKeyFromAlias(keyAliases, key, sectionKey);
-        const { givenKey, fullGivenKey, resolvedKey, fullResolvedKey } = resolved;
+	dlogConfigSectionStart(sectionKey);
 
-        switch (resolvedKey) {
-            case 'minify': {
-                if (typeof value !== 'boolean') {
-                    clogConfigValueWrongType(fullGivenKey, 'boolean', value);
-                    break;
-                }
+	for (const [key, value] of Object.entries(section)) {
+		const resolved = resolveKeyFromAlias(keyAliases, key, sectionKey);
+		const { givenKey, fullGivenKey, resolvedKey, fullResolvedKey } = resolved;
 
-                userConfig.output.minify = value;
-                dlogConfigValueLoaded(resolved, value);
-                break;
-            }
-            case 'indentSpaces': {
-                if (typeof value !== 'number') {
-                    clogConfigValueWrongType(fullGivenKey, 'number', value)
-                    break;
-                }
+		switch (resolvedKey) {
+			case 'minify': {
+				if (typeof value !== 'boolean') {
+					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					break;
+				}
 
-                userConfig.output.indentSpaces = value;
-                dlogConfigValueLoaded(resolved, value);
-                break;
-            }
-            case 'mode': {
-                if (typeof value !== 'string') {
-                    clogConfigValueWrongType(fullGivenKey, 'string', value);
-                    break;
-                }
+				config.output.minify = value;
+				dlogConfigValueLoaded(resolved, value);
+				break;
+			}
+			case 'indentSpaces': {
+				if (typeof value !== 'number') {
+					clogConfigValueWrongType(fullGivenKey, 'number', value);
+					break;
+				}
 
-                userConfig.output.mode = value;
-                dlogConfigValueLoaded(resolved, value);
-                break;
-            }
-            default: {
-                clogConfigValueUnknown(fullGivenKey);
-            }
-        }
-    }
+				config.output.indentSpaces = value;
+				dlogConfigValueLoaded(resolved, value);
+				break;
+			}
+			case 'mode': {
+				if (typeof value !== 'string') {
+					clogConfigValueWrongType(fullGivenKey, 'string', value);
+					break;
+				}
 
-    dlogConfigSectionOk(sectionKey);
+				const valueLow = value.toLowerCase();
 
-    return userConfig;
+				if (valueLow === 'combine') config.output.mode = OutputMode.Combine;
+				else if (valueLow === 'spread') config.output.mode = OutputMode.Spread;
+				else {
+					clogConfigValueUnknown(fullGivenKey, value);
+					break;
+				}
+
+				dlogConfigValueLoaded(resolved, value);
+				break;
+			}
+			default: {
+				clogConfigKeyUnknown(fullGivenKey, config);
+			}
+		}
+	}
+
+	dlogConfigSectionOk(sectionKey);
+
+	return config;
 }
 
 export default parseOutputSection;

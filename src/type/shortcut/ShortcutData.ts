@@ -7,9 +7,9 @@ import ShortcutExportData from './ShortcutExportData';
  * for writing to JSON manifest files.
  */
 interface ShortcutData extends ShortcutExportData {
-    title: string;
-    target: string;
-    enabled: boolean;
+	title: string;
+	target: string;
+	enabled: boolean;
 }
 
 export default ShortcutData;

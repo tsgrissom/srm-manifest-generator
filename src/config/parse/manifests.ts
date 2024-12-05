@@ -11,18 +11,9 @@ import {
 } from '../../utility/config';
 import { clog } from '../../utility/console';
 import { dlog } from '../../utility/debug';
-import {
-	fmtPathAsTag,
-	fmtPath,
-	basenameWithoutExtensions
-} from '../../utility/path';
+import { fmtPathAsTag, fmtPath, basenameWithoutExtensions } from '../../utility/path';
 import { quote } from '../../utility/string';
-import {
-	SB_WARN,
-	SB_OK_LG,
-	SB_ERR_LG,
-	UNICODE_ARRW_RIGHT
-} from '../../utility/symbols';
+import { SB_WARN, SB_OK_LG, SB_ERR_LG, UNICODE_ARRW_RIGHT } from '../../utility/symbols';
 
 import ConfigData from '../../type/config/ConfigData';
 import ConfigKeyAliases from '../../type/config/ConfigKeyAliases';
@@ -31,11 +22,9 @@ import ManifestData from '../../type/manifest/ManifestData';
 
 import { USER_CONFIG_FILENAME } from '../load-data';
 import loadManifestShortcuts from './shortcuts';
+import UserConfig from '../../type/config/UserConfig';
 
-async function makeManifests(
-	manPaths: string[],
-	config: ConfigData
-): Promise<Manifest[]> {
+async function makeManifests(manPaths: string[], config: UserConfig): Promise<Manifest[]> {
 	dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
 
 	const okManifests: Manifest[] = [];
@@ -53,15 +42,10 @@ async function makeManifests(
 		dlog(` > MANIFEST #${id}: Began validating manifest file ${pathTag}`);
 
 		const exists = await validateManifestPathExists(manPath);
-		const okFsType = await validateManifestPathIsSupportedFilesystemType(
-			manPath,
-			config
-		);
+		const okFsType = await validateManifestPathIsSupportedFilesystemType(manPath, config);
 
 		dlog(` ${checkCross(exists)} Path exists (${manPath})`);
-		dlog(
-			` ${checkCross(okFsType)} Path is a supported filesystem type ${pathTag}`
-		);
+		dlog(` ${checkCross(okFsType)} Path is a supported filesystem type ${pathTag}`);
 
 		if (!exists) {
 			clog(` > Skipping manifest (Path: ${manPath})`);
@@ -69,14 +53,12 @@ async function makeManifests(
 		}
 
 		const object = await readManifestFile(manPath);
-		const data = await parseManifestFileContentsToData(manPath, object);
+		const data = await parseManifestFileContentsToData(manPath, object, config);
 		const instance = new Manifest(manPath, data);
 
 		okManifests.push(instance);
 
-		dlog(
-			` ${SB_OK_LG} MANIFEST #${id}: Finished validation of manifest path ${fmtPathAsTag(pathTag)}`
-		);
+		dlog(` ${SB_OK_LG} MANIFEST #${id}: Finished validation of manifest path ${fmtPathAsTag(pathTag)}`);
 	}
 
 	clogLoadedManifests(manPaths, okManifests);
@@ -93,9 +75,7 @@ function clogLoadedManifests(manifestPaths: string[], okManifests: Manifest[]) {
 
 	if (nOk <= 0) {
 		const postfix = nAll > 0 ? clr.red(ratio) : '';
-		clog(
-			`${SB_ERR_LG} No manifest paths were loaded from the ${USER_CONFIG_FILENAME} ${postfix}`
-		);
+		clog(`${SB_ERR_LG} No manifest paths were loaded from the ${USER_CONFIG_FILENAME} ${postfix}`);
 		// TODO Debug log here
 		return;
 	}
@@ -131,9 +111,7 @@ async function validateManifestPathExists(filePath: string): Promise<boolean> {
 			return false;
 		});
 	} catch (err) {
-		throw new Error(
-			`Error while validating manifest path existence ${pathTag}: ${err}`
-		);
+		throw new Error(`Error while validating manifest path existence ${pathTag}: ${err}`);
 	}
 
 	return true;
@@ -167,9 +145,7 @@ async function validateManifestPathIsSupportedFilesystemType(
 
 			return true;
 		} else {
-			clogConfigWarn(
-				`Unsupported filesystem type at the given path was ignored ${pathTag}`
-			);
+			clogConfigWarn(`Unsupported filesystem type at the given path was ignored ${pathTag}`);
 		}
 	} catch (err) {
 		throw new Error(`Could not stat manifest path ${filePath}: ${err}`);
@@ -182,23 +158,21 @@ async function readManifestFile(manPath: string): Promise<object> {
 	const pathTag = fmtPathAsTag(manPath);
 
 	if (!manPath) throw new Error(`Arg filePath was invalid: ${manPath}`);
-	if (manPath.trim() === '')
-		throw new Error(`Arg filePath cannot be empty: ${manPath}`);
+	if (manPath.trim() === '') throw new Error(`Arg filePath cannot be empty: ${manPath}`);
 
 	try {
 		const contents = await fs.readFile(manPath, 'utf-8');
 		const object = YAML.parse(contents);
 		return object;
 	} catch (err) {
-		throw new Error(
-			`Unable to read manifest file at manpath ${pathTag}: ${err}`
-		);
+		throw new Error(`Unable to read manifest file at manpath ${pathTag}: ${err}`);
 	}
 }
 
 async function parseManifestFileContentsToData(
 	filePath: string,
-	obj: object
+	obj: object,
+	config: UserConfig
 ): Promise<ManifestData> {
 	const keyAliases: ConfigKeyAliases = {
 		sourceName: 'sourceName',
@@ -236,18 +210,11 @@ async function parseManifestFileContentsToData(
 
 	const document = obj as Record<string, unknown>;
 
-	if (
-		typeof document !== 'object' ||
-		Array.isArray(document) ||
-		document === null
-	) {
+	if (typeof document !== 'object' || Array.isArray(document) || document === null) {
 		throw new Error(`Manifest is not an object (Type: ${typeof document})`);
 	}
 
-	dlog(
-		UNICODE_ARRW_RIGHT +
-			clr.underline(`Loading: Manifest ${fmtPathAsTag(filePath)}`)
-	);
+	dlog(UNICODE_ARRW_RIGHT + clr.underline(`Loading: Manifest ${fmtPathAsTag(filePath)}`));
 
 	let hasShortcuts = false;
 
@@ -300,11 +267,7 @@ async function parseManifestFileContentsToData(
 			case 'shortcuts': {
 				if (typeof value !== 'object' || !Array.isArray(value)) {
 					// TODO Validate each element is at least an object, soft fail each non-shortcut
-					clogConfigValueWrongType(
-						fullGivenKey,
-						'array of shortcut objects',
-						value
-					);
+					clogConfigValueWrongType(fullGivenKey, 'array of shortcut objects', value);
 					break;
 				}
 
@@ -314,7 +277,9 @@ async function parseManifestFileContentsToData(
 				break;
 			}
 			default: {
-				clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
+				if (config.shouldWarnUnknownConfigKey()) {
+					clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
+				}
 			}
 		}
 	}
@@ -325,34 +290,22 @@ async function parseManifestFileContentsToData(
 	const hasOutputPath = data.outputPath.trim() !== '';
 
 	// TODO Below should be verbose
-	dlog(
-		`  ${checkCross(hasBaseDirectory)} Has required attribute "baseDirectory"?`
-	);
+	dlog(`  ${checkCross(hasBaseDirectory)} Has required attribute "baseDirectory"?`);
 	dlog(`  ${checkCross(hasOutputPath)} Has required attribute "outputPath"?`);
 	dlog(`  ${checkCross(hasSourceName)} Has optional attribute "sourceName"?`);
 	dlog(`  ${checkCross(hasShortcuts)} Has optional attribute "shortcuts"?`);
 
 	// Fallback om filename
 	if (!hasSourceName)
-		data.sourceName = basenameWithoutExtensions(
-			filePath,
-			['.yml', '.yaml', '.manifest'],
-			true
-		);
+		data.sourceName = basenameWithoutExtensions(filePath, ['.yml', '.yaml', '.manifest'], true);
 	// Make sure required attributes are present
 	// TODO Soft fail these
-	if (!hasBaseDirectory)
-		throw new Error(
-			`Manifest is missing a root directory attribute ${pathTag}`
-		);
-	if (!hasOutputPath)
-		throw new Error(
-			`Manifest is missing an output directory attribute ${pathTag}`
-		);
+	if (!hasBaseDirectory) throw new Error(`Manifest is missing a root directory attribute ${pathTag}`);
+	if (!hasOutputPath) throw new Error(`Manifest is missing an output directory attribute ${pathTag}`);
 
 	if (hasShortcuts) {
 		const value = data.shortcuts;
-		data.shortcuts = await loadManifestShortcuts(data, value);
+		data.shortcuts = await loadManifestShortcuts(data, value, config);
 	}
 
 	return data;
