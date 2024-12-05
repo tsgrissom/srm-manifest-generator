@@ -26,11 +26,6 @@ class Shortcut implements ShortcutData {
         // TODO Accept config in constructor, check validity of executable
         // TODO Lint args
 
-        if (!manifest)
-            throw new Error(`Constructor arg "manifest" is invalid: ${manifest}`);
-        if (!(manifest instanceof Manifest))
-            throw new TypeError(`Constructor arg "manifest" is a non-Manifest type: ${manifest}`);
-
         if (!data)
             throw new Error(`Constructor arg "object" is invalid: ${data}`);
         if (typeof data !== 'object')
@@ -58,6 +53,8 @@ class Shortcut implements ShortcutData {
      * @returns The JSON designed for handling by Steam ROM Manager.
      */
     public getExportData() : ShortcutExportData {
+        clog(clr.bgRed(`getExportData called`), `this.title: ${this.getTitle()}`, `this.target: ${this.getFullTargetPath()}`);
+
         return {
             title: this.getTitle(),
             target: this.getFullTargetPath()
@@ -73,16 +70,16 @@ class Shortcut implements ShortcutData {
     }
 
     getFullTargetPath() : string {
-        const rootDir = this.manifest.rootDirectory;
+        const rootDir = this.manifest.baseDirectory;
 
         if (!rootDir) // TODO Rewrite this error
-            throw new Error(`Error while constructing full target path for Shortcut (${this.getTitle()}): Manifest (${this.manifest.name}) root directory was invalid`);
+            throw new Error(`Error while constructing full target path for Shortcut (${this.getTitle()}): Manifest (${this.manifest.sourceName}) root directory was invalid`);
 
-        return path.join(this.manifest.rootDirectory, this.getRelativeTargetPath());
+        return path.join(this.manifest.baseDirectory, this.getRelativeTargetPath());
     }
 
     isEnabled() : boolean {
-        return !this.enabled;
+        return this.enabled;
     }
 
     isDisabled() : boolean {

@@ -4,12 +4,12 @@ import clr from 'chalk';
 import yaml from 'yaml';
 
 import { checkCross } from '../../utility/boolean';
-import { clogConfigWarn } from '../../utility/config';
+import { clogConfigValueWrongType, clogConfigWarn, dlogConfigValueLoaded, resolveKeyFromAlias } from '../../utility/config';
 import { clog } from '../../utility/console';
 import { USER_CONFIG_FILENAME } from '../config';
 import { dlog, dlogHeader } from '../../utility/debug';
-import { fmtPath, fmtPathAsTag } from '../../utility/path';
-import { SB_ERR_LG, SB_ERR_SM, SB_OK_LG, SB_WARN } from '../../utility/symbols';
+import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path';
+import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../../utility/symbols';
 
 import ConfigData from '../../type/config/ConfigData';
 import Manifest from '../../type/manifest/Manifest';
@@ -17,6 +17,7 @@ import ManifestData from '../../type/manifest/ManifestData';
 import { quote } from '../../utility/string';
 import Shortcut from '../../type/shortcut/Shortcut';
 import ShortcutData from '../../type/shortcut/ShortcutData';
+import ConfigKeyAliases from '../../type/config/ConfigKeyAliases';
 
 async function makeManifests(manPaths: string[], config: ConfigData) : Promise<Manifest[]> {
     dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
@@ -45,7 +46,7 @@ async function makeManifests(manPaths: string[], config: ConfigData) : Promise<M
         }
 
         const object = await readManifestFile(manPath);
-        const data = await validateManifestFileContents(manPath, object);        
+        const data = await parseManifestFileContentsToData(manPath, object);        
         const instance = new Manifest(manPath, data);
 
         okManifests.push(instance);
@@ -156,88 +157,163 @@ async function readManifestFile(manPath: string) : Promise<object> {
     }
 }
 
-async function validateManifestFileContents(manPath: string, object: object) : Promise<ManifestData> {
-    const pathTag = fmtPathAsTag(manPath);
-    const data: ManifestData = {
-        name: '',
-        rootDirectory: '',
-        outputPath: '',
-        shortcuts: []
+async function parseManifestFileContentsToData(filePath: string, obj: object) : Promise<ManifestData> {
+    const keyAliases: ConfigKeyAliases = {
+        sourceName: 'sourceName',
+        name: 'sourceName',
+
+        baseDirectory: 'baseDirectory',
+        baseDir: 'baseDirectory',
+        directory: 'baseDirectory',
+        root: 'baseDirectory',
+        rootDir: 'baseDirectory',
+        rootDirectory: 'baseDirectory',
+
+        output: 'outputPath',
+        outputPath: 'outputPath',
+        outputFile: 'outputPath',
+        out: 'outputPath',
+        outputDirectory: 'outputPath',
+        outputDir: 'outputPath',
+
+        shortcuts: 'shortcuts',
+        entries: 'shortcuts',
+        titles: 'shortcuts'
+    }
+    const data: ManifestData = {sourceName: '',baseDirectory: '',outputPath: '',shortcuts: []}
+
+    if (!Object.keys(obj)) { // TODO more graceful exit
+        throw new Error('Manifest has no top level keys'); 
     }
 
-    let keyAliasUsedForName = '',
-        keyAliasUsedForRootDir = '',
-        keyAliasUsedForOutput = '',
-        keyAliasUsedForShortcuts = '';
+    const document = (obj as Record<string, unknown>);
 
-    let shortcutsValue: object[] = [];
+    if (typeof document !== 'object' || Array.isArray(document) || document === null) {
+        throw new Error(`Manifest is not an object (Type: ${typeof document})`);
+    }
 
-    for (const [key, value] of Object.entries(object)) {
-        if (key === 'name' || key === 'sourceName') {
-            keyAliasUsedForName = key;
-            data.name = value;
-        } else if (key === 'root' || key === 'rootDir' || key === 'rootDirectory' || key === 'directory') {
-            keyAliasUsedForRootDir = key;
-            data.rootDirectory = value;
-        } else if (key === 'output' || key === 'outputPath') {
-            keyAliasUsedForOutput = key;
-            data.outputPath = value;
-        } else if (key === 'shortcuts' || key === 'titles' || key === 'entries') {
-            keyAliasUsedForShortcuts = key;
-            data.shortcuts = []; // TODO Parse shortcuts sometime after this, requires Manifest instance
-            shortcutsValue = value;
+    dlog(UNICODE_ARRW_RIGHT + clr.underline(`Loading: Manifest ${fmtPathAsTag(filePath)}`));
+
+    let hasShortcuts = false;
+
+    let aliasUsedSourceName = '',
+        aliasUsedOutputPath = '',
+        aliasUsedBaseDir    = '',
+        aliasUsedShortcuts  = '';
+
+    for (const [key, value] of Object.entries(document)) {
+        const resolved = resolveKeyFromAlias(keyAliases, key, null);
+        const { fullGivenKey, givenKey, resolvedKey } = resolved;
+
+        switch (resolvedKey) {
+            case 'sourceName': {
+                if (typeof value !== 'string') { // Not a failure for Manifest
+                    clogConfigValueWrongType(fullGivenKey, 'string', value);
+                    break;
+                }
+
+                // TODO Check for empty
+
+                if (givenKey !== resolvedKey)
+                    aliasUsedSourceName = givenKey;
+
+                data.sourceName = value;
+                dlogConfigValueLoaded(resolved, value);
+                break;
+            }
+            case 'baseDirectory': {
+                if (typeof value !== 'string') { // Manifest fails
+                    // TODO Soft fail this manifest only
+                    clogConfigValueWrongType(fullGivenKey, 'string', value);
+                    break;
+                }
+
+                // TODO Check for empty
+
+                if (givenKey !== resolvedKey)
+                    aliasUsedBaseDir = givenKey;
+
+                data.baseDirectory = value;
+                dlogConfigValueLoaded(resolved, value);
+                break;
+            }
+            case 'outputPath': {
+                if (typeof value !== 'string') { // Manifest fails
+                    // TODO Soft fail this manifest only
+                    clogConfigValueWrongType(fullGivenKey, 'string', value);
+                    break;
+                }
+
+                // TODO Check for empty
+
+                if (givenKey !== resolvedKey)
+                    aliasUsedOutputPath = givenKey;
+
+                data.outputPath = value;
+                dlogConfigValueLoaded(resolved, value);
+                break;
+            }
+            case 'shortcuts': {
+                if (typeof value !== 'object' || !Array.isArray(value)) {
+                    // TODO Validate each element is at least an object, soft fail each non-shortcut
+                    clogConfigValueWrongType(fullGivenKey, 'array of shortcut objects', value);
+                    break;
+                }
+
+                if (givenKey !== resolvedKey)
+                    aliasUsedShortcuts = givenKey;
+
+                hasShortcuts = true;
+                data.shortcuts = value;
+                dlogConfigValueLoaded(resolved, value);
+                break;
+            }
+            default: {
+                clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
+            }
         }
     }
-
-    // TODO REWRITE
-
-    const hasAttrName = keyAliasUsedForName !== '',
-          hasAttrRootDir = keyAliasUsedForRootDir !== '',
-          hasAttrOutput = keyAliasUsedForOutput !== '',
-          hasAttrShortcuts = keyAliasUsedForShortcuts !== '';
-    const wasAttrNameAnAlias = keyAliasUsedForName !== '' && keyAliasUsedForName !== 'name',
-          wasAttrRootDirAnAlias = keyAliasUsedForName !== '' && keyAliasUsedForName !== 'rootDirectory',
-          wasAttrOutputAnAlias = keyAliasUsedForName !== '' && keyAliasUsedForName !== 'outputPath',
-          wasAttrShortcutsAnAlias = keyAliasUsedForName !== '' && keyAliasUsedForName !== 'shortcuts';
     
-    // Debug prints
-    dlog(`MANIFEST FILE: ${fmtPath(manPath)}`);
-    dlog(` ${checkCross(hasAttrName)} Has Optional Name Attribute`); // TODO checkWarn
-    if (wasAttrNameAnAlias)
-        dlog(` - Alias used: "${keyAliasUsedForName}"`);
-    dlog(` ${checkCross(hasAttrShortcuts)} Has Optional Shortcuts Attribute`);
-    if (wasAttrShortcutsAnAlias)
-        dlog(` - Alias used: "${keyAliasUsedForShortcuts}"`);
-    dlog(` ${checkCross(hasAttrRootDir)} Has Required Root Dir Attribute`);
-    if (wasAttrRootDirAnAlias)
-        dlog(` - Alias used: "${keyAliasUsedForRootDir}"`);
-    dlog(` ${checkCross(hasAttrOutput)} Has Required Output Attribute`);
-    if (wasAttrOutputAnAlias)
-        dlog(` - Alias used: "${keyAliasUsedForOutput}"`);
+    const pathTag = fmtPathAsTag(filePath);
+    const hasSourceName = data.sourceName.trim() !== '';
+    const hasBaseDirectory = data.baseDirectory.trim() !== '';
+    const hasOutputPath = data.outputPath.trim() !== '';
+
+    // TODO Below should be verbose
+    const dlogAlias = (aliasUsed: string) =>
+        dlog(`   - Alias: ${quote(aliasUsed)}`);
+    dlog(`  ${checkCross(hasBaseDirectory)} Has required attribute "baseDirectory"?`);
+    if (hasBaseDirectory && aliasUsedBaseDir !== '')
+        dlogAlias(aliasUsedBaseDir);
+    dlog(`  ${checkCross(hasOutputPath)} Has required attribute "outputPath"?`);
+    if (hasOutputPath && aliasUsedOutputPath !== '')
+        dlogAlias(aliasUsedOutputPath);
+    dlog(`  ${checkCross(hasSourceName)} Has optional attribute "sourceName"?`);
+    if (hasSourceName && aliasUsedSourceName !== '')
+        dlogAlias(aliasUsedSourceName);
+    dlog(`  ${checkCross(hasShortcuts)} Has optional attribute "shortcuts"?`);
+    if (hasShortcuts && aliasUsedShortcuts !== '')
+        dlogAlias(aliasUsedShortcuts);
+    if (!hasSourceName)
+        data.sourceName = basenameWithoutExtensions(filePath, ['.yml', '.yaml', '.manifest'], true);
 
     // Make sure required attributes are present
-    if (!hasAttrRootDir) 
-        throw new Error(`Manifest is missing a root directory attribute ${pathTag}`); // TODO Make these errors land better, skip that one manifest + process remaining
-    if (!hasAttrOutput)
+    // TODO Soft fail these
+    if (!hasBaseDirectory) 
+        throw new Error(`Manifest is missing a root directory attribute ${pathTag}`);
+    if (!hasOutputPath)
         throw new Error(`Manifest is missing an output directory attribute ${pathTag}`);
 
-    const instance = new Manifest(manPath, data);
-
-    if (hasAttrShortcuts) {
-        // TODO Load shortcuts
-
-        data.shortcuts = await loadManifestShortcuts(instance, shortcutsValue);
+    if (hasShortcuts) {
+        const value = data.shortcuts;
+        data.shortcuts = await loadManifestShortcuts(data, value);
     }
 
     return data;
 }
 
-function hasRequiredFields(obj: object) : obj is Shortcut {
-    return Object.prototype.hasOwnProperty.call(obj, 'title') && Object.prototype.hasOwnProperty.call(obj, 'target');
-}
-
-async function loadManifestShortcuts(manifest: Manifest, shortcutsValue: object[]) : Promise<Shortcut[]> {
-    dlogHeader(`MANIFEST ${quote(manifest.getName())} > ${clr.cyanBright('Load Shortcuts')}`);
+async function loadManifestShortcuts(manifest: ManifestData, shortcutsValue: object[]) : Promise<Shortcut[]> {
+    dlogHeader(`MANIFEST ${quote(manifest.sourceName)} > ${clr.cyanBright('Load Shortcuts')}`);
 
     if (shortcutsValue.length === 0) {
         dlog(`  ${SB_WARN} Shortcuts value was empty so no shortcuts were added to the Manifest`);
@@ -247,36 +323,107 @@ async function loadManifestShortcuts(manifest: Manifest, shortcutsValue: object[
     const okShortcuts: Shortcut[] = [];
 
     for (const [index, shortcutValue] of shortcutsValue.entries()) {
-        const id = index+1;
-        
-        dlog(clr.cyanBright.underline(`SHORTCUT #${id} > Processing`));
-
-        const hasRequired = hasRequiredFields(shortcutValue);
-        dlog(`  ${checkCross(hasRequired)} Has required fields?`);
-        if (!hasRequired) {
-            dlog(`  Skipping Shortcut #${id}`);
-            continue;
-        }
-
         const shortcut = await makeShortcut(manifest, shortcutValue);        
         dlog(`${SB_OK_LG} Shortcut created: ${quote(shortcut.title)}`);
+        okShortcuts.push(shortcut);
     }
 
     return okShortcuts;
 }
 
-async function makeShortcut(manifestData: ManifestData, obj: object) {
-    const shortcutData: ShortcutData = {
-        title: 'Testing!',
+async function makeShortcut(manifest: ManifestData, obj: object) {
+    const keyAliases: ConfigKeyAliases = {
+        title: 'title',
+        name:  'title',
+
+        target: 'target',
+        exec:   'target',
+
+        enabled: 'enabled',
+        enable:  'enabled',
+
+        disabled: 'disabled',
+        disable:  'disabled'
+    }
+
+    const data: ShortcutData = {
+        title: '',
         target: '',
         enabled: true
     };
 
-    for (const [key, value] of Object.entries(obj)) {
-        dlog(` - ${key}: ${value}`);
+    if (!Object.keys(obj)) { // TODO More graceful
+        throw new Error('Shortcut has no keys');
     }
 
-    return new Shortcut(manifestData, shortcutData);
+    const document = (obj as Record<string, unknown>);
+
+    if (typeof document !== 'object' || Array.isArray(document) || document === null) {
+        throw new Error(`Shortcut is not an object (Type: ${typeof document})`);
+    }
+
+    dlog(UNICODE_ARRW_RIGHT + clr.underline(`Loading: Shortcut (from Manifest ${quote(manifest.sourceName)})`));
+
+    for (const [key, value] of Object.entries(document)) {
+        clog(` - ${key}: ${value}`)
+
+        const resolved = resolveKeyFromAlias(keyAliases, key, null);
+        const { fullGivenKey, givenKey, resolvedKey } = resolved;
+
+        switch (resolvedKey) {
+            case 'title': {
+                if (typeof value !== 'string') {
+                    clogConfigValueWrongType(fullGivenKey, 'string', value);
+                    break;
+                }
+
+                // TODO CHeck for empty
+
+                data.title = value;
+                dlogConfigValueLoaded(resolved, value);
+                break;
+            }
+            case 'target': {
+                if (typeof value !== 'string') {
+                    clogConfigValueWrongType(fullGivenKey, 'string', value);
+                    break;
+                }
+
+                // TODO CHeck for empty
+
+                data.target = value;
+                dlogConfigValueLoaded(resolved, value);
+                break;
+            }
+            case 'enabled': {
+                if (typeof value !== 'boolean') {
+                    clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+                    break;
+                }
+
+                data.enabled = value;
+                dlogConfigValueLoaded(resolved, value);
+                break;
+            }
+            case 'disabled': {
+                if (typeof value !== 'boolean') {
+                    clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+                    break;
+                }
+
+                data.enabled = !value;
+                dlogConfigValueLoaded(resolved, !value);
+                break;
+            }
+            default: {
+                clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
+            }
+        }
+    }
+
+    // TODO Lint data after the fact
+
+    return new Shortcut(manifest, data);
 }
 
 export { makeManifests };

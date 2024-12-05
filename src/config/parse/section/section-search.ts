@@ -1,12 +1,3 @@
-import clr from 'chalk';
-
-import { clog } from '../../../utility/console';
-import { quote } from '../../../utility/string';
-import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../../../utility/symbols'
-
-import { USER_CONFIG_FILENAME } from '../../load-data';
-import { makeManifests } from '../user-data';
-
 import {
     dlogConfigSectionOk,
     dlogConfigValueLoaded,
@@ -17,10 +8,15 @@ import {
     clogConfigValueWrongType,
     clogConfigValueUnknown
 } from '../../../utility/config';
+import { clog } from '../../../utility/console';
+import { SB_ERR_LG } from '../../../utility/symbols'
+
+
+
 import UserConfig from '../../../type/config/UserConfig';
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
-import ConfigKeyPair from '../../../type/config/ConfigKeyPair';
-import Manifest from '../../../type/manifest/Manifest';
+
+import { makeManifests } from '../user-data';
 
 const sectionKey = 'search';
 const keyAliases: ConfigKeyAliases = {
@@ -84,11 +80,6 @@ async function parseSearchSection(data: object, userConfig: UserConfig) : Promis
 
                 userConfig.search.manifests = await makeManifests(value, userConfig);
                 dlogConfigValueLoaded(resolved, value);
-
-                for (const manifest of userConfig.search.manifests) {
-                    
-                }
-
                 break;
             }
             default: {

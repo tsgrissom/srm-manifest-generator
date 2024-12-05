@@ -6,6 +6,7 @@
 
 ## General TODO
 
+* Duplicate key protection for configs
 * Telemetry
 * Implement verbose flag + env var
 * Implement no color flag + config option

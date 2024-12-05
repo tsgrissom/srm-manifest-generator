@@ -39,8 +39,8 @@ class Manifest implements ManifestData {
     // TODO jsdoc
     filePath: string;
     
-    name: string;
-    rootDirectory: string;
+    sourceName: string;
+    baseDirectory: string;
     outputPath: string;
     shortcuts: Shortcut[];
 
@@ -58,10 +58,10 @@ class Manifest implements ManifestData {
             throw new Error('Required arg "data" is invalid');
 
         this.filePath = filePath;
-        this.name = data.name;
-        this.rootDirectory = data.rootDirectory;
+        this.sourceName = data.sourceName;
+        this.baseDirectory = data.baseDirectory;
         this.outputPath = data.outputPath;
-        this.shortcuts = [];
+        this.shortcuts = data.shortcuts;
         // TODO Fill shortcuts
     }
     
@@ -77,7 +77,7 @@ class Manifest implements ManifestData {
     }
 
     getRootDirectory() : string {
-        return this.rootDirectory;
+        return this.baseDirectory;
     }
 
     getFilePath() : string {
@@ -95,18 +95,18 @@ class Manifest implements ManifestData {
     }
 
     hasNameAttribute() : boolean {
-        if (!this.name)
+        if (!this.sourceName)
             return false;
 
-        return this.name.trim() !== '';
+        return this.sourceName.trim() !== '';
     }
 
     // TODO jsdoc
     getNameAttribute() : string {
-        if (!this.name || this.name.trim() === '')
+        if (!this.sourceName || this.sourceName.trim() === '')
             return '';
 
-        return this.name;
+        return this.sourceName;
     }
 
 
@@ -166,6 +166,10 @@ class Manifest implements ManifestData {
     }
 
     public async writeToOutput() : Promise<ManifestWriteResults> {
+        const enabledShortcuts = this.getEnabledShortcuts();
+        for (const sc of enabledShortcuts) {
+            clog(chalk.bgRed('enabled'), `${sc.title}`, sc.target)
+        }
         const exportData = this.getExportData();
         const writeData = JSON.stringify(exportData);
         const writePath = this.getWritePath();
@@ -250,7 +254,7 @@ class Manifest implements ManifestData {
         const sourceFilePath = await fmtPathWithExistsAndName(man.filePath, 'Source File Path');
         const outputPath = await fmtPathWithExistsAndName(man.getOutputPath(), 'Output Path');
         const writeFilePath = await fmtPathWithExistsAndName(man.getWritePath(), 'Write File Path');
-        const rootDirectory = await fmtPathWithExistsAndName(man.rootDirectory, 'Root Directory');
+        const rootDirectory = await fmtPathWithExistsAndName(man.baseDirectory, 'Root Directory');
 
         console.log('');
         dlogDataSection(

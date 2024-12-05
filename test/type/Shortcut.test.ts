@@ -52,7 +52,7 @@ function setupFiles() {
     const name = basenameWithoutExtensions(resourceFileManOk.name, '*', true),
           rootDir = resourceSubdirManRoot.name,
           outputPath = resourceSubdirManOutput.name,
-          manData: ManifestData = {name: name, rootDirectory: rootDir, outputPath: outputPath, shortcuts: []};
+          manData: ManifestData = {sourceName: name, baseDirectory: rootDir, outputPath: outputPath, shortcuts: []};
     
     fs.writeFileSync(resourceFileManOk.name, yaml.stringify(manData));
     resourceManifestOk = new Manifest(resourceFileManOk.name, manData);

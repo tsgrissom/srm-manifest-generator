@@ -1,8 +1,10 @@
 import Shortcut from '../shortcut/Shortcut.js'
 
+// TODO jsdoc
+
 interface ManifestData {
-    name: string,
-    rootDirectory: string,
+    sourceName: string,
+    baseDirectory: string,
     outputPath: string,
     shortcuts: Shortcut[]
 }

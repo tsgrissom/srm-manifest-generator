@@ -81,8 +81,8 @@ function setupFiles() { // TODO Replace execs with a func from utils
         const root = resourceSubdirManRoot.name;
         const output = path.join(resourceSubdirManOutput.name, yamlToJsonExt(resourceFileManOk.name));
         const manData: ManifestData = {
-            name: 'Some Valid Manifest',
-            rootDirectory: root,
+            sourceName: 'Some Valid Manifest',
+            baseDirectory: root,
             outputPath: output,
             shortcuts: []
         };
@@ -116,7 +116,7 @@ function setupFiles() { // TODO Replace execs with a func from utils
         resourceFileManNonExistent = tmpManifestYml('non-existent', resourceSubdirManifests.name);
         const rootDir = resourceSubdirManRoot.name,
               outputPath = path.join(resourceSubdirManOutput.name, yamlToJsonExt(resourceFileManNonExistent.name)),
-              manData: ManifestData = {name: 'Some Non-Existent Manifest', rootDirectory: rootDir, outputPath: outputPath, shortcuts: []};
+              manData: ManifestData = {sourceName: 'Some Non-Existent Manifest', baseDirectory: rootDir, outputPath: outputPath, shortcuts: []};
 
         manData.shortcuts.push(new Shortcut(manData, shortcutObjFromFileName(resourceFileExecutableOk.name)))
 
@@ -136,7 +136,7 @@ function setupFiles() { // TODO Replace execs with a func from utils
         resourceFileManNoNameAttribute = tmpManifestYml('no-name-attribute', resourceSubdirManifests.name);
         const rootDir = resourceSubdirManRoot.name,
               outputPath = path.join(resourceSubdirManOutput.name, yamlToJsonExt(resourceFileManNoNameAttribute.name)),
-              manData: ManifestData = {name: '', rootDirectory: rootDir, outputPath: outputPath, shortcuts: []};
+              manData: ManifestData = {sourceName: '', baseDirectory: rootDir, outputPath: outputPath, shortcuts: []};
         
         manData.shortcuts.push(new Shortcut(manData, shortcutObjFromFileName(resourceFileExecutableOk.name)));
 
