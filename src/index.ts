@@ -1,7 +1,7 @@
-import startApp from './app.js';
+import startApp from './app';
 
 try {
-    await startApp();
+	await startApp();
 } catch (err) {
-    console.error('Error on app start:', err);
+	console.error('Error on app start:', err);
 }

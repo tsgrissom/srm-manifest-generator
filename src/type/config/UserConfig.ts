@@ -1,7 +1,7 @@
-import ConfigData from './ConfigData.js';
-import Manifest from '../manifest/Manifest.js';
-import { isDebugActive, isEnvVerbose, isProcessVerbose } from '../../utility/debug.js';
-import OutputMode from './OutputMode.js';
+import { isDebugActive, isEnvVerbose, isProcessVerbose } from '../../utility/debug';
+import Manifest from '../manifest/Manifest';
+import ConfigData from './ConfigData';
+import OutputMode from './OutputMode';
 
 class UserConfig implements ConfigData {
 	search: { manifests: Manifest[]; scanDirectories: boolean; scanRecursively: boolean };

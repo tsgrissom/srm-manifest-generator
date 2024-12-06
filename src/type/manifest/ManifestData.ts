@@ -1,12 +1,12 @@
-import Shortcut from '../shortcut/Shortcut.js'
+import Shortcut from '../shortcut/Shortcut';
 
 // TODO jsdoc
 
 interface ManifestData {
-    sourceName: string,
-    baseDirectory: string,
-    outputPath: string,
-    shortcuts: Shortcut[]
+	sourceName: string;
+	baseDirectory: string;
+	outputPath: string;
+	shortcuts: Shortcut[];
 }
 
 export default ManifestData;

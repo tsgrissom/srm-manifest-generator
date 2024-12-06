@@ -2,15 +2,15 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { fmtBool } from '../../utility/boolean.js';
-import { clog } from '../../utility/console.js';
-import { quote } from '../../utility/string.js';
+import { fmtBool } from '../../utility/boolean';
+import { clog } from '../../utility/console';
+import { quote } from '../../utility/string';
 
-import ShortcutData from './ShortcutData.js';
-import ShortcutExportData from './ShortcutExportData.js';
-import ManifestData from '../manifest/ManifestData.js';
-import { SB_WARN } from '../../utility/symbols.js';
-import UserConfig from '../config/UserConfig.js';
+import { SB_WARN } from '../../utility/symbols';
+import UserConfig from '../config/UserConfig';
+import ManifestData from '../manifest/ManifestData';
+import ShortcutData from './ShortcutData';
+import ShortcutExportData from './ShortcutExportData';
 
 // TODO jsdoc
 class Shortcut implements ShortcutData {

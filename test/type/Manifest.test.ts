@@ -1,26 +1,19 @@
-import path from 'node:path';
 import fs from 'node:fs';
+import path from 'node:path';
 
 import { DirResult, FileResult } from 'tmp';
 import yaml from 'yaml';
 
-import { dlog } from '../../src/utility/debug.js';
-import { replaceFileExtension } from '../../src/utility/path.js';
+import { dlog } from '../../src/utility/debug';
+import { replaceFileExtension } from '../../src/utility/path';
 
-import ManifestData from '../../src/type/manifest/ManifestData.js';
-import Manifest from '../../src/type/manifest/Manifest.js';
-import Shortcut from '../../src/type/shortcut/Shortcut.js';
+import Manifest from '../../src/type/manifest/Manifest';
+import ManifestData from '../../src/type/manifest/ManifestData';
 
 import assert from 'node:assert';
-import { before, after, describe, it } from 'node:test';
-import {
-	shortcutObjFromFileName,
-	tmpDirForScope,
-	tmpManifestYml,
-	tmpSubdir,
-	tmpExecutableFile
-} from '../resource/test-utilities.js';
-import { clog } from '../../src/utility/console.js';
+import { after, before, describe, it } from 'node:test';
+import { clog } from '../../src/utility/console';
+import { tmpDirForScope, tmpExecutableFile, tmpManifestYml, tmpSubdir } from '../resource/test-utilities';
 
 const __filebasename = path.basename(import.meta.filename);
 
