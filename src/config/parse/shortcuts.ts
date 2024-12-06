@@ -3,14 +3,14 @@ import clr from 'chalk';
 import { clogConfigValueWrongType, dlogConfigValueLoaded, resolveKeyFromAlias } from '../../utility/config';
 import { clog } from '../../utility/console';
 import { dlog, dlogHeader } from '../../utility/debug';
-import { SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../../utility/symbols';
+import { SB_OK_LG, SB_WARN } from '../../utility/symbols';
 
-import ManifestData from '../../type/manifest/ManifestData';
-import { quote } from '../../utility/string';
-import Shortcut from '../../type/shortcut/Shortcut';
-import ShortcutData from '../../type/shortcut/ShortcutData';
 import ConfigKeyAliases from '../../type/config/ConfigKeyAliases';
 import UserConfig from '../../type/config/UserConfig';
+import ManifestData from '../../type/manifest/ManifestData';
+import Shortcut from '../../type/shortcut/Shortcut';
+import ShortcutData from '../../type/shortcut/ShortcutData';
+import { quote } from '../../utility/string';
 
 /**
  *
@@ -18,11 +18,7 @@ import UserConfig from '../../type/config/UserConfig';
  * @param object The value of a given manifest's shortcuts field.
  * @returns
  */
-async function loadManifestShortcuts(
-	manifest: ManifestData,
-	objects: object[],
-	config: UserConfig
-): Promise<Shortcut[]> {
+function loadManifestShortcuts(manifest: ManifestData, objects: object[], config: UserConfig): Shortcut[] {
 	dlogHeader(`MANIFEST ${quote(manifest.sourceName)} > ${clr.cyanBright('Load Shortcuts')}`);
 
 	if (objects.length === 0) {
@@ -33,7 +29,7 @@ async function loadManifestShortcuts(
 	const ok: Shortcut[] = [];
 
 	for (const object of objects) {
-		const shortcut = await makeShortcut(object, config);
+		const shortcut = makeShortcut(object, config);
 		dlog(`${SB_OK_LG} Shortcut created: ${quote(shortcut.title)}`);
 		ok.push(shortcut);
 	}
@@ -41,7 +37,7 @@ async function loadManifestShortcuts(
 	return ok;
 }
 
-async function makeShortcut(obj: object, config: UserConfig) {
+function makeShortcut(obj: object, config: UserConfig) {
 	const keyAliases: ConfigKeyAliases = {
 		title: 'title',
 		name: 'title',

@@ -1,10 +1,9 @@
 import clr from 'chalk';
 
-import { dlog } from './utility/debug';
-
 import Manifest from './type/manifest/Manifest';
 
 import parseUserConfigData from './config/config';
+import { fmtPathAsTag } from './utility/path';
 
 async function processManifest(manifest: Manifest) {
 	// TODO Additionally validate if write path is valid, make folders if missing
@@ -22,28 +21,22 @@ async function processManifest(manifest: Manifest) {
 	try {
 		const writeResults = await manifest.writeToOutput();
 		await manifest.logWriteResults(writeResults);
-	} catch (err) {
+	} catch {
 		throw new Error(
-			`An error occurred while writing an output manifest (Manifest: ${manifest.getName()}): ${err}`
+			`An error occurred while writing an output manifest (Manifest: ${manifest.getName()})`
 		);
 	}
 }
 
 async function startApp() {
 	const userConfig = await parseUserConfigData();
-	const { manifests: manifestPaths } = userConfig.search;
+	const { manifests } = userConfig.search;
 
-	for (const filePath of manifestPaths) {
-		dlog(`  - "${filePath.getFilePath()}"`);
-
+	for (const manifest of manifests) {
 		try {
-			await processManifest(filePath); // TODO This doesn't need to always happen automatically
-		} catch (err) {
-			console.error(
-				clr.red(
-					`Error processing manifest (${filePath.getFilePath()}): ${err}`
-				)
-			);
+			await processManifest(manifest); // TODO This doesn't need to always happen automatically
+		} catch {
+			console.error(clr.red(`Error processing manifest ${fmtPathAsTag(manifest.filePath)}`));
 		}
 	}
 }

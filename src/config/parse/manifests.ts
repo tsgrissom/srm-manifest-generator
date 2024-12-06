@@ -1,28 +1,29 @@
-import fs from 'node:fs/promises';
 import clr from 'chalk';
+import fs from 'node:fs/promises';
 import YAML from 'yaml';
 
 import { checkCross } from '../../utility/boolean';
 import {
-	clogConfigWarn,
-	resolveKeyFromAlias,
 	clogConfigValueWrongType,
-	dlogConfigValueLoaded
+	clogConfigWarn,
+	dlogConfigValueLoaded,
+	resolveKeyFromAlias
 } from '../../utility/config';
 import { clog } from '../../utility/console';
 import { dlog } from '../../utility/debug';
-import { fmtPathAsTag, fmtPath, basenameWithoutExtensions } from '../../utility/path';
+import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path';
 import { quote } from '../../utility/string';
-import { SB_WARN, SB_OK_LG, SB_ERR_LG, UNICODE_ARRW_RIGHT } from '../../utility/symbols';
+import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../../utility/symbols';
 
 import ConfigData from '../../type/config/ConfigData';
 import ConfigKeyAliases from '../../type/config/ConfigKeyAliases';
 import Manifest from '../../type/manifest/Manifest';
 import ManifestData from '../../type/manifest/ManifestData';
 
+import UserConfig from '../../type/config/UserConfig';
+import Shortcut from '../../type/shortcut/Shortcut';
 import { USER_CONFIG_FILENAME } from '../load-data';
 import loadManifestShortcuts from './shortcuts';
-import UserConfig from '../../type/config/UserConfig';
 
 async function makeManifests(manPaths: string[], config: UserConfig): Promise<Manifest[]> {
 	dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
@@ -53,7 +54,7 @@ async function makeManifests(manPaths: string[], config: UserConfig): Promise<Ma
 		}
 
 		const object = await readManifestFile(manPath);
-		const data = await parseManifestFileContentsToData(manPath, object, config);
+		const data = parseManifestFileContentsToData(manPath, object, config);
 		const instance = new Manifest(manPath, data);
 
 		okManifests.push(instance);
@@ -157,23 +158,23 @@ async function validateManifestPathIsSupportedFilesystemType(
 async function readManifestFile(manPath: string): Promise<object> {
 	const pathTag = fmtPathAsTag(manPath);
 
-	if (!manPath) throw new Error(`Arg filePath was invalid: ${manPath}`);
-	if (manPath.trim() === '') throw new Error(`Arg filePath cannot be empty: ${manPath}`);
+	if (!manPath) {
+		throw new Error(`Arg filePath was invalid: ${manPath}`);
+	}
+	if (manPath.trim() === '') {
+		throw new Error(`Arg filePath cannot be empty: ${manPath}`);
+	}
 
 	try {
 		const contents = await fs.readFile(manPath, 'utf-8');
-		const object = YAML.parse(contents);
+		const object = YAML.parse(contents) as ManifestData;
 		return object;
 	} catch (err) {
-		throw new Error(`Unable to read manifest file at manpath ${pathTag}: ${err}`);
+		throw new Error(`Unable to read manifest file at manpath ${pathTag}`);
 	}
 }
 
-async function parseManifestFileContentsToData(
-	filePath: string,
-	obj: object,
-	config: UserConfig
-): Promise<ManifestData> {
+function parseManifestFileContentsToData(filePath: string, obj: object, config: UserConfig): ManifestData {
 	const keyAliases: ConfigKeyAliases = {
 		sourceName: 'sourceName',
 		name: 'sourceName',
@@ -265,15 +266,18 @@ async function parseManifestFileContentsToData(
 				break;
 			}
 			case 'shortcuts': {
-				if (typeof value !== 'object' || !Array.isArray(value)) {
-					// TODO Validate each element is at least an object, soft fail each non-shortcut
-					clogConfigValueWrongType(fullGivenKey, 'array of shortcut objects', value);
+				if (
+					typeof value === 'object' &&
+					Array.isArray(value) &&
+					value.every(element => element instanceof Shortcut)
+				) {
+					hasShortcuts = true;
+					data.shortcuts = value;
+					dlogConfigValueLoaded(resolved, value);
 					break;
 				}
 
-				hasShortcuts = true;
-				data.shortcuts = value;
-				dlogConfigValueLoaded(resolved, value);
+				clogConfigValueWrongType(fullGivenKey, 'array of shortcut objects', value);
 				break;
 			}
 			default: {
@@ -305,7 +309,7 @@ async function parseManifestFileContentsToData(
 
 	if (hasShortcuts) {
 		const value = data.shortcuts;
-		data.shortcuts = await loadManifestShortcuts(data, value, config);
+		data.shortcuts = loadManifestShortcuts(data, value, config);
 	}
 
 	return data;

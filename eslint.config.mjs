@@ -26,6 +26,7 @@ export default ts.config(
       'no-undef': 'off',
       'no-unused-vars': 'off',
       '@typescript-eslint/curly': 'off',
+      
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/array-type': 'warn',
       '@typescript-eslint/no-inferrable-types': 'warn'
