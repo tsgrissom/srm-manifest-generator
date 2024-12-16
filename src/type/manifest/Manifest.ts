@@ -255,7 +255,7 @@ class Manifest implements ManifestData {
 		console.log('');
 		dlogDataSection(
 			clr.magentaBright.underline(`MANIFEST ${name} > Write Operation`),
-			` > `,
+			`  > `,
 			`Name: ${name}`,
 			`Name From: ${man.getNameSourceAsString()}`,
 			`Value of Name Attribute: ${quote(man.getNameAttribute())}`,
@@ -268,14 +268,14 @@ class Manifest implements ManifestData {
 
 		dlogDataSection(
 			clr.magentaBright.underline(`MANIFEST ${name} > Numbers`),
-			` - `,
-			`# Total: ${nTotal}`,
-			`# Written: ${nOk}`,
-			`# Enabled: ${nEnabled}`,
-			`# Disabled: ${nDisabled}`,
-			`# Valid: ${nValid}`,
-			`# Invalid: ${nInvalid}`,
-			`# Skipped: ${nSkipped}`
+			`  # `,
+			`Total: ${nTotal}`,
+			`Written: ${nOk}`,
+			`Enabled: ${nEnabled}`,
+			`Disabled: ${nDisabled}`,
+			`Valid: ${nValid}`,
+			`Invalid: ${nInvalid}`,
+			`Skipped: ${nSkipped}`
 		);
 	}
 
@@ -290,7 +290,9 @@ class Manifest implements ManifestData {
 		const name = quote(manifest.getName());
 
 		let okRatio = `${stats.nOk}/${stats.nTotal} shortcut`;
-		if (nTotal > 1) okRatio += 's';
+		if (nTotal > 1) {
+			okRatio += 's';
+		}
 		okRatio = useColor ? clr.magentaBright(okRatio) : okRatio;
 
 		const sourceName = useColor ? clr.cyanBright(name) : name;

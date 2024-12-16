@@ -169,7 +169,7 @@ async function readManifestFile(manPath: string): Promise<object> {
 		const contents = await fs.readFile(manPath, 'utf-8');
 		const object = YAML.parse(contents) as ManifestData;
 		return object;
-	} catch (err) {
+	} catch {
 		throw new Error(`Unable to read manifest file at manpath ${pathTag}`);
 	}
 }
