@@ -199,8 +199,8 @@ class Manifest implements ManifestData {
 					nOk: nOk
 				}
 			};
-		} catch (err) {
-			throw new Error(`Failed to write manifest to output file (Name: ${this.getName()}): ${err}`);
+		} catch {
+			throw new Error(`Failed to write manifest to output file (Name: ${this.getName()})`);
 		}
 	}
 
