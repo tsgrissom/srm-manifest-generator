@@ -1,21 +1,8 @@
 import { isDebugActive } from './debug';
 
-// MARK: WRAPPING
 // TODO TEST Whole section
 
-/**
- * Checks if a string is wrapped by a character sequence, i.e.
- * if the sequence is at both the start and the end of the string.
- * @param s The string which will be searched at its start and end
- *  for the presence of the given {@link sequence}.
- * @param sequence The sequence of characters to search for at the
- *  start and end of string {@link s}.
- * @returns A `boolean` representing whether or not the {@link sequence}
- *  was found at the start and end of the string {@link s}.
- */
-export function isWrapped(s: string, sequence: string): boolean {
-	return s.startsWith(sequence) && s.endsWith(sequence);
-}
+// MARK: Fn startsButDoesNotEndWith
 
 /**
  * Checks if a string starts with but does not end with a sequence
@@ -25,9 +12,11 @@ export function isWrapped(s: string, sequence: string): boolean {
  * @returns Whether the {@link str} starts but does not end with
  *  {@link sequence}.
  */
-function startsButDoesNotEndWith(str: string, sequence: string): boolean {
+export function startsButDoesNotEndWith(str: string, sequence: string): boolean {
 	return str.startsWith(sequence) && !str.endsWith(sequence);
 }
+
+// MARK: Fn endsButDoesNotStartWith
 
 /**
  * Checks if a string does not start with but does end with a sequence
@@ -37,16 +26,40 @@ function startsButDoesNotEndWith(str: string, sequence: string): boolean {
  * @returns Whether the {@link str} ends with but does not start with the
  *  given {@link sequence}.
  */
-function endsButDoesNotStartWith(str: string, sequence: string): boolean {
+export function endsButDoesNotStartWith(
+    str: string,
+    sequence: string
+) : boolean {
 	return !str.startsWith(sequence) && str.endsWith(sequence);
 }
+
+// MARK: Fn isWrapped
+
+/**
+ * Checks if a string is wrapped by a character sequence, i.e.
+ * if the sequence is at both the start and the end of the string.
+ * @param str The string which will be searched at its start and end
+ *  for the presence of the given {@link sequence}.
+ * @param sequence The sequence of characters to search for at the
+ *  start and end of string {@link str}.
+ * @returns A `boolean` representing whether or not the {@link sequence}
+ *  was found at the start and end of the string {@link str}.
+ */
+export function isWrapped(
+    str: string,
+    sequence: string
+) : boolean {
+	return str.startsWith(sequence) && str.endsWith(sequence);
+}
+
+// MARK: Fn wrap
 
 /**
  * Wraps a string with a sequence of characters, prepending and appending the
  * sequence to the string if it is not already present. If it is already present,
  * the string will not be modified unless {@link force} is set to `true`.
- * @param s The string to wrap in the character {@link sequence}.
- * @param sequence The characters to wrap the string {@link s} in.
+ * @param str The string to wrap in the character {@link sequence}.
+ * @param sequence The characters to wrap the string {@link str} in.
  * @param force Whether the sequence should be forcibly applied to the start and
  *  end of the string without consideration for if it is already present.
  * @param fixPartialWrap Whether a given string which starts with the sequence but
@@ -55,22 +68,27 @@ function endsButDoesNotStartWith(str: string, sequence: string): boolean {
  * @returns The resulting `string`, which will be wrapped in the sequence if it
  *  was not already present.
  */
-function wrap(s: string, sequence: string, force = false, fixPartialWrap = false): string {
-	const doWrap = () => sequence + s + sequence;
+export function wrap(
+    str: string,
+    sequence: string,
+    force = false,
+    fixPartialWrap = false
+) : string {
+	const doWrap = () => sequence + str + sequence;
 
 	if (force) return doWrap();
 	else {
-		const alreadyStarts = s.startsWith(sequence);
-		const alreadyEnds = s.endsWith(sequence);
+		const alreadyStarts = str.startsWith(sequence);
+		const alreadyEnds = str.endsWith(sequence);
 
-		if (alreadyStarts && alreadyEnds) return s;
+		if (alreadyStarts && alreadyEnds) return str;
 
 		const warnPartialWrap = (startsOrEnds: string) => {
 			if (isDebugActive()) {
 				console.warn(
 					`wrap() invoked on a string that already ${startsOrEnds} with the given sequence, will be unmodified because arg force was false`
 				);
-				console.warn(`- string: ${s}`);
+				console.warn(`- string: ${str}`);
 				console.warn(`- sequence: ${sequence}`);
 			} else {
 				console.warn(
@@ -81,23 +99,25 @@ function wrap(s: string, sequence: string, force = false, fixPartialWrap = false
 
 		if (alreadyStarts && !alreadyEnds) {
 			if (fixPartialWrap) {
-				return s + sequence;
+				return str + sequence;
 			} else {
 				warnPartialWrap('starts');
-				return s;
+				return str;
 			}
 		} else if (!alreadyStarts && alreadyEnds) {
 			if (fixPartialWrap) {
-				return sequence + s;
+				return sequence + str;
 			} else {
 				warnPartialWrap('ends');
-				return s;
+				return str;
 			}
 		}
 
 		return doWrap();
 	}
 }
+
+// MARK: Fn unwrap
 
 /**
  * Unwraps a string by checking if a sequence of characters is present at both
@@ -150,7 +170,7 @@ export function unwrap(
 	return str;
 }
 
-// MARK: QUOTING
+// MARK: Fn isSingleQuoted
 
 /**
  * Checks if a given string is wrapped in single quotes (the `'` character.)
@@ -163,6 +183,8 @@ export function isSingleQuoted(s: string): boolean {
 	return isWrapped(s, `'`);
 }
 
+// MARK: Fn isDoubleQuoted
+
 /**
  * Checks if a given string is wrapped in quotation marks (double quotes.)
  * @param s The string which will be searched at its start and end
@@ -173,6 +195,8 @@ export function isSingleQuoted(s: string): boolean {
 export function isDoubleQuoted(s: string): boolean {
 	return isWrapped(s, `"`);
 }
+
+// MARK: Fn isQuoted
 
 /**
  * Checks if a given string is quoted, i.e. wrapped in quotation marks.
@@ -187,13 +211,15 @@ export function isDoubleQuoted(s: string): boolean {
  *  quotation mark character was found at the start and end of the
  *  string {@link str}.
  */
-function isQuoted(
+export function isQuoted(
 	str: string,
 	acceptSingleQuotes = false
 ) : boolean {
 	const isSingle = isSingleQuoted(str);
 	return acceptSingleQuotes && isSingle ? isSingle : isDoubleQuoted(str);
 }
+
+// MARK: Fn singleQuote
 
 /**
  * Wraps a given string in single quotation mark character `'`.
@@ -206,13 +232,15 @@ function isQuoted(
  *  wrapping by adding the missing side's quotation mark.
  * @returns The wrapped string.
  */
-function singleQuote(
+export function singleQuote(
 	str: string,
 	force = false,
 	fixPartialWrap = false
 ) : string {
 	return wrap(str, `'`, force, fixPartialWrap);
 }
+
+// MARK: Fn doubleQuote
 
 // TODO When done, find and replace symbol in code: "${
 /**
@@ -223,10 +251,10 @@ function singleQuote(
  *  even if they are already present.
  * @param fixPartialWrap Whether to, if the {@link str} starts but does
  *  not end with the double quote character, or vice versa, "repair" the
- *  wrapping by adding the missing side's quotation mark.
+ *  wrapping by adding the quotation mark to the missing side.
  * @returns The wrapped string.
  */
-function doubleQuote(
+export function doubleQuote(
 	str: string,
 	force = false,
 	fixPartialWrap = false
@@ -234,6 +262,21 @@ function doubleQuote(
 	return wrap(str, `"`, force, fixPartialWrap);
 }
 
+// MARK: Fn quote
+
+/**
+ * Wraps a given string in quotation marks, preferring double quotes
+ * by default.
+ * @param str The string to wrap.
+ * @param useSingleQuotes Whether to use single quotes instead of
+ *  double quotes.
+ * @param force Whether to forcibly wrap the string in quotation marks
+ *  even if they are already present.
+ * @param fixPartialWrap Whether to, if ${@link str} starts but does not
+ *  end with the given quotation mark, or vice versa, "repair" the
+ *  wrapping by adding the quotation mark to the missing side.
+ * @returns The given string wrapped in quotation marks.
+ */
 export function quote(
 	str: string,
 	useSingleQuotes = false,
@@ -248,21 +291,36 @@ export function quote(
 	return wrap(str, sequence, force, fixPartialWrap);
 }
 
-function unquote(
+// MARK: Fn unquote
+
+/**
+ * Unwraps a given string, removing its quotation marks, which by
+ * default will be double quotes.
+ * @param str The string to unwrap.
+ * @param useSingleQuotes Whether to look for and remove single
+ *  quotes instead of double quotes.
+ * @param removePartialWrap Whether to, if {@link str} starts but does not
+ *  end with the given quotation mark, or vice versa, remove the one-sided
+ *  wrap from the present side.
+ * @returns The string unwrapped of quotation marks.
+ */
+export function unquote(
 	str: string,
 	useSingleQuotes = false,
 	removePartialWrap = false
-): string {
+) : string {
+    const sequence = useSingleQuotes ? `'` : `"`;
+
 	if (!isQuoted(str, useSingleQuotes) ) {
-        const sequence = useSingleQuotes ? `'` : '"';
-        if (startsButDoesNotEndWith(str, sequence)) {
-		} else if (endsButDoesNotStartWith(str, sequence)) {
-		}
-		return str;
-	} else if (isSingleQuoted(str) && useSingleQuotes) {
-		return unwrap(str, `'`, removePartialWrap);
-	} else if (isDoubleQuoted(str)) {
-		return unwrap(str, `"`, removePartialWrap);
-	}
-	return str;
+        if (startsButDoesNotEndWith(str, sequence) && removePartialWrap) {
+            return str.substring(sequence.length);
+        }
+        if (endsButDoesNotStartWith(str, sequence) && removePartialWrap) {
+            return str.substring(0, str.length - sequence.length);
+        }
+
+        return str;
+    }
+    
+    return unwrap(str, sequence, removePartialWrap);
 }

@@ -14,6 +14,7 @@ import ShortcutExportData from './ShortcutExportData';
 
 // TODO jsdoc
 class Shortcut implements ShortcutData {
+
 	config?: UserConfig;
 
 	title: string;
@@ -25,7 +26,7 @@ class Shortcut implements ShortcutData {
 
 		if (data.title.trim() === '') {
 			throw new Error(
-				`Cannot construct Shortcut from ShortcutData with empty or whitespace-only title: "${data.title}"`
+				`Cannot construct Shortcut from ShortcutData with empty str title`
 			);
 		}
 
@@ -70,6 +71,8 @@ class Shortcut implements ShortcutData {
 	public isTargetPathAbsolute(): boolean {
 		return path.isAbsolute(this.target);
 	}
+
+	// TODO Method: isTargetPathRelative
 
 	public getFullTargetPath(manifest: ManifestData): string {
 		const baseDirectory = manifest.baseDirectory;

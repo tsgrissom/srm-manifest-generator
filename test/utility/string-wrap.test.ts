@@ -1,13 +1,61 @@
-// MARK: Fn startsButDoesNotEndWith
-// TODO
+import {
+	startsButDoesNotEndWith,
+	isWrapped,
+	wrap,
+	unwrap,
+	isQuoted,
+	isDoubleQuoted,
+	isSingleQuoted,
+	quote,
+	unquote,
+	doubleQuote,
+	singleQuote
+} from '../../src/utility/string-wrap';
 
-import { isDoubleQuoted, isSingleQuoted, isWrapped, unwrap } from '../../src/utility/string-wrap';
+// MARK: Fn startsButDoesNotEndWith
+
+describe('Function: startsButDoesNotEndWith', () => {
+    test.each([
+        {
+            params: {
+                str: '**Str',
+                sequence: '**'
+            },
+            expected: true
+        },
+        {
+            params: {
+                str: '**Str**',
+                sequence: '**'
+            },
+            expected: false
+        },
+        {
+            params: {
+                str: 'Str**',
+                sequence: '**'
+            },
+            expected: false
+        },
+        {
+            params: {
+                str: 'Str',
+                sequence: '**'
+            },
+            expected: false
+        }
+    ])(
+        'returns expected for given input parameters', data => {
+            const { params, expected } = data;
+            expect(startsButDoesNotEndWith(params.str, params.sequence)).toBe(expected);
+        }
+    )
+})
 
 // MARK: Fn endsButDoesNotStartWith
 // TODO
 
 // MARK: Fn isWrapped
-// TODO
 
 describe('Function: isWrapped', () => {
 	test.each([
@@ -74,7 +122,12 @@ describe('Function: isWrapped', () => {
 });
 
 // MARK: Fn wrap
-// TODO
+
+describe('Function: wrap', () => {
+
+
+
+});
 
 // MARK: Fn unwrap
 
@@ -207,7 +260,114 @@ describe('Function: isDoubleQuoted', () => {
 });
 
 // MARK: Fn isQuoted
-// TODO
+
+describe('Function: isQuoted', () => {
+
+    test.each([
+		{
+			params: {
+				str: `"Str"`,
+				acceptSingleQuotes: false
+			},
+			expected: true
+		},
+		{
+			params: {
+				str: `"Str"`,
+				acceptSingleQuotes: true
+			},
+			expected: true
+		},
+		{
+			params: {
+				str: `'Str'`,
+				acceptSingleQuotes: false
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: `'Str'`,
+				acceptSingleQuotes: true
+			},
+			expected: true
+		},
+		{
+			params: {
+				str: 'Str',
+				acceptSingleQuotes: false
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: 'Str',
+				acceptSingleQuotes: true
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: `'Str`,
+				acceptSingleQuotes: false
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: `'Str`,
+				acceptSingleQuotes: true
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: `Str'`,
+				acceptSingleQuotes: false
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: `Str'`,
+				acceptSingleQuotes: true
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: `"Str`,
+				acceptSingleQuotes: false
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: `"Str`,
+				acceptSingleQuotes: true
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: `Str"`,
+				acceptSingleQuotes: false
+			},
+			expected: false
+		},
+		{
+			params: {
+				str: `Str"`,
+				acceptSingleQuotes: true
+			},
+			expected: false
+		}
+    ])('returns expected for given input parameters', data => {
+        const { params, expected } = data;
+        expect(isQuoted(params.str, params.acceptSingleQuotes)).toBe(expected);
+    });
+
+});
 
 // MARK: Fn singleQuote
 // TODO
