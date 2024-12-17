@@ -3,7 +3,6 @@ import fs from 'node:fs';
 
 import mockFs from 'mock-fs';
 import FileSystem from 'mock-fs/lib/filesystem';
-import tmp from 'tmp';
 import yaml from 'yaml';
 
 import { basenameWithoutExtensions } from '../../src/utility/path';
@@ -18,12 +17,11 @@ const pathSubdirExecutables = path.join(resourceDir, 'executables');
 const pathSubdirManifests = path.join(resourceDir, 'manifests');
 const pathSubdirManBaseDir = path.join(resourceDir, 'baseDir');
 const pathSubdirManOutputDir = path.join(resourceDir, 'outputDir');
-const pathSubdirManRootDir = path.join(resourceDir, 'rootDir');
 
 // TODO Whole thing could probably be more DRY?
 
 const pathExecFileOkExt = path.join(pathSubdirExecutables, 'ok-executable-ext.exe');
-const pathExecFileBadExt = path.join(pathSubdirExecutables, 'bad-executable-ext.txt');
+// const pathExecFileBadExt = path.join(pathSubdirExecutables, 'bad-executable-ext.txt');
 const pathManFileOk  = path.join(pathSubdirManifests, 'ok-manifest.manifest.yml');
 const pathManFileBad = path.join(pathSubdirManifests, 'bad-manifest.manifest.yml');
 
@@ -57,20 +55,17 @@ beforeEach(() => {
                 'ok-executable-ext.exe': 'some valid exe data',
                 'bad-executable-ext.txt': 'some invalid data'
             },
-            'baseDir': {},
-            'rootDir': {}, // TODO Might need to put a txt in here, test if that makes existSync see dir
+            'baseDir': {}, // TODO Might need to put a txt in here, test if that makes existSync see dir
             'outputDir': {},
         }
     };
 
     manOk = new Manifest(path.join(pathSubdirManifests, 'ok-manifest.manifest.yml'), manDataOk);
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     mockFs(config);
 });
 
 afterEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     mockFs.restore();
 })
 

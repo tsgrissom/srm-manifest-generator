@@ -15,8 +15,6 @@ const pathSubdirManOutputDir = path.join(resourceDir, 'mockOutputDir');
 
 // TODO This could be DRYer
 
-let pathManFileOk: string;
-
 beforeEach(() => {
     const scDataGenOk: ShortcutData = {
         title: 'Some Game',
