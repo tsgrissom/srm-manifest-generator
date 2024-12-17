@@ -15,69 +15,52 @@ import Manifest from '../../src/type/manifest/Manifest';
 const resourceDir = 'test/resource/Manifest';
 const pathSubdirExecutables = path.join(resourceDir, 'executables');
 const pathSubdirManifests = path.join(resourceDir, 'manifests');
-const pathSubdirManBaseDir = path.join(resourceDir, 'baseDir');
-const pathSubdirManOutputDir = path.join(resourceDir, 'outputDir');
 
-// TODO Whole thing could probably be more DRY?
+// TODO Phase out above
 
-// const pathExecFileBadExt = path.join(pathSubdirExecutables, 'bad-executable-ext.txt');
-// const pathManFileBad = path.join(pathSubdirManifests, 'bad-manifest.manifest.yml');
-const pathExecFileOkExt = path.join(pathSubdirExecutables, 'ok-executable-ext.exe');
-const pathManFileOk = path.join(pathSubdirManifests, 'ok-manifest.manifest.yml');
-const pathManFileNoNameAttr = path.join(pathSubdirManifests, 'no-name-attribute.manifest.yml');
-// TODO Manifest with empty file contents
-// TODO Manifest which has bad ext, bad contents, etc.
+const mockBaseDir = '/mock/base/dir';
+const mockTargetSubdir = 'path/to/target.exe';
 
-const shortcutDataOk: ShortcutData = {
-    title: 'A Fake Game',
-    target: pathExecFileOkExt
-}
-
-const shortcutsOk: Shortcut[] = [
-    new Shortcut(shortcutDataOk)
-];
-
-const manDataOk: ManifestData = {
-    sourceName: basenameWithoutExtensions(pathManFileOk, '*'),
-    baseDirectory: pathSubdirManBaseDir,
-    outputPath: pathSubdirManOutputDir,
-    shortcuts: shortcutsOk
-};
-
-const manDataNoNameAttr: ManifestData = {
-    sourceName: '',
-    baseDirectory: pathSubdirManBaseDir,
-    outputPath: pathSubdirManOutputDir,
-    shortcuts: shortcutsOk
-};
-
-let manOk: Manifest;
-let manNoNameAttr: Manifest;
+let mockScData: ShortcutData;
+let mockSc: Shortcut;
+let mockManData: ManifestData;
+let mockManifest: Manifest;
 
 beforeEach(() => {
 
     // TODO Construct the rest of the test data
-    
-    const config: FileSystem.DirectoryItems = {
-        'test/resource/Manifest': {
-            'manifests': {
-                'ok-manifest.manifest.yml': yaml.stringify(manDataOk),
-                'bad-manifest.manifest.yml': 'invalid mandata here',
-                // 'non-existent.manifest.yml': '',
-                'empty.manifest.yml': '',
-                'no-name-attribute.manifest.yml': yaml.stringify(manDataNoNameAttr)
-            },
-            'executables': {
-                'ok-executable-ext.exe': 'some valid exe data',
-                'bad-executable-ext.txt': 'some invalid data'
-            },
-            'baseDir': {}, // TODO Might need to put a txt in here, test if that makes existSync see dir
-            'outputDir': {},
-        }
-    };
+	mockScData = {
+		title: 'A Game',
+		target: mockTargetSubdir
+	};
+	mockSc = new Shortcut(mockScData);
 
-    manOk = new Manifest(pathManFileOk, manDataOk);
-    manNoNameAttr = new Manifest(pathManFileNoNameAttr, manDataNoNameAttr);
+	mockManData = {
+		sourceName: 'Some Source of Titles',
+		baseDirectory: mockBaseDir,
+		outputPath: '/mock/output/dir',
+		shortcuts: [mockSc]
+	};
+	mockManifest = new Manifest(path.join(pathSubdirManifests, 'mock-manifest.manifest.yml'), mockManData);
+
+	const mockManDataNoNameAttribute = { ...mockManData };
+	mockManDataNoNameAttribute.sourceName = '';
+
+    const config: FileSystem.DirectoryItems = {
+		'test/resource/Manifest': {
+			manifests: {
+				'mock-manifest.manifest.yml': yaml.stringify(mockManData),
+				'no-name-attribute.manifest.yml': yaml.stringify(mockManDataNoNameAttribute),
+				// 'bad-manifest.manifest.yml': 'invalid mandata here',
+				// // 'non-existent.manifest.yml': '',
+				// 'empty.manifest.yml': '',
+			},
+			executables: {
+				'ok-executable-ext.exe': 'some valid exe data',
+				'bad-executable-ext.txt': 'some invalid data'
+			}
+		}
+	};
 
     mockFs(config);
 });
@@ -89,10 +72,7 @@ afterEach(() => {
 // MARK: Mock FS
 
 test('mock fs should be created', () => {
-    // expect(fs.existsSync(pathFileExecOk)).toBe(true);
-    // expect(fs.existsSync(pathFileExecBad)).toBe(true);
-    expect(fs.existsSync(pathManFileOk)).toBe(true);
-    expect(fs.existsSync(pathManFileNoNameAttr)).toBe(true);
+    expect(fs.existsSync(mockManifest.filePath)).toBe(true);
 });
 
 describe('Class: Manifest', () => {
@@ -108,11 +88,13 @@ describe('Class: Manifest', () => {
 	describe('Method: hasNameAttribute()', () => {
 
 		it('returns true when valid manifest', () => {
-			expect(manOk.hasNameAttribute()).toBe(true);
+			mockManifest.sourceName = 'Some Source';
+			expect(mockManifest.hasNameAttribute()).toBe(true);
 		});
 
 		it('returns false when no name attribute manifest', () => {
-			expect(manNoNameAttr.hasNameAttribute()).toBe(false);
+			mockManifest.sourceName = '';
+			expect(mockManifest.hasNameAttribute()).toBe(false);
 		});
 
 	});
@@ -120,15 +102,10 @@ describe('Class: Manifest', () => {
 	// MARK: Mtd getFileBasename
 
 	describe('Method: getFileBasename()', () => {
-		// it('should return a string not equal to the original file path of the source manifest file', () => {
-		// 	const fileBasename = manOk.getFileBasename();
-		// 	const filePath = path.join(pathSubdirManifests, 'ok-manifest.manifest.yml');
-		// 	expect(fileBasename).not.toBe(filePath);
-		// });
 		
 		it('returns str not equal to instance.filePath when valid manifest', () => {
-			const fileBasename = manOk.getFileBasename();
-			const filePath = path.join(pathSubdirManifests, 'ok-manifest.manifest.yml');
+			const fileBasename = mockManifest.getFileBasename();
+			const filePath = path.join(pathSubdirManifests, 'mock-manifest.manifest.yml');
 			expect(fileBasename).not.toBe(filePath);
 		});
 
@@ -141,21 +118,18 @@ describe('Class: Manifest', () => {
 		test.each(['Something', 'Another', 'A Manifest'])(
 			'returns given str when ok instance made with sourceName value: %p',
 			value => {
-				const data: ManifestData = {
-					sourceName: value,
-					baseDirectory: manDataOk.baseDirectory,
-					outputPath: manDataOk.outputPath,
-					shortcuts: manDataOk.shortcuts
-				};
-				const inst = new Manifest(pathManFileOk, data);
+				const mockData = { ...mockManData };
+				mockData.sourceName = value;
+				const mockInstance = new Manifest(path.join(pathSubdirManifests, 'mock-manifest.manifest.yml'), mockData);
 
-				expect(inst.getName()).toBe(value);
+				expect(mockInstance.getName()).toBe(value);
 			}
 		);
 
 		it('returns basename w/o exts when ok manifest without name attr', () => {
-			const actual = manNoNameAttr.getName();
-			const expected = basenameWithoutExtensions(manNoNameAttr.filePath, '*', true);
+			mockManifest.sourceName = '';
+			const actual = mockManifest.getName();
+			const expected = basenameWithoutExtensions(mockManifest.filePath, '*', true);
 			expect(actual).toBe(expected);
 		});
 		
