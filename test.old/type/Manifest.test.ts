@@ -69,24 +69,24 @@ function setupFiles() {
 	dlog(`Test resource setup finished: Manifest.test.js executable files`);
 
 	{
-		// resourceFileManOk = tmpManifestYml('generic-valid', resourceSubdirManifests.name);
-		// const root = resourceSubdirManRoot.name;
-		// const output = path.join(resourceSubdirManOutput.name, yamlToJsonExt(resourceFileManOk.name));
-		// const manData: ManifestData = {
-		//     sourceName: 'Some Valid Manifest',
-		//     baseDirectory: root,
-		//     outputPath: output,
-		//     shortcuts: []
-		// };
-		// manData.shortcuts.push(
-		//     new Shortcut(manData, {
-		//         title: 'A Fake Game',
-		//         target: resourceFileExecutableOk.name,
-		//         enabled: true
-		//     })
-		// );
-		// fs.writeFileSync(resourceFileManOk.name, yaml.stringify(manData));
-		// resourceManifestOk = new Manifest(resourceFileManOk.name, manData);
+		resourceFileManOk = tmpManifestYml('generic-valid', resourceSubdirManifests.name);
+		const root = resourceSubdirManRoot.name;
+		const output = path.join(resourceSubdirManOutput.name, yamlToJsonExt(resourceFileManOk.name));
+		const manData: ManifestData = {
+		    sourceName: 'Some Valid Manifest',
+		    baseDirectory: root,
+		    outputPath: output,
+		    shortcuts: []
+		};
+		manData.shortcuts.push(
+		    new Shortcut(manData, {
+		        title: 'A Fake Game',
+		        target: resourceFileExecutableOk.name,
+		        enabled: true
+		    })
+		);
+		fs.writeFileSync(resourceFileManOk.name, yaml.stringify(manData));
+		resourceManifestOk = new Manifest(resourceFileManOk.name, manData);
 	}
 
 	{
@@ -186,13 +186,6 @@ describe('Class: Manifest', () => {
 		// TODO More TEST for constructor
 	});
 
-	// MARK: Manifest#getNameOfFile
-	describe('Method: getFileBasename()', () => {
-		it("should, when instance constructed from existing manifest file, return a string not equal to the file's original path", () => {
-			// const nameOfFile = resourceManifestOk.getFileBasename();
-			// assert.notStrictEqual(nameOfFile, resourceManifestOk.filePath);
-		});
-	});
 
 	describe('Method: hasNameAttribute()', () => {
 		it('should, when instance constructed from valid manifest file, return true', () => {
