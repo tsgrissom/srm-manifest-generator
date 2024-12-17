@@ -1,6 +1,8 @@
 import { capitalize, delimitedList, describeQuantity, isCapitalized } from '../../src/utility/string';
 import { setOfEmptyStrings, setOfWhitespaceStrings } from '../resource/test-values';
 
+// MARK: Fn isCapitalized
+
 describe('Function: isCapitalized', () => {
 
     test.each(setOfEmptyStrings)(
@@ -54,6 +56,8 @@ describe('Function: isCapitalized', () => {
 
 });
 
+// MARK: Fn capitalize
+
 describe(`Function: capitalize`, () => {
 
     test.each([
@@ -66,9 +70,11 @@ describe(`Function: capitalize`, () => {
         (input, expected) => {
             expect(capitalize(input)).toBe(expected);
         }
-    )
+    );
 
-})
+});
+
+// MARK: Fn describeQuantity
 
 describe('Function: describeQuantity', () => {
 
@@ -77,9 +83,11 @@ describe('Function: describeQuantity', () => {
         value => {
             expect(() => describeQuantity(value as unknown as number, 'cat')).toThrow();
         }
-    )
+    );
 
-})
+});
+
+// MARK: Fn delimitedList
 
 describe('Function: delimitedList', () => {
 

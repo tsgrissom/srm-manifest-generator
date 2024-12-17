@@ -47,39 +47,41 @@ afterEach(() => {
 });
 
 describe('Class: Shortcut', () => {
-    const someExecutablePath = tmp.tmpNameSync({ prefix: 'some-executable', postfix: '.exe' });
-    const scDataGenOk: ShortcutData = {
-        title: 'Some Title',
-        target: someExecutablePath,
-        enabled: true
+	const someExecutablePath = tmp.tmpNameSync({ prefix: 'some-executable', postfix: '.exe' });
+	const scDataGenOk: ShortcutData = {
+		title: 'Some Title',
+		target: someExecutablePath,
+		enabled: true
+	};
+	const scDataEmptyTitle: ShortcutData = {
+		title: '',
+		target: someExecutablePath,
+		enabled: true
     };
-    const scDataEmptyTitle: ShortcutData = {
-        title: '',
-        target: someExecutablePath,
-        enabled: true
-    };
+    
+    // MARK: Constructor
 
-    describe('Constructor', () => {
-        it(
-            `should throw err if constructed from data which has an empty title: (Title: "${scDataEmptyTitle.title}")`,
-            () => {
-                expect(() => new Shortcut(scDataEmptyTitle)).toThrow();
-            }
-        );
+	describe('Constructor', () => {
+		it(`should throw err if constructed from data which has an empty title: (Title: "${scDataEmptyTitle.title}")`, () => {
+			expect(() => new Shortcut(scDataEmptyTitle)).toThrow();
+		});
 
-        it('should not throw err if constructed with undefined config arg', () => {
-            expect(() => new Shortcut(scDataGenOk, undefined)).not.toThrow();
-        });
+		it('should not throw err if constructed with undefined config arg', () => {
+			expect(() => new Shortcut(scDataGenOk, undefined)).not.toThrow();
+		});
 
-        test.each([undefined, null])(
-            `should not throw err if constructed with undefined or null enabled arg: %p`,
-            value => {
-                expect(() => new Shortcut({
-                    title: 'Something',
-                    target: someExecutablePath,
-                    enabled: value as unknown as boolean
-                })).not.toThrow();
-            }
-        );
-    });
+		test.each([undefined, null])(
+			`should not throw err if constructed with undefined or null enabled arg: %p`,
+			value => {
+				expect(
+					() =>
+						new Shortcut({
+							title: 'Something',
+							target: someExecutablePath,
+							enabled: value as unknown as boolean
+						})
+				).not.toThrow();
+			}
+		);
+	});
 });

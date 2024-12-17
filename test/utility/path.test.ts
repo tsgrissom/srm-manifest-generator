@@ -9,7 +9,7 @@ import { setOfNonBooleans, setOfNonStrings, setOfEmptyStrings } from '../resourc
 // TODO beforeAll -> setup()
 // TODO afterAll -> teardown()
 
-// MARK: fn basenameWithoutExtensions
+// MARK: Fn basenameWithoutExtensions
 
 describe('Function: basenameWithoutExtensions', () => {
 
@@ -107,7 +107,7 @@ describe('Function: basenameWithoutExtensions', () => {
 });
 
 
-// MARK: fn normalizeFileExtension
+// MARK: Fn normalizeFileExtension
 
 describe('Function: normalizeFileExtension', () => {
 
@@ -145,7 +145,7 @@ describe('Function: normalizeFileExtension', () => {
 });
 
 
-// MARK: fn pathHasFileExtension
+// MARK: Fn pathHasFileExtension
 
 describe('Function: pathHasFileExtension', () => {
 
@@ -172,7 +172,7 @@ describe('Function: pathHasFileExtension', () => {
 });
 
 
-// MARK: fn replaceFileExtension
+// MARK: Fn replaceFileExtension
 
 describe('Function: replaceFileExtension', () => {
 
