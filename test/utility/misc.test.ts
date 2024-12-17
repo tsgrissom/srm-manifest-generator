@@ -1,6 +1,3 @@
-import assert from 'node:assert';
-import { describe, it } from 'node:test';
-
 import { isProcessRunning } from '../../src/utility/misc.js';
 
 describe('File: utility/misc.js', () => {
@@ -18,8 +15,9 @@ describe('File: utility/misc.js', () => {
             }
         };
 
-        it('should not reject its Promise', async () => {
-            await assert.doesNotReject(isProcessRunning(defaultPlatformOptions)); 
+        test('should not reject its Promise', async () => {
+            await expect(isProcessRunning(defaultPlatformOptions)).resolves.not.toThrow();
+            // await assert.doesNotReject(isProcessRunning(defaultPlatformOptions)); 
         });
     });
 });

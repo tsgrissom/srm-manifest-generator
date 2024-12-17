@@ -1,84 +1,62 @@
-import assert from 'node:assert';
-import { describe, it } from 'node:test';
 import { capitalize, delimitedList, describeQuantity } from '../../src/utility/string';
 
+describe(`Function: capitalize`, () => {
 
-describe('Function: capitalize', () => {
-
-    it('should, when passed an empty string or a string which only contains whitespace, return the given string', async (t) => {
-        const inputs = ['', ' ', '   ', '   '];
-        for (const input of inputs) {
-            await t.test(`Subtest for input: "${input}"`, () => {
-                assert.strictEqual(capitalize(input), input);
-            });
+    test.each([
+        ['', ''],
+        [' ', ' '],
+        ['   ', '   '],
+        ['    ', '    ']
+    ])(
+        'should, when passed an empty string or a string which only contains whitespace, return the given string',
+        (input, expected) => {
+            expect(capitalize(input)).toBe(expected);
         }
-    });
+    )
 
-});
+})
 
-describe('Function: quantityString', () => {
+describe('Function: describeQuantity', () => {
 
-    it.skip('should, when passed a non-number argument to number of things parameter, throw an error', async (t) => {
-        const values = ['Some string', true, false, 'true', '2'];
-        for (const value of values) {
-            await t.test(`Subtest for input=${value}`, () => {
-                // assert.throws(() => quantityString(value));
-            });
+    test.each(['Some string', true, false, 'true', '2'])(
+        'should, when passed a non-number argument to number of things parameter, throw an error',
+        (value) => {
+            expect(() => describeQuantity(value as unknown as number, 'cat')).toThrow();
         }
-    });
+    )
 
-    // TODO: This
-    // TODO: Rephrase last clause in description
-    it('should, when arguments include a plural number of things and no specified plural noun, infer a plural noun', () => {
+})
 
-    });
+describe('Function: delimitedList', () => {
 
-});
-
-describe('Function: getDelimitedList', () => {
-
-    it.skip('should, when given an items arg which is neither an array nor a string, throw an error', async (t) => {
-        const values = [false, 0, 2.5, {}];
-        for (const value of values) {
-            await t.test(`Subtest for arg items=${value}`, () => {
-                // assert.throws(() => delimitedList(value));
-            });
+    test.each([false, 0, 2.5, {}])(
+        'should, when given an items arg which is neither an array nor a string, throw an error',
+        (value) => {
+            expect(() => delimitedList(value as unknown as string[])).toThrow();
         }
-    });
+    )
 
-    it.skip('should, when given an items arg which is a string, return that string', async (t) => {
-        const values = ['Some string', 'Another str', 'Text'];
-        for (const value of values) {
-            // const actual = delimitedList(value);
-            // const expected = value;
-            // await t.test(`Subtest for arg items=${value}`, () => {
-            //     assert.strictEqual(actual, expected);
-            // });
+    test.each([
+        ['string', 'string'],
+        ['another string', 'another string'],
+        [' ', ' ']
+    ])(
+        'should, when given an items arg which is a string, return that string',
+        (input, expected) => {
+            expect(delimitedList(input)).toBe(expected);
         }
+    )
+
+    it('should, when given an empty array as items arg, return an empty string literal', () => {
+        expect(delimitedList([])).toBe('');
     });
 
-    it('should, when given an empty array for items arg, return an empty string literal', () => {
-        const actual = delimitedList([]);
-        const expected = '';
-        assert.strictEqual(actual, expected);
-    });
-
-    it.skip('should, when given a array for items arg which contains a non-string, throw an error', async (t) => {
-        const values = [false, 0, 2.5, [], {}, undefined, null];
-        for (const value of values) {
-            const mockItems = ['a string', 'another', value];
-            await t.test(`Subtest for element of arg items=${value}`, () => {
-                // assert.throws(() => delimitedList(mockItems));
-            });
+    test.each([false, 0, 2.5, [], {}, undefined, null])(
+        'should throw an error when given an items arg which contains a non-string: %p',
+        (value) => {
+          const itemsArg = ['a string', 'another string', value as unknown as string];
+          expect(() => delimitedList(itemsArg)).toThrow();
         }
-    });
-
-    it.skip('should not, when given an array of multiple strings for items arg and a delimiter of string literal ",", return a string that ends in a comma', () => {
-        const delimiter = ',';
-        const result = delimitedList([], delimiter);
-        const actual = result.endsWith(delimiter);
-        const expected = false;
-        assert.strictEqual(actual, expected);
-    });
+    );
 
 });

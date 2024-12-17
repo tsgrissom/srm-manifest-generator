@@ -37,6 +37,7 @@
   "scripts": {
     "postinstall:dirs": "mkdir ./out && mkdir -p ./config/manifest",
     "postinstall": "npm run postinstall:dirs && npm run build:src",
+
     "lint": "eslint . --ignore-pattern \"out/**\" --ignore-pattern \"test/**\"",
     "lint:all": "eslint .",
     "lint:out": "eslint out",
@@ -46,6 +47,7 @@
     "lint:config": "eslint --print-config ./src/index.ts",
     "lint:noignore": "eslint .",
     "lint:nowarn": "eslint --quiet src/",
+
     "start": "tsx ./src/index.ts",
     "start:d": "npm run start:debug",
     "start:v": "npm run start:verbose",
@@ -54,9 +56,11 @@
     "start:loader": "node --loader ts-node/esm ./src/index.ts",
     "start:yaml": "echo \"Not implemented\"",
     "start:yml": "echo \"Not implemented\"",
+
     "clean": "npm run clean:out && npm run clean:tmp",
     "clean:out": "rimraf -g -v \"./out/**/*\"",
     "clean:tmp": "rimraf -g -v \"./test/resource/tmp/**/*\"",
+
     "prebuild": "npm run clean",
     "build": "npm run prebuild && npm run build:out && npm run postbuild",
     "postbuild": "npm run lint:src",
@@ -64,9 +68,10 @@
     "build:nolint": "npm run prebuild && npm run build:out",
     "build:config": "echo \"Not implemented\"",
     "build:out": "tsc --project ./tsconfig.json",
-    "pretest": "npm run clean:tmp",
-    "test": "node --test",
-    "test:debug": "node --test --env-file=.env/debug.env"
+    "pretest": "npm run clean && npm run build:out",
+    
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:debug": "node --experimental-vm-modules --env-file=.env/debug.env node_modules/jest/bin/jest.js"
   },
   "packageManager": "pnpm@9.13.2+sha512.88c9c3864450350e65a33587ab801acf946d7c814ed1134da4a924f6df5a2120fd36b46aab68f7cd1d413149112d53c7db3a4136624cfd00ff1846a0c6cef48a",
   "dependencies": {
@@ -75,13 +80,19 @@
     "yaml": "^2.6.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
     "@eslint/js": "^9.14.0",
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.10.1",
     "@types/tmp": "^0.2.6",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
+    "babel-jest": "^29.7.0",
     "eslint": "^9.16.0",
     "globals": "^15.11.0",
+    "jest": "^29.7.0",
     "prettier": "^3.4.2",
     "prettier-plugin-organize-imports": "^4.1.0",
     "rimraf": "^6.0.1",

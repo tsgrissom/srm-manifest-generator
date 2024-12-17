@@ -5,7 +5,7 @@ import ts from 'typescript-eslint';
 export default ts.config(
   {
     // config with just ignores is the replacement for `.eslintignore`
-    ignores: ['*.config.mjs', 'dist/**/*.js', 'out/**/*.js']
+    ignores: ['*.config.mjs', 'dist/**/*.js', 'out/**/*.js', 'test/**/*.ts']
   },
   js.configs.recommended,
   ts.configs.recommendedTypeChecked,
