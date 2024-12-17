@@ -23,10 +23,16 @@ class Shortcut implements ShortcutData {
 	constructor(data: ShortcutData, config?: UserConfig) {
 		// TODO Accept config in constructor, check validity of executable
 
+		if (data.title.trim() === '') {
+			throw new Error(
+				`Cannot construct Shortcut from ShortcutData with empty or whitespace-only title: "${data.title}"`
+			);
+		}
+
 		this.config = config;
 		this.title = data.title;
 		this.target = data.target;
-		this.enabled = data.enabled;
+		this.enabled = data.enabled ?? true;
 
 		if (process.argv.includes('--list-shortcuts')) {
 			clog(clr.blue.underline(`LOADED SHORTCUT: ${quote(this.title)}`));

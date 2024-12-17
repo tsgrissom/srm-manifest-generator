@@ -36,7 +36,7 @@
   },
   "scripts": {
     "postinstall": "npm run build:out",
-    "lint": "eslint . --ignore-pattern \"out/**\" --ignore-pattern \"test/**\"",
+    "lint": "eslint . --ignore-pattern \"out/**\"",
     "lint:all": "eslint .",
     "lint:out": "eslint out",
     "lint:src": "eslint src",
@@ -63,7 +63,7 @@
     "build:config": "echo \"Not implemented\"",
     "build:out": "tsc --project ./tsconfig.json",
     "pretest": "npm run clean && npm run build:out",
-    "test": "node --no-warnings --experimental-vm-modules --require ts-node/register node_modules/jest/bin/jest.js --verbose",
+    "test": "node --no-warnings --experimental-vm-modules --require ts-node/register node_modules/jest/bin/jest.js",
     "test:verbose": "npm run test -- --verbose",
     "test:v": "npm run test:verbose"
   },

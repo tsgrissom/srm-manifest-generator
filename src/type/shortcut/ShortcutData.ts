@@ -9,7 +9,7 @@ import ShortcutExportData from './ShortcutExportData';
 interface ShortcutData extends ShortcutExportData {
 	title: string;
 	target: string;
-	enabled: boolean;
+	enabled?: boolean;
 }
 
 export default ShortcutData;

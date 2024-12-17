@@ -1,33 +1,43 @@
 import path from 'node:path';
-import fs from 'node:fs';
 
 import mockFs from 'mock-fs';
 import FileSystem from 'mock-fs/lib/filesystem';
+import tmp from 'tmp';
+import yaml from 'yaml';
+
+import ManifestData from '../../src/type/manifest/ManifestData';
+import Shortcut from '../../src/type/shortcut/Shortcut';
+import ShortcutData from '../../src/type/shortcut/ShortcutData';
 
 const resourceDir = 'test/resource/Shortcut';
+const pathSubdirManBaseDir = path.join(resourceDir, 'mockBaseDir');
+const pathSubdirManOutputDir = path.join(resourceDir, 'mockOutputDir');
+
+// TODO This could be DRYer
+
+let pathManFileOk: string;
 
 beforeEach(() => {
-    // const config: FileSystem.DirectoryItems = {
-    //         'test/resource/tmp': {
-    //             'manifests': {
-    //                 'generic-valid.manifest.yml': 'valid mandata here',
-    //                 'generic-invalid.manifest.yml': 'invalid mandata here',
-    //                 'non-existent.manifest.yml': '',
-    //                 'empty.manifest.yml': '',
-    //                 'no-name-attribute.manifest.yml': 'no name attr mandata here'
-    //             },
-    //             'executables': {
-    //                 'valid-executable.exe': 'some valid exe data',
-    //                 'invalid-executable.txt': 'some invalid data'
-    //             },
-    //             'root': {},
-    //             'output': {},
-    //         }
-    //     };
+    const scDataGenOk: ShortcutData = {
+        title: 'Some Game',
+        target: 'Some Path/Relative/To/Base/Dir/to/Game.exe',
+        enabled: true
+    }
+    
+    const scGenOk = new Shortcut(scDataGenOk);
+
+    const manFileContentsGenOk: ManifestData = {
+        sourceName: 'generic-ok',
+        baseDirectory: pathSubdirManBaseDir,
+        outputPath: pathSubdirManOutputDir,
+        shortcuts: [scGenOk]
+    }
 
     const config: FileSystem.DirectoryItems = {
         'test/resource/Shortcut': {
-
+            'manifests': {
+                'generic-ok.manifest.yml': yaml.stringify(manFileContentsGenOk)
+            }
         }
     };
 
@@ -38,6 +48,40 @@ afterEach(() => {
     mockFs.restore();
 });
 
-test('1+2=3', () => {
-    expect(1 + 2).toBe(3);
-})
+describe('Class: Shortcut', () => {
+    const someExecutablePath = tmp.tmpNameSync({ prefix: 'some-executable', postfix: '.exe' });
+    const scDataGenOk: ShortcutData = {
+        title: 'Some Title',
+        target: someExecutablePath,
+        enabled: true
+    };
+    const scDataEmptyTitle: ShortcutData = {
+        title: '',
+        target: someExecutablePath,
+        enabled: true
+    };
+
+    describe('Constructor', () => {
+        it(
+            `should throw err if constructed from data which has an empty title: (Title: "${scDataEmptyTitle.title}")`,
+            () => {
+                expect(() => new Shortcut(scDataEmptyTitle)).toThrow();
+            }
+        );
+
+        it('should not throw err if constructed with undefined config arg', () => {
+            expect(() => new Shortcut(scDataGenOk, undefined)).not.toThrow();
+        });
+
+        test.each([undefined, null])(
+            `should not throw err if constructed with undefined or null enabled arg: %p`,
+            value => {
+                expect(() => new Shortcut({
+                    title: 'Something',
+                    target: someExecutablePath,
+                    enabled: value as unknown as boolean
+                })).not.toThrow();
+            }
+        );
+    });
+});

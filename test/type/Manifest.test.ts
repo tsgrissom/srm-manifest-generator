@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
 
-import mockfs from 'mock-fs';
+import mockFs from 'mock-fs';
 import FileSystem from 'mock-fs/lib/filesystem';
 
 const resourceDir = 'test/resource/Manifest';
@@ -47,11 +47,11 @@ beforeEach(() => {
     resourceFileManOk = path.join(resourceSubdirManifests, 'generic-valid.manifest.yml');
     resourceFileManBad = path.join(resourceSubdirManifests, 'generic-invalid.manifest.yml');
 
-    mockfs(config);
+    mockFs(config);
 });
 
 afterEach(() => {
-    mockfs.restore();
+    mockFs.restore();
 })
 
 test('mock fs should be created', () => {
