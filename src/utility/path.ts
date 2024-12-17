@@ -140,12 +140,20 @@ export function normalizeFileExtension(
 	extname: string,
 	excludeExts: string | string[] = ['*']
 ): string {
-	if (typeof extname !== 'string')
+	if (typeof extname !== 'string') {
 		throw new TypeError(`Arg extname must be a string: ${extname}`);
-	if (typeof excludeExts !== 'string' && !Array.isArray(excludeExts))
+	}
+
+	if (typeof excludeExts !== 'string' && !Array.isArray(excludeExts)) {
 		throw new TypeError(
-			`Arg excludeExtensions must be a string or a string array: ${excludeExts}`
+			`Arg excludeExts must be a string or a string array: ${excludeExts}`
 		);
+	}
+	if (Array.isArray(excludeExts) && !excludeExts.every(value => typeof value === 'string')) {
+		throw new TypeError(
+			`If arg excludeExts is an array, every element of it must be a string (at least one was a non-string): ${excludeExts}`
+		);
+	}
 
 	if (typeof excludeExts === 'string') {
 		if (excludeExts === '') {
@@ -178,14 +186,22 @@ export function basenameWithoutExtensions(
 	extsToRemove: string | string[],
 	iterate = false
 ): string {
-	if (typeof fileName !== 'string')
-		throw new TypeError(`Arg "fileName" must be a string: ${fileName}`);
-	if (typeof extsToRemove !== 'string' && !Array.isArray(extsToRemove))
+	if (typeof fileName !== 'string') {
+		throw new TypeError(`Arg fileName must be a string: ${fileName}`);
+	}
+	if (typeof extsToRemove !== 'string' && !Array.isArray(extsToRemove)) {
 		throw new TypeError(
-			`Arg "extensionsToRemove" must be a string or an array of strings: ${extsToRemove}`
+			`Arg extsToRemove must be a string or an array of strings: ${extsToRemove}`
 		);
-	if (typeof iterate !== 'boolean')
-		throw new TypeError(`Arg "iterate" must be a boolean: ${iterate}`);
+	}
+	if (Array.isArray(extsToRemove) && !extsToRemove.every(each => typeof each === 'string')) {
+		throw new TypeError(
+			`If arg extsToRemove is an array, every element of the array must be a string, but at least one was not: ${extsToRemove}`
+		)
+	}
+	if (typeof iterate !== 'boolean') {
+		throw new TypeError(`Arg iterate must be a boolean: ${iterate}`);
+	}
 
 	if (!Array.isArray(extsToRemove))
 		// TEST Unit

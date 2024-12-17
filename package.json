@@ -58,8 +58,8 @@
     "start:yml": "echo \"Not implemented\"",
 
     "clean": "npm run clean:out && npm run clean:tmp",
-    "clean:out": "rimraf -g -v \"./out/**/*\"",
-    "clean:tmp": "rimraf -g -v \"./test/resource/tmp/**/*\"",
+    "clean:out": "rimraf -g \"./out/**/*\"",
+    "clean:tmp": "rimraf -g \"./test/resource/tmp/**/*\"",
 
     "prebuild": "npm run clean",
     "build": "npm run prebuild && npm run build:out && npm run postbuild",
@@ -68,10 +68,11 @@
     "build:nolint": "npm run prebuild && npm run build:out",
     "build:config": "echo \"Not implemented\"",
     "build:out": "tsc --project ./tsconfig.json",
+
     "pretest": "npm run clean && npm run build:out",
-    
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "test:debug": "node --experimental-vm-modules --env-file=.env/debug.env node_modules/jest/bin/jest.js"
+    "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:verbose": "npm run test -- --verbose",
+    "test:v": "npm run test:verbose"
   },
   "packageManager": "pnpm@9.13.2+sha512.88c9c3864450350e65a33587ab801acf946d7c814ed1134da4a924f6df5a2120fd36b46aab68f7cd1d413149112d53c7db3a4136624cfd00ff1846a0c6cef48a",
   "dependencies": {
