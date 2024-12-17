@@ -100,16 +100,21 @@ describe('Class: Manifest', () => {
     });
 
     describe('Method: hasNameAttribute()', () => {
-
-        it('should, when instance constructed from valid manifest file, return true', () => {
-            expect(manOk.hasNameAttribute()).toBe(true);
+		// it('should, when instance constructed from valid manifest file, return true', () => {
+		//     expect(manOk.hasNameAttribute()).toBe(true);
+		// });
+		// it('should, when instance constructed from manifest that has no name attribute, return false', () => {
+		//     expect(manNoNameAttr.hasNameAttribute()).toBe(false);
+        // });
+        
+		it('should be true when constructed from valid manifest', () => {
+			expect(manOk.hasNameAttribute()).toBe(true);
 		});
 
-        it('should, when instance constructed from manifest that has no name attribute, return false', () => {
-            expect(manNoNameAttr.hasNameAttribute()).toBe(false);
+		it('should be false when constructed from no name attribute manifest', () => {
+			expect(manNoNameAttr.hasNameAttribute()).toBe(false);
 		});
-
-    });
+	});
 
     describe('Method: getFileBasename()', () => {
         it('should return a string not equal to the original file path of the source manifest file', () => {

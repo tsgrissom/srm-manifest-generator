@@ -4,7 +4,7 @@ import { setOfEmptyStrings, setOfWhitespaceStrings } from '../resource/test-valu
 describe('Function: isCapitalized', () => {
 
     test.each(setOfEmptyStrings)(
-        'should return false when given an empty string',
+        'returns false given empty str',
         value => {
             expect(isCapitalized(value)).toBe(false);
         }
@@ -13,7 +13,7 @@ describe('Function: isCapitalized', () => {
     test.each([
         'string', '2nd', ' some string'
     ])(
-        'should return false when given an uncapitalized string',
+        'returns false given an uncapitalized str',
         value => {
             expect(isCapitalized(value)).toBe(false);
         }
@@ -22,7 +22,7 @@ describe('Function: isCapitalized', () => {
     test.each([
         'String', 'A string'
     ])(
-        'should return true when given a capitalize dstring',
+        'returns true given a capitalized str',
         value => {
             expect(isCapitalized(value)).toBe(true);
         }
@@ -37,7 +37,7 @@ describe('Function: isCapitalized', () => {
     test.each(
         setOfUncapitalizedLeadingWhitespaceStrings
     )(
-        'should return false when trim start is enabled and given a uncapitalized string padded with leading whitespace: %p',
+        'returns false given an uncapitalized str w/ leading whitespace + trim start enabled',
         value => {
             expect(isCapitalized(value, true)).toBe(false);
         }
@@ -46,7 +46,7 @@ describe('Function: isCapitalized', () => {
     test.each(
         setOfCapitalizedLeadingWhitespaceStrings
     )(
-        'should return false when trim start is enabled and given a uncapitalized string padded with leading whitespace: %p',
+        'returns true given a capitalized str w/ leading whitespace + trim start enabled',
         value => {
             expect(isCapitalized(value, true)).toBe(true);
         }
@@ -62,7 +62,7 @@ describe(`Function: capitalize`, () => {
         ['   ', '   '],
         ['    ', '    ']
     ])(
-        'should, when passed an empty string or a string which only contains whitespace, return the given string',
+        'returns given str when it is empty or only whitespace',
         (input, expected) => {
             expect(capitalize(input)).toBe(expected);
         }
@@ -73,7 +73,7 @@ describe(`Function: capitalize`, () => {
 describe('Function: describeQuantity', () => {
 
     test.each(['Some string', true, false, 'true', '2'])(
-        'should, when passed a non-number argument to number of things parameter, throw an error',
+        'throws err given non-number number of things arg',
         value => {
             expect(() => describeQuantity(value as unknown as number, 'cat')).toThrow();
         }
@@ -84,8 +84,8 @@ describe('Function: describeQuantity', () => {
 describe('Function: delimitedList', () => {
 
     test.each([false, 0, 2.5, {}])(
-        'should, when given an items arg which is neither an array nor a string, throw an error',
-        (value) => {
+        'throws err given non-array, non-str arg to items param',
+        value => {
             expect(() => delimitedList(value as unknown as string[])).toThrow();
         }
     )
@@ -95,19 +95,19 @@ describe('Function: delimitedList', () => {
         ['another string', 'another string'],
         [' ', ' ']
     ])(
-        'should, when given an items arg which is a string, return that string',
+        'returns given str when passed to items param',
         (input, expected) => {
             expect(delimitedList(input)).toBe(expected);
         }
     )
 
-    it('should, when given an empty array as items arg, return an empty string literal', () => {
-        expect(delimitedList([])).toBe('');
-    });
+    it('should return empty str given empty array arg to items param', () => {
+		expect(delimitedList([])).toBe('');
+	});
 
     test.each([false, 0, 2.5, [], {}, undefined, null])(
-        'should throw an error when given an items arg which contains a non-string: %p',
-        (value) => {
+        'throws err given items param which contains a non-str: %p',
+        value => {
           const itemsArg = ['a string', 'another string', value as unknown as string];
           expect(() => delimitedList(itemsArg)).toThrow();
         }
