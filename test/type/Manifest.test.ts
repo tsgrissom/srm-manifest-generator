@@ -20,36 +20,53 @@ const pathSubdirManOutputDir = path.join(resourceDir, 'outputDir');
 
 // TODO Whole thing could probably be more DRY?
 
-const pathExecFileOkExt = path.join(pathSubdirExecutables, 'ok-executable-ext.exe');
 // const pathExecFileBadExt = path.join(pathSubdirExecutables, 'bad-executable-ext.txt');
-const pathManFileOk  = path.join(pathSubdirManifests, 'ok-manifest.manifest.yml');
-const pathManFileBad = path.join(pathSubdirManifests, 'bad-manifest.manifest.yml');
+// const pathManFileBad = path.join(pathSubdirManifests, 'bad-manifest.manifest.yml');
+const pathExecFileOkExt = path.join(pathSubdirExecutables, 'ok-executable-ext.exe');
+const pathManFileOk = path.join(pathSubdirManifests, 'ok-manifest.manifest.yml');
+const pathManFileNoNameAttr = path.join(pathSubdirManifests, 'no-name-attribute.manifest.yml');
+// TODO Manifest with empty file contents
+// TODO Manifest which has bad ext, bad contents, etc.
+
+
+const shortcutDataOk: ShortcutData = {
+    title: 'A Fake Game',
+    target: pathExecFileOkExt
+}
+
+const shortcutsOk: Shortcut[] = [
+    new Shortcut(shortcutDataOk)
+];
+
+const manDataOk: ManifestData = {
+    sourceName: basenameWithoutExtensions(pathManFileOk, '*'),
+    baseDirectory: pathSubdirManBaseDir,
+    outputPath: pathSubdirManOutputDir,
+    shortcuts: shortcutsOk
+};
+
+const manDataNoNameAttr: ManifestData = {
+    sourceName: '',
+    baseDirectory: pathSubdirManBaseDir,
+    outputPath: pathSubdirManOutputDir,
+    shortcuts: shortcutsOk
+};
 
 let manOk: Manifest;
+let manNoNameAttr: Manifest;
 
 beforeEach(() => {
 
     // TODO Construct the rest of the test data
-
-    const shortcutDataOk: ShortcutData = {
-        title: 'A Fake Game',
-        target: pathExecFileOkExt
-    }
-    const manDataOk: ManifestData = {
-        sourceName: basenameWithoutExtensions(pathManFileOk, '.yml'),
-        baseDirectory: pathSubdirManBaseDir,
-        outputPath: pathSubdirManOutputDir,
-        shortcuts: [new Shortcut(shortcutDataOk)]
-    }
     
     const config: FileSystem.DirectoryItems = {
         'test/resource/Manifest': {
             'manifests': {
                 'ok-manifest.manifest.yml': yaml.stringify(manDataOk),
                 'bad-manifest.manifest.yml': 'invalid mandata here',
-                'non-existent.manifest.yml': '',
+                // 'non-existent.manifest.yml': '',
                 'empty.manifest.yml': '',
-                'no-name-attribute.manifest.yml': 'no name attr mandata here'
+                'no-name-attribute.manifest.yml': yaml.stringify(manDataNoNameAttr)
             },
             'executables': {
                 'ok-executable-ext.exe': 'some valid exe data',
@@ -60,7 +77,8 @@ beforeEach(() => {
         }
     };
 
-    manOk = new Manifest(path.join(pathSubdirManifests, 'ok-manifest.manifest.yml'), manDataOk);
+    manOk = new Manifest(pathManFileOk, manDataOk);
+    manNoNameAttr = new Manifest(pathManFileNoNameAttr, manDataNoNameAttr);
 
     mockFs(config);
 });
@@ -73,15 +91,25 @@ test('mock fs should be created', () => {
     // expect(fs.existsSync(pathFileExecOk)).toBe(true);
     // expect(fs.existsSync(pathFileExecBad)).toBe(true);
     expect(fs.existsSync(pathManFileOk)).toBe(true);
-    expect(fs.existsSync(pathManFileBad)).toBe(true);
+    expect(fs.existsSync(pathManFileNoNameAttr)).toBe(true);
 });
 
 describe('Class: Manifest', () => {
     
     describe('Constructor', () => {
-        it('Should throw err when constructed based on a non-existent source manifest file', () => {
+        // TODO Tests
+    });
 
-        });
+    describe('Method: hasNameAttribute()', () => {
+
+        it('should, when instance constructed from valid manifest file, return true', () => {
+            expect(manOk.hasNameAttribute()).toBe(true);
+		});
+
+        it('should, when instance constructed from manifest that has no name attribute, return false', () => {
+            expect(manNoNameAttr.hasNameAttribute()).toBe(false);
+		});
+
     });
 
     describe('Method: getFileBasename()', () => {
@@ -90,6 +118,31 @@ describe('Class: Manifest', () => {
             const filePath = path.join(pathSubdirManifests, 'ok-manifest.manifest.yml')
             expect(fileBasename).not.toBe(filePath);
         });
+    });
+
+    describe('Method: getName()', () => {
+
+        test.each(['Something', 'Another', 'A Manifest'])(
+            'should, when instance constructed from an ok manifest with the given sourceName value, return the same value',
+            value => {
+                const data: ManifestData = {
+                    sourceName: value,
+                    baseDirectory: manDataOk.baseDirectory,
+                    outputPath: manDataOk.outputPath,
+                    shortcuts: manDataOk.shortcuts
+                }
+                const inst = new Manifest(pathManFileOk, data);
+                
+                expect(inst.getName()).toBe(value);
+            }
+        )
+
+        it('should, when instance constructed from an ok manifest with no name attribute, return the basename without exts of the fileName', () => {
+            const actual = manNoNameAttr.getName();
+            const expected = basenameWithoutExtensions(manNoNameAttr.filePath, '*', true);
+            expect(actual).toBe(expected);
+        });
+
     });
 
 });

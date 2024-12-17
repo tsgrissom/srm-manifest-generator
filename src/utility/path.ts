@@ -183,11 +183,13 @@ export function normalizeFileExtension(
  */
 export function basenameWithoutExtensions(
 	fileName: string,
-	extsToRemove: string | string[],
-	iterate = false
+	extsToRemove: string | string[] = '*',
+	iterate = true
 ): string {
 	if (typeof fileName !== 'string') {
-		throw new TypeError(`Arg fileName must be a string: ${fileName}`);
+		throw new TypeError(
+			`Arg fileName must be a string: ${fileName}`
+		);
 	}
 	if (typeof extsToRemove !== 'string' && !Array.isArray(extsToRemove)) {
 		throw new TypeError(

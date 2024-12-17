@@ -31,7 +31,7 @@ describe('Function: basenameWithoutExtensions', () => {
 
 
     // MARK: param extsToRemove
-    test.each([null, undefined, NaN, 42, 3.14, {}])(
+    test.each([null, NaN, 42, 3.14, {}])(
         `should throw err when param extsToRemove passed an arg which is neither string nor string[]: %p`,
         value => {
             expect(() => basenameWithoutExtensions(

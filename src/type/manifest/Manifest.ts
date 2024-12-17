@@ -1,4 +1,4 @@
-import fs from 'node:fs/promises';
+import fs from 'node:fs';
 import path from 'node:path';
 
 import clr from 'chalk';
@@ -179,7 +179,7 @@ class Manifest implements ManifestData {
 		}
 
 		try {
-			await fs.writeFile(writePath, writeData);
+			await fs.promises.writeFile(writePath, writeData);
 			dlog(
 				` ${SB_OK_LG} Wrote Manifest to file ${fmtPathAsTag(this.filePath)}`,
 				` > Source File: ${fmtPath(this.filePath)}`,
