@@ -3,6 +3,7 @@ import { isDebugActive } from './debug';
 // MARK: GRAMMATICAL
 
 // TODO jsdoc
+// TODO trimStart option
 // TEST Unit
 export const capitalize = (s: string): string => {
 	if (s.trim() === '' || s.length < 1) return s;
@@ -18,9 +19,19 @@ export const capitalize = (s: string): string => {
 };
 
 // TODO jsdoc
-// TEST Unit
-export const isCapitalized = (s: string): boolean => {
-	if (s.trim() === '') return false;
+// TODO Consider edge cases: Unicode, escape chars, non-alphabetic characters
+export const isCapitalized = (
+	s: string,
+	trimStart = false
+): boolean => {
+	if (s.trim() === '') {
+		return false;
+	} else {
+		if (trimStart) {
+			s = s.trimStart();
+		}
+	}
+
 	const firstChar = s.substring(0, 1);
 	return firstChar.toLowerCase() !== firstChar;
 };

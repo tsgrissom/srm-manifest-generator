@@ -28,7 +28,6 @@ const pathManFileNoNameAttr = path.join(pathSubdirManifests, 'no-name-attribute.
 // TODO Manifest with empty file contents
 // TODO Manifest which has bad ext, bad contents, etc.
 
-
 const shortcutDataOk: ShortcutData = {
     title: 'A Fake Game',
     target: pathExecFileOkExt

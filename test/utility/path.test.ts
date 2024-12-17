@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { basenameWithoutExtensions, normalizeFileExtension, pathHasFileExtension, replaceFileExtension } from '../../src/utility/path';
-import { setOfNonBooleans, setOfNonStrings, setOfWhitespaceStrings } from '../resource/test-values';
+import { setOfNonBooleans, setOfNonStrings, setOfEmptyStrings } from '../resource/test-values';
 
 // TODO fn setup
 // TODO fn teardown
@@ -160,7 +160,7 @@ describe('Function: pathHasFileExtension', () => {
 
     // Param: fileExt
 
-    test.each(setOfWhitespaceStrings)(
+    test.each(setOfEmptyStrings)(
         'should throw err when param fileExt passed an empty string: %p',
         (value) => {
             expect(() => pathHasFileExtension('manifest.yml', value as unknown as string)).toThrow();
@@ -177,7 +177,7 @@ describe('Function: pathHasFileExtension', () => {
 describe('Function: replaceFileExtension', () => {
 
     // Param: findExt
-    test.each(setOfWhitespaceStrings)(
+    test.each(setOfEmptyStrings)(
         'should throw err when param findExt passed an empty string: %p',
         (value) => {
             expect(() => replaceFileExtension('manifest.yml', value, '.json'));
