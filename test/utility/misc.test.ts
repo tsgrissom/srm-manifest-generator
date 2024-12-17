@@ -13,7 +13,7 @@ describe('Function: isProcessRunning', () => {
         }
     };
 
-    test('should not reject its Promise', async () => {
+    test('does not reject its Promise', async () => {
         await expect(isProcessRunning(defaultPlatformOptions)).resolves.not.toThrow();
         // await assert.doesNotReject(isProcessRunning(defaultPlatformOptions)); 
     });

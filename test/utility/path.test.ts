@@ -14,17 +14,16 @@ import { setOfNonBooleans, setOfNonStrings, setOfEmptyStrings } from '../resourc
 describe('Function: basenameWithoutExtensions', () => {
 
     const okFileName = 'manifest.yml';
-    const okSingleExtsToRemove = '.yml';
-    const okMultipleExtsToRemove = ['.yml', '.yaml'];
+    const okExtsToRemove = ['.yml', '.yaml'];
     const okFilenamesWithExtensions = ['Manifest.example.yml', 'Something.yml', 'Some Filename.yml'];
 
     // MARK: param fileName
     test.each(setOfNonStrings)(
-        'should throw err when param fileName passed a non-string: %p',
+        'throws err when non-string fileName arg: %p',
         value => {
             expect(() => basenameWithoutExtensions(
                 value as unknown as string,
-                okMultipleExtsToRemove
+                okExtsToRemove
             )).toThrow();
         }
     );
@@ -32,7 +31,7 @@ describe('Function: basenameWithoutExtensions', () => {
 
     // MARK: param extsToRemove
     test.each([null, NaN, 42, 3.14, {}])(
-        `should throw err when param extsToRemove passed an arg which is neither string nor string[]: %p`,
+        'throws err when non-str, non-str array extsToRemove arg: %p',
         value => {
             expect(() => basenameWithoutExtensions(
                 okFileName,
@@ -48,7 +47,7 @@ describe('Function: basenameWithoutExtensions', () => {
         [['string1', 'string2', false]], // mixed array with boolean
         [['string1', 'string2', {}]] // mixed array with an object
     ])(
-        'should throw err when param extsToRemove passed a mixed-type array: %p',
+        'throws err when mixed-type array extsToRemove arg: %p',
         value => {
             expect(() => basenameWithoutExtensions(
                 okFileName,
@@ -60,11 +59,11 @@ describe('Function: basenameWithoutExtensions', () => {
 
     // MARK: param iterate
     test.each(setOfNonBooleans)(
-        'should throw err when param iterate passed a non-boolean: %p',
+        'throws err when non-boolean iterate arg: %p',
         value => {
             expect(() => basenameWithoutExtensions(
                 okFileName,
-                okMultipleExtsToRemove,
+                okExtsToRemove,
                 value as unknown as boolean
             )).toThrow();
         }
@@ -83,7 +82,7 @@ describe('Function: basenameWithoutExtensions', () => {
         }
         // TODO: More cases
     ])(
-        'should, when given a valid sample case, equal expected',
+        'returns expected given valid manifest file name',
         ({ params, expected }) => {
             const result = basenameWithoutExtensions(
                 params.fileName,
@@ -95,7 +94,7 @@ describe('Function: basenameWithoutExtensions', () => {
     );
 
     test.each(okFilenamesWithExtensions)(
-        'should, when param fileName given ok filenames with extensions, and param extsToRemove given wildcard string literal, should return a string whose path.extname value equals an empty string literal',
+        'returns str whose path.basename equals empty str when filenames w/ exts given as fileName arg + wildcard given as extsToRemove arg',
         value => {
             const result = basenameWithoutExtensions(value, '*', true);
             const actual = path.extname(result);
@@ -113,7 +112,7 @@ describe('Function: normalizeFileExtension', () => {
 
     // MARK: param extname
     test.each(setOfNonStrings)(
-        'should throw err when param extname passed a non-string',
+        'throws err when param extname passed a non-str',
         (value) => {
             expect(
                 () => normalizeFileExtension(value as unknown as string)
@@ -129,14 +128,14 @@ describe('Function: normalizeFileExtension', () => {
         ['json', '.json'],
         ['jsonc', '.jsonc']
     ])(
-        'should return given extname with a period prepended to it when param extname passed string which lacks period prefix: %p',
+        'returns given str w/ prepended period char when extname given str w/o period prefix: %p',
         (input, expected) => {
             expect(normalizeFileExtension(input)).toBe(expected);
         }
     );
 
     test.each(['.yml', '.yaml', '.json', '.jsonc'])(
-        'should return given extname when param extname passed string which already has a period prefix: %p',
+        'returns given str when extname given str w/ period prefix: %p',
         (value) => {
             expect(normalizeFileExtension(value)).toBe(value);
         }
@@ -152,7 +151,7 @@ describe('Function: pathHasFileExtension', () => {
     // Param: fileName
 
     test.each(setOfNonStrings)(
-        'should throw err when param filePath passed a non-string: %p',
+        'throws err when non-str filePath arg: %p',
         (value) => {
             expect(() => pathHasFileExtension(value as unknown as string)).toThrow();
         }
@@ -161,7 +160,7 @@ describe('Function: pathHasFileExtension', () => {
     // Param: fileExt
 
     test.each(setOfEmptyStrings)(
-        'should throw err when param fileExt passed an empty string: %p',
+        'throws err when empty str fileExt arg: %p',
         (value) => {
             expect(() => pathHasFileExtension('manifest.yml', value as unknown as string)).toThrow();
         }
@@ -178,7 +177,7 @@ describe('Function: replaceFileExtension', () => {
 
     // Param: findExt
     test.each(setOfEmptyStrings)(
-        'should throw err when param findExt passed an empty string: %p',
+        'throws err when empty str findExt arg: %p',
         (value) => {
             expect(() => replaceFileExtension('manifest.yml', value, '.json'));
         }
@@ -186,7 +185,7 @@ describe('Function: replaceFileExtension', () => {
 
     // Param: replaceExt
     test.each(setOfNonStrings)(
-        'should throw err when param replaceExt passed a non-string: %p',
+        'throws err when non-str replaceExt arg: %p',
         (value) => {
             expect(() => replaceFileExtension(
                 'manifest.yml',
@@ -198,7 +197,7 @@ describe('Function: replaceFileExtension', () => {
 
     // Param: normalize
     test.each(setOfNonBooleans)(
-        'should throw err when param normalize: %p',
+        'throws err when non-boolean normalize arg: %p',
         (value) => {
             expect(() => replaceFileExtension(
                 'manifest.yml',

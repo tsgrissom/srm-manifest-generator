@@ -39,7 +39,7 @@ describe('Function: isCapitalized', () => {
     test.each(
         setOfUncapitalizedLeadingWhitespaceStrings
     )(
-        'returns false given an uncapitalized str w/ leading whitespace + trim start enabled',
+        'returns false given uncapitalized str w/ leading whitespace + trim start enabled',
         value => {
             expect(isCapitalized(value, true)).toBe(false);
         }
@@ -48,7 +48,7 @@ describe('Function: isCapitalized', () => {
     test.each(
         setOfCapitalizedLeadingWhitespaceStrings
     )(
-        'returns true given a capitalized str w/ leading whitespace + trim start enabled',
+        'returns true given capitalized str w/ leading whitespace + trim start enabled',
         value => {
             expect(isCapitalized(value, true)).toBe(true);
         }
@@ -66,7 +66,7 @@ describe(`Function: capitalize`, () => {
         ['   ', '   '],
         ['    ', '    ']
     ])(
-        'returns given str when it is empty or only whitespace',
+        'returns given str when empty or only whitespace',
         (input, expected) => {
             expect(capitalize(input)).toBe(expected);
         }
@@ -79,7 +79,7 @@ describe(`Function: capitalize`, () => {
 describe('Function: describeQuantity', () => {
 
     test.each(['Some string', true, false, 'true', '2'])(
-        'throws err given non-number number of things arg',
+        'throws err when non-number number of things arg',
         value => {
             expect(() => describeQuantity(value as unknown as number, 'cat')).toThrow();
         }
@@ -92,7 +92,7 @@ describe('Function: describeQuantity', () => {
 describe('Function: delimitedList', () => {
 
     test.each([false, 0, 2.5, {}])(
-        'throws err given non-array, non-str arg to items param',
+        'throws err when non-array, non-str items arg',
         value => {
             expect(() => delimitedList(value as unknown as string[])).toThrow();
         }
@@ -103,18 +103,18 @@ describe('Function: delimitedList', () => {
         ['another string', 'another string'],
         [' ', ' ']
     ])(
-        'returns given str when passed to items param',
+        'returns given str when passed as items arg',
         (input, expected) => {
             expect(delimitedList(input)).toBe(expected);
         }
     )
 
-    it('should return empty str given empty array arg to items param', () => {
+    it('returns empty str when empty array items arg', () => {
 		expect(delimitedList([])).toBe('');
 	});
 
     test.each([false, 0, 2.5, [], {}, undefined, null])(
-        'throws err given items param which contains a non-str: %p',
+        'throws err when array items arg contains a non-str: %p',
         value => {
           const itemsArg = ['a string', 'another string', value as unknown as string];
           expect(() => delimitedList(itemsArg)).toThrow();

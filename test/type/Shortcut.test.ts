@@ -62,16 +62,17 @@ describe('Class: Shortcut', () => {
     // MARK: Constructor
 
 	describe('Constructor', () => {
-		it(`should throw err if constructed from data which has an empty title: (Title: "${scDataEmptyTitle.title}")`, () => {
+
+		it(`throws err if from data w/ empty title: (Title: "${scDataEmptyTitle.title}")`, () => {
 			expect(() => new Shortcut(scDataEmptyTitle)).toThrow();
 		});
 
-		it('should not throw err if constructed with undefined config arg', () => {
+		it('does not throw err if instantiated with undefined config arg', () => {
 			expect(() => new Shortcut(scDataGenOk, undefined)).not.toThrow();
 		});
 
 		test.each([undefined, null])(
-			`should not throw err if constructed with undefined or null enabled arg: %p`,
+			`does not throw err if instantiated w/ undefined or null enabled arg: %p`,
 			value => {
 				expect(
 					() =>
@@ -83,5 +84,6 @@ describe('Class: Shortcut', () => {
 				).not.toThrow();
 			}
 		);
+		
 	});
 });

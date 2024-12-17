@@ -106,37 +106,40 @@ describe('Class: Manifest', () => {
 	// MARK: Mtd hasNameAttribute
 
 	describe('Method: hasNameAttribute()', () => {
-		// it('should, when instance constructed from valid manifest file, return true', () => {
-		//     expect(manOk.hasNameAttribute()).toBe(true);
-		// });
-		// it('should, when instance constructed from manifest that has no name attribute, return false', () => {
-		//     expect(manNoNameAttr.hasNameAttribute()).toBe(false);
-		// });
 
-		it('should be true when constructed from valid manifest', () => {
+		it('returns true when valid manifest', () => {
 			expect(manOk.hasNameAttribute()).toBe(true);
 		});
 
-		it('should be false when constructed from no name attribute manifest', () => {
+		it('returns false when no name attribute manifest', () => {
 			expect(manNoNameAttr.hasNameAttribute()).toBe(false);
 		});
+
 	});
 
 	// MARK: Mtd getFileBasename
 
 	describe('Method: getFileBasename()', () => {
-		it('should return a string not equal to the original file path of the source manifest file', () => {
+		// it('should return a string not equal to the original file path of the source manifest file', () => {
+		// 	const fileBasename = manOk.getFileBasename();
+		// 	const filePath = path.join(pathSubdirManifests, 'ok-manifest.manifest.yml');
+		// 	expect(fileBasename).not.toBe(filePath);
+		// });
+		
+		it('returns str not equal to instance.filePath when valid manifest', () => {
 			const fileBasename = manOk.getFileBasename();
 			const filePath = path.join(pathSubdirManifests, 'ok-manifest.manifest.yml');
 			expect(fileBasename).not.toBe(filePath);
 		});
+
 	});
 
 	// MARK: Mtd getName
 
 	describe('Method: getName()', () => {
+
 		test.each(['Something', 'Another', 'A Manifest'])(
-			'should, when instance constructed from an ok manifest with the given sourceName value, return the same value',
+			'returns given str when ok instance made with sourceName value: %p',
 			value => {
 				const data: ManifestData = {
 					sourceName: value,
@@ -150,10 +153,11 @@ describe('Class: Manifest', () => {
 			}
 		);
 
-		it('should, when instance constructed from an ok manifest with no name attribute, return the basename without exts of the fileName', () => {
+		it('returns basename w/o exts when ok manifest without name attr', () => {
 			const actual = manNoNameAttr.getName();
 			const expected = basenameWithoutExtensions(manNoNameAttr.filePath, '*', true);
 			expect(actual).toBe(expected);
 		});
+		
 	});
 });
