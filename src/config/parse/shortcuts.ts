@@ -3,6 +3,7 @@ import clr from 'chalk';
 import { clogConfigValueWrongType, dlogConfigValueLoaded, resolveKeyFromAlias } from '../../utility/config';
 import { clog } from '../../utility/console';
 import { dlog, dlogHeader } from '../../utility/debug';
+import { quote } from '../../utility/string-wrap';
 import { SB_OK_LG, SB_WARN } from '../../utility/symbols';
 
 import ConfigKeyAliases from '../../type/config/ConfigKeyAliases';
@@ -10,7 +11,6 @@ import UserConfig from '../../type/config/UserConfig';
 import ManifestData from '../../type/manifest/ManifestData';
 import Shortcut from '../../type/shortcut/Shortcut';
 import ShortcutData from '../../type/shortcut/ShortcutData';
-import { quote } from '../../utility/string';
 
 /**
  *

@@ -5,7 +5,8 @@ import clr from 'chalk';
 import { checkCross, fmtBool } from './boolean';
 import { clog } from './console';
 import { dlog } from './debug';
-import { getTypeDisplayName, indefiniteArticleFor, quote } from './string';
+import { getTypeDisplayName, indefiniteArticleFor } from './string';
+import { quote } from './string-wrap';
 import { SB_ERR_LG, SB_ERR_SM, SB_OK_LG, SB_OK_SM, SB_WARN, UNICODE_ARRW_RIGHT } from './symbols';
 
 import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME } from '../config/config';

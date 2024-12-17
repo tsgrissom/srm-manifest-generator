@@ -12,7 +12,7 @@ import {
 import { clog } from '../../utility/console';
 import { dlog } from '../../utility/debug';
 import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path';
-import { quote } from '../../utility/string';
+import { quote } from '../../utility/string-wrap';
 import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../../utility/symbols';
 
 import ConfigData from '../../type/config/ConfigData';

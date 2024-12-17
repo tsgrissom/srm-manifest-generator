@@ -8,7 +8,7 @@ import {
 	dlogConfigWarnOptionalSectionSkippedWrongType,
 	resolveKeyFromAlias
 } from '../../../utility/config';
-import { quote } from '../../../utility/string';
+import { quote } from '../../../utility/string-wrap';
 
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
 import UserConfig from '../../../type/config/UserConfig';

@@ -11,7 +11,7 @@ import {
 	fmtPathAsTag,
 	fmtPathWithExistsAndName
 } from '../../utility/path';
-import { quote } from '../../utility/string';
+import { quote } from '../../utility/string-wrap';
 import {
 	SB_ERR_LG,
 	SB_OK_LG,

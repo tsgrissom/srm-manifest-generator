@@ -9,7 +9,7 @@ import {
 	resolveKeyFromAlias
 } from '../../../utility/config';
 import { clog } from '../../../utility/console';
-import { quote } from '../../../utility/string';
+import { quote } from '../../../utility/string-wrap';
 import { SB_ERR_SM, SB_WARN } from '../../../utility/symbols';
 
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';

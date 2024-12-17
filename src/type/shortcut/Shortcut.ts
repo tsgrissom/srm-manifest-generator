@@ -4,7 +4,7 @@ import clr from 'chalk';
 
 import { fmtBool } from '../../utility/boolean';
 import { clog } from '../../utility/console';
-import { quote } from '../../utility/string';
+import { quote } from '../../utility/string-wrap';
 
 import { SB_WARN } from '../../utility/symbols';
 import UserConfig from '../config/UserConfig';

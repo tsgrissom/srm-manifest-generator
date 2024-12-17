@@ -1,5 +1,15 @@
-import { capitalize, delimitedList, describeQuantity, isCapitalized } from '../../src/utility/string';
-import { setOfEmptyStrings, setOfWhitespaceStrings } from '../resource/test-values';
+import {
+	capitalize,
+	isCapitalized,
+	delimitedList,
+	describeQuantity,
+    startsWithVowel,
+    indefiniteArticleFor
+} from '../../src/utility/string';
+import {
+    setOfEmptyStrings,
+    setOfWhitespaceStrings
+} from '../resource/test-values';
 
 // MARK: Fn isCapitalized
 
@@ -60,6 +70,10 @@ describe('Function: isCapitalized', () => {
 
 describe(`Function: capitalize`, () => {
 
+    test.each(['A', 'B', 'C', 'D'])('returns given str when capital str w/ length of 1: %p', value => {
+		expect(capitalize(value)).toBe(value);
+	});
+
     test.each([
         ['', ''],
         [' ', ' '],
@@ -72,6 +86,39 @@ describe(`Function: capitalize`, () => {
         }
     );
 
+    test.each([
+        'Some already capitalized string',
+        'Hello world',
+        'This is already capital'
+    ])(
+        'returns given str when first char already capital: %p',
+        value => {
+            expect(capitalize(value)).toBe(value);
+        }
+    );
+
+    test.each([
+        '42 Some uncapitalizable string',
+        '% No capital version of the leading character',
+        '` Non-Latin alphabet leading character'
+    ])(
+        'returns given str when first char cannot be capitalized: %p',
+        value => {
+            expect(capitalize(value)).toBe(value);
+        }
+    );
+
+    test.each([
+        ['some uncapitalized string', 'Some uncapitalized string'],
+        ['a string', 'A string'],
+        ['string', 'String']
+    ])(
+        'returns expected capital str when first char uncapital: %p',
+        (input, expected) => {
+            expect(capitalize(input)).toBe(expected);
+        }
+    );
+
 });
 
 // MARK: Fn describeQuantity
@@ -79,9 +126,16 @@ describe(`Function: capitalize`, () => {
 describe('Function: describeQuantity', () => {
 
     test.each(['Some string', true, false, 'true', '2'])(
-        'throws err when non-number number of things arg',
+        'throws err when non-number for arg "n": %p',
         value => {
             expect(() => describeQuantity(value as unknown as number, 'cat')).toThrow();
+        }
+    );
+
+    test.each(setOfEmptyStrings)(
+        'throws err when empty str for arg "singular": %p',
+        value => {
+            expect(() => describeQuantity(10, value)).toThrow();
         }
     );
 
@@ -122,3 +176,74 @@ describe('Function: delimitedList', () => {
     );
 
 });
+
+// MARK: Fn startsWithVowel
+
+describe('Function: startsWithVowel', () => {
+
+    const vowels = [
+        'a', 'A',
+        'e', 'E',
+        'i', 'I',
+        'o', 'O',
+        'u', 'U'
+    ];
+
+    const consonants = [
+		'b', 'B',
+		'c', 'C',
+		'd', 'D',
+		'f', 'F',
+		'g', 'G',
+		'h', 'H',
+		'j', 'J',
+		'k', 'K',
+		'l', 'L',
+		'm', 'M',
+		'n', 'N',
+		'p', 'P',
+		'q', 'Q',
+		'r', 'R',
+		's', 'S',
+		't', 'T',
+		'v', 'V',
+		'w', 'W',
+		'x', 'X',
+		'y', 'Y',
+		'z', 'Z'
+	];
+
+    test.each(vowels)(
+        'returns true given vowel str literal: %p',
+        value => {
+            expect(startsWithVowel(value)).toBe(true);
+        }
+    )
+
+    test.each(consonants)(
+        'returns false given consonant str literal: %p',
+        value => {
+            expect(startsWithVowel(value)).toBe(false);
+        }
+    )
+
+});
+
+// MARK: Fn indefiniteArticleFor
+
+describe('Function: indefiniteArticleFor', () => {
+    
+    test.each([
+        ['axe', 'an'], ['box', 'a'], ['cat', 'a'], ['dog', 'a'],
+        ['ex', 'an'], ['tux', 'a'], ['ox', 'an'], ['Uber', 'an']
+    ])(
+        'returns str which equals expected for given input word',
+        (input, expected) => {
+            expect(indefiniteArticleFor(input)).toBe(expected);
+        }
+    );
+
+});
+
+// MARK: Fn getTypeDisplayName
+// TODO

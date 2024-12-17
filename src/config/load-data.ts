@@ -7,7 +7,7 @@ import yaml from 'yaml';
 import { clog } from '../utility/console';
 import { dlog } from '../utility/debug';
 import { fmtPath, fmtPathAsTag } from '../utility/path';
-import { quote } from '../utility/string';
+import { quote } from '../utility/string-wrap';
 import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../utility/symbols';
 import {
 	EXAMPLE_CONFIG_FILENAME,
