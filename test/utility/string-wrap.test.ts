@@ -65,6 +65,10 @@ describe('Function: isWrapped', () => {
 // TODO
 describe('Function: wrap', () => {
 
+	it('throws err when empty str for arg "sequence"', () => {
+		expect(() => wrap('string', '')).toThrow();
+	});
+
 	test.each([
 		// str, sequence, force, fixPartialWrap, expected
 		['Hello', '**', false, false, '**Hello**'],

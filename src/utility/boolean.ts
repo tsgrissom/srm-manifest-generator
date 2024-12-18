@@ -33,7 +33,9 @@ function formattedBoolean(
 	trueStr: string,
 	falseStr: string
 ): string {
-	if (typeof b !== 'boolean') throw new TypeError(`Arg b must be a boolean: ${b}`);
+	if (typeof b !== 'boolean') {
+		throw new TypeError(`Arg "b" must be a boolean: ${b}`);
+	}
 
 	let str = b ? trueStr : falseStr;
 	if (capitalize) str = strCapitalize(str);

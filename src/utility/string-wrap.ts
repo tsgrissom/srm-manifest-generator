@@ -73,48 +73,42 @@ export function wrap(
     sequence: string,
     force = false,
     fixPartialWrap = false
-) : string {
+): string {
+	if (sequence === '') {
+		throw new Error(
+			`Arg "sequence" cannot be an empty string: "${sequence}"`
+		);
+	}
+
 	const doWrap = () => sequence + str + sequence;
+	const alreadyStarts = str.startsWith(sequence);
+	const alreadyEnds = str.endsWith(sequence);
 
-	if (force) return doWrap();
-	else {
-		const alreadyStarts = str.startsWith(sequence);
-		const alreadyEnds = str.endsWith(sequence);
-
-		if (alreadyStarts && alreadyEnds) return str;
-
-		const warnPartialWrap = (startsOrEnds: string) => {
-			if (isDebugActive()) {
-				console.warn(
-					`wrap() invoked on a string that already ${startsOrEnds} with the given sequence, will be unmodified because arg force was false`
-				);
-				console.warn(`- string: ${str}`);
-				console.warn(`- sequence: ${sequence}`);
-			} else {
-				console.warn(
-					`wrap() invoked on a partially wrapped string: Enable debug mode with --debug command flag for more details`
-				);
-			}
-		};
-
-		if (alreadyStarts && !alreadyEnds) {
-			if (fixPartialWrap) {
-				return str + sequence;
-			} else {
-				warnPartialWrap('starts');
-				return str;
-			}
-		} else if (!alreadyStarts && alreadyEnds) {
-			if (fixPartialWrap) {
-				return sequence + str;
-			} else {
-				warnPartialWrap('ends');
-				return str;
-			}
-		}
-
+	if (force || (!alreadyStarts && !alreadyEnds)) {
 		return doWrap();
 	}
+
+	if (alreadyStarts && alreadyEnds) {
+		return str;
+	}
+
+	if (startsButDoesNotEndWith(str, sequence)) {
+		if (fixPartialWrap) {
+			return str + sequence;
+		} else {
+			return str;
+		}
+	}
+
+	if (endsButDoesNotStartWith(str, sequence)) {
+		if (fixPartialWrap) {
+			return sequence + str;
+		} else {
+			return str;
+		}
+	}
+
+	return doWrap();
 }
 
 // MARK: Fn unwrap

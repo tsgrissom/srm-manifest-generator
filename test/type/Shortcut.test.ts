@@ -113,7 +113,7 @@ describe('Class: Shortcut', () => {
 	});
 
 	// FIXME Appears broken on macOS
-	describe.skip('Method: isTargetPathAbsolute()', () => {
+	describe('Method: isTargetPathAbsolute()', () => {
 
 		it('returns false if target path is empty', () => {
 			mockSc.target = '';

@@ -86,7 +86,7 @@ describe('Function: doesPlatformExist()', () => {
 // TODO TEST More unit tests
 // TODO TEST Test argument checking 
 // FIXME Broken on macOS
-describe.skip('Function: isProcessRunning()', () => {
+describe('Function: isProcessRunning()', () => {
 
     it('throws err if platformOptions is null', async () => {
         await expect(isProcessRunning(null as any)).rejects.toThrow();
