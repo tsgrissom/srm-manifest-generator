@@ -1,39 +1,9 @@
 import clr from 'chalk';
+
 import { capitalize as strCapitalize } from './string';
 
-// TODO Benchmark is it faster to store four string values: trueLowerStr trueUpperStr falseLowerStr and falseUpperStr or current?
-
-// TEST Unit
-// TODO jsdoc
-interface BoolFmtOptions {
-	/** Whether the formatted boolean should be color-coded */
-	color: boolean;
-	/** Whether the boolean value-dependent string should have its first letter capitalized */
-	capitalize: boolean;
-	/** The string to use if a given boolean is true */
-	trueStr: string;
-	/** The string to use if a given boolean is false */
-	falseStr: string;
-}
-
-// TEST Unit
-// TODO jsdoc
-const BoolFmtPreset: Record<string, BoolFmtOptions> = {
-	/** "true" / "false" - color on, capitalize off */
-	TrueFalse: { color: true, capitalize: false, trueStr: 'true', falseStr: 'false' },
-	/** "Yes" / "No" - color on, capitalize off */
-	YesNo: { color: true, capitalize: true, trueStr: 'yes', falseStr: 'no' },
-	/** "On" / "Off" - color on, capitalize off */
-	OnOff: { color: true, capitalize: true, trueStr: 'on', falseStr: 'off' },
-	/** "Enabled" / "Disabled" - color on, capitalize off */
-	EnabledDisabled: { color: true, capitalize: true, trueStr: 'enabled', falseStr: 'disabled' },
-	/** "enable" / "disable" - color on, capitalize off */
-	EnableDisable: { color: true, capitalize: false, trueStr: 'enable', falseStr: 'disable' },
-	/** "✓" (unicode 2713) / "✕" (unicode 2715) - color on */
-	CheckCross: { color: true, capitalize: false, trueStr: '\u2713', falseStr: '\u2715' },
-	/** "✔" (unicode 2714) / "✖" (unicode 2716) */
-	CheckCrossHeavy: { color: true, capitalize: false, trueStr: '\u2714', falseStr: '\u2716' }
-};
+import BoolFmtOptions from './type/BoolFmtOptions';
+import BoolFmtPreset from './type/BoolFmtPreset';
 
 /**
  * TODO Benchmark faster to store all four truth+capitalization values (trueUpper, falseLower, etc.) than current impl
@@ -78,4 +48,4 @@ const yesNo = (b: boolean): string => fmtBool(b, BoolFmtPreset.YesNo);
 const enabledDisabled = (b: boolean): string => fmtBool(b, BoolFmtPreset.EnabledDisabled);
 const checkCross = (b: boolean): string => fmtBool(b, BoolFmtPreset.CheckCross);
 
-export { BoolFmtOptions, BoolFmtPreset, checkCross, enabledDisabled, fmtBool, formattedBoolean, yesNo };
+export { checkCross, enabledDisabled, fmtBool, formattedBoolean, yesNo };

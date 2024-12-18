@@ -2,7 +2,7 @@ import { argv, env } from 'node:process';
 
 import clr from 'chalk';
 
-import { doArgsInclude } from './misc';
+import { doArgsInclude } from './process';
 import { clog } from './console';
 
 const FLAGS_DEBUG   = ['-D', '--debug', '--debugging'],
@@ -78,7 +78,7 @@ const isDebugActive = (isVerboseCountedAsDebugging = true) =>
  * 
  * @param lines The messages you want to log to `stdout`.
  */
-const dlog = (...lines: any[]) => isDebugActive() && lines.forEach(e => clog(e));
+const dlog = (...lines: string[]) => isDebugActive() && lines.forEach(e => clog(e));
 
 /**
  * If debugging is active, logs an emphasized header message styled
@@ -107,7 +107,7 @@ const dlogHeader = (header: string, newlineBefore = false) => {
  * @param linePfx The prefix to apply to each line.
  * @param lines The lines you want to log to `stdout`.
  */
-const dlogList = (linePfx = ' - ', ...lines: any[]) => lines.forEach(e => dlog(linePfx + e));
+const dlogList = (linePfx = ' - ', ...lines: string[]) => lines.forEach(e => dlog(linePfx + e));
 
 /**
  * If debugging is active, this function logs formatted data sections

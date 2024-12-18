@@ -2,7 +2,9 @@ import { exec } from 'node:child_process';
 
 import { delimitedList } from './string';
 
-// MARK: doArgsInclude
+import FindProcessDefaultOptions from './type/FindProcessDefaultOptions';
+
+// MARK: Fn doArgsInclude
 
 /**
  * Checks if any one of the given values within `argsToFind` can
@@ -35,17 +37,33 @@ const doArgsInclude = (argsToSearch: string[] = process.argv, ...argsToFind: str
 	return false;
 };
 
-// MARK: isProcessRunning
+// MARK: Fn doesPlatformExist
 
-interface PlatformSearchProcessCommand {
-	command: string;
-	processName: string;
+/** A list of recognized Node platforms for use with {@link doesPlatformExist} */
+const KNOWN_NODE_PLATFORMS = [
+	'aix',
+	'darwin',
+	'freebsd',
+	'linux',
+	'openbsd',
+	'sunos',
+	'win32',
+	'cygwin',
+	'netbsd'
+];
+
+/**
+ * Checks if a given platform name is recognized as a
+ * {@link KNOWN_NODE_PLATFORMS}.
+ * @param platform The platform name to check for.
+ * @returns Whether the platform name was found in
+ *  {@link KNOWN_NODE_PLATFORMS}.
+ */
+function doesPlatformExist(platform: string): boolean {
+	return KNOWN_NODE_PLATFORMS.includes(platform);
 }
 
-interface PlatformSearchProcessCommandMap {
-	supportedPlatforms: string[];
-	settings: Record<string, PlatformSearchProcessCommand>;
-}
+// MARK: Fn isProcessRunning
 
 /**
  * Checks if a process is running on the system, with support for flexible Node
@@ -53,46 +71,33 @@ interface PlatformSearchProcessCommandMap {
  * options object.
  * 
  * @param platformOptions Indicates the commands for finding a process on a given system. See example.
- * @returns {Promise} Promise which resolves to a boolean which indicates whether the given
+ * @returns Promise which resolves to a boolean which indicates whether the given
  * process is running on the system.
  * @example
  * // platformOptions Example
  * {
  *      supportedPlatforms: ['win32', 'darwin', 'linux'],
  *      settings: {
-            win32: { commandExec: 'tasklist', processSearchName: 'steam.exe' },
-            darwin: { commandExec: 'ps aux | grep [S]team', processSearchName: 'steam' },
-            linux: { commandExec: 'ps aux | grep [s]team', processSearchName: 'steam' }
-        }
+ *          win32: { commandExec: 'tasklist', processSearchName: 'steam.exe' },
+ *          darwin: { commandExec: 'ps aux | grep [S]team', processSearchName: 'steam' },
+ *          linux: { commandExec: 'ps aux | grep [s]team', processSearchName: 'steam' }
+ *      }
  * };
  */
-async function isProcessRunning(platformOptions: PlatformSearchProcessCommandMap): Promise<boolean> {
-	const refJsdoc = 'Refer to the isProcessRunning jsdoc for an example of platformOptions.';
+async function isProcessRunning(platformOptions = FindProcessDefaultOptions): Promise<boolean> {
+	if (platformOptions === null) {
+		throw new Error(`Arg "platformOptions" must be provided.`);
+	}
 
-	// Lint platformOptions type
-	if (!platformOptions) throw new Error(`Arg platformOptions must be provided. ${refJsdoc}`);
-	if (typeof platformOptions !== 'object')
-		throw new TypeError(`Arg platformOptions must be an object. ${refJsdoc}`);
-	if (Array.isArray(platformOptions))
-		throw new TypeError(`Arg platformOptions must be an object but was an array. ${refJsdoc}`);
+	if (typeof platformOptions !== 'object') {
+		throw new TypeError(`Arg "platformOptions" must be an object.`);
+	}
+
+	if (Array.isArray(platformOptions)) {
+		throw new TypeError(`Arg "platformOptions" must be an object but was an array.`);
+	}
 
 	const { settings, supportedPlatforms } = platformOptions;
-
-	// Lint platformOptions.settings type
-	if (!settings)
-		throw new Error(`Arg platformOptions must include object keyed to "settings". ${refJsdoc}`);
-	if (typeof settings !== 'object')
-		throw new TypeError(`Arg platformOptions.settings must be an object. ${refJsdoc}`);
-	if (Array.isArray(settings))
-		throw new TypeError(`Arg platformOptions.settings must be an object but was an array. ${refJsdoc}`);
-
-	// Lint platformOptions.supportedPlatforms
-	if (!supportedPlatforms)
-		throw new Error(
-			`Arg platformOptions must include array keyed to "supportedPlatforms" which lists supported Node process.platform options.`
-		);
-	if (!Array.isArray(supportedPlatforms))
-		throw new TypeError(`Arg platformOptions.supportedPlatforms must be an array`);
 
 	// Lint values inside of platformOptions.settings.EACH-SUPPORTED-PLATFORM
 	for (const supportedPlatform of supportedPlatforms) {
@@ -106,24 +111,27 @@ async function isProcessRunning(platformOptions: PlatformSearchProcessCommandMap
 			);
 
 		if (!section.command)
-			throw new Error(`Arg ${sectionKeyName} was missing required option "command". ${refJsdoc}`);
+			throw new Error(`Arg ${sectionKeyName} was missing required option "command".`);
 		if (!section.processName)
-			throw new Error(`Arg ${sectionKeyName} was missing required option "processName". ${refJsdoc}`);
+			throw new Error(`Arg ${sectionKeyName} was missing required option "processName".`);
 	}
 
 	const { platform } = process;
 
-	if (!supportedPlatforms.includes(platform))
+	if (!supportedPlatforms.includes(platform)) {
 		throw new Error(
-			`Your platform (${platform}) is unsupported at the moment. Supported platforms: ${delimitedList(supportedPlatforms)}`
+			`Your platform (${platform}) is unsupported. Supported platforms: ${delimitedList(supportedPlatforms)}`
 		);
+	}
 
 	const { command, processName } = platformOptions.settings[platform];
 
 	return new Promise((resolve, reject) => {
 		exec(command, (err, stdout, stderr) => {
 			if (err) {
-				if (err.code === 1) return resolve(false);
+				if (err.code === 1) {
+					return resolve(false);
+				}
 
 				console.error(`Error executing ${command}:`, err);
 				return reject(err);
@@ -140,4 +148,4 @@ async function isProcessRunning(platformOptions: PlatformSearchProcessCommandMap
 	});
 }
 
-export { doArgsInclude, isProcessRunning };
+export { KNOWN_NODE_PLATFORMS, doArgsInclude, doesPlatformExist, isProcessRunning };
