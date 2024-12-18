@@ -106,36 +106,14 @@ describe('Function: unwrap', () => {
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isSingleQuoted', () => {
 	test.each([
-		{
-			input: `"Str"`,
-			expected: false
-		},
-		{
-			input: `'Str'`,
-			expected: true
-		},
-		{
-			input: 'Str',
-			expected: false
-		},
-		{
-			input: `'Str`,
-			expected: false
-		},
-		{
-			input: `Str'`,
-			expected: false
-		},
-		{
-			input: `"Str`,
-			expected: false
-		},
-		{
-			input: `Str"`,
-			expected: false
-		}
-	])('returns expected for given input string: %p', data => {
-		const { input, expected } = data;
+		[`"str"`, false],
+		[`'str'`, true],
+		[`str`, false],
+		[`'Str`, false],
+		[`str'`, false],
+		[`"str`, false],
+		[`str"`, false],
+	])('returns expected for given input string: %p', (input, expected) => {
 		expect(isSingleQuoted(input)).toBe(expected);
 	});
 });
@@ -145,36 +123,14 @@ describe('Function: isSingleQuoted', () => {
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isDoubleQuoted', () => {
 	test.each([
-		{
-			input: `"Str"`,
-			expected: true
-		},
-		{
-			input: `'Str'`,
-			expected: false
-		},
-		{
-			input: 'Str',
-			expected: false
-		},
-		{
-			input: `'Str`,
-			expected: false
-		},
-		{
-			input: `Str'`,
-			expected: false
-		},
-		{
-			input: `"Str`,
-			expected: false
-		},
-		{
-			input: `Str"`,
-			expected: false
-		}
-	])('returns expected for given input string: %p', data => {
-		const { input, expected } = data;
+		[`"str"`, true],
+		[`'str'`, false],
+		[`str`, false],
+		[`'str`, false],
+		[`str'`, false],
+		[`"str`, false],
+		[`str"`, false],
+	])('returns expected for given input string: %p', (input, expected) => {
 		expect(isDoubleQuoted(input)).toBe(expected);
 	});
 });
