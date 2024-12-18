@@ -170,5 +170,3 @@ export function delimitedList(items: string | string[], delimiter = ', '): strin
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getTypeDisplayName = (value?: any): string =>
 	Array.isArray(value) ? 'array' : `${typeof value}`;
-
-

@@ -139,6 +139,34 @@ describe('Function: describeQuantity', () => {
         }
     );
 
+    const pluralNumbersOfThings = [3, 3.14, 0, -2, 42];
+
+    test.each(pluralNumbersOfThings)(
+        'infers a plural noun if arg "plural" is undefined', numberOfThings => {
+            const expected = `${numberOfThings} cats`
+            
+            expect(
+                describeQuantity(numberOfThings, 'cat', undefined)
+            ).toBe(expected);
+        }
+    );
+
+    test.each(setOfWhitespaceStrings)(
+        'infers a plural noun if arg "plural" is whitespace-only str: %p',
+        pluralForm => {
+            expect(describeQuantity(3, 'dog', pluralForm)).toBe('3 dogs');
+        }
+    );
+
+    test.each(pluralNumbersOfThings)(
+        'infers suffix es if arg "singular" ends in s', numberOfThings => {
+            const singularForm = 'class';
+            const expected = `${numberOfThings} ${singularForm}es`;
+
+            expect(describeQuantity(numberOfThings, singularForm)).toBe(expected);
+        }
+    )
+
 });
 
 // MARK: Fn delimitedList

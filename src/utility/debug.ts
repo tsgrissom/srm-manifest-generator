@@ -1,5 +1,3 @@
-import { argv, env } from 'node:process';
-
 import clr from 'chalk';
 
 import { doArgsInclude } from './process';
@@ -14,7 +12,11 @@ const FLAGS_DEBUG   = ['-D', '--debug', '--debugging'],
  * @returns A `boolean` representing whether one of the debugging flags was passed
  *   to the process or not.
  */
-const isProcessDebugging = () => doArgsInclude(argv, ...FLAGS_DEBUG);
+// const isProcessDebugging = () => doArgsInclude(process.argv, ...FLAGS_DEBUG);
+
+function isProcessDebugging() {
+    return doArgsInclude(process.argv, ...FLAGS_DEBUG);
+}
 
 /**
  * Checks if one of at least one of the verbose flags was passed to the
@@ -22,7 +24,9 @@ const isProcessDebugging = () => doArgsInclude(argv, ...FLAGS_DEBUG);
  * @returns A `boolean` representing whether one of the debugging flags was passed
  *   to the process or not.
  */
-const isProcessVerbose = () => doArgsInclude(argv, ...FLAGS_VERBOSE);
+function isProcessVerbose() {
+    return doArgsInclude(process.argv, ...FLAGS_VERBOSE);
+}
 
 /**
  * Checks if the `DEBUG` environment variable is set to `true` in
@@ -30,7 +34,9 @@ const isProcessVerbose = () => doArgsInclude(argv, ...FLAGS_VERBOSE);
  * @returns A `boolean` representing whether the debugging environment
  *   variable is enabled. 
  */
-const isEnvDebug = () => env.DEBUG === 'true';
+function isEnvDebug() {
+    return process.env.DEBUG === 'true';
+}
 
 /**
  * Checks if the the `VERBOSE` environment variable is set to `true`
@@ -38,7 +44,9 @@ const isEnvDebug = () => env.DEBUG === 'true';
  * @returns A `boolean` representing whether the `VERBOSE` environment
  *   variable is enabled.
  */
-const isEnvVerbose = () => env.VERBOSE === 'true';
+function isEnvVerbose() {
+    return process.env.VERBOSE === 'true';
+}
 
 /**
  * Checks if verbosity is active by checking if either is true:
@@ -47,7 +55,9 @@ const isEnvVerbose = () => env.VERBOSE === 'true';
  *     switch `-D`
  * @returns A `boolean` representing whether verbosity is active or not.
  */
-const isVerbose = () => isEnvVerbose() || isProcessVerbose();
+function isVerbose() {
+    return isEnvVerbose() || isProcessVerbose();
+}
 
 /**
  * Checks if debugging is active by checking if any one of the following
@@ -67,8 +77,9 @@ const isVerbose = () => isEnvVerbose() || isProcessVerbose();
  *   `true`, or a `--verbose` flag is passed to the process. Default: true.
  * @returns A `boolean` representing whether debugging is active or not.
  */
-const isDebugActive = (isVerboseCountedAsDebugging = true) =>
-    isEnvDebug() || isProcessDebugging() || (isVerboseCountedAsDebugging && isVerbose());
+function isDebugActive(isVerboseCountedAsDebugging = true) {
+    return isEnvDebug() || isProcessDebugging() || (isVerboseCountedAsDebugging && isVerbose());
+}
 
 /**
  * Logs messages to standard output if debugging is active, which
@@ -118,13 +129,14 @@ const dlogList = (linePfx = ' - ', ...lines: string[]) => lines.forEach(e => dlo
  * @param linePfx The prefix to apply to each line.
  * @param lines The lines you want to log to `stdout`.
  */
-const dlogDataSection = (header: string, linePfx = ' > ', ...lines: any[]) => {
+const dlogDataSection = (header: string, linePfx = ' > ', ...lines: string[]) => {
     dlog(header);
     dlogList(linePfx, ...lines);
 }
 
 export {
+    FLAGS_DEBUG, FLAGS_VERBOSE,
     isEnvDebug, isProcessDebugging, isDebugActive,
-    isEnvVerbose, isProcessVerbose,
+    isEnvVerbose, isProcessVerbose, isVerbose,
     dlog, dlogHeader, dlogList, dlogDataSection
 }
