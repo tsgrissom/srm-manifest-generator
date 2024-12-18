@@ -311,6 +311,10 @@ export function unquote(
 ) : string {
     const sequence = useSingleQuotes ? `'` : `"`;
 
+	if (useSingleQuotes && isWrapped(str, `"`)) {
+		return unwrap(str, `"`, removePartialWrap);
+	}
+
 	if (!isQuoted(str, useSingleQuotes) ) {
         if (startsButDoesNotEndWith(str, sequence) && removePartialWrap) {
             return str.substring(sequence.length);
