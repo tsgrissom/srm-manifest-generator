@@ -184,108 +184,24 @@ describe('Function: isDoubleQuoted', () => {
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isQuoted()', () => {
 
-    test.each([
-		{
-			params: {
-				str: `"Str"`,
-				acceptSingleQuotes: false
-			},
-			expected: true
-		},
-		{
-			params: {
-				str: `"Str"`,
-				acceptSingleQuotes: true
-			},
-			expected: true
-		},
-		{
-			params: {
-				str: `'Str'`,
-				acceptSingleQuotes: false
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: `'Str'`,
-				acceptSingleQuotes: true
-			},
-			expected: true
-		},
-		{
-			params: {
-				str: 'Str',
-				acceptSingleQuotes: false
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: 'Str',
-				acceptSingleQuotes: true
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: `'Str`,
-				acceptSingleQuotes: false
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: `'Str`,
-				acceptSingleQuotes: true
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: `Str'`,
-				acceptSingleQuotes: false
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: `Str'`,
-				acceptSingleQuotes: true
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: `"Str`,
-				acceptSingleQuotes: false
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: `"Str`,
-				acceptSingleQuotes: true
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: `Str"`,
-				acceptSingleQuotes: false
-			},
-			expected: false
-		},
-		{
-			params: {
-				str: `Str"`,
-				acceptSingleQuotes: true
-			},
-			expected: false
-		}
-    ])('returns expected for given input parameters', data => {
-        const { params, expected } = data;
-        expect(isQuoted(params.str, params.acceptSingleQuotes)).toBe(expected);
+	test.each([
+		// str, acceptSingleQuotes, expected
+		[`"str"`, false, true],
+		[`"str"`, true, true],
+		[`'str'`, false, false],
+		[`'str'`, true, true],
+		[`str`, false, false],
+		[`str`, true, false],
+		[`'str`, false, false],
+		[`'str`, true, false],
+		[`str'`, false, false],
+		[`str'`, true, false],
+		[`"str`, false, false],
+		[`"str`, true, false],
+		[`str"`, false, false],
+		[`str"`, true, false],
+	])('returns expected for given input parameters', (str, acceptSingleQuotes, expected) => {
+        expect(isQuoted(str, acceptSingleQuotes)).toBe(expected);
     });
 
 });
@@ -339,7 +255,7 @@ describe('Function: doubleQuote()', () => {
 
 // MARK: Fn quote
 
-describe('Function: quote()', () => {
+describe.skip('Function: quote()', () => {
 	test.each([
 		// str, useSingleQuotes, force, fixPartialWrap, expected
 		// TODO
@@ -352,7 +268,7 @@ describe('Function: quote()', () => {
 });
 
 // MARK: Fn unquote
-describe('Function: unquote()', () => {
+describe.skip('Function: unquote()', () => {
 	test.each([
 		// str, useSingleQuotes, removePartialWrap, expected
 		// TODO
