@@ -3,13 +3,13 @@ import { fmtBool, formattedBoolean } from '../../src/utility/boolean';
 import { setOfNonBooleans } from '../resource/test-values';
 
 describe('Function: formattedBoolean()', () => {
-	it.each(setOfNonBooleans)('throws err if arg "b" is non-boolean: %p', value => {
+	test.each(setOfNonBooleans)('throws err if arg "b" is non-boolean: %p', value => {
 		expect(() => {
 			formattedBoolean(value as unknown as boolean, true, true, 'yes', 'no');
 		}).toThrow();
 	});
 
-	it.each([
+	test.each([
 		// bool, color, capitalize, trueStr, falseStr, expected
 		[true, false, false, 'yes', 'no', 'yes'],
 		[false, false, false, 'yes', 'no', 'no'],
@@ -36,7 +36,7 @@ describe('Function: formattedBoolean()', () => {
 });
 
 describe('Function: fmtBool()', () => {
-	it.each(setOfNonBooleans)('throws err if arg "b" is non-boolean: %p', value => {
+	test.each(setOfNonBooleans)('throws err if arg "b" is non-boolean: %p', value => {
 		expect(() => {
 			fmtBool(value as unknown as boolean);
 		}).toThrow();

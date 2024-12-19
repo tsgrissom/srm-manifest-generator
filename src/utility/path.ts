@@ -32,7 +32,10 @@ import ConfigData from '../type/config/ConfigData';
  * );
  */
 // TODO TEST Unit
-export function pathHasFileExtension(filePath: string, fileExt: string | Array<string> = '*') {
+export function pathHasFileExtension(
+	filePath: string,
+	fileExt: string | Array<string> = '*',
+) {
 	if (typeof fileExt === 'string' && fileExt.trim() === '')
 		throw new Error(`Arg fileExt cannot be an empty string: "${fileExt}"`);
 
@@ -204,7 +207,7 @@ export function basenameWithoutExtensions(
  *  the given filepath if it not surrounded by them already.
  * @returns The formatted filepath with the options applied.
  */
-export function fmtPath(filePath: string, useUnderline = true, useQuotes = true) {
+export function fmtPath(filePath: string, useUnderline = true, useQuotes = true): string {
 	// TODO Replace with quote utility function
 	if (useQuotes && !filePath.startsWith('"')) filePath = '"' + filePath;
 	if (useQuotes && !filePath.endsWith('"')) filePath = filePath + '"';

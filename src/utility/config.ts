@@ -7,7 +7,14 @@ import { clog } from './console';
 import { dlog } from './debug';
 import { getTypeDisplayName, indefiniteArticleFor } from './string';
 import { quote } from './string-wrap';
-import { SB_ERR_LG, SB_ERR_SM, SB_OK_LG, SB_OK_SM, SB_WARN, UNICODE_ARRW_RIGHT } from './symbols';
+import {
+	SB_ERR_LG,
+	SB_ERR_SM,
+	SB_OK_LG,
+	SB_OK_SM,
+	SB_WARN,
+	UNICODE_ARRW_RIGHT,
+} from './symbols';
 
 import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME } from '../config/config';
 import ConfigKeyAliases from '../type/config/ConfigKeyAliases';
@@ -36,14 +43,14 @@ import UserConfig from '../type/config/UserConfig';
 export const resolveKeyFromAlias = (
 	keyAliases: ConfigKeyAliases,
 	givenKey: string,
-	sectionFullKey: string | null
+	sectionFullKey: string | null,
 ): ConfigKeyPair => {
 	const upperKey = sectionFullKey === null ? '' : sectionFullKey;
 	return {
 		givenKey: givenKey,
 		resolvedKey: keyAliases[givenKey] || givenKey,
 		fullGivenKey: joinPathKeys(upperKey, givenKey),
-		fullResolvedKey: joinPathKeys(upperKey, givenKey)
+		fullResolvedKey: joinPathKeys(upperKey, givenKey),
 	};
 };
 
@@ -67,7 +74,7 @@ export const resolveKeyFromAlias = (
  */
 // TODO jsdoc + example
 // TODO Write TEST
-export const joinPathKeys = (...keys: Array<string>) => {
+export const joinPathKeys = (...keys: Array<string>): string => {
 	return keys
 		.filter(k => !k.startsWith('.'))
 		.filter(k => !k.endsWith('.'))
@@ -78,31 +85,35 @@ export const joinPathKeys = (...keys: Array<string>) => {
 // MARK: General Logs
 
 export const clogConfigSucc = (emphasis: boolean, msg: string) =>
-	clog(`  ` + (emphasis ? SB_OK_LG : SB_OK_SM) + ` ${msg}`); // TODO Support changing whitespace prefix?
+	void clog(`  ` + (emphasis ? SB_OK_LG : SB_OK_SM) + ` ${msg}`); // TODO Support changing whitespace prefix?
 
-export const clogConfigWarn = (msg: string) => console.warn(` ${SB_WARN} ${USER_CONFIG_ATTRIBUTION}: ${msg}`);
+export const clogConfigWarn = (msg: string) =>
+	void console.warn(` ${SB_WARN} ${USER_CONFIG_ATTRIBUTION}: ${msg}`);
 // TODO Check out where these old styles are used and replace
 
-export const clogConfigFatalErr = (msg: string) => {
+export const clogConfigFatalErr = (msg: string): void => {
 	const errUserAttribution = clr.red(`User `) + clr.redBright(USER_CONFIG_FILENAME);
 	console.error(`${SB_ERR_LG} ${errUserAttribution} ` + clr.red(msg));
 };
 
 // MARK: Section Logging
 
-export const dlogConfigSectionStart = (sectionKey: string) => {
-	dlog(UNICODE_ARRW_RIGHT + clr.underline(`Loading: Config section "${sectionKey}"`));
-};
+export const dlogConfigSectionStart = (sectionKey: string) =>
+	void dlog(
+		UNICODE_ARRW_RIGHT + clr.underline(`Loading: Config section "${sectionKey}"`),
+	);
 
 export const clogConfigFatalErrMissingRequiredSection = (sectionKey: string) =>
-	clogConfigFatalErr(`is missing required required section ${clr.redBright(quote(sectionKey))}.`);
+	void clogConfigFatalErr(
+		`is missing required required section ${clr.redBright(quote(sectionKey))}.`,
+	);
 
 export const clogConfigFatalErrRequiredSectionWrongType = (
 	sectionKey: string,
 	expectedType: string,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	value?: any
-) => {
+	value?: any,
+): void => {
 	const typeOfValue = getTypeDisplayName(value);
 	const articleActualType = indefiniteArticleFor(typeOfValue);
 	const articleExpectedType = indefiniteArticleFor(expectedType);
@@ -112,10 +123,14 @@ export const clogConfigFatalErrRequiredSectionWrongType = (
 };
 
 export const dlogConfigWarnMissingOptionalSection = (sectionKey: string) =>
-	dlog(`${SB_WARN} ${USER_CONFIG_ATTRIBUTION} is missing optional section ${quote(sectionKey)}`);
+	void dlog(
+		`${SB_WARN} ${USER_CONFIG_ATTRIBUTION} is missing optional section ${quote(sectionKey)}`,
+	);
 
-export const dlogConfigWarnOptionalSectionSkipped = (sectionKey: string, reason: string) =>
-	dlog(`${SB_ERR_LG} Skipped section ${quote(sectionKey)}: ${reason}`);
+export const dlogConfigWarnOptionalSectionSkipped = (
+	sectionKey: string,
+	reason: string,
+): void => dlog(`${SB_ERR_LG} Skipped section ${quote(sectionKey)}: ${reason}`);
 
 /*
  * TODO jsdoc
@@ -128,8 +143,8 @@ export const dlogConfigWarnOptionalSectionSkippedWrongType = (
 	sectionKey: string,
 	expectedType: string,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	value?: any
-) => {
+	value?: any,
+): void => {
 	// Various terms used to describe an object when it is serialized to JSON or YAML
 	const typeOfValue = getTypeDisplayName(value);
 	const articleActualType = indefiniteArticleFor(typeOfValue);
@@ -140,7 +155,9 @@ export const dlogConfigWarnOptionalSectionSkippedWrongType = (
 };
 
 export const dlogConfigSectionOk = (sectionKey: string) =>
-	console.log(SB_OK_LG + ` ` + clr.underline(`Loaded: Config section "${sectionKey}"`));
+	void console.log(
+		SB_OK_LG + ` ` + clr.underline(`Loaded: Config section "${sectionKey}"`),
+	);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fmtValueForLoadedLog = (value?: any): string => {
@@ -155,10 +172,12 @@ const fmtValueForLoadedLog = (value?: any): string => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const dlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any) => {
+export const dlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any): void => {
 	const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
 	const usedAlias = givenKey !== resolvedKey;
-	dlog(`  ${SB_OK_SM} Value loaded ${quote(fullGivenKey)} (${fmtValueForLoadedLog(value)})`);
+	dlog(
+		`  ${SB_OK_SM} Value loaded ${quote(fullGivenKey)} (${fmtValueForLoadedLog(value)})`,
+	);
 	// TODO Make the below verbose logs
 	dlog(`    > Alias used? ${checkCross(usedAlias)}`);
 	if (usedAlias) {
@@ -167,26 +186,27 @@ export const dlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any) 
 	}
 };
 
-export const clogConfigKeyUnknown = (fullGivenKey: string, config: UserConfig) => {
+export const clogConfigKeyUnknown = (fullGivenKey: string, config: UserConfig): void => {
 	if (!config.shouldWarnUnknownConfigKey()) return;
 	clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const clogConfigValueUnknown = (fullGivenKey: string, value: any) => {
-	clog(`  ${SB_WARN} Unknown value set for key ${quote(fullGivenKey)} (Value: ${value})`);
-};
+export const clogConfigValueUnknown = (fullGivenKey: string, value: any) =>
+	void clog(
+		`  ${SB_WARN} Unknown value set for key ${quote(fullGivenKey)} (Value: ${value})`,
+	);
 
 export const clogConfigValueErr = (key: string, msg: string) =>
-	clog(`  ${SB_ERR_SM} Value of key ${quote(key)} ${msg}`);
+	void clog(`  ${SB_ERR_SM} Value of key ${quote(key)} ${msg}`);
 
 export const clogConfigValueWrongType = (
 	key: string,
 	expectedType: string,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	value?: any,
-	displayValue = true
-) => {
+	displayValue = true,
+): void => {
 	const valuef = fmtValueForLoadedLog(value);
 	let msg = `must be ${indefiniteArticleFor(expectedType)} ${expectedType} but was`;
 

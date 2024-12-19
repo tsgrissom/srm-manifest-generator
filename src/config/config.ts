@@ -27,17 +27,17 @@ export const USER_CONFIG_FILENAME = 'config.yml',
 
 // MARK: LOAD + PARSE
 
-const logUrlToExampleConf = () => {
+const logUrlToExampleConf = (): void => {
 	const urlStyled = clr.redBright.underline(EXAMPLE_CONFIG_URL);
 	console.error(`For an example config, please see: ${urlStyled}`);
 };
 
-const logConfErrMalformed = (msg: string) => {
+const logConfErrMalformed = (msg: string): void => {
 	console.error(`User ${clr.redBright(USER_CONFIG_FILENAME)} is malformed: ${msg}`);
 	logUrlToExampleConf();
 };
 
-const logConfGenericLoadErr = (msg: string) => {
+const logConfGenericLoadErr = (msg: string): void => {
 	console.error(clr.red(msg));
 	logUrlToExampleConf();
 };
@@ -46,8 +46,8 @@ async function loadData(): Promise<object> {
 	try {
 		const data = await loadUserConfigData();
 		return data;
-	} catch (err) {
-		throw new Error(`Failed to load user config data: ${err}`);
+	} catch {
+		throw new Error(`Failed to load user config data`);
 	}
 }
 
@@ -62,7 +62,9 @@ async function parseUserConfigData(): Promise<ConfigData> {
 			await fs.access(USER_CONFIG_PATH);
 			logConfGenericLoadErr(`Your ${userConfName} cannot be empty.`);
 		} catch {
-			logConfGenericLoadErr(`You must create a ${userConfName} to use SRM Manifest Generator.`);
+			logConfGenericLoadErr(
+				`You must create a ${userConfName} to use SRM Manifest Generator.`,
+			);
 		}
 
 		process.exit();
@@ -74,10 +76,12 @@ async function parseUserConfigData(): Promise<ConfigData> {
 	if (!isObject || isArray) {
 		if (!isObject) {
 			logConfErrMalformed(
-				`Expected file contents to be of type object, but was actually a ${typeof userConfigData}`
+				`Expected file contents to be of type object, but was actually a ${typeof userConfigData}`,
 			);
 		} else if (isArray) {
-			logConfErrMalformed(`Expected file contents to be of type object, but was actually an array.`);
+			logConfErrMalformed(
+				`Expected file contents to be of type object, but was actually an array.`,
+			);
 		}
 
 		process.exit();

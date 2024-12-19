@@ -1,5 +1,5 @@
-import path from 'node:path';
 import fs from 'node:fs';
+import path from 'node:path';
 
 import mockFs from 'mock-fs';
 import FileSystem from 'mock-fs/lib/filesystem';
@@ -7,13 +7,13 @@ import yaml from 'yaml';
 
 import { basenameWithoutExtensions } from '../../src/utility/path';
 
-import ManifestData from '../../src/type/manifest/ManifestData';
-import ShortcutData from '../../src/type/shortcut/ShortcutData';
-import Shortcut from '../../src/type/shortcut/Shortcut';
 import Manifest from '../../src/type/manifest/Manifest';
+import ManifestData from '../../src/type/manifest/ManifestData';
+import Shortcut from '../../src/type/shortcut/Shortcut';
+import ShortcutData from '../../src/type/shortcut/ShortcutData';
 
 const resourceDir = 'test/resource/Manifest';
-const pathSubdirExecutables = path.join(resourceDir, 'executables');
+// const pathSubdirExecutables = path.join(resourceDir, 'executables');
 const pathSubdirManifests = path.join(resourceDir, 'manifests');
 
 // TODO Phase out above
@@ -27,11 +27,10 @@ let mockManData: ManifestData;
 let mockManifest: Manifest;
 
 beforeEach(() => {
-
-    // TODO Construct the rest of the test data
+	// TODO Construct the rest of the test data
 	mockScData = {
 		title: 'A Game',
-		target: mockTargetSubdir
+		target: mockTargetSubdir,
 	};
 	mockSc = new Shortcut(mockScData);
 
@@ -39,54 +38,57 @@ beforeEach(() => {
 		sourceName: 'Some Source of Titles',
 		baseDirectory: mockBaseDir,
 		outputPath: '/mock/output/dir',
-		shortcuts: [mockSc]
+		shortcuts: [mockSc],
 	};
-	mockManifest = new Manifest(path.join(pathSubdirManifests, 'mock-manifest.manifest.yml'), mockManData);
+	mockManifest = new Manifest(
+		path.join(pathSubdirManifests, 'mock-manifest.manifest.yml'),
+		mockManData,
+	);
 
 	const mockManDataNoNameAttribute = { ...mockManData };
 	mockManDataNoNameAttribute.sourceName = '';
 
-    const config: FileSystem.DirectoryItems = {
+	const config: FileSystem.DirectoryItems = {
 		'test/resource/Manifest': {
 			manifests: {
 				'mock-manifest.manifest.yml': yaml.stringify(mockManData),
-				'no-name-attribute.manifest.yml': yaml.stringify(mockManDataNoNameAttribute),
+				'no-name-attribute.manifest.yml': yaml.stringify(
+					mockManDataNoNameAttribute,
+				),
 				// 'bad-manifest.manifest.yml': 'invalid mandata here',
 				// // 'non-existent.manifest.yml': '',
 				// 'empty.manifest.yml': '',
 			},
 			executables: {
 				'ok-executable-ext.exe': 'some valid exe data',
-				'bad-executable-ext.txt': 'some invalid data'
-			}
-		}
+				'bad-executable-ext.txt': 'some invalid data',
+			},
+		},
 	};
 
-    mockFs(config);
+	mockFs(config);
 });
 
 afterEach(() => {
-    mockFs.restore();
-})
+	mockFs.restore();
+});
 
 // MARK: Mock FS
 
 test('mock fs should be created', () => {
-    expect(fs.existsSync(mockManifest.filePath)).toBe(true);
+	expect(fs.existsSync(mockManifest.filePath)).toBe(true);
 });
 
 describe('Class: Manifest', () => {
-	
-    // MARK: Constructor
+	// MARK: Constructor
 
-    describe('Constructor', () => {
+	describe('Constructor', () => {
 		// TODO Tests
 	});
 
 	// MARK: Mtd hasNameAttribute
 
 	describe('Method: hasNameAttribute()', () => {
-
 		it('returns true when valid manifest', () => {
 			mockManifest.sourceName = 'Some Source';
 			expect(mockManifest.hasNameAttribute()).toBe(true);
@@ -96,34 +98,33 @@ describe('Class: Manifest', () => {
 			mockManifest.sourceName = '';
 			expect(mockManifest.hasNameAttribute()).toBe(false);
 		});
-
 	});
 
 	// MARK: Mtd getFileBasename
 
 	describe('Method: getFileBasename()', () => {
-		
 		it('returns str not equal to instance.filePath when valid manifest', () => {
 			const fileBasename = mockManifest.getFileBasename();
 			const filePath = path.join(pathSubdirManifests, 'mock-manifest.manifest.yml');
 			expect(fileBasename).not.toBe(filePath);
 		});
-
 	});
 
 	// MARK: Mtd getName
 
 	describe('Method: getName()', () => {
-
-		it.each(['Something', 'Another', 'A Manifest'])(
+		test.each(['Something', 'Another', 'A Manifest'])(
 			'returns given str when ok instance made with sourceName value: %p',
 			value => {
 				const mockData = { ...mockManData };
 				mockData.sourceName = value;
-				const mockInstance = new Manifest(path.join(pathSubdirManifests, 'mock-manifest.manifest.yml'), mockData);
+				const mockInstance = new Manifest(
+					path.join(pathSubdirManifests, 'mock-manifest.manifest.yml'),
+					mockData,
+				);
 
 				expect(mockInstance.getName()).toBe(value);
-			}
+			},
 		);
 
 		it('returns basename w/o exts when ok manifest without name attr', () => {
@@ -132,6 +133,5 @@ describe('Class: Manifest', () => {
 			const expected = basenameWithoutExtensions(mockManifest.filePath, '*', true);
 			expect(actual).toBe(expected);
 		});
-		
 	});
 });

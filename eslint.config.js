@@ -40,7 +40,10 @@ const pluginTsCustomizations = {
 		'@typescript-eslint/array-type': ['error', { default: 'generic' }], // TODO Change?
 		'@typescript-eslint/class-literal-property-style': ['error', 'getters'],
 		'@typescript-eslint/class-methods-use-this': 'error',
-		'@typescript-eslint/explicit-function-return-type': 'error',
+		'@typescript-eslint/explicit-function-return-type': [
+			'error',
+			{ allowConciseArrowFunctionExpressionsStartingWithVoid: true },
+		],
 	},
 };
 
@@ -53,7 +56,8 @@ const pluginJestCustomizations = {
 	files: ['**/*.test.ts'],
 	plugins: { jest: pluginJest }, // TODO Add some TS rules as well
 	rules: {
-		'jest/consistent-test-it': ['warn', { fn: 'test', withinDescribe: 'it' }],
+		// TODO Make utility function `each` instead of `test.each` then enable this rule
+		// 'jest/consistent-test-it': ['warn', { fn: 'test', withinDescribe: 'it' }],
 		'jest/no-disabled-tests': 'warn',
 		'jest/prefer-todo': 'warn',
 		'jest/prefer-lowercase-title': ['warn', { ignore: ['describe', 'test'] }],
@@ -69,6 +73,8 @@ const pluginJestCustomizations = {
 		'jest/no-identical-title': 'error',
 		'jest/valid-describe-callback': 'error',
 		'jest/valid-expect': 'error',
+
+		'@typescript-eslint/max-params': 'off',
 	},
 };
 

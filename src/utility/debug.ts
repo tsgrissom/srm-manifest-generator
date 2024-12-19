@@ -1,10 +1,10 @@
 import clr from 'chalk';
 
-import { doArgsInclude } from './process';
 import { clog } from './console';
+import { doArgsInclude } from './process';
 
-const FLAGS_DEBUG   = ['-D', '--debug', '--debugging'],
-      FLAGS_VERBOSE = ['-v', '--verbose'];
+const FLAGS_DEBUG = ['-D', '--debug', '--debugging'],
+	FLAGS_VERBOSE = ['-v', '--verbose'];
 
 /**
  * Checks if one of at least one of the debugging flags was passed to the
@@ -14,8 +14,8 @@ const FLAGS_DEBUG   = ['-D', '--debug', '--debugging'],
  */
 // const isProcessDebugging = () => doArgsInclude(process.argv, ...FLAGS_DEBUG);
 
-function isProcessDebugging() {
-    return doArgsInclude(process.argv, ...FLAGS_DEBUG);
+function isProcessDebugging(): boolean {
+	return doArgsInclude(process.argv, ...FLAGS_DEBUG);
 }
 
 /**
@@ -24,18 +24,18 @@ function isProcessDebugging() {
  * @returns A `boolean` representing whether one of the debugging flags was passed
  *   to the process or not.
  */
-function isProcessVerbose() {
-    return doArgsInclude(process.argv, ...FLAGS_VERBOSE);
+function isProcessVerbose(): boolean {
+	return doArgsInclude(process.argv, ...FLAGS_VERBOSE);
 }
 
 /**
  * Checks if the `DEBUG` environment variable is set to `true` in
  * the current environment.
  * @returns A `boolean` representing whether the debugging environment
- *   variable is enabled. 
+ *   variable is enabled.
  */
-function isEnvDebug() {
-    return process.env.DEBUG === 'true';
+function isEnvDebug(): boolean {
+	return process.env.DEBUG === 'true';
 }
 
 /**
@@ -44,8 +44,8 @@ function isEnvDebug() {
  * @returns A `boolean` representing whether the `VERBOSE` environment
  *   variable is enabled.
  */
-function isEnvVerbose() {
-    return process.env.VERBOSE === 'true';
+function isEnvVerbose(): boolean {
+	return process.env.VERBOSE === 'true';
 }
 
 /**
@@ -55,62 +55,68 @@ function isEnvVerbose() {
  *     switch `-D`
  * @returns A `boolean` representing whether verbosity is active or not.
  */
-function isVerbose() {
-    return isEnvVerbose() || isProcessVerbose();
+function isVerbose(): boolean {
+	return isEnvVerbose() || isProcessVerbose();
 }
 
 /**
  * Checks if debugging is active by checking if any one of the following
  * is true:
- * 
+ *
  * 1. The `DEBUG` environment variable is set to `true`.
  * 2. The process was passed either command flag `--debug` or
  *     switch `-D`
  * 3. If {@link isVerboseCountedAsDebugging} is left enabled + either the
  *     `VERBOSE` environment variable is `true` or a `--verbose` flag
  *     was passed to the process.
- * 
+ *
  * See also: {@link isEnvDebug} as well as {@link isProcessDebugging}
- * 
+ *
  * @param isVerboseCountedAsDebugging Whether process verbosity should count
  *   as debugging, such as if the `VERBOSE` environment variable is set to
  *   `true`, or a `--verbose` flag is passed to the process. Default: true.
  * @returns A `boolean` representing whether debugging is active or not.
  */
-function isDebugActive(isVerboseCountedAsDebugging = true) {
-    return isEnvDebug() || isProcessDebugging() || (isVerboseCountedAsDebugging && isVerbose());
+function isDebugActive(isVerboseCountedAsDebugging = true): boolean {
+	return (
+		isEnvDebug() ||
+		isProcessDebugging() ||
+		(isVerboseCountedAsDebugging && isVerbose())
+	);
 }
 
 /**
  * Logs messages to standard output if debugging is active, which
  * occurs if the current process or environment is debugging.
- * 
+ *
  * See: {@link isDebugActive}
- * 
+ *
  * @param lines The messages you want to log to `stdout`.
  */
-const dlog = (...lines: Array<string>) => isDebugActive() && lines.forEach(e => clog(e));
+const dlog = (...lines: Array<string>): void => {
+	if (isDebugActive()) {
+		lines.forEach(line => clog(line));
+	}
+};
 
 /**
  * If debugging is active, logs an emphasized header message styled
  * with magenta color and underline formatting.
- * 
+ *
  * See: {@link isDebugActive}
- * 
+ *
  * @param header The primary message and body of the header.
  * @param newlineBefore Whether to log a newline immediately
  *  before loggin the header to visually separate the output.
  * * Default: false
  */
-const dlogHeader = (header: string, newlineBefore = false) => {
-    if (!header || (typeof header === 'string' && header.trim() === ''))
-        return;
+const dlogHeader = (header: string, newlineBefore = false): void => {
+	if (!header || (typeof header === 'string' && header.trim() === '')) return;
 
-    if (newlineBefore)
-        dlog('');
+	if (newlineBefore) dlog('');
 
-    dlog(clr.magenta.underline(header));
-}
+	dlog(clr.magenta.underline(header));
+};
 
 /**
  * If debugging is active, this function logs formatted lists of
@@ -118,7 +124,8 @@ const dlogHeader = (header: string, newlineBefore = false) => {
  * @param linePfx The prefix to apply to each line.
  * @param lines The lines you want to log to `stdout`.
  */
-const dlogList = (linePfx = ' - ', ...lines: Array<string>) => lines.forEach(e => dlog(linePfx + e));
+const dlogList = (linePfx = ' - ', ...lines: Array<string>) =>
+	void lines.forEach(e => dlog(linePfx + e));
 
 /**
  * If debugging is active, this function logs formatted data sections
@@ -129,14 +136,26 @@ const dlogList = (linePfx = ' - ', ...lines: Array<string>) => lines.forEach(e =
  * @param linePfx The prefix to apply to each line.
  * @param lines The lines you want to log to `stdout`.
  */
-const dlogDataSection = (header: string, linePfx = ' > ', ...lines: Array<string>) => {
-    dlog(header);
-    dlogList(linePfx, ...lines);
-}
+const dlogDataSection = (
+	header: string,
+	linePfx = ' > ',
+	...lines: Array<string>
+): void => {
+	dlog(header);
+	dlogList(linePfx, ...lines);
+};
 
 export {
-    FLAGS_DEBUG, FLAGS_VERBOSE,
-    isEnvDebug, isProcessDebugging, isDebugActive,
-    isEnvVerbose, isProcessVerbose, isVerbose,
-    dlog, dlogHeader, dlogList, dlogDataSection
-}
+	dlog,
+	dlogDataSection,
+	dlogHeader,
+	dlogList,
+	FLAGS_DEBUG,
+	FLAGS_VERBOSE,
+	isDebugActive,
+	isEnvDebug,
+	isEnvVerbose,
+	isProcessDebugging,
+	isProcessVerbose,
+	isVerbose,
+};

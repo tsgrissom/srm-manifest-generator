@@ -1,5 +1,3 @@
-import { isDebugActive } from './debug';
-
 // MARK: GRAMMATICAL
 
 // TODO jsdoc
@@ -20,10 +18,7 @@ export const capitalize = (s: string): string => {
 
 // TODO jsdoc
 // TODO Consider edge cases: Unicode, escape chars, non-alphabetic characters
-export const isCapitalized = (
-	s: string,
-	trimStart = false
-): boolean => {
+export const isCapitalized = (s: string, trimStart = false): boolean => {
 	if (s.trim() === '') {
 		return false;
 	} else {
@@ -48,7 +43,7 @@ export const isCapitalized = (
 export const startsWithVowel = (s: string): boolean => {
 	const firstLetter = s.substring(0, 1); // TODO firstLetter fn w/ support for trim start
 	return ['a', 'e', 'i', 'o', 'u'].includes(firstLetter.toLowerCase());
-}
+};
 
 /**
  * Attempts to infer an English indefinite article for a
@@ -89,10 +84,7 @@ export const indefiniteArticleFor = (noun: string): string => {
  *  to be inferred if absent or empty.
  * @returns A `string` containing the created quantity description.
  */
-export function describeQuantity(n: number, singular: string, plural?: string) {
-	if (typeof n !== 'number') {
-		throw new TypeError(`Arg n must be a number: ${n}`);
-	}
+export function describeQuantity(n: number, singular: string, plural?: string): string {
 	if (singular.trim() === '') {
 		throw new Error(`Arg singular must be a non-empty string: ${singular}`);
 	}
@@ -122,31 +114,23 @@ export function describeQuantity(n: number, singular: string, plural?: string) {
 // TODO jsdoc
 // TODO TEST Unit
 export function delimitedList(items: string | Array<string>, delimiter = ', '): string {
-	if (!items) throw new Error(`Cannot create delimited list from given items: ${items}`);
-	if (!delimiter) throw new Error(`Cannot create delimited list using given delimiter: ${delimiter}`);
-
-	if (!Array.isArray(items)) {
-		if (typeof items === 'string') {
-			return items;
-		} else {
-			throw new Error(
-				`Cannot create comma-delimited list from input which is neither an array nor a string: ${items}`
-			);
-		}
+	if (typeof items === 'string') {
+		return items;
 	}
 
-	if (items.length === 0) return '';
+	if (!delimiter) {
+		throw new Error(`Arg "delimiter" must be a non-empty string: ${delimiter}`);
+	}
 
 	let list = '';
 	const size = items.length;
 
-	for (const [index, entry] of items.entries()) {
-		if (typeof entry !== 'string')
-			throw new Error(`Element ${index} of given array is a non-string type: ${entry}`);
+	if (Array.isArray(items) && items.length > 0) {
+		for (const [index, entry] of items.entries()) {
+			list += entry;
 
-		list += entry;
-
-		if (index < size) list += delimiter;
+			if (index < size) list += delimiter;
+		}
 	}
 
 	return list;

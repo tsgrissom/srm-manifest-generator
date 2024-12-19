@@ -17,7 +17,6 @@ import { setOfEmptyStrings, setOfNonStrings } from '../resource/test-values';
 // MARK: Fn basenameWithoutExtensions
 
 describe('Function: basenameWithoutExtensions', () => {
-	const okFileName = 'manifest.yml';
 	const okExtsToRemove = ['.yml', '.yaml'];
 	const okFilenamesWithExtensions = [
 		'Manifest.example.yml',
@@ -26,14 +25,14 @@ describe('Function: basenameWithoutExtensions', () => {
 	];
 
 	// MARK: param fileName
-	it.each(setOfNonStrings)('throws err when non-string fileName arg: %p', value => {
+	test.each(setOfNonStrings)('throws err when non-string fileName arg: %p', value => {
 		expect(() =>
 			basenameWithoutExtensions(value as unknown as string, okExtsToRemove),
 		).toThrow();
 	});
 
 	// MARK: functionality
-	it.each([
+	test.each([
 		{
 			params: {
 				fileName: 'Manifest.example.manifest.yml',
@@ -52,7 +51,7 @@ describe('Function: basenameWithoutExtensions', () => {
 		expect(result).toBe(expected);
 	});
 
-	it.each(okFilenamesWithExtensions)(
+	test.each(okFilenamesWithExtensions)(
 		'returns str whose path.basename equals empty str when filenames w/ exts given as fileName arg + wildcard given as extsToRemove arg',
 		value => {
 			const result = basenameWithoutExtensions(value, '*', true);
@@ -67,13 +66,16 @@ describe('Function: basenameWithoutExtensions', () => {
 
 describe('Function: normalizeFileExtension', () => {
 	// MARK: param extname
-	it.each(setOfNonStrings)('throws err when param extname passed a non-str', value => {
-		expect(() => normalizeFileExtension(value as unknown as string)).toThrow();
-	});
+	test.each(setOfNonStrings)(
+		'throws err when param extname passed a non-str',
+		value => {
+			expect(() => normalizeFileExtension(value as unknown as string)).toThrow();
+		},
+	);
 
 	// TODO TEST param excludeExts
 
-	it.each([
+	test.each([
 		['yml', '.yml'],
 		['yaml', '.yaml'],
 		['json', '.json'],
@@ -85,7 +87,7 @@ describe('Function: normalizeFileExtension', () => {
 		},
 	);
 
-	it.each(['.yml', '.yaml', '.json', '.jsonc'])(
+	test.each(['.yml', '.yaml', '.json', '.jsonc'])(
 		'returns given str when extname given str w/ period prefix: %p',
 		value => {
 			expect(normalizeFileExtension(value)).toBe(value);
@@ -98,13 +100,13 @@ describe('Function: normalizeFileExtension', () => {
 describe('Function: pathHasFileExtension', () => {
 	// Param: fileName
 
-	it.each(setOfNonStrings)('throws err when non-str filePath arg: %p', value => {
+	test.each(setOfNonStrings)('throws err when non-str filePath arg: %p', value => {
 		expect(() => pathHasFileExtension(value as unknown as string)).toThrow();
 	});
 
 	// Param: fileExt
 
-	it.each(setOfEmptyStrings)('throws err when empty str fileExt arg: %p', value => {
+	test.each(setOfEmptyStrings)('throws err when empty str fileExt arg: %p', value => {
 		expect(() =>
 			pathHasFileExtension('manifest.yml', value as unknown as string),
 		).toThrow();
@@ -117,7 +119,7 @@ describe('Function: pathHasFileExtension', () => {
 
 describe('Function: replaceFileExtension', () => {
 	// Param: findExt
-	it.each(setOfEmptyStrings)('throws err when empty str findExt arg: %p', value => {
+	test.each(setOfEmptyStrings)('throws err when empty str findExt arg: %p', value => {
 		expect(() => replaceFileExtension('manifest.yml', value, '.json')).toThrow();
 	});
 

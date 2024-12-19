@@ -7,13 +7,6 @@ import yaml from 'yaml';
 import ManifestData from '../../src/type/manifest/ManifestData';
 import Shortcut from '../../src/type/shortcut/Shortcut';
 import ShortcutData from '../../src/type/shortcut/ShortcutData';
-import Manifest from '../../src/type/manifest/Manifest';
-
-const resourceDir = 'test/resource/Shortcut';
-const pathSubdirManifests = path.join(resourceDir, 'manifests');
-const pathSubdirExecutables = path.join(resourceDir, 'executables');
-
-// TODO Phase out above
 
 const mockBaseDir = '/mock/base/dir';
 const mockTargetSubdir = 'path/to/target.exe';
@@ -23,71 +16,67 @@ let mockSc: Shortcut;
 let expectedSc: { title: string; target: string; fullTargetPath: string };
 
 let mockManData: ManifestData;
-let mockMan: Manifest;
+// let mockMan: Manifest;
 
 beforeEach(() => {
 	mockScData = {
 		title: 'Some Game',
-		target: mockTargetSubdir
+		target: mockTargetSubdir,
 	};
 	mockSc = new Shortcut(mockScData);
 	expectedSc = {
 		title: mockScData.title,
 		target: mockScData.target,
-		fullTargetPath: path.join(mockBaseDir, mockTargetSubdir)
+		fullTargetPath: path.join(mockBaseDir, mockTargetSubdir),
 	};
 
 	mockManData = {
 		sourceName: 'Some Source',
 		baseDirectory: mockBaseDir,
 		outputPath: '/mock/output/dir',
-		shortcuts: [mockSc]
+		shortcuts: [mockSc],
 	};
-	mockMan = new Manifest(
-		path.join(pathSubdirManifests, 'mocked-manifest.manifest.yml'),
-		mockManData
-	);
+	// mockMan = new Manifest(
+	// 	path.join(pathSubdirManifests, 'mocked-manifest.manifest.yml'),
+	// 	mockManData,
+	// );
 
 	// TODO Make this more dynamic as well or do away with it altogether
-    const config: FileSystem.DirectoryItems = {
-        'test/resource/Shortcut': {
-            'manifests': {
-                'mocked-manifest.manifest.yml': yaml.stringify(mockManData)
+	const config: FileSystem.DirectoryItems = {
+		'test/resource/Shortcut': {
+			manifests: {
+				'mocked-manifest.manifest.yml': yaml.stringify(mockManData),
 			},
-			'executables': {
-				'ok-executable.exe': 'some exe data'
-			}
-        }
-    };
+			executables: {
+				'ok-executable.exe': 'some exe data',
+			},
+		},
+	};
 
 	mockFs(config);
 });
 
 afterEach(() => {
-    mockFs.restore();
+	mockFs.restore();
 });
 
 describe('Class: Shortcut', () => {
-    
-    // MARK: Constructor
+	// MARK: Constructor
 
 	describe('Constructor', () => {
-
 		it(`throws err if from data w/ empty title`, () => {
 			mockScData.title = '';
 			expect(() => new Shortcut(mockScData)).toThrow();
 		});
 
 		it('does not throw err if instantiated with undefined config arg', () => {
-
 			expect(() => new Shortcut(mockScData, undefined)).not.toThrow();
 		});
 
 		it('does not throw err if instantiated w/ undefined enabled arg', () => {
 			mockScData.enabled = undefined;
 			expect(() => new Shortcut(mockScData)).not.toThrow();
-		})
-		
+		});
 	});
 
 	describe('Method: getExportData()', () => {
@@ -96,7 +85,7 @@ describe('Class: Shortcut', () => {
 
 			expect(exportData).toEqual({
 				title: expectedSc.title,
-				target: expectedSc.fullTargetPath
+				target: expectedSc.fullTargetPath,
 			});
 		});
 	});
@@ -114,7 +103,6 @@ describe('Class: Shortcut', () => {
 
 	// FIXME Appears broken on macOS
 	describe('Method: isTargetPathAbsolute()', () => {
-
 		it('returns false if target path is empty', () => {
 			mockSc.target = '';
 			expect(mockSc.isTargetPathAbsolute()).toBe(false);
@@ -137,34 +125,28 @@ describe('Class: Shortcut', () => {
 			mockSc.target = 'some\\relative\\path';
 			expect(mockSc.isTargetPathAbsolute()).toBe(false);
 		});
-
 	});
 
 	// TEST Method: isTargetPathRelative
 
 	describe('Method: getFullTargetPath()', () => {
-
 		it('returns expected full target path', () => {
 			expect(mockSc.getFullTargetPath(mockManData)).toBe(expectedSc.fullTargetPath);
 		});
-
 	});
 
 	describe('Method: isEnabled()', () => {
-
 		it('returns true when enabled is true', () => {
 			expect(mockSc.isEnabled()).toBe(true);
 		});
-		
+
 		it('returns false when enabled is false', () => {
 			mockSc.enabled = false;
 			expect(mockSc.isEnabled()).toBe(false);
 		});
-
 	});
 
 	describe('Method: isDisabled()', () => {
-
 		it('returns true when enabled is false', () => {
 			mockSc.enabled = false;
 			expect(mockSc.isDisabled()).toBe(true);
@@ -172,8 +154,6 @@ describe('Class: Shortcut', () => {
 
 		it('returns false when enabled is true', () => {
 			expect(mockSc.isDisabled()).toBe(false);
-		})
-
+		});
 	});
-
 });
