@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1734566613598" clover="3.2.0">
-  <project timestamp="1734566613598" name="All files">
-    <metrics statements="1120" coveredstatements="314" conditionals="522" coveredconditionals="162" methods="174" coveredmethods="54" elements="1816" coveredelements="530" complexity="0" loc="1120" ncloc="1120" packages="10" files="33" classes="33"/>
+<coverage generated="1734569519997" clover="3.2.0">
+  <project timestamp="1734569519997" name="All files">
+    <metrics statements="1120" coveredstatements="326" conditionals="522" coveredconditionals="175" methods="174" coveredmethods="61" elements="1816" coveredelements="562" complexity="0" loc="1120" ncloc="1120" packages="10" files="33" classes="33"/>
     <package name="src">
       <metrics statements="16" coveredstatements="0" conditionals="1" coveredconditionals="0" methods="2" coveredmethods="0"/>
       <file name="app.ts" path="D:\Projects\Dev\Node\srm-manifest-generator\src\app.ts">
@@ -756,7 +756,7 @@
       </file>
     </package>
     <package name="src.utility">
-      <metrics statements="441" coveredstatements="251" conditionals="310" coveredconditionals="150" methods="88" coveredmethods="39"/>
+      <metrics statements="441" coveredstatements="263" conditionals="310" coveredconditionals="163" methods="88" coveredmethods="46"/>
       <file name="boolean.ts" path="D:\Projects\Dev\Node\srm-manifest-generator\src\utility\boolean.ts">
         <metrics statements="15" coveredstatements="15" conditionals="8" coveredconditionals="8" methods="5" coveredmethods="2"/>
         <line num="1" count="3" type="stmt"/>
@@ -843,15 +843,15 @@
         <line num="198" count="0" type="stmt"/>
       </file>
       <file name="console.ts" path="D:\Projects\Dev\Node\srm-manifest-generator\src\utility\console.ts">
-        <metrics statements="9" coveredstatements="6" conditionals="1" coveredconditionals="0" methods="8" coveredmethods="2"/>
+        <metrics statements="9" coveredstatements="9" conditionals="1" coveredconditionals="1" methods="8" coveredmethods="8"/>
         <line num="5" count="4" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
-        <line num="14" count="4" type="cond" truecount="0" falsecount="1"/>
-        <line num="15" count="0" type="stmt"/>
+        <line num="14" count="4" type="cond" truecount="1" falsecount="0"/>
+        <line num="15" count="4" type="stmt"/>
         <line num="21" count="4" type="stmt"/>
-        <line num="22" count="0" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
         <line num="28" count="4" type="stmt"/>
-        <line num="29" count="0" type="stmt"/>
+        <line num="29" count="2" type="stmt"/>
         <line num="31" count="4" type="stmt"/>
       </file>
       <file name="debug.ts" path="D:\Projects\Dev\Node\srm-manifest-generator\src\utility\debug.ts">
@@ -899,7 +899,7 @@
         <line num="21" count="0" type="stmt"/>
       </file>
       <file name="path.ts" path="D:\Projects\Dev\Node\srm-manifest-generator\src\utility\path.ts">
-        <metrics statements="141" coveredstatements="52" conditionals="134" coveredconditionals="30" methods="14" coveredmethods="5"/>
+        <metrics statements="141" coveredstatements="61" conditionals="134" coveredconditionals="42" methods="14" coveredmethods="6"/>
         <line num="1" count="3" type="stmt"/>
         <line num="2" count="3" type="stmt"/>
         <line num="4" count="3" type="stmt"/>
@@ -920,16 +920,16 @@
         <line num="57" count="0" type="stmt"/>
         <line num="62" count="0" type="stmt"/>
         <line num="76" count="3" type="stmt"/>
-        <line num="82" count="0" type="cond" truecount="0" falsecount="3"/>
+        <line num="82" count="16" type="cond" truecount="2" falsecount="1"/>
         <line num="83" count="0" type="stmt"/>
-        <line num="84" count="0" type="cond" truecount="0" falsecount="4"/>
-        <line num="86" count="0" type="stmt"/>
-        <line num="89" count="0" type="cond" truecount="0" falsecount="3"/>
-        <line num="90" count="0" type="stmt"/>
-        <line num="91" count="0" type="cond" truecount="0" falsecount="1"/>
-        <line num="92" count="0" type="stmt"/>
-        <line num="93" count="0" type="cond" truecount="0" falsecount="1"/>
-        <line num="94" count="0" type="stmt"/>
+        <line num="84" count="16" type="cond" truecount="4" falsecount="0"/>
+        <line num="86" count="1" type="stmt"/>
+        <line num="89" count="15" type="cond" truecount="3" falsecount="0"/>
+        <line num="90" count="3" type="stmt"/>
+        <line num="91" count="12" type="cond" truecount="1" falsecount="0"/>
+        <line num="92" count="7" type="stmt"/>
+        <line num="93" count="5" type="cond" truecount="1" falsecount="0"/>
+        <line num="94" count="5" type="stmt"/>
         <line num="96" count="0" type="stmt"/>
         <line num="98" count="0" type="cond" truecount="0" falsecount="2"/>
         <line num="99" count="0" type="cond" truecount="0" falsecount="2"/>

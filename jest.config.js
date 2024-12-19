@@ -1,6 +1,5 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
 export default {
-  collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.ts', // Adjust this path to include all source files
     '!src/**/*.d.ts', // Exclude type declaration files

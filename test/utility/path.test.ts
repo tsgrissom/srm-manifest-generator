@@ -179,7 +179,7 @@ describe('Function: replaceFileExtension', () => {
     test.each(setOfEmptyStrings)(
         'throws err when empty str findExt arg: %p',
         (value) => {
-            expect(() => replaceFileExtension('manifest.yml', value, '.json'));
+            expect(() => replaceFileExtension('manifest.yml', value, '.json')).toThrow();
         }
     );
 
@@ -191,7 +191,7 @@ describe('Function: replaceFileExtension', () => {
                 'manifest.yml',
                 ['.yml', '.yaml'],
                 value as unknown as string
-            ));
+            )).toThrow();
         }
     );
 
@@ -204,7 +204,7 @@ describe('Function: replaceFileExtension', () => {
                 ['.yml', '.yaml'],
                 '.json',
                 value as unknown as boolean
-            ));
+            )).toThrow();
         }
     );
 

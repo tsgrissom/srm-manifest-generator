@@ -1,13 +1,12 @@
 import globals from 'globals';
 import js from '@eslint/js';
 import ts from 'typescript-eslint';
+import jest from 'eslint-plugin-jest';
 
 export default ts.config(
   {
-    // config with just ignores is the replacement for `.eslintignore`
-    ignores: ['*.config.mjs', 'dist/**/*.js', 'out/**/*.js', 'test.old/**']
+    ignores: ['*.config.js', 'dist/**/*.js', 'out/**/*.js', 'coverage/**/*.js']
   },
-  js.configs.recommended,
   ts.configs.recommendedTypeChecked,
   {
     languageOptions: {
@@ -19,17 +18,25 @@ export default ts.config(
         tsconfigRootDir: import.meta.dirname
       }
     },
-    plugins: {
-      ts
-    },
+    plugins: { ts },
     rules: {
-      'no-undef': 'off',
-      'no-unused-vars': 'off',
-      '@typescript-eslint/curly': 'off',
-      
       '@typescript-eslint/no-unused-vars': 'warn',
       '@typescript-eslint/array-type': 'warn',
       '@typescript-eslint/no-inferrable-types': 'warn'
     }
+  },
+  {
+    languageOptions: {
+      globals: jest.environments.globals.globals,
+    },
+    files: ['**/*.test.ts'],
+    plugins: { jest },
+    rules: {
+      'jest/no-disabled-tests': 'warn',
+      'jest/no-focused-tests': 'error',
+      'jest/no-identical-title': 'error',
+      'jest/prefer-to-have-length': 'warn',
+      'jest/valid-expect': 'error',
+    },
   }
 );

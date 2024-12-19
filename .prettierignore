@@ -1,3 +1,4 @@
 out/
 dist/
+test/coverage/
 node_modules/
