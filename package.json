@@ -41,6 +41,7 @@
 		"start:d": "npm run start:debug",
 		"start:v": "npm run start:verbose",
 		"start:loader": "node --loader ts-node/esm ./src/index.ts",
+		"cli": "npm run build && npm link && srmg",
 		"clean": "npm run clean:out",
 		"clean:out": "rimraf ./out",
 		"clean:coverage": "rimraf ./test/coverage",
