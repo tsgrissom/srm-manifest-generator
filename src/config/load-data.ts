@@ -4,20 +4,20 @@ import https from 'node:https';
 import clr from 'chalk';
 import yaml from 'yaml';
 
-import { clog } from '../utility/console';
-import { dlog } from '../utility/debug';
-import { fmtPath, fmtPathAsTag } from '../utility/path';
-import { quote } from '../utility/string-wrap';
-import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../utility/symbols';
+import { clog } from '../utility/console.js';
+import { dlog } from '../utility/debug.js';
+import { fmtPath, fmtPathAsTag } from '../utility/path.js';
+import { quote } from '../utility/string-wrap.js';
+import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../utility/symbols.js';
 import {
 	EXAMPLE_CONFIG_FILENAME,
 	EXAMPLE_CONFIG_PATH,
 	EXAMPLE_CONFIG_URL,
 	USER_CONFIG_FILENAME,
 	USER_CONFIG_PATH,
-} from './config';
+} from './config.js';
 
-import ConfigData from '../type/config/ConfigData';
+import ConfigData from '../type/config/ConfigData.js';
 
 /**
  * Attempts to download the example.config.yml from the project repository,

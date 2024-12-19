@@ -1,6 +1,6 @@
 // TEST Unit
 
-import BoolFmtOptions from './BoolFmtOptions';
+import BoolFmtOptions from './BoolFmtOptions.js';
 
 // TODO jsdoc
 const BoolFmtPreset: Record<string, BoolFmtOptions> = {

@@ -1,5 +1,5 @@
-import Manifest from '../manifest/Manifest';
-import OutputMode from './OutputMode';
+import Manifest from '../manifest/Manifest.js';
+import OutputMode from './OutputMode.js';
 
 // TODO jsdoc for everything
 

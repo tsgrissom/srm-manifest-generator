@@ -4,17 +4,17 @@ import {
 	clogConfigValueWrongType,
 	dlogConfigValueLoaded,
 	resolveKeyFromAlias,
-} from '../../utility/config';
-import { clog } from '../../utility/console';
-import { dlog, dlogHeader } from '../../utility/debug';
-import { quote } from '../../utility/string-wrap';
-import { SB_OK_LG, SB_WARN } from '../../utility/symbols';
+} from '../../utility/config.js';
+import { clog } from '../../utility/console.js';
+import { dlog, dlogHeader } from '../../utility/debug.js';
+import { quote } from '../../utility/string-wrap.js';
+import { SB_OK_LG, SB_WARN } from '../../utility/symbols.js';
 
-import ConfigKeyAliases from '../../type/config/ConfigKeyAliases';
-import UserConfig from '../../type/config/UserConfig';
-import ManifestData from '../../type/manifest/ManifestData';
-import Shortcut from '../../type/shortcut/Shortcut';
-import ShortcutData from '../../type/shortcut/ShortcutData';
+import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
+import UserConfig from '../../type/config/UserConfig.js';
+import ManifestData from '../../type/manifest/ManifestData.js';
+import Shortcut from '../../type/shortcut/Shortcut.js';
+import ShortcutData from '../../type/shortcut/ShortcutData.js';
 
 /**
  *

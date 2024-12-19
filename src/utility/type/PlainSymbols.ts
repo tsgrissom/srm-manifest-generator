@@ -1,6 +1,6 @@
 // TODO Functions for pulling symbols, fallback symbols, etc. based on config
 
-import UnicodeModeMap from './UnicodeModeMap';
+import UnicodeModeMap from './UnicodeModeMap.js';
 
 /**
  * Sets of plain symbols free of any styling.

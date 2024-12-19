@@ -1,4 +1,4 @@
-import ShortcutExportData from './ShortcutExportData';
+import ShortcutExportData from './ShortcutExportData.js';
 
 /**
  * Represents the full data structure of a YAML shortcut from

@@ -7,11 +7,11 @@ import {
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
 	resolveKeyFromAlias
-} from '../../../utility/config';
-import { quote } from '../../../utility/string-wrap';
+} from '../../../utility/config.js';
+import { quote } from '../../../utility/string-wrap.js';
 
-import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
-import UserConfig from '../../../type/config/UserConfig';
+import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
+import UserConfig from '../../../type/config/UserConfig.js';
 
 const sectionKey = 'validate';
 const keyAliases: ConfigKeyAliases = {

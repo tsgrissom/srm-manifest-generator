@@ -8,11 +8,11 @@ import {
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
 	resolveKeyFromAlias
-} from '../../../utility/config';
+} from '../../../utility/config.js';
 
-import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
-import OutputMode from '../../../type/config/OutputMode';
-import UserConfig from '../../../type/config/UserConfig';
+import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
+import OutputMode from '../../../type/config/OutputMode.js';
+import UserConfig from '../../../type/config/UserConfig.js';
 
 const sectionKey = 'output';
 const keyAliases: ConfigKeyAliases = {

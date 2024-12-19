@@ -1,9 +1,9 @@
 import clr from 'chalk';
 
-import Manifest from './type/manifest/Manifest';
+import Manifest from './type/manifest/Manifest.js';
 
-import parseUserConfigData from './config/config';
-import { fmtPathAsTag } from './utility/path';
+import parseUserConfigData from './config/config.js';
+import { fmtPathAsTag } from './utility/path.js';
 
 async function processManifest(manifest: Manifest): Promise<void> {
 	// TODO Additionally validate if write path is valid, make folders if missing

@@ -2,28 +2,28 @@ import clr from 'chalk';
 import fs from 'node:fs/promises';
 import YAML from 'yaml';
 
-import { checkCross } from '../../utility/boolean';
+import { checkCross } from '../../utility/boolean.js';
 import {
 	clogConfigValueWrongType,
 	clogConfigWarn,
 	dlogConfigValueLoaded,
 	resolveKeyFromAlias,
-} from '../../utility/config';
-import { clog } from '../../utility/console';
-import { dlog } from '../../utility/debug';
-import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path';
-import { quote } from '../../utility/string-wrap';
-import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../../utility/symbols';
+} from '../../utility/config.js';
+import { clog } from '../../utility/console.js';
+import { dlog } from '../../utility/debug.js';
+import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path.js';
+import { quote } from '../../utility/string-wrap.js';
+import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../../utility/symbols.js';
 
-import ConfigData from '../../type/config/ConfigData';
-import ConfigKeyAliases from '../../type/config/ConfigKeyAliases';
-import Manifest from '../../type/manifest/Manifest';
-import ManifestData from '../../type/manifest/ManifestData';
+import ConfigData from '../../type/config/ConfigData.js';
+import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
+import Manifest from '../../type/manifest/Manifest.js';
+import ManifestData from '../../type/manifest/ManifestData.js';
 
-import UserConfig from '../../type/config/UserConfig';
-import Shortcut from '../../type/shortcut/Shortcut';
-import { USER_CONFIG_FILENAME } from '../load-data';
-import loadManifestShortcuts from './shortcuts';
+import UserConfig from '../../type/config/UserConfig.js';
+import Shortcut from '../../type/shortcut/Shortcut.js';
+import { USER_CONFIG_FILENAME } from '../load-data.js';
+import loadManifestShortcuts from './shortcuts.js';
 
 async function makeManifests(
 	manPaths: Array<string>,

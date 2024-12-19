@@ -1,4 +1,4 @@
-import Shortcut from '../shortcut/Shortcut';
+import Shortcut from '../shortcut/Shortcut.js';
 
 // TODO jsdoc
 
