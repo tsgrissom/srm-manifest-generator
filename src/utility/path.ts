@@ -3,9 +3,9 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { SB_ERR_SM, SB_OK_SM } from './symbols';
+import { SB_ERR_SM, SB_OK_SM } from './symbols.js';
 
-import ConfigData from '../type/config/ConfigData';
+import ConfigData from '../type/config/ConfigData.js';
 
 /**
  * Checks if a given file path has a file extension. When `fileExt` is set to *,

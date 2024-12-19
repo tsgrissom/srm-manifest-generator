@@ -1,6 +1,6 @@
 import clr from 'chalk';
 
-import PlainSymbols  from './type/PlainSymbols';
+import PlainSymbols  from './type/PlainSymbols.js';
 
 // TODO Phase out hardcoded symbol constants
 

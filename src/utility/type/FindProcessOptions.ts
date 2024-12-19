@@ -1,4 +1,4 @@
-import FindProcessCommand from './FindProcessCommand';
+import FindProcessCommand from './FindProcessCommand.js';
 
 // TODO Condense FindProcessCommand into a single object, omitting current supportedPlatforms list
 /**

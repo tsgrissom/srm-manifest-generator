@@ -3,17 +3,17 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { dlogHeader } from '../utility/debug';
+import { dlogHeader } from '../utility/debug.js';
 
-import ConfigData from '../type/config/ConfigData';
-import UserConfig from '../type/config/UserConfig';
+import ConfigData from '../type/config/ConfigData.js';
+import UserConfig from '../type/config/UserConfig.js';
 
-import { loadUserConfigData } from './load-data';
-import parseLogsSection from './parse/section/section-logs';
-import parseOtherSection from './parse/section/section-other';
-import parseOutputSection from './parse/section/section-output';
-import parseSearchSection from './parse/section/section-search';
-import parseValidateSection from './parse/section/section-validate';
+import { loadUserConfigData } from './load-data.js';
+import parseLogsSection from './parse/section/section-logs.js';
+import parseOtherSection from './parse/section/section-other.js';
+import parseOutputSection from './parse/section/section-output.js';
+import parseSearchSection from './parse/section/section-search.js';
+import parseValidateSection from './parse/section/section-validate.js';
 
 export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml',
 	EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME),

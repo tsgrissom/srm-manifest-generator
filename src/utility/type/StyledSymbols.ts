@@ -1,7 +1,7 @@
 // TODO Once functions for pulling PlainSymbols are done, set up these ones
 // TODO Once all of that is done, phase out the hardcoded symbols
 
-import UnicodeModeMap from './UnicodeModeMap';
+import UnicodeModeMap from './UnicodeModeMap.js';
 
 /**
  * Sets of symbols with styling such as color applied

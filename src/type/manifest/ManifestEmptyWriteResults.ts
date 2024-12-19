@@ -1,6 +1,6 @@
-import ShortcutExportData from '../shortcut/ShortcutExportData';
-import Manifest from './Manifest';
-import ManifestWriteResults from './ManifestWriteResults';
+import ShortcutExportData from '../shortcut/ShortcutExportData.js';
+import Manifest from './Manifest.js';
+import ManifestWriteResults from './ManifestWriteResults.js';
 
 /**
  * Represents the results of a Manifest write operation when the Manifest

@@ -7,10 +7,10 @@ import {
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
 	resolveKeyFromAlias
-} from '../../../utility/config';
+} from '../../../utility/config.js';
 
-import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
-import UserConfig from '../../../type/config/UserConfig';
+import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
+import UserConfig from '../../../type/config/UserConfig.js';
 
 const sectionKey = 'logs';
 const keyAliases: ConfigKeyAliases = {

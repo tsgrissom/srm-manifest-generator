@@ -32,13 +32,9 @@
 	"type": "module",
 	"main": "./src/index.ts",
 	"bin": {
-		"srmg": "out/bin/cli.js"
+		"srmg": "out/src/bin/cli.js"
 	},
 	"scripts": {
-		"lint": "eslint",
-		"lint:test": "eslint test",
-		"lint:config": "eslint --print-config ./src/index.ts",
-		"lint:errors": "eslint --quiet",
 		"start": "tsx .",
 		"start:debug": "tsx . --debug",
 		"start:verbose": "tsx . --verbose",
@@ -49,11 +45,14 @@
 		"clean:out": "rimraf ./out",
 		"clean:coverage": "rimraf ./test/coverage",
 		"prebuild": "npm run clean",
-		"build": "npm run prebuild && npm run build:out && npm run postbuild",
-		"postbuild": "npm run lint",
-		"build:noclean": "npm run build:out && npm run postbuild",
-		"build:nolint": "npm run prebuild && npm run build:out",
-		"build:out": "tsc --project ./tsconfig.json",
+		"build": "tsc",
+		"build:noclean": "tsc",
+		"postbuild": "chmod +x ./out/src/bin/cli.js",
+		"postuninstall": "npm unlink . && npm run clean:out",
+		"lint": "eslint",
+		"lint:test": "eslint test",
+		"lint:config": "eslint --print-config ./src/index.ts",
+		"lint:errors": "eslint --quiet",
 		"test": "jest",
 		"test:coverage": "npm run test -- --coverage",
 		"test:c": "npm run test:coverage",
@@ -64,7 +63,8 @@
 	"dependencies": {
 		"chalk": "^4.1.2",
 		"steamgriddb": "^2.2.0",
-		"yaml": "^2.6.1"
+		"yaml": "^2.6.1",
+		"yargs": "^17.7.2"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.26.0",
@@ -74,6 +74,7 @@
 		"@types/mock-fs": "^4.13.4",
 		"@types/node": "^22.10.2",
 		"@types/tmp": "^0.2.6",
+		"@types/yargs": "^17.0.33",
 		"@typescript-eslint/eslint-plugin": "^8.18.1",
 		"@typescript-eslint/parser": "^8.18.1",
 		"babel-jest": "^29.7.0",

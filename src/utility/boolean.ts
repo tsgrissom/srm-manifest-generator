@@ -1,9 +1,9 @@
 import clr from 'chalk';
 
-import { capitalize as strCapitalize } from './string';
+import { capitalize as strCapitalize } from './string.js';
 
-import BoolFmtOptions from './type/BoolFmtOptions';
-import BoolFmtPreset from './type/BoolFmtPreset';
+import BoolFmtOptions from './type/BoolFmtOptions.js';
+import BoolFmtPreset from './type/BoolFmtPreset.js';
 
 /**
  * TODO Benchmark faster to store all four truth+capitalization values (trueUpper, falseLower, etc.) than current impl

@@ -7,14 +7,14 @@ import {
 	dlogConfigSectionStart,
 	dlogConfigValueLoaded,
 	resolveKeyFromAlias
-} from '../../../utility/config';
-import { clog } from '../../../utility/console';
-import { quote } from '../../../utility/string-wrap';
-import { SB_ERR_SM, SB_WARN } from '../../../utility/symbols';
+} from '../../../utility/config.js';
+import { clog } from '../../../utility/console.js';
+import { quote } from '../../../utility/string-wrap.js';
+import { SB_ERR_SM, SB_WARN } from '../../../utility/symbols.js';
 
-import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases';
-import UserConfig from '../../../type/config/UserConfig';
-import makeManifests from '../manifests';
+import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
+import UserConfig from '../../../type/config/UserConfig.js';
+import makeManifests from '../manifests.js';
 
 const sectionKey = 'search';
 const keyAliases: ConfigKeyAliases = {

@@ -2,11 +2,11 @@
 
 import clr from 'chalk';
 
-import { checkCross, fmtBool } from './boolean';
-import { clog } from './console';
-import { dlog } from './debug';
-import { getTypeDisplayName, indefiniteArticleFor } from './string';
-import { quote } from './string-wrap';
+import { checkCross, fmtBool } from './boolean.js';
+import { clog } from './console.js';
+import { dlog } from './debug.js';
+import { getTypeDisplayName, indefiniteArticleFor } from './string.js';
+import { quote } from './string-wrap.js';
 import {
 	SB_ERR_LG,
 	SB_ERR_SM,
@@ -14,12 +14,12 @@ import {
 	SB_OK_SM,
 	SB_WARN,
 	UNICODE_ARRW_RIGHT,
-} from './symbols';
+} from './symbols.js';
 
-import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME } from '../config/config';
-import ConfigKeyAliases from '../type/config/ConfigKeyAliases';
-import ConfigKeyPair from '../type/config/ConfigKeyPair';
-import UserConfig from '../type/config/UserConfig';
+import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME } from '../config/config.js';
+import ConfigKeyAliases from '../type/config/ConfigKeyAliases.js';
+import ConfigKeyPair from '../type/config/ConfigKeyPair.js';
+import UserConfig from '../type/config/UserConfig.js';
 
 // MARK: Utility
 

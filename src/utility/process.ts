@@ -1,10 +1,10 @@
 import { exec } from 'node:child_process';
 
-import { joinPathKeys } from './config';
-import { delimitedList } from './string';
+import { joinPathKeys } from './config.js';
+import { delimitedList } from './string.js';
 
-import FindProcessCommand from './type/FindProcessCommand';
-import { defaultOptions, FindProcessOptions } from './type/FindProcessOptions';
+import FindProcessCommand from './type/FindProcessCommand.js';
+import { defaultOptions, FindProcessOptions } from './type/FindProcessOptions.js';
 
 // MARK: Fn doArgsInclude
 
