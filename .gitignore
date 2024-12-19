@@ -1,13 +1,22 @@
-# DIRECTORIES
+# Ignore node_modules
 node_modules/
-dist/
-out/
-output/
-test/resource/tmp/
-coverage/
 
-# FILES
+# Ignore build files
+out/**/*
+
+# Ignore test temp files
+test/resource/tmp/
+# Ignore test coverage files
+test/coverage/
+
+# Ignore tsconfig build files
+tsconfig.tsbuildinfo
+
+# Ignore macOS system files
 .DS_Store
+
 # Ignore user configurations
 config/config.yml
 config/manifest/**
+# Ignore user logs
+logs/**/*
