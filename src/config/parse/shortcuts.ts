@@ -14,7 +14,7 @@ import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
 import UserConfig from '../../type/config/UserConfig.js';
 import ManifestData from '../../type/manifest/ManifestData.js';
 import Shortcut from '../../type/shortcut/Shortcut.js';
-import ShortcutData from '../../type/shortcut/ShortcutData.js';
+import { ShortcutData } from '../../type/shortcut/ShortcutData.js';
 
 /**
  *

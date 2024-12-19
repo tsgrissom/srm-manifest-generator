@@ -1,4 +1,4 @@
-import ShortcutExportData from '../shortcut/ShortcutExportData.js';
+import { ShortcutExportData } from '../shortcut/ShortcutData.js';
 import Manifest from './Manifest.js';
 import ManifestWriteResults from './ManifestWriteResults.js';
 
@@ -7,14 +7,22 @@ import ManifestWriteResults from './ManifestWriteResults.js';
  * instance has zero shortcuts to write to a file.
  */
 export class EmptyManifestWriteResults implements ManifestWriteResults {
-    manifest: Manifest;
-    outputData: Array<ShortcutExportData>;
-    readonly stats = { nTotal: 0, nEnabled: 0, nDisabled: 0, nInvalid: 0, nValid: 0, nSkipped: 0, nOk: 0 };
+	manifest: Manifest;
+	outputData: Array<ShortcutExportData>;
+	readonly stats = {
+		nTotal: 0,
+		nEnabled: 0,
+		nDisabled: 0,
+		nInvalid: 0,
+		nValid: 0,
+		nSkipped: 0,
+		nOk: 0,
+	};
 
-    constructor(emptyManifest: Manifest) {
-        this.manifest = emptyManifest;
-        this.outputData = [];
-    }
+	constructor(emptyManifest: Manifest) {
+		this.manifest = emptyManifest;
+		this.outputData = [];
+	}
 }
 
 export default EmptyManifestWriteResults;

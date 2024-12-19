@@ -27,6 +27,7 @@ import ManifestData from '../../type/manifest/ManifestData.js';
 
 import UserConfig from '../../type/config/UserConfig.js';
 import Shortcut from '../../type/shortcut/Shortcut.js';
+import { isShortcutData } from '../../type/shortcut/ShortcutData.js';
 import { USER_CONFIG_FILENAME } from '../load-data.js';
 import loadManifestShortcuts from './shortcuts.js';
 
@@ -297,26 +298,53 @@ function parseManifestFileContentsToData(
 					console.log(clr.red(`SHORTCUTS!!! NOT AN ARRAY: ${manName}`));
 					break;
 				}
-				if (
-					Array.isArray(value) &&
-					!value.every(element => element instanceof Shortcut)
-				) {
-					console.log(
-						clr.red(`SHORTCUTS!!! ONE ELEMENT NOT A SHORTCUT: ${manName}`),
-					);
-					break;
-				}
+				if (Array.isArray(value)) {
+					const okShortcuts = value.filter(isShortcutData);
 
-				if (
-					typeof value === 'object' &&
-					Array.isArray(value) //&&
-					// value.every(element => element instanceof Shortcut)
-				) {
+					if (okShortcuts.length <= 0) {
+						console.log(
+							clr.red(
+								`MAN SHORTCUTS!!! LESS THAN OR 0 OK SHORTCUTS: ${manName}`,
+							),
+						);
+					} else {
+						console.log(
+							clr.green(
+								`MAN SHORTCUTS!!! ${okShortcuts.length} OK SHORTCUTS: ${manName}`,
+							),
+						);
+					}
+
 					hasShortcuts = true;
-					data.shortcuts = value;
+					data.shortcuts = okShortcuts.map(each => new Shortcut(each), config);
 					dlogConfigValueLoaded(resolved, value);
 					break;
 				}
+				// if (
+				// 	Array.isArray(value) &&
+				// 	!value.every(element => element instanceof Shortcut)
+				// ) {
+				// 	console.log(
+				// 		clr.red(`SHORTCUTS!!! ONE ELEMENT NOT A SHORTCUT: ${manName}`),
+				// 	);
+
+				// 	for (const element of value) {
+				// 		console.log(element as object);
+				// 	}
+
+				// 	break;
+				// }
+
+				// if (
+				// 	typeof value === 'object' &&
+				// 	Array.isArray(value) //&&
+				// 	// value.every(element => element instanceof Shortcut)
+				// ) {
+				// 	hasShortcuts = true;
+				// 	data.shortcuts = value;
+				// 	dlogConfigValueLoaded(resolved, value);
+				// 	break;
+				// }
 
 				clogConfigValueWrongType(
 					fullGivenKey,

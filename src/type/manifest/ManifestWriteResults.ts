@@ -1,4 +1,4 @@
-import ShortcutExportData from '../shortcut/ShortcutExportData.js';
+import { ShortcutExportData } from '../shortcut/ShortcutData.js';
 import Manifest from './Manifest.js';
 
 /**

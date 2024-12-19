@@ -10,7 +10,7 @@ import { basenameWithoutExtensions } from '../../src/utility/path';
 import Manifest from '../../src/type/manifest/Manifest';
 import ManifestData from '../../src/type/manifest/ManifestData';
 import Shortcut from '../../src/type/shortcut/Shortcut';
-import ShortcutData from '../../src/type/shortcut/ShortcutData';
+import { ShortcutData } from '../../src/type/shortcut/ShortcutData';
 
 const resourceDir = 'test/resource/Manifest';
 // const pathSubdirExecutables = path.join(resourceDir, 'executables');

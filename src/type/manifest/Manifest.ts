@@ -27,7 +27,7 @@ import ManifestWriteResults from './ManifestWriteResults.js';
 
 import UserConfig from '../config/UserConfig.js';
 import Shortcut from '../shortcut/Shortcut.js';
-import ShortcutExportData from '../shortcut/ShortcutExportData.js';
+import { ShortcutExportData } from '../shortcut/ShortcutData.js';
 import EmptyManifestWriteResults from './ManifestEmptyWriteResults.js';
 
 // TODO getName by ManifestNameSource

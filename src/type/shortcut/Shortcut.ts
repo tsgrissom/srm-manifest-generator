@@ -9,8 +9,7 @@ import { quote } from '../../utility/string-wrap.js';
 import { SB_WARN } from '../../utility/symbols.js';
 import UserConfig from '../config/UserConfig.js';
 import ManifestData from '../manifest/ManifestData.js';
-import ShortcutData from './ShortcutData.js';
-import ShortcutExportData from './ShortcutExportData.js';
+import { ShortcutData, ShortcutExportData } from './ShortcutData.js';
 
 // TODO jsdoc
 class Shortcut implements ShortcutData {

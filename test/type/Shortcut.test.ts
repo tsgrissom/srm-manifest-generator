@@ -6,7 +6,7 @@ import yaml from 'yaml';
 
 import ManifestData from '../../src/type/manifest/ManifestData';
 import Shortcut from '../../src/type/shortcut/Shortcut';
-import ShortcutData from '../../src/type/shortcut/ShortcutData';
+import { ShortcutData } from '../../src/type/shortcut/ShortcutData';
 
 const mockBaseDir = '/mock/base/dir';
 const mockTargetSubdir = 'path/to/target.exe';
