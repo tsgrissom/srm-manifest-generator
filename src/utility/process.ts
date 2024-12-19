@@ -1,8 +1,10 @@
 import { exec } from 'node:child_process';
 
+import { joinPathKeys } from './config';
 import { delimitedList } from './string';
 
-import FindProcessDefaultOptions from './type/FindProcessDefaultOptions';
+import FindProcessCommand from './type/FindProcessCommand';
+import { defaultOptions, FindProcessOptions } from './type/FindProcessOptions';
 
 // MARK: Fn doArgsInclude
 
@@ -63,71 +65,40 @@ function doesPlatformExist(platform: string): boolean {
 	return KNOWN_NODE_PLATFORMS.includes(platform);
 }
 
-// MARK: Fn isProcessRunning
+// MARK: validatePlatformSupportedByFindProcessOptions()
 
-/**
- * Checks if a process is running on the system, with support for flexible Node
- * process.platform-based multiplatform support. See example below for example
- * options object.
- * 
- * @param platformOptions Indicates the commands for finding a process on a given system. See example.
- * @returns Promise which resolves to a boolean which indicates whether the given
- * process is running on the system.
- * @example
- * // platformOptions Example
- * {
- *      supportedPlatforms: ['win32', 'darwin', 'linux'],
- *      settings: {
- *          win32: { commandExec: 'tasklist', processSearchName: 'steam.exe' },
- *          darwin: { commandExec: 'ps aux | grep [S]team', processSearchName: 'steam' },
- *          linux: { commandExec: 'ps aux | grep [s]team', processSearchName: 'steam' }
- *      }
- * };
- */
-async function isProcessRunning(platformOptions = FindProcessDefaultOptions): Promise<boolean> {
-	if (platformOptions === null) {
-		throw new Error(`Arg "platformOptions" must be provided.`);
-	}
+function validatePlatformSupportedByFindProcessOptions(
+	platform: string,
+	platformOptions: FindProcessOptions
+): boolean {
+	// TODO Validate is supported platform exists in Node
+	const key = platformOptions.settings[platform];
+	const fullKey = joinPathKeys('platformOptions', 'settings', platform);
+	const supportedKey = joinPathKeys('platformOptions', 'supportedPlatforms');
 
-	if (typeof platformOptions !== 'object') {
-		throw new TypeError(`Arg "platformOptions" must be an object.`);
-	}
-
-	if (Array.isArray(platformOptions)) {
-		throw new TypeError(`Arg "platformOptions" must be an object but was an array.`);
-	}
-
-	const { settings, supportedPlatforms } = platformOptions;
-
-	// Lint values inside of platformOptions.settings.EACH-SUPPORTED-PLATFORM
-	for (const supportedPlatform of supportedPlatforms) {
-		// TODO Validate is supported platform exists in Node
-		const section = settings[supportedPlatform];
-		const sectionKeyName = `platformOptions.settings.${supportedPlatform}`;
-
-		if (!section)
-			throw new Error(
-				`Arg ${sectionKeyName} was missing for a platform listed in platformOptions.supportedPlatforms: ${supportedPlatform}`
-			);
-
-		if (!section.command)
-			throw new Error(`Arg ${sectionKeyName} was missing required option "command".`);
-		if (!section.processName)
-			throw new Error(`Arg ${sectionKeyName} was missing required option "processName".`);
-	}
-
-	const { platform } = process;
-
-	if (!supportedPlatforms.includes(platform)) {
+	if (!key) {
 		throw new Error(
-			`Your platform (${platform}) is unsupported. Supported platforms: ${delimitedList(supportedPlatforms)}`
+			`Platform ${platform} was missing for a platform listed at ${supportedKey} (Expected: ${fullKey})`
 		);
 	}
 
-	const { command, processName } = platformOptions.settings[platform];
+	if (!key.command) {
+		throw new Error(`Arg ${fullKey} was missing required option "command".`);
+	}
 
+	if (!key.processName) {
+		throw new Error(`Arg ${fullKey} was missing required option "processName".`);
+	}
+
+	return true;
+}
+
+// MARK: Fn getProcessStatus
+
+async function getProcessStatus(platformCommandOptions: FindProcessCommand): Promise<boolean> {
+	const { command, processName, shell } = platformCommandOptions;
 	return new Promise((resolve, reject) => {
-		exec(command, (err, stdout, stderr) => {
+		exec(command, { shell: shell }, (err, stdout, stderr) => {
 			if (err) {
 				if (err.code === 1) {
 					return resolve(false);
@@ -142,10 +113,52 @@ async function isProcessRunning(platformOptions = FindProcessDefaultOptions): Pr
 				return reject(new Error(stderr));
 			}
 
-			const isRunning = stdout.toLowerCase().includes(processName);
+			const isRunning = stdout.toLowerCase().includes(processName.toLowerCase());
 			resolve(isRunning);
 		});
 	});
+}
+
+// MARK: Fn isProcessRunning
+
+/**
+ * Checks if a process is running on the system, with support for flexible Node
+ * `process.platform`-based multiplatform support. See example below for example
+ * options object.
+ * 
+ * Example: {@link FindProcessDefaultOptions}
+ * 
+ * @param platformOptions Indicates the commands for finding a process on a given system. See example.
+ * @returns Promise which resolves to a boolean which indicates whether the given
+ * process is running on the system.
+ */
+async function isProcessRunning(platformOptions = defaultOptions): Promise<boolean> {
+	if (platformOptions === null) {
+		throw new Error(`Arg "platformOptions" must be provided.`);
+	}
+
+	if (typeof platformOptions !== 'object') {
+		throw new TypeError(`Arg "platformOptions" must be an object.`);
+	}
+
+	if (Array.isArray(platformOptions)) {
+		throw new TypeError(`Arg "platformOptions" must be an object but was an array.`);
+	}
+
+	const { supportedPlatforms } = platformOptions;
+
+	const okSupportedPlatforms = platformOptions.supportedPlatforms
+		.filter(each => validatePlatformSupportedByFindProcessOptions(each, platformOptions));
+
+	const { platform } = process;
+
+	if (!okSupportedPlatforms.includes(platform)) {
+		throw new Error(
+			`Your platform (${platform}) is unsupported. Supported platforms: ${delimitedList(supportedPlatforms)}`
+		);
+	}
+
+	return await getProcessStatus(platformOptions.settings[platform]);
 }
 
 export { KNOWN_NODE_PLATFORMS, doArgsInclude, doesPlatformExist, isProcessRunning };

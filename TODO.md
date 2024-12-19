@@ -6,6 +6,9 @@
 
 ## General TODO
 
+* Testing beyond Windows needed:
+  * More extensive on macOS
+  * Full Linux tests
 * Duplicate key protection for configs
 * Telemetry
 * Implement verbose flag + env var

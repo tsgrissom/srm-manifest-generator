@@ -111,8 +111,11 @@ describe('Class: Shortcut', () => {
 		it('returns true if target path is absolute', () => {
 			mockSc.target = '/some/absolute/path';
 			expect(mockSc.isTargetPathAbsolute()).toBe(true);
-			mockSc.target = 'C:\\Some\\Absolute\\Path';
-			expect(mockSc.isTargetPathAbsolute()).toBe(true);
+
+			if (process.platform === 'win32') { // TODO Maybe mock this?
+				mockSc.target = 'C:\\Some\\Absolute\\Path';
+				expect(mockSc.isTargetPathAbsolute()).toBe(true);
+			}
 		});
 
 		it('returns false if target path is relative', () => {
