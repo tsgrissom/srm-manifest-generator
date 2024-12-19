@@ -14,11 +14,11 @@
     },
     "include": [
         "src/**/*",
-        "test/**/*"
+        "test/**/*",
     ],
     "exclude": [
         "node_modules",
         "out",
-        "dist"
+        "dist",
     ]
 }
