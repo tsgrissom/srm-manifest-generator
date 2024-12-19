@@ -112,7 +112,8 @@ describe('Class: Shortcut', () => {
 			mockSc.target = '/some/absolute/path';
 			expect(mockSc.isTargetPathAbsolute()).toBe(true);
 
-			if (process.platform === 'win32') { // TODO Maybe mock this?
+			if (process.platform === 'win32') {
+				// TODO Maybe mock this?
 				mockSc.target = 'C:\\Some\\Absolute\\Path';
 				expect(mockSc.isTargetPathAbsolute()).toBe(true);
 			}
@@ -140,23 +141,23 @@ describe('Class: Shortcut', () => {
 
 	describe('Method: isEnabled()', () => {
 		it('returns true when enabled is true', () => {
-			expect(mockSc.isEnabled()).toBe(true);
+			expect(mockSc.isEnabled).toBe(true);
 		});
 
 		it('returns false when enabled is false', () => {
 			mockSc.enabled = false;
-			expect(mockSc.isEnabled()).toBe(false);
+			expect(mockSc.isEnabled).toBe(false);
 		});
 	});
 
 	describe('Method: isDisabled()', () => {
 		it('returns true when enabled is false', () => {
 			mockSc.enabled = false;
-			expect(mockSc.isDisabled()).toBe(true);
+			expect(mockSc.isDisabled).toBe(true);
 		});
 
 		it('returns false when enabled is true', () => {
-			expect(mockSc.isDisabled()).toBe(false);
+			expect(mockSc.isDisabled).toBe(false);
 		});
 	});
 });

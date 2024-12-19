@@ -2,11 +2,11 @@
 
 import clr from 'chalk';
 
-import { checkCross, fmtBool } from './boolean.js';
+import { fmtBool, yesNo } from './boolean.js';
 import { clog } from './console.js';
-import { dlog } from './debug.js';
-import { getTypeDisplayName, indefiniteArticleFor } from './string.js';
+import { dlog, isDebugActive } from './debug.js';
 import { quote } from './string-wrap.js';
+import { getTypeDisplayName, indefiniteArticleFor } from './string.js';
 import {
 	SB_ERR_LG,
 	SB_ERR_SM,
@@ -98,10 +98,9 @@ export const clogConfigFatalErr = (msg: string): void => {
 
 // MARK: Section Logging
 
-export const dlogConfigSectionStart = (sectionKey: string) =>
-	void dlog(
-		UNICODE_ARRW_RIGHT + clr.underline(`Loading: Config section "${sectionKey}"`),
-	);
+export function dlogConfigSectionStart(sectionKey: string): void {
+	dlog(`${UNICODE_ARRW_RIGHT} Loading: Config section ${quote(sectionKey)}`);
+}
 
 export const clogConfigFatalErrMissingRequiredSection = (sectionKey: string) =>
 	void clogConfigFatalErr(
@@ -154,10 +153,9 @@ export const dlogConfigWarnOptionalSectionSkippedWrongType = (
 	dlogConfigWarnOptionalSectionSkipped(sectionKey, msg);
 };
 
-export const dlogConfigSectionOk = (sectionKey: string) =>
-	void console.log(
-		SB_OK_LG + ` ` + clr.underline(`Loaded: Config section "${sectionKey}"`),
-	);
+export function dlogConfigSectionOk(sectionKey: string): void {
+	dlog(`${SB_OK_LG} Loaded: Config section ${quote(sectionKey)}`);
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fmtValueForLoadedLog = (value?: any): string => {
@@ -175,11 +173,11 @@ const fmtValueForLoadedLog = (value?: any): string => {
 export const dlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any): void => {
 	const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
 	const usedAlias = givenKey !== resolvedKey;
-	dlog(
-		`  ${SB_OK_SM} Value loaded ${quote(fullGivenKey)} (${fmtValueForLoadedLog(value)})`,
-	);
+
+	dlog(`  ${SB_OK_SM} Key loaded ${quote(fullGivenKey)}`);
 	// TODO Make the below verbose logs
-	dlog(`    > Alias used? ${checkCross(usedAlias)}`);
+	dlog(`    > Value: ${fmtValueForLoadedLog(value)}`);
+	dlog(`    > Alias used? ${yesNo(usedAlias)}`);
 	if (usedAlias) {
 		dlog(`    > Alias: ${quote(givenKey)}`);
 		dlog(`    > Actual: ${quote(resolvedKey)}`);
@@ -197,8 +195,16 @@ export const clogConfigValueUnknown = (fullGivenKey: string, value: any) =>
 		`  ${SB_WARN} Unknown value set for key ${quote(fullGivenKey)} (Value: ${value})`,
 	);
 
-export const clogConfigValueErr = (key: string, msg: string) =>
-	void clog(`  ${SB_ERR_SM} Value of key ${quote(key)} ${msg}`);
+function clogConfigValueErr(key: string, msg: string): void {
+	const prefix = isDebugActive() ? SB_ERR_SM : `${SB_ERR_LG} Config:`;
+	let blob = `${prefix} Value of key ${quote(key)} ${msg}`;
+
+	if (isDebugActive()) {
+		blob = `  ` + blob;
+	}
+
+	clog(blob);
+}
 
 export const clogConfigValueWrongType = (
 	key: string,

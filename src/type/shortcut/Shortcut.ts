@@ -14,19 +14,30 @@ import ShortcutExportData from './ShortcutExportData.js';
 
 // TODO jsdoc
 class Shortcut implements ShortcutData {
-
-	config?: UserConfig;
+	private config?: UserConfig;
 
 	title: string;
 	target: string;
 	enabled: boolean;
+
+	public get getTitle(): string {
+		return this.title;
+	}
+
+	public get isEnabled(): boolean {
+		return this.enabled;
+	}
+
+	public get isDisabled(): boolean {
+		return !this.enabled;
+	}
 
 	constructor(data: ShortcutData, config?: UserConfig) {
 		// TODO Accept config in constructor, check validity of executable
 
 		if (data.title.trim() === '') {
 			throw new Error(
-				`Cannot construct Shortcut from ShortcutData with empty str title`
+				`Cannot construct Shortcut from ShortcutData with empty str title`,
 			);
 		}
 
@@ -36,6 +47,7 @@ class Shortcut implements ShortcutData {
 		this.enabled = data.enabled ?? true;
 
 		if (process.argv.includes('--list-shortcuts')) {
+			// TODO Decide fate
 			clog(clr.blue.underline(`LOADED SHORTCUT: ${quote(this.title)}`));
 			clog(` Title: ${quote(this.title)}`);
 			clog(` Target: ${quote(this.target)}`);
@@ -53,7 +65,7 @@ class Shortcut implements ShortcutData {
 	public getExportData(manifest: ManifestData): ShortcutExportData {
 		return {
 			title: this.title,
-			target: this.getFullTargetPath(manifest)
+			target: this.getFullTargetPath(manifest),
 		};
 	}
 
@@ -82,19 +94,11 @@ class Shortcut implements ShortcutData {
 
 		if (!baseDirectory) {
 			console.error(
-				`${SB_WARN} Could not construct full target path for Shortcut (${quote(this.title)}): Given Manifest's base directory is invalid`
+				`${SB_WARN} Could not construct full target path for Shortcut (${quote(this.title)}): Given Manifest's base directory is invalid`,
 			);
 		}
 
 		return path.join(manifest.baseDirectory, targetPath);
-	}
-
-	public isEnabled(): boolean {
-		return this.enabled;
-	}
-
-	public isDisabled(): boolean {
-		return !this.enabled;
 	}
 }
 

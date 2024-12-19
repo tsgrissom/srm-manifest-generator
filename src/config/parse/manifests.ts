@@ -10,10 +10,15 @@ import {
 	resolveKeyFromAlias,
 } from '../../utility/config.js';
 import { clog } from '../../utility/console.js';
-import { dlog } from '../../utility/debug.js';
+import { dlog, dlogHeader } from '../../utility/debug.js';
 import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path.js';
 import { quote } from '../../utility/string-wrap.js';
-import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../../utility/symbols.js';
+import {
+	SB_ERR_LG,
+	SB_OK_LG,
+	SB_WARN,
+	UNICODE_ARRW_RIGHT,
+} from '../../utility/symbols.js';
 
 import ConfigData from '../../type/config/ConfigData.js';
 import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
@@ -29,7 +34,7 @@ async function makeManifests(
 	manPaths: Array<string>,
 	config: UserConfig,
 ): Promise<Array<Manifest>> {
-	dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
+	dlogHeader('CREATING MANIFEST OBJECTS FROM FILES');
 
 	const okManifests: Array<Manifest> = [];
 
@@ -43,7 +48,7 @@ async function makeManifests(
 	for (const [index, manPath] of manPaths.entries()) {
 		const id = index + 1;
 		const pathTag = fmtPathAsTag(manPath);
-		dlog(` > MANIFEST #${id}: Began validating manifest file ${pathTag}`);
+		dlog(`${UNICODE_ARRW_RIGHT} Validating: Manifest #${id} ${pathTag}`);
 
 		const exists = await validateManifestPathExists(manPath);
 		const okFsType = await validateManifestPathIsSupportedFilesystemType(
@@ -51,11 +56,11 @@ async function makeManifests(
 			config,
 		);
 
-		dlog(` ${checkCross(exists)} Path exists (${manPath})`);
-		dlog(` ${checkCross(okFsType)} Path is a supported filesystem type ${pathTag}`);
+		dlog(`  ${checkCross(exists)} Path exists`);
+		dlog(`  ${checkCross(okFsType)} Path is a supported filesystem type`);
 
 		if (!exists) {
-			clog(` > Skipping manifest (Path: ${manPath})`);
+			clog(` ${SB_WARN} Skipping non-existent manifest ${pathTag}`);
 			continue;
 		}
 
@@ -65,9 +70,7 @@ async function makeManifests(
 
 		okManifests.push(instance);
 
-		dlog(
-			` ${SB_OK_LG} MANIFEST #${id}: Finished validation of manifest path ${fmtPathAsTag(pathTag)}`,
-		);
+		dlog(`${SB_OK_LG} Validated: Manifest #${id} ${pathTag}`);
 	}
 
 	clogLoadedManifests(manPaths, okManifests);
@@ -234,9 +237,7 @@ function parseManifestFileContentsToData(
 		throw new Error(`Manifest is not an object (Type: ${typeof document})`);
 	}
 
-	dlog(
-		UNICODE_ARRW_RIGHT + clr.underline(`Loading: Manifest ${fmtPathAsTag(filePath)}`),
-	);
+	dlog(`${UNICODE_ARRW_RIGHT} Loading: Manifest ${fmtPathAsTag(filePath)}`);
 
 	let hasShortcuts = false;
 
@@ -287,10 +288,29 @@ function parseManifestFileContentsToData(
 				break;
 			}
 			case 'shortcuts': {
+				const manName = data.sourceName;
+				if (typeof value !== 'object') {
+					console.log(clr.red(`SHORTCUTS!!! NOT AN OBJECT: ${manName}`));
+					break;
+				}
+				if (!Array.isArray(value)) {
+					console.log(clr.red(`SHORTCUTS!!! NOT AN ARRAY: ${manName}`));
+					break;
+				}
+				if (
+					Array.isArray(value) &&
+					!value.every(element => element instanceof Shortcut)
+				) {
+					console.log(
+						clr.red(`SHORTCUTS!!! ONE ELEMENT NOT A SHORTCUT: ${manName}`),
+					);
+					break;
+				}
+
 				if (
 					typeof value === 'object' &&
-					Array.isArray(value) &&
-					value.every(element => element instanceof Shortcut)
+					Array.isArray(value) //&&
+					// value.every(element => element instanceof Shortcut)
 				) {
 					hasShortcuts = true;
 					data.shortcuts = value;

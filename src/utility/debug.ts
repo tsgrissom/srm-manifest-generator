@@ -110,7 +110,7 @@ const dlog = (...lines: Array<string>): void => {
  *  before loggin the header to visually separate the output.
  * * Default: false
  */
-const dlogHeader = (header: string, newlineBefore = false): void => {
+const dlogHeader = (header: string, newlineBefore = true): void => {
 	if (!header || (typeof header === 'string' && header.trim() === '')) return;
 
 	if (newlineBefore) dlog('');

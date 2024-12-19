@@ -3,11 +3,11 @@
 import chalk from 'chalk';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
-import startApp from '../app.js';
+import { listLoadedManifests, listShortcutsOfLoadedManifests, startApp } from '../app.js';
+import parseUserConfigData from '../config/config.js';
 import { quote } from '../utility/string-wrap.js';
 import { delimitedList } from '../utility/string.js';
 
-const CMD_LIST_CATEGORIES = ['manifests', 'shortcuts'];
 const ALIASES_MANIFEST = ['manifest', 'manifests', 'man', 'source', 'sources'];
 const ALIASES_SHORTCUT = [
 	'shortcut',
@@ -21,60 +21,76 @@ const ALIASES_SHORTCUT = [
 	'roms',
 	'rom',
 ];
+const ALIASES_LIST_CATEGORIES = [
+	'categories',
+	'category',
+	'types',
+	'type',
+	'options',
+	'option',
+];
 
-yargs(hideBin(process.argv))
+const LIST_ALL_CATEGORIES = Array.from(
+	new Set([...ALIASES_LIST_CATEGORIES, ...ALIASES_MANIFEST, ...ALIASES_SHORTCUT]),
+);
+const LIST_RECOMMENDED_CATEGORIES = ['categories', 'manifests', 'shortcuts'];
+
+await yargs(hideBin(process.argv))
+	.scriptName('srmg')
 	.command(
 		'list [category]',
 		'list things recognized by srm manifest generator',
 		yargs => {
 			return yargs.positional('category', {
 				desc: 'the kind of things to list',
+				type: 'string',
+				choices: LIST_ALL_CATEGORIES,
 				default: 'manifests',
 			});
 		},
-		argv => {
+		async argv => {
 			const { category } = argv;
+			const categoryLow = category.toLowerCase();
 
-			if (typeof category === 'undefined') {
-				listManifests();
-				return;
+			if (ALIASES_LIST_CATEGORIES.includes(categoryLow)) {
+				listCategories();
+			} else if (ALIASES_MANIFEST.includes(categoryLow)) {
+				await listManifests();
+			} else if (ALIASES_SHORTCUT.includes(categoryLow)) {
+				await listShortcuts();
+			} else {
+				listCategories(category);
 			}
-
-			if (typeof category !== 'string') {
-				throw new Error(`Command "list" argument "category" must be a string`);
-			}
-
-			if (ALIASES_MANIFEST.includes(category.toLowerCase())) {
-				listManifests();
-				return;
-			}
-
-			if (ALIASES_SHORTCUT.includes(category.toLowerCase())) {
-				listShortcuts();
-				return;
-			}
-
-			console.log(chalk.red(`Unknown list category: ${quote(category)}`));
-			console.log(
-				chalk.red(`Valid categories: ${delimitedList(CMD_LIST_CATEGORIES)}`),
-			);
 		},
 	)
 	.command(
 		'run',
 		'run srm manifest generator transformations',
-		() => {},
-		argv => {
-			startApp();
+		yargs => {},
+		async argv => {
+			await startApp();
 		},
 	)
 	.demandCommand(1, 'You must enter at least one command')
 	.parse();
 
-function listManifests() {
-	console.log(chalk.magenta(`List of manifests appears`));
+function listCategories(unknownGiven?: string): void {
+	if (unknownGiven !== undefined) {
+		console.log(chalk.red(`Unknown list category: ${quote(unknownGiven)}`));
+		console.log(
+			chalk.red(`Valid categories: ${delimitedList(LIST_RECOMMENDED_CATEGORIES)}`),
+		);
+	} else {
+		console.log(`Valid categories: ${delimitedList(LIST_RECOMMENDED_CATEGORIES)}`);
+	}
 }
 
-function listShortcuts() {
-	console.log(chalk.cyan(`List of shortcuts appears`));
+async function listManifests(): Promise<void> {
+	const userConfig = await parseUserConfigData();
+	listLoadedManifests(userConfig);
+}
+
+async function listShortcuts(): Promise<void> {
+	const userConfig = await parseUserConfigData();
+	await listShortcutsOfLoadedManifests(userConfig);
 }

@@ -149,7 +149,7 @@ class Manifest implements ManifestData {
 	}
 
 	public getEnabledShortcuts(): Array<Shortcut> {
-		return this.getShortcuts().filter(each => each.isEnabled());
+		return this.getShortcuts().filter(each => each.isEnabled);
 	}
 
 	public getExportData(): Array<ShortcutExportData> {

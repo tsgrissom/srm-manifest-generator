@@ -1,4 +1,4 @@
-import startApp from './app.js';
+import { startApp } from './app.js';
 
 try {
 	await startApp();
