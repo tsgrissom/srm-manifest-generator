@@ -9,7 +9,7 @@ import {
 	basenameWithoutExtensions,
 	fmtPath,
 	fmtPathAsTag,
-	fmtPathWithExistsAndName
+	fmtPathWithExistsAndName,
 } from '../../utility/path';
 import { quote } from '../../utility/string-wrap';
 import {
@@ -18,7 +18,7 @@ import {
 	SB_WARN,
 	UNICODE_CHECK_LG,
 	UNICODE_WARN,
-	UNICODE_XMARK_LG
+	UNICODE_XMARK_LG,
 } from '../../utility/symbols';
 
 import ManifestData from './ManifestData';
@@ -81,7 +81,11 @@ class Manifest implements ManifestData {
 	}
 
 	getFallbackName(): string {
-		return basenameWithoutExtensions(this.filePath, ['.yml', '.yaml', '.manifest', '.example'], true);
+		return basenameWithoutExtensions(
+			this.filePath,
+			['.yml', '.yaml', '.manifest', '.example'],
+			true,
+		);
 	}
 
 	hasNameAttribute(): boolean {
@@ -172,7 +176,7 @@ class Manifest implements ManifestData {
 
 		if (nOk === 0) {
 			clog(
-				`${SB_WARN} Skipped Manifest ${quote(this.getName())}: No shortcuts which were both enabled and valid`
+				`${SB_WARN} Skipped Manifest ${quote(this.getName())}: No shortcuts which were both enabled and valid`,
 			);
 			// TODO Verbose print more info here
 			return new EmptyManifestWriteResults(this);
@@ -184,7 +188,7 @@ class Manifest implements ManifestData {
 				` ${SB_OK_LG} Wrote Manifest to file ${fmtPathAsTag(this.filePath)}`,
 				` > Source File: ${fmtPath(this.filePath)}`,
 				` > Output Path: ${fmtPath(this.getOutputPath())}`,
-				` > File Written To: ${fmtPath(writePath)}`
+				` > File Written To: ${fmtPath(writePath)}`,
 			);
 			return {
 				manifest: this,
@@ -196,15 +200,20 @@ class Manifest implements ManifestData {
 					nInvalid: 0,
 					nValid: nEnabled - nInvalid,
 					nSkipped: nSkipped,
-					nOk: nOk
-				}
+					nOk: nOk,
+				},
 			};
 		} catch {
-			throw new Error(`Failed to write manifest to output file (Name: ${this.getName()})`);
+			throw new Error(
+				`Failed to write manifest to output file (Name: ${this.getName()})`,
+			);
 		}
 	}
 
-	private calculatePrefixForResults(results: ManifestWriteResults, config?: UserConfig) {
+	private calculatePrefixForResults(
+		results: ManifestWriteResults,
+		config?: UserConfig,
+	): string {
 		const { nTotal, nOk, nDisabled } = results.stats;
 		const useColor = config?.shouldUseColor() ?? true;
 
@@ -242,17 +251,30 @@ class Manifest implements ManifestData {
 		return prefix;
 	}
 
-	private async dlogWriteResults(results: ManifestWriteResults) {
+	private async dlogWriteResults(results: ManifestWriteResults): Promise<void> {
 		const { manifest: man } = results;
-		const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } = results.stats;
+		const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } =
+			results.stats;
 
 		const name = quote(man.getName());
-		const sourceFilePath = await fmtPathWithExistsAndName(man.filePath, 'Source File Path');
-		const outputPath = await fmtPathWithExistsAndName(man.getOutputPath(), 'Output Path');
-		const writeFilePath = await fmtPathWithExistsAndName(man.getWritePath(), 'Write File Path');
-		const rootDirectory = await fmtPathWithExistsAndName(man.baseDirectory, 'Root Directory');
+		const sourceFilePath = await fmtPathWithExistsAndName(
+			man.filePath,
+			'Source File Path',
+		);
+		const outputPath = await fmtPathWithExistsAndName(
+			man.getOutputPath(),
+			'Output Path',
+		);
+		const writeFilePath = await fmtPathWithExistsAndName(
+			man.getWritePath(),
+			'Write File Path',
+		);
+		const rootDirectory = await fmtPathWithExistsAndName(
+			man.baseDirectory,
+			'Root Directory',
+		);
 
-		console.log('');
+		dlog();
 		dlogDataSection(
 			clr.magentaBright.underline(`MANIFEST ${name} > Write Operation`),
 			`  > `,
@@ -263,7 +285,7 @@ class Manifest implements ManifestData {
 			sourceFilePath,
 			outputPath,
 			writeFilePath,
-			rootDirectory
+			rootDirectory,
 		);
 
 		dlogDataSection(
@@ -275,11 +297,14 @@ class Manifest implements ManifestData {
 			`Disabled: ${nDisabled}`,
 			`Valid: ${nValid}`,
 			`Invalid: ${nInvalid}`,
-			`Skipped: ${nSkipped}`
+			`Skipped: ${nSkipped}`,
 		);
 	}
 
-	public async logWriteResults(results: ManifestWriteResults, config?: UserConfig) {
+	public async logWriteResults(
+		results: ManifestWriteResults,
+		config?: UserConfig,
+	): Promise<void> {
 		await this.dlogWriteResults(results);
 
 		const { manifest, stats } = results;

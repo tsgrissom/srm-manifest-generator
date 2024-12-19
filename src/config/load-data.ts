@@ -14,7 +14,7 @@ import {
 	EXAMPLE_CONFIG_PATH,
 	EXAMPLE_CONFIG_URL,
 	USER_CONFIG_FILENAME,
-	USER_CONFIG_PATH
+	USER_CONFIG_PATH,
 } from './config';
 
 import ConfigData from '../type/config/ConfigData';
@@ -29,7 +29,9 @@ async function downloadExampleConfig(): Promise<boolean> {
 	try {
 		await fs.promises.access(EXAMPLE_CONFIG_PATH);
 		throw new Error(
-			clr.red(`downloadExampleConfig was invoked but ${EXAMPLE_CONFIG_PATH} already exists`)
+			clr.red(
+				`downloadExampleConfig was invoked but ${EXAMPLE_CONFIG_PATH} already exists`,
+			),
 		);
 	} catch {
 		/* empty */
@@ -41,8 +43,8 @@ async function downloadExampleConfig(): Promise<boolean> {
 				if (response.statusCode !== 200)
 					return reject(
 						new Error(
-							`Failed to grab "${EXAMPLE_CONFIG_FILENAME}" from ${fmtPath(EXAMPLE_CONFIG_URL)}". Status code: ${response.statusCode}`
-						)
+							`Failed to grab "${EXAMPLE_CONFIG_FILENAME}" from ${fmtPath(EXAMPLE_CONFIG_URL)}". Status code: ${response.statusCode}`,
+						),
 					);
 
 				const fileStreamExample = fs.createWriteStream(EXAMPLE_CONFIG_PATH),
@@ -53,7 +55,7 @@ async function downloadExampleConfig(): Promise<boolean> {
 
 				let finishedStreams = 0;
 
-				const onStreamFinish = () => {
+				const onStreamFinish = (): void => {
 					finishedStreams += 1;
 					if (finishedStreams === 2) {
 						resolve(true);
@@ -62,35 +64,37 @@ async function downloadExampleConfig(): Promise<boolean> {
 
 				fileStreamExample.on('finish', () => {
 					clog(
-						`${SB_OK_LG} Restored "${EXAMPLE_CONFIG_FILENAME}" from GitHub ${fmtPathAsTag(EXAMPLE_CONFIG_PATH)}`
+						`${SB_OK_LG} Restored "${EXAMPLE_CONFIG_FILENAME}" from GitHub ${fmtPathAsTag(EXAMPLE_CONFIG_PATH)}`,
 					);
 					onStreamFinish();
 				});
 				fileStreamUser.on('finish', () => {
-					clog(`${SB_OK_LG} Copied "${EXAMPLE_CONFIG_FILENAME}" to ${fmtPath(USER_CONFIG_PATH)}`);
+					clog(
+						`${SB_OK_LG} Copied "${EXAMPLE_CONFIG_FILENAME}" to ${fmtPath(USER_CONFIG_PATH)}`,
+					);
 					onStreamFinish();
 				});
 
-				const onError = (err: Error) => {
+				const onError = (err: Error): void => {
 					fileStreamExample.close(() =>
 						fs.unlink(EXAMPLE_CONFIG_PATH, err => {
 							if (err) {
 								console.error(
 									`Something went wrong while closing file handle for ${EXAMPLE_CONFIG_FILENAME}:`,
-									err?.message
+									err?.message,
 								);
 							}
-						})
+						}),
 					);
 					fileStreamUser.close(() =>
 						fs.unlink(USER_CONFIG_PATH, err => {
 							if (err) {
 								console.error(
 									`Something went wrong while closing file handle for ${USER_CONFIG_FILENAME}:`,
-									err?.message
+									err?.message,
 								);
 							}
-						})
+						}),
 					);
 					reject(err);
 				};
@@ -113,7 +117,9 @@ async function copyExampleConfigToUserConfigPath(): Promise<void> {
 	try {
 		await fs.promises.access(USER_CONFIG_PATH);
 		throw new Error(
-			clr.red(`copyExampleConfigToUserConfigPath was invoked but ${USER_CONFIG_PATH} already exists`)
+			clr.red(
+				`copyExampleConfigToUserConfigPath was invoked but ${USER_CONFIG_PATH} already exists`,
+			),
 		);
 	} catch {
 		/* empty */
@@ -124,7 +130,10 @@ async function copyExampleConfigToUserConfigPath(): Promise<void> {
 		await fs.promises.writeFile(USER_CONFIG_PATH, exampleConfigFile, 'utf8');
 		clog(`${SB_OK_LG} Example config copied to ${fmtPath(USER_CONFIG_PATH)}`);
 	} catch (err) {
-		console.error(`${SB_ERR_LG} Failed to copy example config to ${USER_CONFIG_PATH}:`, err);
+		console.error(
+			`${SB_ERR_LG} Failed to copy example config to ${USER_CONFIG_PATH}:`,
+			err,
+		);
 	}
 }
 
@@ -170,7 +179,7 @@ async function loadUserConfigData(): Promise<object> {
 			`${clr.yellowBright(UNICODE_ARRW_RIGHT)}A new copy of the ${quote(EXAMPLE_CONFIG_FILENAME)} will be downloaded from GitHub...`,
 			`  > URL: ${fmtPath(EXAMPLE_CONFIG_URL)}`,
 			`  > Downloading To: ${fmtPath(EXAMPLE_CONFIG_PATH)}`,
-			`  > Then Copying To: ${fmtPath(USER_CONFIG_PATH)}`
+			`  > Then Copying To: ${fmtPath(USER_CONFIG_PATH)}`,
 		);
 
 		await downloadExampleConfig();
@@ -187,17 +196,19 @@ async function loadUserConfigData(): Promise<object> {
 			// Check if example config is in place, copy it to the user's config path if present
 			exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');
 			clog(
-				` ${SB_ERR_LG} No "${USER_CONFIG_FILENAME}" was found at the expected path. Some configuration is required for SRM Manifest Generator to function.`
+				` ${SB_ERR_LG} No "${USER_CONFIG_FILENAME}" was found at the expected path. Some configuration is required for SRM Manifest Generator to function.`,
 			);
-			clog(` ... Attempting to create a new default config based on ${EXAMPLE_CONFIG_FILENAME}`);
+			clog(
+				` ... Attempting to create a new default config based on ${EXAMPLE_CONFIG_FILENAME}`,
+			);
 			await copyExampleConfigToUserConfigPath();
 		} catch {
 			// If both are missing, try to fetch the latest copy of the example config from repo
 			clog(
-				`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}, but the ${EXAMPLE_CONFIG_FILENAME} has been deleted.`
+				`SRM Manifest Generator is missing a ${USER_CONFIG_PATH}, but the ${EXAMPLE_CONFIG_FILENAME} has been deleted.`,
 			);
 			clog(
-				`Restoring ${EXAMPLE_CONFIG_PATH} with latest version from GitHub (URL below), then creating a new default ${USER_CONFIG_FILENAME} based on ${EXAMPLE_CONFIG_FILENAME}...`
+				`Restoring ${EXAMPLE_CONFIG_PATH} with latest version from GitHub (URL below), then creating a new default ${USER_CONFIG_FILENAME} based on ${EXAMPLE_CONFIG_FILENAME}...`,
 			);
 			await downloadExampleConfig();
 		}
@@ -218,5 +229,5 @@ export {
 	EXAMPLE_CONFIG_URL,
 	loadUserConfigData,
 	USER_CONFIG_FILENAME,
-	USER_CONFIG_PATH
+	USER_CONFIG_PATH,
 };

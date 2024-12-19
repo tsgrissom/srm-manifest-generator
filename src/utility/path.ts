@@ -35,7 +35,7 @@ import ConfigData from '../type/config/ConfigData';
 export function pathHasFileExtension(
 	filePath: string,
 	fileExt: string | Array<string> = '*',
-) {
+): boolean {
 	if (typeof fileExt === 'string' && fileExt.trim() === '')
 		throw new Error(`Arg fileExt cannot be an empty string: "${fileExt}"`);
 

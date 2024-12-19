@@ -1,5 +1,3 @@
-import { isDebugActive } from './debug';
-
 // TODO TEST Whole section
 
 // MARK: Fn startsButDoesNotEndWith
@@ -26,10 +24,7 @@ export function startsButDoesNotEndWith(str: string, sequence: string): boolean 
  * @returns Whether the {@link str} ends with but does not start with the
  *  given {@link sequence}.
  */
-export function endsButDoesNotStartWith(
-    str: string,
-    sequence: string
-) : boolean {
+export function endsButDoesNotStartWith(str: string, sequence: string): boolean {
 	return !str.startsWith(sequence) && str.endsWith(sequence);
 }
 
@@ -45,10 +40,7 @@ export function endsButDoesNotStartWith(
  * @returns A `boolean` representing whether or not the {@link sequence}
  *  was found at the start and end of the string {@link str}.
  */
-export function isWrapped(
-    str: string,
-    sequence: string
-) : boolean {
+export function isWrapped(str: string, sequence: string): boolean {
 	return str.startsWith(sequence) && str.endsWith(sequence);
 }
 
@@ -69,18 +61,16 @@ export function isWrapped(
  *  was not already present.
  */
 export function wrap(
-    str: string,
-    sequence: string,
-    force = false,
-    fixPartialWrap = false
+	str: string,
+	sequence: string,
+	force = false,
+	fixPartialWrap = false,
 ): string {
 	if (sequence === '') {
-		throw new Error(
-			`Arg "sequence" cannot be an empty string: "${sequence}"`
-		);
+		throw new Error(`Arg "sequence" cannot be an empty string: "${sequence}"`);
 	}
 
-	const doWrap = () => sequence + str + sequence;
+	const doWrap = (): string => sequence + str + sequence;
 	const alreadyStarts = str.startsWith(sequence);
 	const alreadyEnds = str.endsWith(sequence);
 
@@ -123,15 +113,9 @@ export function wrap(
  *  string {@link str}
  * @returns
  */
-export function unwrap(
-	str: string,
-	sequence: string,
-	removePartialWrap = false
-): string {
+export function unwrap(str: string, sequence: string, removePartialWrap = false): string {
 	if (sequence === '') {
-		throw new Error(
-			`Arg "sequence" cannot be an empty string: "${sequence}"`
-		);
+		throw new Error(`Arg "sequence" cannot be an empty string: "${sequence}"`);
 	}
 
 	if (!isWrapped(str, sequence)) {
@@ -205,10 +189,7 @@ export function isDoubleQuoted(s: string): boolean {
  *  quotation mark character was found at the start and end of the
  *  string {@link str}.
  */
-export function isQuoted(
-	str: string,
-	acceptSingleQuotes = false
-) : boolean {
+export function isQuoted(str: string, acceptSingleQuotes = false): boolean {
 	const isSingle = isSingleQuoted(str);
 	return acceptSingleQuotes && isSingle ? isSingle : isDoubleQuoted(str);
 }
@@ -226,11 +207,7 @@ export function isQuoted(
  *  wrapping by adding the missing side's quotation mark.
  * @returns The wrapped string.
  */
-export function singleQuote(
-	str: string,
-	force = false,
-	fixPartialWrap = false
-) : string {
+export function singleQuote(str: string, force = false, fixPartialWrap = false): string {
 	return wrap(str, `'`, force, fixPartialWrap);
 }
 
@@ -248,11 +225,7 @@ export function singleQuote(
  *  wrapping by adding the quotation mark to the missing side.
  * @returns The wrapped string.
  */
-export function doubleQuote(
-	str: string,
-	force = false,
-	fixPartialWrap = false
-) : string {
+export function doubleQuote(str: string, force = false, fixPartialWrap = false): string {
 	return wrap(str, `"`, force, fixPartialWrap);
 }
 
@@ -275,8 +248,8 @@ export function quote(
 	str: string,
 	useSingleQuotes = false,
 	force = false,
-	fixPartialWrap = false
-) : string {
+	fixPartialWrap = false,
+): string {
 	if ((isDoubleQuoted(str) || (isSingleQuoted(str) && useSingleQuotes)) && !force) {
 		return str;
 	}
@@ -301,24 +274,24 @@ export function quote(
 export function unquote(
 	str: string,
 	useSingleQuotes = false,
-	removePartialWrap = false
-) : string {
-    const sequence = useSingleQuotes ? `'` : `"`;
+	removePartialWrap = false,
+): string {
+	const sequence = useSingleQuotes ? `'` : `"`;
 
 	if (useSingleQuotes && isWrapped(str, `"`)) {
 		return unwrap(str, `"`, removePartialWrap);
 	}
 
-	if (!isQuoted(str, useSingleQuotes) ) {
-        if (startsButDoesNotEndWith(str, sequence) && removePartialWrap) {
-            return str.substring(sequence.length);
-        }
-        if (endsButDoesNotStartWith(str, sequence) && removePartialWrap) {
-            return str.substring(0, str.length - sequence.length);
-        }
+	if (!isQuoted(str, useSingleQuotes)) {
+		if (startsButDoesNotEndWith(str, sequence) && removePartialWrap) {
+			return str.substring(sequence.length);
+		}
+		if (endsButDoesNotStartWith(str, sequence) && removePartialWrap) {
+			return str.substring(0, str.length - sequence.length);
+		}
 
-        return str;
-    }
-    
-    return unwrap(str, sequence, removePartialWrap);
+		return str;
+	}
+
+	return unwrap(str, sequence, removePartialWrap);
 }

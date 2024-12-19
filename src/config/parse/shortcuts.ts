@@ -1,6 +1,10 @@
 import clr from 'chalk';
 
-import { clogConfigValueWrongType, dlogConfigValueLoaded, resolveKeyFromAlias } from '../../utility/config';
+import {
+	clogConfigValueWrongType,
+	dlogConfigValueLoaded,
+	resolveKeyFromAlias,
+} from '../../utility/config';
 import { clog } from '../../utility/console';
 import { dlog, dlogHeader } from '../../utility/debug';
 import { quote } from '../../utility/string-wrap';
@@ -18,11 +22,19 @@ import ShortcutData from '../../type/shortcut/ShortcutData';
  * @param object The value of a given manifest's shortcuts field.
  * @returns
  */
-function loadManifestShortcuts(manifest: ManifestData, objects: Array<object>, config: UserConfig): Array<Shortcut> {
-	dlogHeader(`MANIFEST ${quote(manifest.sourceName)} > ${clr.cyanBright('Load Shortcuts')}`);
+function loadManifestShortcuts(
+	manifest: ManifestData,
+	objects: Array<object>,
+	config: UserConfig,
+): Array<Shortcut> {
+	dlogHeader(
+		`MANIFEST ${quote(manifest.sourceName)} > ${clr.cyanBright('Load Shortcuts')}`,
+	);
 
 	if (objects.length === 0) {
-		dlog(`  ${SB_WARN} Shortcuts value was empty so no shortcuts were added to the Manifest`);
+		dlog(
+			`  ${SB_WARN} Shortcuts value was empty so no shortcuts were added to the Manifest`,
+		);
 		return [];
 	}
 
@@ -37,7 +49,7 @@ function loadManifestShortcuts(manifest: ManifestData, objects: Array<object>, c
 	return ok;
 }
 
-function makeShortcut(obj: object, config: UserConfig) {
+function makeShortcut(obj: object, config: UserConfig): Shortcut {
 	const keyAliases: ConfigKeyAliases = {
 		title: 'title',
 		name: 'title',
@@ -49,13 +61,13 @@ function makeShortcut(obj: object, config: UserConfig) {
 		enable: 'enabled',
 
 		disabled: 'disabled',
-		disable: 'disabled'
+		disable: 'disabled',
 	};
 
 	const data: ShortcutData = {
 		title: '',
 		target: '',
-		enabled: true
+		enabled: true,
 	};
 
 	if (!Object.keys(obj)) {
