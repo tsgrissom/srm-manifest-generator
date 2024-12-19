@@ -115,7 +115,7 @@ describe('Class: Manifest', () => {
 
 	describe('Method: getName()', () => {
 
-		test.each(['Something', 'Another', 'A Manifest'])(
+		it.each(['Something', 'Another', 'A Manifest'])(
 			'returns given str when ok instance made with sourceName value: %p',
 			value => {
 				const mockData = { ...mockManData };

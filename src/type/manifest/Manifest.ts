@@ -40,7 +40,7 @@ class Manifest implements ManifestData {
 	sourceName: string;
 	baseDirectory: string;
 	outputPath: string;
-	shortcuts: Shortcut[];
+	shortcuts: Array<Shortcut>;
 
 	/**
 	 * Constructs a new Manifest instance.
@@ -140,15 +140,15 @@ class Manifest implements ManifestData {
 
 	// MARK: Shortcuts
 
-	public getShortcuts(): Shortcut[] {
+	public getShortcuts(): Array<Shortcut> {
 		return this.shortcuts;
 	}
 
-	public getEnabledShortcuts(): Shortcut[] {
+	public getEnabledShortcuts(): Array<Shortcut> {
 		return this.getShortcuts().filter(each => each.isEnabled());
 	}
 
-	public getExportData(): ShortcutExportData[] {
+	public getExportData(): Array<ShortcutExportData> {
 		return this.getEnabledShortcuts().map(each => each.getExportData(this));
 	}
 

@@ -4,12 +4,12 @@ import ConfigData from './ConfigData';
 import OutputMode from './OutputMode';
 
 class UserConfig implements ConfigData {
-	search: { manifests: Manifest[]; scanDirectories: boolean; scanRecursively: boolean };
+	search: { manifests: Array<Manifest>; scanDirectories: boolean; scanRecursively: boolean };
 	output: { minify: boolean; indentSpaces: number; mode: OutputMode };
 	validate: {
 		filePaths: boolean;
 		executables: boolean;
-		executableExtensions: string[];
+		executableExtensions: Array<string>;
 		unknownConfigKeys: boolean;
 	};
 	other: { useColor: boolean; debug: boolean; verbose: boolean };
@@ -48,7 +48,7 @@ class UserConfig implements ConfigData {
 	// TODO jsdocs below
 
 	// MARK: "search"
-	public getManifestPaths = (): string[] => this.search.manifests.map(man => man.filePath);
+	public getManifestPaths = (): Array<string> => this.search.manifests.map(man => man.filePath);
 
 	// MARK: "output"
 	public shouldMinifyOutput = (): boolean => this.output.minify;
@@ -59,7 +59,7 @@ class UserConfig implements ConfigData {
 	public shouldValidateFilePaths = (): boolean => this.validate.filePaths;
 	public shouldValidateExecutables = (): boolean => this.validate.executables;
 	public shouldWarnUnknownConfigKey = (): boolean => this.validate.unknownConfigKeys;
-	public getValidExecutableExtensions = (): string[] => this.validate.executableExtensions;
+	public getValidExecutableExtensions = (): Array<string> => this.validate.executableExtensions;
 
 	// MARK: "other"
 	public shouldUseColor = (): boolean => this.other.useColor;

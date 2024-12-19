@@ -121,7 +121,7 @@ export function describeQuantity(n: number, singular: string, plural?: string) {
 
 // TODO jsdoc
 // TODO TEST Unit
-export function delimitedList(items: string | string[], delimiter = ', '): string {
+export function delimitedList(items: string | Array<string>, delimiter = ', '): string {
 	if (!items) throw new Error(`Cannot create delimited list from given items: ${items}`);
 	if (!delimiter) throw new Error(`Cannot create delimited list using given delimiter: ${delimiter}`);
 

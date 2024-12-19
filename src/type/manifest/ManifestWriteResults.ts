@@ -17,7 +17,7 @@ interface ManifestWriteResults {
 	/**
 	 * The contents of the output file in JSON form.
 	 */
-	readonly outputData: ShortcutExportData[];
+	readonly outputData: Array<ShortcutExportData>;
 
 	/**
 	 * Statistics about the results of the parsing and writing

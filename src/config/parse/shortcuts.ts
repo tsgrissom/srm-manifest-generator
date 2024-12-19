@@ -18,7 +18,7 @@ import ShortcutData from '../../type/shortcut/ShortcutData';
  * @param object The value of a given manifest's shortcuts field.
  * @returns
  */
-function loadManifestShortcuts(manifest: ManifestData, objects: object[], config: UserConfig): Shortcut[] {
+function loadManifestShortcuts(manifest: ManifestData, objects: Array<object>, config: UserConfig): Array<Shortcut> {
 	dlogHeader(`MANIFEST ${quote(manifest.sourceName)} > ${clr.cyanBright('Load Shortcuts')}`);
 
 	if (objects.length === 0) {
@@ -26,7 +26,7 @@ function loadManifestShortcuts(manifest: ManifestData, objects: object[], config
 		return [];
 	}
 
-	const ok: Shortcut[] = [];
+	const ok: Array<Shortcut> = [];
 
 	for (const object of objects) {
 		const shortcut = makeShortcut(object, config);

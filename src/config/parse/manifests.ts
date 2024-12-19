@@ -25,10 +25,10 @@ import Shortcut from '../../type/shortcut/Shortcut';
 import { USER_CONFIG_FILENAME } from '../load-data';
 import loadManifestShortcuts from './shortcuts';
 
-async function makeManifests(manPaths: string[], config: UserConfig): Promise<Manifest[]> {
+async function makeManifests(manPaths: Array<string>, config: UserConfig): Promise<Array<Manifest>> {
 	dlog(clr.magenta.underline('CREATING MANIFEST INSTANCES'));
 
-	const okManifests: Manifest[] = [];
+	const okManifests: Array<Manifest> = [];
 
 	if (manPaths.length === 0) {
 		clog(
@@ -67,7 +67,7 @@ async function makeManifests(manPaths: string[], config: UserConfig): Promise<Ma
 	return okManifests;
 }
 
-function clogLoadedManifests(manifestPaths: string[], okManifests: Manifest[]) {
+function clogLoadedManifests(manifestPaths: Array<string>, okManifests: Array<Manifest>) {
 	const nAll = manifestPaths.length;
 	const nOk = okManifests.length;
 	const ratio = `${nOk}/${nAll}`;

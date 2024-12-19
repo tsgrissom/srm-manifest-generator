@@ -8,7 +8,7 @@ import ManifestWriteResults from './ManifestWriteResults';
  */
 export class EmptyManifestWriteResults implements ManifestWriteResults {
     manifest: Manifest;
-    outputData: ShortcutExportData[];
+    outputData: Array<ShortcutExportData>;
     readonly stats = { nTotal: 0, nEnabled: 0, nDisabled: 0, nInvalid: 0, nValid: 0, nSkipped: 0, nOk: 0 };
 
     constructor(emptyManifest: Manifest) {

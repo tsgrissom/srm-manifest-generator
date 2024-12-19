@@ -15,7 +15,7 @@ afterEach(() => {
 
 describe(`Function: isProcessDebugging()`, () => {
 
-    test.each(FLAGS_DEBUG)(
+    it.each(FLAGS_DEBUG)(
         'returns true if argv has %p',
         value => {
             process.argv = ['node', 'script.js', value];
@@ -38,7 +38,7 @@ describe(`Function: isProcessDebugging()`, () => {
 
 describe(`Function: isProcessVerbose()`, () => {
 
-    test.each(FLAGS_VERBOSE)(
+    it.each(FLAGS_VERBOSE)(
         'returns true if argv has %p',
         value => {
             process.argv = ['node', 'script.js', value];
@@ -99,7 +99,7 @@ describe(`Function: isEnvVerbose()`, () => {
 
 describe(`Function: isDebugActive()`, () => {
 
-    test.each(FLAGS_DEBUG)(
+    it.each(FLAGS_DEBUG)(
         'returns true if argv has %p but env.DEBUG undefined',
         value => {
 		    delete process.env.DEBUG;
@@ -108,7 +108,7 @@ describe(`Function: isDebugActive()`, () => {
         }
     );
 
-    test.each(FLAGS_DEBUG)(
+    it.each(FLAGS_DEBUG)(
         'returns true if argv has %p but env.DEBUG false',
         value => {
             process.env.DEBUG = 'false';
@@ -117,7 +117,7 @@ describe(`Function: isDebugActive()`, () => {
         }
     );
 
-    test.each(FLAGS_DEBUG)(
+    it.each(FLAGS_DEBUG)(
         'returns true if both env.DEBUG true and argv has %p',
         value => {
             process.env.DEBUG = 'true';
@@ -148,7 +148,7 @@ describe(`Function: isDebugActive()`, () => {
 
 describe(`Function: isVerbose()`, () => {
 
-    test.each(FLAGS_VERBOSE)(
+    it.each(FLAGS_VERBOSE)(
 		'returns true if argv has %p but env.VERBOSE undefined',
 		value => {
 			delete process.env.VERBOSE;
@@ -157,7 +157,7 @@ describe(`Function: isVerbose()`, () => {
 		}
 	);
 
-	test.each(FLAGS_VERBOSE)(
+	it.each(FLAGS_VERBOSE)(
 		'returns true if argv has %p but env.VERBOSE false',
 		value => {
 			process.env.VERBOSE = 'false';
@@ -166,7 +166,7 @@ describe(`Function: isVerbose()`, () => {
 		}
 	);
 
-	test.each(FLAGS_VERBOSE)(
+	it.each(FLAGS_VERBOSE)(
 		'returns true if both env.VERBOSE true and argv has %p',
 		value => {
 			process.env.VERBOSE = 'true';

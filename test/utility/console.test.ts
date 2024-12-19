@@ -15,20 +15,20 @@ afterEach(() => {
 });
 
 describe("clog", () => {
-	test("logs messages to standard output stream", () => {
+	it("logs messages to standard output stream", () => {
 		clog("Hello, World!");
 		expect(logSpy).toHaveBeenCalledWith("Hello, World!");
 	});
 });
 
 describe("Function: clogList", () => {
-	test("logs each line with prefix to stdout", () => {
+	it("logs each line with prefix to stdout", () => {
 		clogList("prefix", "message1", "message2");
 		expect(logSpy).toHaveBeenCalledWith("prefixmessage1");
 		expect(logSpy).toHaveBeenCalledWith("prefixmessage2");
 	});
 
-	test("uses default prefix if none provided", () => {
+	it("uses default prefix if none provided", () => {
 		clogList(undefined, "message1", "message2");
 		expect(logSpy).toHaveBeenCalledWith(" - message1");
 		expect(logSpy).toHaveBeenCalledWith(" - message2");
@@ -36,7 +36,7 @@ describe("Function: clogList", () => {
 });
 
 describe("clogErr", () => {
-	test("logs each line to stderr", () => {
+	it("logs each line to stderr", () => {
 		clogErr("error1", "error2");
 		expect(errorSpy).toHaveBeenCalledWith("error1");
 		expect(errorSpy).toHaveBeenCalledWith("error2");
@@ -44,7 +44,7 @@ describe("clogErr", () => {
 });
 
 describe("clogWarn", () => {
-	test("logs each line to stderr at warn level", () => {
+	it("logs each line to stderr at warn level", () => {
 		clogWarn("warn1", "warn2");
 		expect(warnSpy).toHaveBeenCalledWith("warn1");
 		expect(warnSpy).toHaveBeenCalledWith("warn2");

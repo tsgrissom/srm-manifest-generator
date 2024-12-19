@@ -6,7 +6,7 @@ interface ManifestData {
 	sourceName: string;
 	baseDirectory: string;
 	outputPath: string;
-	shortcuts: Shortcut[];
+	shortcuts: Array<Shortcut>;
 }
 
 export default ManifestData;

@@ -5,7 +5,7 @@ import { doArgsInclude, doesPlatformExist, isProcessRunning, KNOWN_NODE_PLATFORM
 
 describe('Function: doArgsInclude()', () => {
 
-    let originalArgv: string[];
+    let originalArgv: Array<string>;
     const simpleArgsToSearch = ['arg1', 'arg2'];
     const customArgsToSearch = ['--foo', '--bar', '--baz'];
 
@@ -62,14 +62,14 @@ describe('Function: doArgsInclude()', () => {
 
 describe('Function: doesPlatformExist()', () => {
 
-    test.each(KNOWN_NODE_PLATFORMS)(
+    it.each(KNOWN_NODE_PLATFORMS)(
         'returns true for known Node platforms',
         value => {
             expect(doesPlatformExist(value)).toBe(true);
         }
     )
 
-    test.each([
+    it.each([
         'macos', 'windows', 'debian', 'archlinux',
         'osx', 'windows11', 'windows10', 'windows7'
     ])(

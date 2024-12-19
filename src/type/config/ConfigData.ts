@@ -5,7 +5,7 @@ import OutputMode from './OutputMode';
 
 interface ConfigData {
 	search: {
-		manifests: Manifest[];
+		manifests: Array<Manifest>;
 		scanDirectories: boolean;
 		scanRecursively: boolean;
 	};
@@ -18,7 +18,7 @@ interface ConfigData {
 		filePaths: boolean;
 		executables: boolean;
 		unknownConfigKeys: boolean;
-		executableExtensions: string[];
+		executableExtensions: Array<string>;
 	};
 	other: {
 		useColor: boolean;

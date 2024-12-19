@@ -1,7 +1,7 @@
 import FindProcessCommand from './FindProcessCommand';
 
 interface FindProcessOptions {
-	supportedPlatforms: string[];
+	supportedPlatforms: Array<string>;
 	settings: Record<string, FindProcessCommand>;
 }
 

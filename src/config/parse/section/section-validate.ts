@@ -87,7 +87,7 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 					break;
 				}
 
-				let normalized: string[];
+				let normalized: Array<string>;
 
 				if (typeof value === 'string') {
 					normalized = [value];

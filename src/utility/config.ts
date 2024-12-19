@@ -67,7 +67,7 @@ export const resolveKeyFromAlias = (
  */
 // TODO jsdoc + example
 // TODO Write TEST
-export const joinPathKeys = (...keys: string[]) => {
+export const joinPathKeys = (...keys: Array<string>) => {
 	return keys
 		.filter(k => !k.startsWith('.'))
 		.filter(k => !k.endsWith('.'))

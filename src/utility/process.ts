@@ -25,7 +25,7 @@ import FindProcessDefaultOptions from './type/FindProcessDefaultOptions';
  * }
  */
 // TEST Unit
-const doArgsInclude = (argsToSearch: string[] = process.argv, ...argsToFind: string[]): boolean => {
+const doArgsInclude = (argsToSearch: Array<string> = process.argv, ...argsToFind: Array<string>): boolean => {
 	if (argsToSearch === process.argv && argsToSearch.length <= 2) return false;
 	if (argsToFind.length === 0) return false;
 

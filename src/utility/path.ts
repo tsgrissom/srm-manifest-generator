@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { SB_OK_SM, SB_ERR_SM } from './symbols';
+import { SB_ERR_SM, SB_OK_SM } from './symbols';
 
 import ConfigData from '../type/config/ConfigData';
 
@@ -32,16 +32,7 @@ import ConfigData from '../type/config/ConfigData';
  * );
  */
 // TODO TEST Unit
-export function pathHasFileExtension(
-	filePath: string,
-	fileExt: string | string[] = '*'
-) {
-	if (typeof filePath !== 'string')
-		throw new TypeError(`Arg filePath must be a string: ${filePath}`);
-	if (typeof fileExt !== 'string' && !Array.isArray(fileExt))
-		throw new TypeError(
-			`Arg fileExt must a string or an array: ${fileExt}`
-		);
+export function pathHasFileExtension(filePath: string, fileExt: string | Array<string> = '*') {
 	if (typeof fileExt === 'string' && fileExt.trim() === '')
 		throw new Error(`Arg fileExt cannot be an empty string: "${fileExt}"`);
 
@@ -75,23 +66,17 @@ export function pathHasFileExtension(
  */
 export function replaceFileExtension(
 	fileName: string,
-	findExt: string | string[],
+	findExt: string | Array<string>,
 	replaceExt: string,
-	normalize = true
+	normalize = true,
 ): string {
 	if (!fileName || typeof fileName !== 'string')
 		throw new TypeError(`Arg fileName must be a string: ${fileName}`);
 	if (!findExt || (typeof findExt !== 'string' && !Array.isArray(findExt)))
 		// TEST And make sure this doesn't have unexpected behavior
-		throw new TypeError(
-			`Arg findExt must be a string or an array: ${fileName}`
-		);
+		throw new TypeError(`Arg findExt must be a string or an array: ${fileName}`);
 	if (typeof findExt === 'string' && findExt.trim() === '')
 		throw new Error(`Arg findExt cannot be an empty string`);
-	if (typeof replaceExt !== 'string')
-		throw new TypeError(`Arg replaceExt must be a string: ${replaceExt}`);
-	if (typeof normalize !== 'boolean')
-		throw new TypeError(`Arg normalize must be a boolean: ${normalize}`);
 
 	const extsToRemove = [];
 
@@ -99,18 +84,9 @@ export function replaceFileExtension(
 		findExt = normalize ? normalizeFileExtension(findExt) : findExt;
 		extsToRemove.push(findExt);
 	} else {
-		const normalized = findExt
-			.filter(entry => {
-				if (typeof entry !== 'string') {
-					console.error(
-						`Arg findExt contained a non-string within its array value: ${entry}`
-					);
-					return false;
-				}
-
-				return true;
-			})
-			.map(entry => (normalize ? normalizeFileExtension(entry) : entry));
+		const normalized = findExt.map(entry =>
+			normalize ? normalizeFileExtension(entry) : entry,
+		);
 		extsToRemove.push(...normalized);
 	}
 
@@ -138,23 +114,8 @@ export function replaceFileExtension(
  */
 export function normalizeFileExtension(
 	extname: string,
-	excludeExts: string | string[] = ['*']
+	excludeExts: string | Array<string> = ['*'],
 ): string {
-	if (typeof extname !== 'string') {
-		throw new TypeError(`Arg extname must be a string: ${extname}`);
-	}
-
-	if (typeof excludeExts !== 'string' && !Array.isArray(excludeExts)) {
-		throw new TypeError(
-			`Arg excludeExts must be a string or a string array: ${excludeExts}`
-		);
-	}
-	if (Array.isArray(excludeExts) && !excludeExts.every(value => typeof value === 'string')) {
-		throw new TypeError(
-			`If arg excludeExts is an array, every element of it must be a string (at least one was a non-string): ${excludeExts}`
-		);
-	}
-
 	if (typeof excludeExts === 'string') {
 		if (excludeExts === '') {
 			excludeExts = [''];
@@ -183,28 +144,9 @@ export function normalizeFileExtension(
  */
 export function basenameWithoutExtensions(
 	fileName: string,
-	extsToRemove: string | string[] = '*',
-	iterate = true
+	extsToRemove: string | Array<string> = '*',
+	iterate = true,
 ): string {
-	if (typeof fileName !== 'string') {
-		throw new TypeError(
-			`Arg fileName must be a string: ${fileName}`
-		);
-	}
-	if (typeof extsToRemove !== 'string' && !Array.isArray(extsToRemove)) {
-		throw new TypeError(
-			`Arg extsToRemove must be a string or an array of strings: ${extsToRemove}`
-		);
-	}
-	if (Array.isArray(extsToRemove) && !extsToRemove.every(each => typeof each === 'string')) {
-		throw new TypeError(
-			`If arg extsToRemove is an array, every element of the array must be a string, but at least one was not: ${extsToRemove}`
-		)
-	}
-	if (typeof iterate !== 'boolean') {
-		throw new TypeError(`Arg iterate must be a boolean: ${iterate}`);
-	}
-
 	if (!Array.isArray(extsToRemove))
 		// TEST Unit
 		extsToRemove = [extsToRemove];
@@ -262,14 +204,7 @@ export function basenameWithoutExtensions(
  *  the given filepath if it not surrounded by them already.
  * @returns The formatted filepath with the options applied.
  */
-export function fmtPath( // FIXME Quote check doesn't seem to work
-	filePath: string,
-	useUnderline = true,
-	useQuotes = true
-) {
-	if (typeof filePath !== 'string')
-		throw new TypeError(`Arg filePath must be a string: ${filePath}`);
-
+export function fmtPath(filePath: string, useUnderline = true, useQuotes = true) {
 	// TODO Replace with quote utility function
 	if (useQuotes && !filePath.startsWith('"')) filePath = '"' + filePath;
 	if (useQuotes && !filePath.endsWith('"')) filePath = filePath + '"';
@@ -300,13 +235,9 @@ export async function fmtPathWithExistsPrefix( // TODO Update jsdoc
 	usePrefix = true,
 	useSimplePrefix = true,
 	useUnderline = true,
-	useQuotes = true
+	useQuotes = true,
 ): Promise<string> {
-	if (typeof filePath !== 'string')
-		throw new TypeError(`Arg filePath must be a string: ${filePath}`);
-
-	if (useUnderline || useQuotes)
-		filePath = fmtPath(filePath, useUnderline, useQuotes);
+	if (useUnderline || useQuotes) filePath = fmtPath(filePath, useUnderline, useQuotes);
 	if (!(config?.validate.filePaths ?? true)) return filePath;
 
 	let prefixOk = '',
@@ -326,13 +257,9 @@ export function fmtPathWithName(
 	filePath: string,
 	nickname: string,
 	useUnderline = true,
-	useQuotes = true
+	useQuotes = true,
 ): string {
-	if (typeof filePath !== 'string')
-		throw new TypeError(`Arg filePath must be a string: ${filePath}`);
-
-	if (useUnderline || useQuotes)
-		filePath = fmtPath(filePath, useUnderline, useQuotes);
+	if (useUnderline || useQuotes) filePath = fmtPath(filePath, useUnderline, useQuotes);
 
 	return nickname + ': ' + filePath;
 }
@@ -343,13 +270,9 @@ export async function fmtPathWithExistsAndName(
 	config?: ConfigData,
 	linePrefix = '',
 	useUnderline = true,
-	useQuotes = true
+	useQuotes = true,
 ): Promise<string> {
-	if (typeof filePath !== 'string')
-		throw new TypeError(`Arg filePath must be a string: ${filePath}`);
-
-	if (useUnderline || useQuotes)
-		filePath = fmtPath(filePath, useUnderline, useQuotes);
+	if (useUnderline || useQuotes) filePath = fmtPath(filePath, useUnderline, useQuotes);
 	if (!(config?.validate.filePaths ?? true)) return filePath;
 
 	const accessible = await isPathAccessible(filePath);
@@ -362,13 +285,9 @@ export function fmtPathAsTag(
 	filePath: string,
 	useUnderline = true,
 	useQuotes = true,
-	innerPrefix = 'Path'
+	innerPrefix = 'Path',
 ): string {
-	if (typeof filePath !== 'string')
-		throw new TypeError(`Arg filePath must be a string: ${filePath}`);
-
-	if (useUnderline || useQuotes)
-		filePath = fmtPath(filePath, useUnderline, useQuotes);
+	if (useUnderline || useQuotes) filePath = fmtPath(filePath, useUnderline, useQuotes);
 
 	innerPrefix = innerPrefix !== '' ? innerPrefix + ': ' : '';
 

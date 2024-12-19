@@ -16,7 +16,7 @@ import {
 // MARK: Fn startsButDoesNotEndWith
 
 describe('Function: startsButDoesNotEndWith', () => {
-	test.each([
+	it.each([
 		// str, sequence, expected
 		['**String', '**', true],
 		['**String**', '**', false],
@@ -30,7 +30,7 @@ describe('Function: startsButDoesNotEndWith', () => {
 // MARK: Fn endsButDoesNotStartWith
 
 describe('Function: endsButDoesNotStartWith', () => {
-	test.each([
+	it.each([
 		// str, sequence, expected
 		['**String', '**', false],
 		['**String**', '**', false],
@@ -45,7 +45,7 @@ describe('Function: endsButDoesNotStartWith', () => {
 
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isWrapped', () => {
-	test.each([
+	it.each([
 		['Unquoted (double)', '"', false],
 		['"Quoted (double)"', '"', true],
 		['"Partial Quoted (double, lead)', '"', false],
@@ -69,7 +69,7 @@ describe('Function: wrap', () => {
 		expect(() => wrap('string', '')).toThrow();
 	});
 
-	test.each([
+	it.each([
 		// str, sequence, force, fixPartialWrap, expected
 		['Hello', '**', false, false, '**Hello**'],
 		['Hello', '**', true, false, '**Hello**'],
@@ -93,7 +93,7 @@ describe('Function: unwrap', () => {
 		expect(() => unwrap('string', '')).toThrow();
 	});
 
-	test.each([
+	it.each([
 		// str, sequence, removePartialWrap, expected
 		['**Hello**', '**', false, 'Hello'],
 		['**Hello', '**', false, '**Hello'],
@@ -109,7 +109,7 @@ describe('Function: unwrap', () => {
 
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isSingleQuoted', () => {
-	test.each([
+	it.each([
 		[`"str"`, false],
 		[`'str'`, true],
 		[`str`, false],
@@ -126,7 +126,7 @@ describe('Function: isSingleQuoted', () => {
 
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isDoubleQuoted', () => {
-	test.each([
+	it.each([
 		[`"str"`, true],
 		[`'str'`, false],
 		[`str`, false],
@@ -144,7 +144,7 @@ describe('Function: isDoubleQuoted', () => {
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isQuoted()', () => {
 
-	test.each([
+	it.each([
 		// str, acceptSingleQuotes, expected
 		[`"str"`, false, true],
 		[`"str"`, true, true],
@@ -169,7 +169,7 @@ describe('Function: isQuoted()', () => {
 // MARK: Fn singleQuote
 
 describe('Function: singleQuote()', () => {
-	test.each([
+	it.each([
 		// expected, str, force, fixPartialWrap
 		["'str'", "str", false, false],     // normal wrap
 		[`'"str"'`, `"str"`, false, false], // both quote styles (already double)
@@ -192,7 +192,7 @@ describe('Function: singleQuote()', () => {
 // MARK: Fn doubleQuote
 
 describe('Function: doubleQuote()', () => {
-	test.each([
+	it.each([
 		// expected, str, force, fixPartialWrap
 		// TODO Find solution to how ugly this ordering is, expected first bleh
 		['"str"', 'str', false, false],    // normal wrap
@@ -216,7 +216,7 @@ describe('Function: doubleQuote()', () => {
 // MARK: Fn quote
 
 describe('Function: quote()', () => {
-	test.each([
+	it.each([
 		// str, useSingleQuotes, force, fixPartialWrap, expected
 		[`string`,   false, false, false, `"string"`],   // non-quoted -> double-quoted
 		[`string`,   true,  false, false, `'string'`],   // non-quoted -> single-quoted
@@ -242,7 +242,7 @@ describe('Function: quote()', () => {
 
 // MARK: Fn unquote
 describe('Function: unquote()', () => {
-	test.each([
+	it.each([
 		// str, useSingleQuotes, removePartialWrap, expected
 		[`string`, false, false, 'string'], // non-quoted -> given str
 		[`string`, true,  true,  'string'], // non-quoted -> given str
