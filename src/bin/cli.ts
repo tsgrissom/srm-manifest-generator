@@ -35,6 +35,8 @@ const LIST_ALL_CATEGORIES = Array.from(
 );
 const LIST_RECOMMENDED_CATEGORIES = ['categories', 'manifests', 'shortcuts'];
 
+// TODO Handle no config
+
 await yargs(hideBin(process.argv))
 	.scriptName('srmg')
 	.command(

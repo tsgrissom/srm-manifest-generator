@@ -2,20 +2,22 @@ import clr from 'chalk';
 import fs from 'node:fs/promises';
 import YAML from 'yaml';
 
-import { checkCross } from '../../utility/boolean.js';
+import { checkCross, yesNo } from '../../utility/boolean.js';
 import {
+	clogConfigKeyUnknown,
 	clogConfigValueWrongType,
 	clogConfigWarn,
-	dlogConfigValueLoaded,
 	resolveKeyFromAlias,
+	vlogConfigValueLoaded,
 } from '../../utility/config.js';
 import { clog } from '../../utility/console.js';
-import { dlog, dlogHeader } from '../../utility/debug.js';
+import { dlog, dlogHeader, isDebugActive, isVerbose, vlog } from '../../utility/debug.js';
 import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path.js';
-import { quote } from '../../utility/string-wrap.js';
 import {
 	SB_ERR_LG,
+	SB_ERR_SM,
 	SB_OK_LG,
+	SB_OK_SM,
 	SB_WARN,
 	UNICODE_ARRW_RIGHT,
 } from '../../utility/symbols.js';
@@ -27,7 +29,7 @@ import ManifestData from '../../type/manifest/ManifestData.js';
 
 import UserConfig from '../../type/config/UserConfig.js';
 import Shortcut from '../../type/shortcut/Shortcut.js';
-import { isShortcutData } from '../../type/shortcut/ShortcutData.js';
+import { isShortcutData, ShortcutData } from '../../type/shortcut/ShortcutData.js';
 import { USER_CONFIG_FILENAME } from '../load-data.js';
 import loadManifestShortcuts from './shortcuts.js';
 
@@ -49,7 +51,7 @@ async function makeManifests(
 	for (const [index, manPath] of manPaths.entries()) {
 		const id = index + 1;
 		const pathTag = fmtPathAsTag(manPath);
-		dlog(`${UNICODE_ARRW_RIGHT} Validating: Manifest #${id} ${pathTag}`);
+		dlog(`${UNICODE_ARRW_RIGHT} Starting: Manifest #${id} ${pathTag}`);
 
 		const exists = await validateManifestPathExists(manPath);
 		const okFsType = await validateManifestPathIsSupportedFilesystemType(
@@ -71,7 +73,7 @@ async function makeManifests(
 
 		okManifests.push(instance);
 
-		dlog(`${SB_OK_LG} Validated: Manifest #${id} ${pathTag}`);
+		dlog(`${SB_OK_LG} Finished: Manifest #${id} ${pathTag}`);
 	}
 
 	clogLoadedManifests(manPaths, okManifests);
@@ -85,40 +87,33 @@ function clogLoadedManifests(
 ): void {
 	const nAll = manifestPaths.length;
 	const nOk = okManifests.length;
-	const ratio = `${nOk}/${nAll}`;
-
-	// TODO Isolate below
+	const nFail = nAll - nOk;
 
 	if (nOk <= 0) {
-		const postfix = nAll > 0 ? clr.red(ratio) : '';
-		clog(
-			`${SB_ERR_LG} No manifest paths were loaded from the ${USER_CONFIG_FILENAME} ${postfix}`,
-		);
-		// TODO Debug log here
-		return;
-	}
-
-	let prefix = '',
-		blob = '',
-		postfix = '';
-	if (nAll === nOk) {
-		if (nAll > 0) {
-			prefix = SB_OK_LG;
-			blob = 'All configured manifest paths were loaded';
-			postfix = clr.greenBright(ratio);
-		} else if (nAll === 0) {
-			prefix = SB_ERR_LG;
-			blob = 'None of the configured manifest paths were loaded';
+		// none were ok
+		if (nOk === nAll) {
+			// none to load so none were ok; pass + warn
+			clog(`${SB_WARN} Since no manifest paths were configured, none were loaded`);
+		} else {
+			// all failed to load; err
+			clog(
+				`${SB_ERR_LG} All configured manifest paths failed to load (${nAll} failed)`,
+			);
 		}
-	} else if (nAll > nOk) {
-		prefix = SB_WARN;
-		blob = 'Some but not all configured manifest paths were loaded';
-		postfix = clr.yellowBright(ratio);
 	} else {
-		throw new Error(`Unexpected: nAll < nOk`);
+		// at least one ok
+		if (nOk === nAll) {
+			// at loaded ok; pass
+			dlog(
+				`${SB_OK_LG} All configured manifest paths were loaded succesfully (${nAll})`,
+			);
+		} else {
+			// at least one failed to load; err
+			clog(
+				`${SB_ERR_LG} At least one configured manifest path failed to load (${nFail} failed)`,
+			);
+		}
 	}
-
-	clog(`${prefix} ${blob} (${postfix})`);
 }
 
 async function validateManifestPathExists(filePath: string): Promise<boolean> {
@@ -128,7 +123,7 @@ async function validateManifestPathExists(filePath: string): Promise<boolean> {
 		await fs.access(filePath).catch(() => {
 			return false;
 		});
-	} catch (err) {
+	} catch {
 		throw new Error(`Error while validating manifest path existence ${pathTag}`);
 	}
 
@@ -167,7 +162,7 @@ async function validateManifestPathIsSupportedFilesystemType(
 				`Unsupported filesystem type at the given path was ignored ${pathTag}`,
 			);
 		}
-	} catch (err) {
+	} catch {
 		throw new Error(`Failed to stat manifest path ${filePath}`);
 	}
 
@@ -257,7 +252,7 @@ function parseManifestFileContentsToData(
 				// TODO Check for empty
 
 				data.sourceName = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'baseDirectory': {
@@ -271,7 +266,7 @@ function parseManifestFileContentsToData(
 				// TODO Check for empty
 
 				data.baseDirectory = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'outputPath': {
@@ -285,41 +280,31 @@ function parseManifestFileContentsToData(
 				// TODO Check for empty
 
 				data.outputPath = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'shortcuts': {
-				const manName = data.sourceName;
-				if (typeof value !== 'object') {
-					console.log(clr.red(`SHORTCUTS!!! NOT AN OBJECT: ${manName}`));
-					break;
-				}
+				const manName = data.sourceName; // TODO Replace with an id
+
+				// TODO Move all this to its own function, maybe its own file `shortcut-data.ts` or to `shortcut.ts`?
+
 				if (!Array.isArray(value)) {
-					console.log(clr.red(`SHORTCUTS!!! NOT AN ARRAY: ${manName}`));
+					clogConfigValueWrongType(
+						fullGivenKey,
+						'array of shortcut objects',
+						value,
+					);
+					// TODO Break down what's wrong for debug log
+					// TODO Verbose log something like this:
+					// Is value type === object? Yes/No
+					// Is value an array? Yes/No
+					//
+					// Is value an array of objects? Yes/No
+					//   Is array? Yes/No (type if no)
+					//   Is every element an object? Yes/No
 					break;
 				}
-				if (Array.isArray(value)) {
-					const okShortcuts = value.filter(isShortcutData);
 
-					if (okShortcuts.length <= 0) {
-						console.log(
-							clr.red(
-								`MAN SHORTCUTS!!! LESS THAN OR 0 OK SHORTCUTS: ${manName}`,
-							),
-						);
-					} else {
-						console.log(
-							clr.green(
-								`MAN SHORTCUTS!!! ${okShortcuts.length} OK SHORTCUTS: ${manName}`,
-							),
-						);
-					}
-
-					hasShortcuts = true;
-					data.shortcuts = okShortcuts.map(each => new Shortcut(each), config);
-					dlogConfigValueLoaded(resolved, value);
-					break;
-				}
 				// if (
 				// 	Array.isArray(value) &&
 				// 	!value.every(element => element instanceof Shortcut)
@@ -346,17 +331,105 @@ function parseManifestFileContentsToData(
 				// 	break;
 				// }
 
-				clogConfigValueWrongType(
-					fullGivenKey,
-					'array of shortcut objects',
-					value,
-				);
+				const totalLen = value.length;
+
+				const okShortcuts: Array<ShortcutData> = [];
+				const disabledShortcuts: Array<ShortcutData> = [];
+				let failLen = 0;
+
+				for (const element of value) {
+					if (!isShortcutData(element)) {
+						clog(
+							`  ${SB_ERR_SM} Invalid shortcut data found (Manifest: ${manName}):`,
+						);
+						if (isDebugActive()) {
+							console.log(element);
+						}
+						failLen++;
+
+						continue;
+					}
+
+					const isEnabled = new Shortcut(element).isEnabled;
+
+					vlog(`  ${SB_OK_SM} Valid shortcut data for title ${element.title}`);
+					if (isVerbose()) {
+						clog(`    > From Manifest: ${manName}`);
+						clog(`    > Title: ${element.title}`);
+						clog(`    > Target: ${element.target}`);
+						clog(`    > Enabled? ${yesNo(isEnabled)}`);
+					}
+
+					if (!isEnabled) {
+						disabledShortcuts.push(element);
+						continue;
+					}
+
+					okShortcuts.push(element);
+				}
+
+				const okLen = okShortcuts.length;
+				const disabledLen = disabledShortcuts.length;
+				const diffTotalToDisabled = totalLen - disabledLen;
+				const enabledLen = diffTotalToDisabled <= 0 ? 0 : diffTotalToDisabled;
+
+				if (enabledLen <= 0 && totalLen > 0) {
+					dlog(
+						`${SB_OK_LG} All shortcuts were disabled in manifest ${manName} (${disabledLen} disabled)`,
+					);
+					break;
+				}
+
+				if (okLen === totalLen) {
+					// equal ok to total
+					if (totalLen <= 0) {
+						// none to load, so none are ok; pass
+						dlog(
+							`${SB_OK_LG} Loaded no shortcuts because there were none to load (Manifest: ${manName})`,
+						);
+					} else {
+						// all were loaded; pass
+						dlog(
+							`${SB_OK_LG} All shortcuts from manifest ${manName} loaded successfully (${okLen})`,
+						);
+					}
+				} else {
+					// inequal ok to total
+					if (okLen <= 0) {
+						// there were some to load, but none were ok; fail
+						dlog(
+							`${SB_ERR_LG} All shortcuts from manifest ${manName} failed to load (${totalLen} failed)`,
+						);
+					} else {
+						// some of the total were loaded, some failed
+						clog(
+							`${SB_WARN} Some shortcuts from manifest ${manName} failed to load (${okLen} ok, ${failLen} failed)`,
+						);
+
+						if (failLen > 0) {
+							// at least one failed
+							clog(
+								`  ${SB_ERR_SM} Some shortcuts from manifest ${manName} failed to load (${failLen} failed)`,
+								`  - To view the failed shortcut, re-execute with the ${clr.italic('--debug')} flag`,
+							);
+						}
+
+						if (disabledLen > 0) {
+							// at least one
+							dlog(
+								`  ${SB_OK_SM} Some shortcuts from manifest ${manName} were disabled (${disabledLen} disabled)`,
+							);
+						}
+					}
+				}
+
+				hasShortcuts = true;
+				data.shortcuts = okShortcuts.map(each => new Shortcut(each), config);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {
-				if (config.shouldWarnUnknownConfigKey()) {
-					clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
-				}
+				clogConfigKeyUnknown(fullGivenKey, config);
 			}
 		}
 	}
@@ -366,11 +439,12 @@ function parseManifestFileContentsToData(
 	const hasBaseDirectory = data.baseDirectory.trim() !== '';
 	const hasOutputPath = data.outputPath.trim() !== '';
 
-	// TODO Below should be verbose
-	dlog(`  ${checkCross(hasBaseDirectory)} Has required attribute "baseDirectory"?`);
-	dlog(`  ${checkCross(hasOutputPath)} Has required attribute "outputPath"?`);
-	dlog(`  ${checkCross(hasSourceName)} Has optional attribute "sourceName"?`);
-	dlog(`  ${checkCross(hasShortcuts)} Has optional attribute "shortcuts"?`);
+	vlog(
+		`  ${checkCross(hasBaseDirectory)} Has required attribute "baseDirectory"?`,
+		`  ${checkCross(hasOutputPath)} Has required attribute "outputPath"?`,
+		`  ${checkCross(hasSourceName)} Has optional attribute "sourceName"?`,
+		`  ${checkCross(hasShortcuts)} Has optional attribute "shortcuts"?`,
+	);
 
 	// Fallback om filename
 	if (!hasSourceName)

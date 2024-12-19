@@ -10,7 +10,8 @@ import { clog } from './utility/console.js';
 import { isVerbose } from './utility/debug.js';
 import { fmtPathAsTag, fmtPathWithExistsPrefix } from './utility/path.js';
 import { quote } from './utility/string-wrap.js';
-import { SB_OK_LG, SB_WARN } from './utility/symbols.js';
+import { countNoun, possessivePronounFor } from './utility/string.js';
+import { SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from './utility/symbols.js';
 
 async function processManifest(manifest: Manifest): Promise<void> {
 	// TODO Additionally validate if write path is valid, make folders if missing
@@ -154,23 +155,34 @@ export async function transformLoadedManifests(config: ConfigData): Promise<void
 		return;
 	}
 
-	const noun = manLen === 1 ? 'manifest' : 'manifests';
-	clog(`${SB_OK_LG} Found ${clr.green(manLen)} ${noun} to transform into JSON`);
+	const subject = countNoun(manLen, 'manifest');
+	const pronoun = possessivePronounFor(manLen);
+	const object = countNoun(manLen, 'equivalent');
+	clog(
+		`${UNICODE_ARRW_RIGHT} Transforming: ${manLen} ${subject} into ${pronoun} JSON ${object}`,
+	);
+
 	if (isVerbose()) {
 		for (const man of manifests) {
 			clog(fmtManifestAsListEntry(man));
 		}
 	}
 
+	let okLen = 0;
+
 	for (const man of manifests) {
 		try {
 			await processManifest(man);
+			okLen++;
 		} catch {
 			console.error(
 				clr.red(`Error processing manifest ${fmtPathAsTag(man.filePath)}`),
 			);
 		}
 	}
+
+	// TODO More responsive print
+	clog(`${SB_OK_LG} Transformed: ${okLen} out of ${manLen} manifests into JSON output`);
 }
 
 export async function startApp(): Promise<void> {

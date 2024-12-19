@@ -3,10 +3,10 @@ import {
 	clogConfigValueWrongType,
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
-	dlogConfigValueLoaded,
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
-	resolveKeyFromAlias
+	resolveKeyFromAlias,
+	vlogConfigValueLoaded,
 } from '../../../utility/config.js';
 
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
@@ -18,7 +18,7 @@ const keyAliases: ConfigKeyAliases = {
 	debug: 'debug',
 	debugging: 'debug',
 	verbose: 'verbose',
-	verbosity: 'verbose'
+	verbosity: 'verbose',
 };
 
 function parseOtherSection(data: object, config: UserConfig): UserConfig {
@@ -48,7 +48,7 @@ function parseOtherSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.other.debug = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'useColor': {
@@ -58,7 +58,7 @@ function parseOtherSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.other.useColor = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'verbose': {
@@ -68,7 +68,7 @@ function parseOtherSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.other.verbose = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {

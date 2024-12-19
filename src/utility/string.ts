@@ -1,8 +1,8 @@
-// MARK: GRAMMATICAL
+// TODO Consider rename file to `string-grammer.ts`
 
 // TODO jsdoc
 // TODO trimStart option
-// TEST Unit
+// TODO Unit test
 export const capitalize = (s: string): string => {
 	if (s.trim() === '' || s.length < 1) return s;
 
@@ -31,41 +31,131 @@ export const isCapitalized = (s: string, trimStart = false): boolean => {
 	return firstChar.toLowerCase() !== firstChar;
 };
 
-// TODO trim start
 /**
  * Checks if given string {@link s} begins with a
- * Latin alphabet vowel character.
+ * vowel letter from the Latin alphabet, based on
+ * vowel set "aeiou".
+ *
  * @param s The string to check for presence of a
  *  Latin vowel character.
  * @returns Whether a vowel character is present
  *  at the beginning of the given string.
  */
+// TODO trim start
 export const startsWithVowel = (s: string): boolean => {
 	const firstLetter = s.substring(0, 1); // TODO firstLetter fn w/ support for trim start
 	return ['a', 'e', 'i', 'o', 'u'].includes(firstLetter.toLowerCase());
 };
 
 /**
- * Attempts to infer an English indefinite article for a
- * given noun based on the first letter of the given
- * argument: Either "a" or "an".
+ * Attempts to infer the correct English language indefinite
+ * article for a noun based on the first character of the
+ * given {@link noun}.
  *
- * If your noun is an edge case where its first letter is
- * a consonant but has a vowel sound, don't use this method
- * and try to hardcode a solution.
+ * * If the first character of the given {@link noun} is a
+ *   vowel letter from the Latin alphabet, returns string
+ *   literal `"an"`. Otherwise, returns `"a"`.
+ * * Simplistic model of the appropriate indefinite article
+ *   for a given noun, based on vowel set "aeiou".
+ * * If given noun is an edge case where its first letter
+ *   has an unexpected sound (e.g. consonant with a vowel
+ *   sound), attempt to manually handle instead.
  *
  * @param noun The noun to attempt inference of the
  *  correct English article from.
  * @returns One of either string literal: `"a"` or `"an"`.
  */
-// TEST Unit
-export const indefiniteArticleFor = (noun: string): string => {
-	noun = `${noun}`;
-	if (noun.trim() === '') return '';
-	return startsWithVowel(noun) ? 'an' : 'a';
-};
+// TODO Unit test
+// TODO Trim start option
+export function indefiniteArticleFor(
+	noun: string,
+	articleIfConsonant = 'a',
+	articleIfVowel = 'an',
+): string {
+	if (noun.trim() === '') {
+		return '';
+	}
 
-// TODO TEST Unit
+	return startsWithVowel(noun) ? articleIfVowel : articleIfConsonant;
+}
+
+/**
+ * Attemps to infer the grammatical number of a given number of
+ * things {@link n} based on a simplified model of English
+ * grammar.
+ *
+ * * Infers if `n` is singular or plural, given the assumption
+ *   that it refers to a number of things.
+ * * If `n` is 1 or `n` is -1, the `n` is singular. Otherwise `n`
+ *   is plural.
+ *
+ * @param n The number of things to attempt inference of
+ * @returns Whether `n` is plural or not (singular.)
+ */
+// TODO Unit test
+export function isNumberPlural(n: number): boolean {
+	return n !== 1 && n !== -1;
+}
+
+/**
+ * Attempts to infer the correct English language possessive
+ * pronoun for a given number of things {@link n}.
+ *
+ * * If the is number is plural ({@link isNumberPlural}), returns
+ *   string literal `"their"`, otherwise returning `"its"`.
+ * * Simplistic model of possessive pronoun grammar for simple
+ *   cases only. Manually handle more complex cases.
+ *
+ * @param n The number of things for which to infer a possessive
+ *  pronoun.
+ * @param pluralForm The plural form of a possessive pronoun.
+ * @param singularForm The singular form of a possessive pronoun.
+ * @returns The inferred possessive pronoun based on the given
+ *  parameters.
+ */
+// TODO Unit test
+export function possessivePronounFor(
+	n: number,
+	pluralForm = 'their',
+	singularForm = 'its',
+): string {
+	return isNumberPlural(n) ? pluralForm : singularForm;
+}
+
+// TODO Unit test
+// TODO jsdoc
+export function countNoun(n: number, singular: string, plural?: string): string {
+	if (singular.trim() === '') {
+		throw new Error(`Arg "singular" must be a non-empty string: "${singular}"`);
+	}
+
+	if (plural === undefined || (typeof plural === 'string' && plural.trim() === '')) {
+		plural = '';
+	}
+
+	if (!plural) {
+		if (!singular.endsWith('s') && !singular.endsWith("'")) {
+			plural = singular + 's';
+		} else if (singular.endsWith('s')) {
+			if (singular.length <= 5 || singular.endsWith('ss')) {
+				// TODO Check if <= 5 is a statistically sound guess
+				plural = singular + 'es';
+			}
+		}
+	}
+
+	let form: string;
+	if (n === 1 || n === -1) form = singular;
+	else form = plural;
+
+	// if (form.startsWith(' ') || form.endsWith(' ')) form = form.trim();
+	if (form.trim() !== form) {
+		form = form.trim();
+	}
+
+	return form;
+}
+
 /**
  * Creates a phrase which counts the quantity of some things.
  * If the {@link plural} form is not given, attempts to apply a
@@ -83,36 +173,22 @@ export const indefiniteArticleFor = (noun: string): string => {
  * @param plural The plural form of the desired noun. Will attempt
  *  to be inferred if absent or empty.
  * @returns A `string` containing the created quantity description.
+ * @example
+ * describeQuantity(0, 'dog'); // -> "0 dogs"
+ * describeQuantity(1, 'cat'); // -> "1 cat"
+ * describeQuantity(2, 'dog'); // -> "2 dogs"
+ * describeQuantity(2, 'dog', 'doggies); // -> "2 doggies"
  */
+// TODO Rewrite unit tests
+// TODO Rewrite jsdoc (except example)
 export function describeQuantity(n: number, singular: string, plural?: string): string {
-	if (singular.trim() === '') {
-		throw new Error(`Arg singular must be a non-empty string: ${singular}`);
-	}
-	if (plural === undefined || (typeof plural === 'string' && plural.trim() === '')) {
-		plural = '';
-	}
-
-	if (!plural) {
-		if (!singular.endsWith('s') && !singular.endsWith("'")) {
-			plural = singular + 's';
-		} else if (singular.endsWith('s')) {
-			if (singular.length <= 5 || singular.endsWith('ss')) {
-				plural = singular + 'es';
-			}
-		}
-	}
-
-	let form: string;
-	if (n === 1 || n === -1) form = singular;
-	else form = plural;
-
-	if (form.startsWith(' ') || form.endsWith(' ')) form = form.trim();
-
+	const form = countNoun(n, singular, plural);
 	return `${n} ${form}`;
 }
 
 // TODO jsdoc
-// TODO TEST Unit
+// TODO Unit test
+// FIXME Trailing delimiter
 export function delimitedList(items: string | Array<string>, delimiter = ', '): string {
 	if (typeof items === 'string') {
 		return items;
@@ -151,6 +227,8 @@ export function delimitedList(items: string | Array<string>, delimiter = ', '): 
  * @param value The value to type check for an array-inclusive
  *  type display name `string`.
  */
+// TODO Custom color for true/false? A lighter green/red to distinguish from ansi green/red
+// TODO Move to `type.ts`?
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getTypeDisplayName = (value?: any): string =>
 	Array.isArray(value) ? 'array' : `${typeof value}`;

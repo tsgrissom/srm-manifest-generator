@@ -3,10 +3,10 @@ import {
 	clogConfigValueWrongType,
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
-	dlogConfigValueLoaded,
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
-	resolveKeyFromAlias
+	resolveKeyFromAlias,
+	vlogConfigValueLoaded,
 } from '../../../utility/config.js';
 import { quote } from '../../../utility/string-wrap.js';
 
@@ -28,7 +28,7 @@ const keyAliases: ConfigKeyAliases = {
 	configKey: 'unknownConfigKeys',
 	configKeys: 'unknownConfigKeys',
 	unknownKey: 'unknownConfigKeys',
-	unknownKeys: 'unknownConfigKeys'
+	unknownKeys: 'unknownConfigKeys',
 };
 
 function parseValidateSection(data: object, config: UserConfig): UserConfig {
@@ -58,7 +58,7 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.validate.filePaths = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'executables': {
@@ -68,7 +68,7 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.validate.executables = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'unknownConfigKeys': {
@@ -78,12 +78,19 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.validate.unknownConfigKeys = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'executableExtensions': {
-				if (typeof value !== 'object' || (!Array.isArray(value) && typeof value !== 'string')) {
-					clogConfigValueWrongType(fullGivenKey, 'string or array of strings', value); // TOOD Check each entry inside array too
+				if (
+					typeof value !== 'object' ||
+					(!Array.isArray(value) && typeof value !== 'string')
+				) {
+					clogConfigValueWrongType(
+						fullGivenKey,
+						'string or array of strings',
+						value,
+					); // TOOD Check each entry inside array too
 					break;
 				}
 
@@ -99,12 +106,12 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 					normalized = value;
 				} else {
 					throw new TypeError(
-						`Unexpected: Could not convert config value ${quote(fullGivenKey)} into an array`
+						`Unexpected: Could not convert config value ${quote(fullGivenKey)} into an array`,
 					);
 				}
 
 				config.validate.executableExtensions = normalized;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {

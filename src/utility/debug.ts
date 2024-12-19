@@ -6,6 +6,8 @@ import { doArgsInclude } from './process.js';
 const FLAGS_DEBUG = ['-D', '--debug', '--debugging'],
 	FLAGS_VERBOSE = ['-v', '--verbose'];
 
+// MARK: Checks
+
 /**
  * Checks if one of at least one of the debugging flags was passed to the
  * current process.
@@ -85,6 +87,8 @@ function isDebugActive(isVerboseCountedAsDebugging = true): boolean {
 	);
 }
 
+// MARK: Debug Logs
+
 /**
  * Logs messages to standard output if debugging is active, which
  * occurs if the current process or environment is debugging.
@@ -145,6 +149,16 @@ const dlogDataSection = (
 	dlogList(linePfx, ...lines);
 };
 
+// MARK: Verbose Logs
+
+function vlog(...lines: Array<string>): void {
+	if (!isVerbose()) {
+		return;
+	}
+
+	lines.forEach(line => console.log(line));
+}
+
 export {
 	dlog,
 	dlogDataSection,
@@ -158,4 +172,5 @@ export {
 	isProcessDebugging,
 	isProcessVerbose,
 	isVerbose,
+	vlog,
 };

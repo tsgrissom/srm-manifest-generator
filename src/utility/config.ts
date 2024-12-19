@@ -4,7 +4,7 @@ import clr from 'chalk';
 
 import { fmtBool, yesNo } from './boolean.js';
 import { clog } from './console.js';
-import { dlog, isDebugActive } from './debug.js';
+import { dlog, isDebugActive, vlog } from './debug.js';
 import { quote } from './string-wrap.js';
 import { getTypeDisplayName, indefiniteArticleFor } from './string.js';
 import {
@@ -170,17 +170,17 @@ const fmtValueForLoadedLog = (value?: any): string => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const dlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any): void => {
+export const vlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any): void => {
 	const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
 	const usedAlias = givenKey !== resolvedKey;
 
-	dlog(`  ${SB_OK_SM} Key loaded ${quote(fullGivenKey)}`);
+	vlog(`  ${SB_OK_SM} Key loaded ${quote(fullGivenKey)}`);
 	// TODO Make the below verbose logs
-	dlog(`    > Value: ${fmtValueForLoadedLog(value)}`);
-	dlog(`    > Alias used? ${yesNo(usedAlias)}`);
+	vlog(`    > Value: ${fmtValueForLoadedLog(value)}`);
+	vlog(`    > Alias used? ${yesNo(usedAlias)}`);
 	if (usedAlias) {
-		dlog(`    > Alias: ${quote(givenKey)}`);
-		dlog(`    > Actual: ${quote(resolvedKey)}`);
+		vlog(`    > Alias: ${quote(givenKey)}`);
+		vlog(`    > Actual: ${quote(resolvedKey)}`);
 	}
 };
 

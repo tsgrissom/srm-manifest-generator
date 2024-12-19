@@ -5,8 +5,8 @@ import {
 	clogConfigValueWrongType,
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
-	dlogConfigValueLoaded,
-	resolveKeyFromAlias
+	resolveKeyFromAlias,
+	vlogConfigValueLoaded,
 } from '../../../utility/config.js';
 import { clog } from '../../../utility/console.js';
 import { quote } from '../../../utility/string-wrap.js';
@@ -23,7 +23,7 @@ const keyAliases: ConfigKeyAliases = {
 	folders: 'scanDirectories',
 	recursively: 'scanRecursively',
 	recursive: 'scanRecursively',
-	sources: 'manifests'
+	sources: 'manifests',
 };
 
 async function parseSearchSection(data: object, config: UserConfig): Promise<UserConfig> {
@@ -53,7 +53,7 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 				}
 
 				config.search.scanDirectories = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'scanRecursively': {
@@ -63,7 +63,7 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 				}
 
 				config.search.scanRecursively = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case `manifests`: {
@@ -71,20 +71,23 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 				// Maybe here we can just validate paths if needed, then have makeManifests in the UserConfig on demand?
 				if (!value) {
 					console.log(
-						`${SB_WARN} No manifest paths were provided at config key ${quote(fullResolvedKey)} so no manifests were loaded`
+						`${SB_WARN} No manifest paths were provided at config key ${quote(fullResolvedKey)} so no manifests were loaded`,
 					);
 					break;
 				}
 
-				if (Array.isArray(value) && value.every(item => typeof item === 'string')) {
+				if (
+					Array.isArray(value) &&
+					value.every(item => typeof item === 'string')
+				) {
 					config.search.manifests = await makeManifests(value, config);
-					dlogConfigValueLoaded(resolved, value);
+					vlogConfigValueLoaded(resolved, value);
 				} else {
 					if (!Array.isArray(value)) {
 						clogConfigValueWrongType(fullGivenKey, 'array of strings', value); // TODO Probably want a custom print here
 					} else {
 						clog(
-							`   ${SB_ERR_SM} Values inside array value of key ${quote(fullResolvedKey)} must all be strings, but at least one was a non-string`
+							`   ${SB_ERR_SM} Values inside array value of key ${quote(fullResolvedKey)} must all be strings, but at least one was a non-string`,
 						);
 					}
 				}

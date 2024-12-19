@@ -5,7 +5,7 @@ import clr from 'chalk';
 import yaml from 'yaml';
 
 import { clog } from '../utility/console.js';
-import { dlog } from '../utility/debug.js';
+import { vlog } from '../utility/debug.js';
 import { fmtPath, fmtPathAsTag } from '../utility/path.js';
 import { quote } from '../utility/string-wrap.js';
 import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../utility/symbols.js';
@@ -170,7 +170,7 @@ async function loadUserConfigData(): Promise<object> {
 
 	try {
 		exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');
-		dlog(`${SB_OK_LG} Example config exists ${tagExampleConfPath}`);
+		vlog(`${SB_OK_LG} Example config exists ${tagExampleConfPath}`);
 	} catch {
 		// TODO Allow disabling this in the config
 		// TODO Maybe take input from user?
@@ -188,8 +188,7 @@ async function loadUserConfigData(): Promise<object> {
 	try {
 		// Check that user config file exists
 		userConfigHandle = await fs.promises.open(USER_CONFIG_PATH, 'r');
-		// TODO Make verbose
-		dlog(`${SB_OK_LG} User config was opened successfully ${tagUserConfPath}`);
+		vlog(`${SB_OK_LG} User config exists ${tagUserConfPath}`);
 	} catch {
 		// User config is missing
 		try {

@@ -3,10 +3,10 @@ import {
 	clogConfigValueWrongType,
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
-	dlogConfigValueLoaded,
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
-	resolveKeyFromAlias
+	resolveKeyFromAlias,
+	vlogConfigValueLoaded,
 } from '../../../utility/config.js';
 
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
@@ -18,7 +18,7 @@ const keyAliases: ConfigKeyAliases = {
 	output: 'outputPath',
 	outputFile: 'outputPath',
 	fileName: 'nameFormat',
-	format: 'nameFormat'
+	format: 'nameFormat',
 };
 
 function parseLogsSection(data: object, config: UserConfig): UserConfig {
@@ -48,7 +48,7 @@ function parseLogsSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.logs.enabled = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'outputPath': {
@@ -58,7 +58,7 @@ function parseLogsSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.logs.outputPath = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'nameFormat': {
@@ -68,7 +68,7 @@ function parseLogsSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.logs.nameFormat = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {

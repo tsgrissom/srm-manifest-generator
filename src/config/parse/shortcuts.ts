@@ -2,13 +2,18 @@ import clr from 'chalk';
 
 import {
 	clogConfigValueWrongType,
-	dlogConfigValueLoaded,
 	resolveKeyFromAlias,
+	vlogConfigValueLoaded,
 } from '../../utility/config.js';
 import { clog } from '../../utility/console.js';
-import { dlog, dlogHeader } from '../../utility/debug.js';
+import { dlog, vlog } from '../../utility/debug.js';
 import { quote } from '../../utility/string-wrap.js';
-import { SB_OK_LG, SB_WARN } from '../../utility/symbols.js';
+import {
+	SB_ERR_LG,
+	SB_OK_LG,
+	SB_WARN,
+	UNICODE_ARRW_RIGHT,
+} from '../../utility/symbols.js';
 
 import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
 import UserConfig from '../../type/config/UserConfig.js';
@@ -27,23 +32,48 @@ function loadManifestShortcuts(
 	objects: Array<object>,
 	config: UserConfig,
 ): Array<Shortcut> {
-	dlogHeader(
-		`MANIFEST ${quote(manifest.sourceName)} > ${clr.cyanBright('Load Shortcuts')}`,
-	);
+	const manName = manifest.sourceName;
+	dlog('');
+	dlog(clr.cyanBright.underline(`LOADING SHORTCUTS FROM MANIFEST ${quote(manName)}`));
 
 	if (objects.length === 0) {
-		dlog(
-			`  ${SB_WARN} Shortcuts value was empty so no shortcuts were added to the Manifest`,
-		);
+		dlog(`  ${SB_WARN} There were no shortcuts to load from manifest ${manName}`);
 		return [];
 	}
 
 	const ok: Array<Shortcut> = [];
+	const nAll = objects.length;
 
-	for (const object of objects) {
+	vlog(`  ${nAll} total shortcuts in this manifest`);
+
+	for (const [index, object] of objects.entries()) {
+		const id = index + 1;
+		dlog(`${UNICODE_ARRW_RIGHT} Creating: Shortcut #${id}`);
 		const shortcut = makeShortcut(object, config);
-		dlog(`${SB_OK_LG} Shortcut created: ${quote(shortcut.title)}`);
+		dlog(`${SB_OK_LG} Created: Shortcut #${id} (${quote(shortcut.title)})`);
 		ok.push(shortcut);
+	}
+
+	const nOk = ok.length;
+
+	if (nOk <= 0) {
+		if (nAll === 0) {
+			dlog(`${SB_OK_LG} There were no shortcuts to load from manifest ${manName}`);
+		} else {
+			dlog(
+				`${SB_ERR_LG} All shortcuts for manifest ${manName} failed to load (${nOk} out of ${nAll})`,
+			);
+		}
+	} else {
+		if (nOk === nAll) {
+			dlog(
+				`${SB_OK_LG} All shortcuts for manifest ${manName} were loaded successfully (${nOk})`,
+			);
+		} else {
+			dlog(
+				`${SB_OK_LG} ${nOk} out of ${nAll} configured shortcuts were successfully`,
+			);
+		}
 	}
 
 	return ok;
@@ -95,7 +125,7 @@ function makeShortcut(obj: object, config: UserConfig): Shortcut {
 				// TODO CHeck for empty
 
 				data.title = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'target': {
@@ -107,7 +137,7 @@ function makeShortcut(obj: object, config: UserConfig): Shortcut {
 				// TODO CHeck for empty
 
 				data.target = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'enabled': {
@@ -117,7 +147,7 @@ function makeShortcut(obj: object, config: UserConfig): Shortcut {
 				}
 
 				data.enabled = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'disabled': {
@@ -127,7 +157,7 @@ function makeShortcut(obj: object, config: UserConfig): Shortcut {
 				}
 
 				data.enabled = !value;
-				dlogConfigValueLoaded(resolved, !value);
+				vlogConfigValueLoaded(resolved, !value);
 				break;
 			}
 			default: {

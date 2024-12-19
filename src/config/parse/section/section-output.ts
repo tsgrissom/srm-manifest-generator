@@ -4,10 +4,10 @@ import {
 	clogConfigValueWrongType,
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
-	dlogConfigValueLoaded,
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
-	resolveKeyFromAlias
+	resolveKeyFromAlias,
+	vlogConfigValueLoaded,
 } from '../../../utility/config.js';
 
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
@@ -20,7 +20,7 @@ const keyAliases: ConfigKeyAliases = {
 	indentationSpaces: 'indentSpaces',
 	indentLevel: 'indentSpaces',
 	outputMode: 'mode',
-	spreadMode: 'mode'
+	spreadMode: 'mode',
 };
 
 function parseOutputSection(data: object, config: UserConfig): UserConfig {
@@ -50,7 +50,7 @@ function parseOutputSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.output.minify = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'indentSpaces': {
@@ -60,7 +60,7 @@ function parseOutputSection(data: object, config: UserConfig): UserConfig {
 				}
 
 				config.output.indentSpaces = value;
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'mode': {
@@ -78,7 +78,7 @@ function parseOutputSection(data: object, config: UserConfig): UserConfig {
 					break;
 				}
 
-				dlogConfigValueLoaded(resolved, value);
+				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {
