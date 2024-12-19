@@ -4,6 +4,7 @@ dist/
 out/
 output/
 test/resource/tmp/
+test/coverage/
 
 # FILES
 .DS_Store
