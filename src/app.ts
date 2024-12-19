@@ -117,7 +117,7 @@ export async function listShortcutsOfLoadedManifests(config: ConfigData): Promis
 		// TODO Replace with index identifier
 		clog(`${clr.magentaBright.bold(`Manifest "${man.getName()}"`)}`);
 
-		const allScLen = man.getShortcuts().length;
+		const allScLen = man.getShortcuts.length;
 		const enabledShortcuts = man.getEnabledShortcuts();
 
 		if (enabledShortcuts.length <= 0) {

@@ -42,6 +42,26 @@ class Manifest implements ManifestData {
 	outputPath: string;
 	shortcuts: Array<Shortcut>;
 
+	public get getFilePath(): string {
+		return this.filePath;
+	}
+
+	public get getSourceName(): string {
+		return this.sourceName;
+	}
+
+	public get getBaseDirectory(): string {
+		return this.baseDirectory;
+	}
+
+	public get getOutputPath(): string {
+		return this.outputPath;
+	}
+
+	public get getShortcuts(): Array<Shortcut> {
+		return this.shortcuts;
+	}
+
 	/**
 	 * Constructs a new Manifest instance.
 	 * @param filePath The filepath of this Manifest's source file. Not read in the constructor, but used as a fallback name if name attribute is not set inside the file.
@@ -58,29 +78,17 @@ class Manifest implements ManifestData {
 
 	// MARK: Paths
 
-	getOutputPath(): string {
+	public getWritePath(): string {
 		return this.outputPath;
-	}
-
-	getWritePath(): string {
-		return this.outputPath;
-	}
-
-	getRootDirectory(): string {
-		return this.baseDirectory;
-	}
-
-	getFilePath(): string {
-		return this.filePath;
 	}
 
 	// MARK: Names
 
-	getFileBasename(): string {
+	public getFileBasename(): string {
 		return path.basename(this.filePath);
 	}
 
-	getFallbackName(): string {
+	public getFallbackName(): string {
 		return basenameWithoutExtensions(
 			this.filePath,
 			['.yml', '.yaml', '.manifest', '.example'],
@@ -88,14 +96,14 @@ class Manifest implements ManifestData {
 		);
 	}
 
-	hasNameAttribute(): boolean {
+	public hasNameAttribute(): boolean {
 		if (!this.sourceName) return false;
 
 		return this.sourceName.trim() !== '';
 	}
 
 	// TODO jsdoc
-	getNameAttribute(): string {
+	public getNameAttribute(): string {
 		if (!this.sourceName || this.sourceName.trim() === '') return '';
 
 		return this.sourceName;
@@ -144,12 +152,8 @@ class Manifest implements ManifestData {
 
 	// MARK: Shortcuts
 
-	public getShortcuts(): Array<Shortcut> {
-		return this.shortcuts;
-	}
-
 	public getEnabledShortcuts(): Array<Shortcut> {
-		return this.getShortcuts().filter(each => each.isEnabled);
+		return this.getShortcuts.filter(each => each.isEnabled);
 	}
 
 	public getExportData(): Array<ShortcutExportData> {
@@ -165,7 +169,7 @@ class Manifest implements ManifestData {
 		const writeData = JSON.stringify(exportData);
 		const writePath = this.getWritePath();
 
-		const nTotal = this.getShortcuts().length,
+		const nTotal = this.getShortcuts.length,
 			nEnabled = this.getEnabledShortcuts().length,
 			nDisabled = nTotal - nEnabled,
 			nSkipped = 0,
@@ -187,7 +191,7 @@ class Manifest implements ManifestData {
 			dlog(
 				` ${SB_OK_LG} Wrote Manifest to file ${fmtPathAsTag(this.filePath)}`,
 				` > Source File: ${fmtPath(this.filePath)}`,
-				` > Output Path: ${fmtPath(this.getOutputPath())}`,
+				` > Output Path: ${fmtPath(this.getOutputPath)}`,
 				` > File Written To: ${fmtPath(writePath)}`,
 			);
 			return {
@@ -262,7 +266,7 @@ class Manifest implements ManifestData {
 			'Source File Path',
 		);
 		const outputPath = await fmtPathWithExistsAndName(
-			man.getOutputPath(),
+			man.getOutputPath,
 			'Output Path',
 		);
 		const writeFilePath = await fmtPathWithExistsAndName(
@@ -337,8 +341,8 @@ class Manifest implements ManifestData {
 		clog(header);
 
 		if (isEmpty) {
-			dlog(`  - Source File: ${fmtPath(manifest.getFilePath())}`);
-			dlog(`  - Output Path: ${fmtPath(manifest.getOutputPath())}`);
+			dlog(`  - Source File: ${fmtPath(manifest.getFilePath)}`);
+			dlog(`  - Output Path: ${fmtPath(manifest.getOutputPath)}`);
 			dlog(`  - File Written To: ${fmtPath(manifest.getWritePath())}`);
 		}
 	}
