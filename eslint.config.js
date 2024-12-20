@@ -6,10 +6,7 @@ import pluginTs from 'typescript-eslint';
 const globalIgnoredFiles = {
 	ignores: [
 		'*.config.js', // TODO Figure out why this warns if removed
-		'out/**/*.js',
-		'test/**/*.js',
-		'src/bin/**/*.js',
-		'src/bin/**/*.mjs',
+		'dist/**/*.js',
     ],
 };
 
@@ -55,7 +52,7 @@ const pluginJestCustomizations = {
 	languageOptions: {
 		globals: pluginJest.environments.globals.globals,
 	},
-	files: ['**/*.test.ts'],
+	files: ['test/**/*.test.ts'],
 	plugins: { jest: pluginJest }, // TODO Add some TS rules as well
 	rules: {
 		// TODO Make utility function `each` instead of `test.each` then enable this rule

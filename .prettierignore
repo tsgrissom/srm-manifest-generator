@@ -2,7 +2,7 @@
 node_modules/
 
 # Ignore build JS files
-out/**/*.js
+dist/**/*.js
 
 # Ignore coverage files
 test/coverage/**/*.js

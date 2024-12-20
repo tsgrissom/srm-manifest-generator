@@ -1,11 +1,10 @@
 {
 	"compilerOptions": {
-		"allowJs": true,
 		"target": "esnext",
 		"module": "esnext",
 		"moduleResolution": "node",
-		"outDir": "out",
-		"rootDir": ".",
+		"rootDir": "src",
+		"outDir": "dist",
 		"strict": true,
 		"esModuleInterop": true,
 		"skipLibCheck": true,
@@ -14,6 +13,7 @@
 		"experimentalDecorators": true,
 		"resolveJsonModule": true
 	},
-	"include": ["src/**/*", "test/**/*", "src/bin/commands/**/*"],
-	"exclude": ["node_modules", "out"]
+	// Keep test/**/* in both include and exclude for type-check without build files
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist"]
 }

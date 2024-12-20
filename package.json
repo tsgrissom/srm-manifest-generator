@@ -32,7 +32,7 @@
 	"type": "module",
 	"main": "./src/index.ts",
 	"bin": {
-		"srmg": "out/src/cli.js"
+		"srmg": "dist/cli.js"
 	},
 	"scripts": {
 		"start": "tsx .",
@@ -42,14 +42,14 @@
 		"start:v": "npm run start:verbose",
 		"start:loader": "node --loader ts-node/esm ./src/index.ts",
 		"cli": "npm run build && npm link && srmg",
-		"clean": "npm run clean:out",
-		"clean:out": "rimraf ./out",
+		"clean": "npm run clean:dist",
+		"clean:dist": "rimraf ./dist",
 		"clean:coverage": "rimraf ./test/coverage",
 		"prebuild": "npm run clean",
 		"build": "tsc",
 		"build:noclean": "tsc",
-		"postbuild": "chmod +x ./out/src/bin/cli.js",
-		"postuninstall": "npm unlink . && npm run clean:out",
+		"postbuild": "chmod +x ./dist/cli.js",
+		"postuninstall": "npm unlink . && npm run clean:dist",
 		"lint": "eslint",
 		"lint:test": "eslint test",
 		"lint:config": "eslint --print-config ./src/index.ts",

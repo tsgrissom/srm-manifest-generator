@@ -2,7 +2,7 @@
 node_modules/
 
 # Ignore build files
-out/**/*
+dist/**/*
 
 # Ignore test temp files
 test/resource/tmp/
