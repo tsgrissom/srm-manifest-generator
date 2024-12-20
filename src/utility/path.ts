@@ -271,7 +271,7 @@ export async function fmtPathWithExistsAndName(
 	filePath: string,
 	nickname: string,
 	config?: ConfigData,
-	linePrefix = '',
+	prefix = ' ',
 	useUnderline = true,
 	useQuotes = true,
 ): Promise<string> {
@@ -279,9 +279,9 @@ export async function fmtPathWithExistsAndName(
 	if (!(config?.validate.filePaths ?? true)) return filePath;
 
 	const accessible = await isPathAccessible(filePath);
-	const prefix = accessible ? SB_OK_SM : SB_ERR_SM;
+	const suffix = accessible ? SB_OK_SM : SB_ERR_SM;
 
-	return linePrefix + prefix + ' ' + nickname + ': ' + filePath;
+	return prefix + nickname + ': ' + filePath + ' ' + suffix;
 }
 
 export function fmtPathAsTag(

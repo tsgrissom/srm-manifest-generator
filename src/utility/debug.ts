@@ -124,29 +124,29 @@ const dlogHeader = (header: string, newlineBefore = true): void => {
 
 /**
  * If debugging is active, this function logs formatted lists of
- * messages to standard output by prefixing each line with a {@link linePfx}.
- * @param linePfx The prefix to apply to each line.
+ * messages to standard output by prefixing each line with a {@link linePrefix}.
+ * @param linePrefix The prefix to apply to each line.
  * @param lines The lines you want to log to `stdout`.
  */
-const dlogList = (linePfx = ' - ', ...lines: Array<string>) =>
-	void lines.forEach(e => dlog(linePfx + e));
+const dlogList = (linePrefix = ' - ', ...lines: Array<string>) =>
+	void lines.forEach(e => dlog(linePrefix + e));
 
 /**
  * If debugging is active, this function logs formatted data sections
  * to the standard output, starting with an emphasized {@link header}
  * followed by a formatted list of {@link lines} with support for
- * a custom line prefix: {@link linePfx}.
+ * a custom line prefix: {@link linePrefix}.
  * @param header The text to display in the header.
- * @param linePfx The prefix to apply to each line.
+ * @param linePrefix The prefix to apply to each line.
  * @param lines The lines you want to log to `stdout`.
  */
 const dlogDataSection = (
 	header: string,
-	linePfx = ' > ',
+	linePrefix = ' > ',
 	...lines: Array<string>
 ): void => {
 	dlog(header);
-	dlogList(linePfx, ...lines);
+	dlogList(linePrefix, ...lines);
 };
 
 // MARK: Verbose Logs
@@ -157,6 +157,10 @@ function vlog(...lines: Array<string>): void {
 	}
 
 	lines.forEach(line => console.log(line));
+}
+
+function vlogList(linePrefix = ' - ', ...lines: Array<string>): void {
+	lines.forEach(line => vlog(linePrefix + line));
 }
 
 export {
@@ -173,4 +177,5 @@ export {
 	isProcessVerbose,
 	isVerbose,
 	vlog,
+	vlogList,
 };

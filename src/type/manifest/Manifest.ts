@@ -4,17 +4,18 @@ import path from 'node:path';
 import clr from 'chalk';
 
 import { clog } from '../../utility/console.js';
-import { dlog, dlogDataSection } from '../../utility/debug.js';
+import { dlog, dlogList, isDebugActive, vlog, vlogList } from '../../utility/debug.js';
 import {
 	basenameWithoutExtensions,
 	fmtPath,
-	fmtPathAsTag,
 	fmtPathWithExistsAndName,
 } from '../../utility/path.js';
 import { quote } from '../../utility/string-wrap.js';
 import {
 	SB_ERR_LG,
+	SB_ERR_SM,
 	SB_OK_LG,
+	SB_OK_SM,
 	SB_WARN,
 	UNICODE_CHECK_LG,
 	UNICODE_WARN,
@@ -188,12 +189,6 @@ class Manifest implements ManifestData {
 
 		try {
 			await fs.promises.writeFile(writePath, writeData);
-			dlog(
-				` ${SB_OK_LG} Wrote Manifest to file ${fmtPathAsTag(this.filePath)}`,
-				` > Source File: ${fmtPath(this.filePath)}`,
-				` > Output Path: ${fmtPath(this.getOutputPath)}`,
-				` > File Written To: ${fmtPath(writePath)}`,
-			);
 			return {
 				manifest: this,
 				outputData: exportData,
@@ -255,53 +250,63 @@ class Manifest implements ManifestData {
 		return prefix;
 	}
 
-	private async dlogWriteResults(results: ManifestWriteResults): Promise<void> {
-		const { manifest: man } = results;
+	private async dlogWriteResults(
+		results: ManifestWriteResults,
+		config?: UserConfig,
+	): Promise<void> {
 		const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } =
 			results.stats;
 
-		const name = quote(man.getName());
-		const sourceFilePath = await fmtPathWithExistsAndName(
-			man.filePath,
-			'Source File Path',
+		const name = quote(this.getName());
+		const fmtBaseDirPath = await fmtPathWithExistsAndName(
+			this.getBaseDirectory,
+			'Base Directory',
+			config,
 		);
-		const outputPath = await fmtPathWithExistsAndName(
-			man.getOutputPath,
-			'Output Path',
+		const fmtSourceFilePath = await fmtPathWithExistsAndName(
+			this.getFilePath,
+			'Source File',
+			config,
 		);
-		const writeFilePath = await fmtPathWithExistsAndName(
-			man.getWritePath(),
-			'Write File Path',
+		const fmtOutputPath = await fmtPathWithExistsAndName(
+			this.getOutputPath,
+			'Output',
 		);
-		const rootDirectory = await fmtPathWithExistsAndName(
-			man.baseDirectory,
-			'Root Directory',
-		);
-
-		dlog();
-		dlogDataSection(
-			clr.magentaBright.underline(`MANIFEST ${name} > Write Operation`),
-			`  > `,
-			`Name: ${name}`,
-			`Name From: ${man.getNameSourceAsString()}`,
-			`Value of Name Attribute: ${quote(man.getNameAttribute())}`,
-			`Fallback Name: ${quote(man.getFallbackName())}`,
-			sourceFilePath,
-			outputPath,
-			writeFilePath,
-			rootDirectory,
+		const fmtWriteFilePath = await fmtPathWithExistsAndName(
+			this.getWritePath(),
+			'Write File',
+			config,
 		);
 
-		dlogDataSection(
-			clr.magentaBright.underline(`MANIFEST ${name} > Numbers`),
-			`  # `,
-			`Total: ${nTotal}`,
+		dlog('');
+		dlog(clr.magentaBright.underline(`MANIFEST OUTPUT RESULTS: ${name}`));
+
+		vlog(`  ` + clr.underline(`NAMES`));
+		vlogList(
+			`    `,
+			`Manifest Name: ${name}`,
+			`Name from Attribute: ${quote(this.getNameAttribute())}`,
+			`Name from Filename: ${quote(this.getFallbackName())}`,
+			`Name Used: ${this.getNameSourceAsString()}`,
+		);
+
+		vlog(`  ` + clr.underline(`PATHS`));
+		vlogList(
+			`   `,
+			fmtSourceFilePath,
+			fmtBaseDirPath,
+			fmtOutputPath,
+			fmtWriteFilePath,
+		);
+
+		dlog(`  ` + clr.cyanBright.underline(`SHORTCUTS`));
+		dlogList(
+			`    `,
+			`Total Number: ${nTotal}`,
 			`Written: ${nOk}`,
-			`Enabled: ${nEnabled}`,
-			`Disabled: ${nDisabled}`,
-			`Valid: ${nValid}`,
-			`Invalid: ${nInvalid}`,
-			`Skipped: ${nSkipped}`,
+			`Enabled to Disabled: ${nEnabled} / ${nDisabled}`,
+			`Valid to Invalid: ${nValid} / ${nInvalid}`,
+			`Total Skipped: ${nSkipped}`,
 		);
 	}
 
@@ -312,38 +317,63 @@ class Manifest implements ManifestData {
 		await this.dlogWriteResults(results);
 
 		const { manifest, stats } = results;
-		const { nTotal, nOk, nEnabled } = stats;
-		const isEmpty = nOk === 0 && nEnabled === 0;
+		const { nTotal, nOk, nDisabled, nInvalid } = stats;
 		const useColor = config?.shouldUseColor() ?? true;
-
-		const name = quote(manifest.getName());
-
-		let okRatio = `${stats.nOk}/${stats.nTotal} shortcut`;
-		if (nTotal > 1) {
-			okRatio += 's';
-		}
-		okRatio = useColor ? clr.magentaBright(okRatio) : okRatio;
-
-		const sourceName = useColor ? clr.cyanBright(name) : name;
-		const fromSource = 'from source ' + sourceName;
-		const emptyAddendum = `(No shortcuts were found)`;
 		const prefix = this.calculatePrefixForResults(results, config);
+		const quotedName = quote(manifest.getName());
+		const writePath = manifest.getWritePath();
+		const sourceName = useColor ? clr.magentaBright(quotedName) : quotedName;
+		const fromSource = 'from source ' + sourceName;
 
-		let header = `${prefix} Wrote `;
+		let writeRatio = `${stats.nOk}/${stats.nTotal} shortcuts`;
+		writeRatio = useColor ? clr.cyanBright(writeRatio) : writeRatio;
+
+		let header = prefix + ` `;
+
 		if (nOk > 0) {
-			header += okRatio + ' ' + fromSource;
+			header += `Created ${writeRatio} ${fromSource}`;
 		} else {
-			header += 'nothing ' + fromSource;
+			header += `Wrote nothing ` + fromSource;
 		}
 
-		if (isEmpty) header += ' ' + emptyAddendum;
+		// Do prints
+		if (isDebugActive()) {
+			clog('');
+		}
 
 		clog(header);
 
-		if (isEmpty) {
-			dlog(`  - Source File: ${fmtPath(manifest.getFilePath)}`);
-			dlog(`  - Output Path: ${fmtPath(manifest.getOutputPath)}`);
-			dlog(`  - File Written To: ${fmtPath(manifest.getWritePath())}`);
+		if (nTotal <= 0) {
+			clog(`  ${SB_WARN} No shortcuts were found for this manifest`);
+			return;
+		}
+
+		if (nOk > 0) {
+			dlog(`  ${SB_OK_SM} Wrote new file to ${fmtPath(writePath)}`);
+
+			vlog(
+				`    - Source File: ${fmtPath(this.filePath)}`,
+				`    - Output Path: ${fmtPath(this.getOutputPath)}`,
+				`    - File Written To: ${fmtPath(writePath)}`,
+			);
+		}
+
+		if (nInvalid > 0) {
+			const invalidToAll = `(${nInvalid}/${nTotal})`;
+			if (nInvalid === nTotal) {
+				clog(`  ${SB_ERR_SM} All shortcuts were invalid ${invalidToAll}`);
+			} else {
+				clog(`  ${SB_ERR_SM} Some shortcuts were invalid ${invalidToAll}`);
+			}
+		}
+
+		if (nDisabled > 0) {
+			const disabledToAll = `(${nDisabled}/${nTotal})`;
+			if (nDisabled === nTotal) {
+				clog(`  ${SB_WARN} All shortcuts were disabled ${disabledToAll}`);
+			} else {
+				clog(`  ${SB_WARN} Some shortcuts were disabled ${disabledToAll}`);
+			}
 		}
 	}
 }

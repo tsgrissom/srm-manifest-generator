@@ -11,15 +11,16 @@ import {
 	vlogConfigValueLoaded,
 } from '../../utility/config.js';
 import { clog } from '../../utility/console.js';
-import { dlog, dlogHeader, isDebugActive, isVerbose, vlog } from '../../utility/debug.js';
+import { dlog, dlogHeader, isDebugActive, vlog, vlogList } from '../../utility/debug.js';
 import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path.js';
 import {
 	SB_ERR_LG,
 	SB_ERR_SM,
 	SB_OK_LG,
 	SB_OK_SM,
+	SB_SECT_END_OK,
+	SB_SECT_START,
 	SB_WARN,
-	UNICODE_ARRW_RIGHT,
 } from '../../utility/symbols.js';
 
 import ConfigData from '../../type/config/ConfigData.js';
@@ -30,6 +31,7 @@ import ManifestData from '../../type/manifest/ManifestData.js';
 import UserConfig from '../../type/config/UserConfig.js';
 import Shortcut from '../../type/shortcut/Shortcut.js';
 import { isShortcutData, ShortcutData } from '../../type/shortcut/ShortcutData.js';
+import { quote } from '../../utility/string-wrap.js';
 import { USER_CONFIG_FILENAME } from '../load-data.js';
 import loadManifestShortcuts from './shortcuts.js';
 
@@ -51,7 +53,7 @@ async function makeManifests(
 	for (const [index, manPath] of manPaths.entries()) {
 		const id = index + 1;
 		const pathTag = fmtPathAsTag(manPath);
-		dlog(`${UNICODE_ARRW_RIGHT} Starting: Manifest #${id} ${pathTag}`);
+		dlog(`${SB_SECT_START}Starting: Manifest #${id} ${pathTag}`);
 
 		const exists = await validateManifestPathExists(manPath);
 		const okFsType = await validateManifestPathIsSupportedFilesystemType(
@@ -59,8 +61,8 @@ async function makeManifests(
 			config,
 		);
 
-		dlog(`  ${checkCross(exists)} Path exists`);
-		dlog(`  ${checkCross(okFsType)} Path is a supported filesystem type`);
+		vlog(`  ${checkCross(exists)} Path exists`);
+		vlog(`  ${checkCross(okFsType)} Path is a supported filesystem type`);
 
 		if (!exists) {
 			clog(` ${SB_WARN} Skipping non-existent manifest ${pathTag}`);
@@ -73,7 +75,7 @@ async function makeManifests(
 
 		okManifests.push(instance);
 
-		dlog(`${SB_OK_LG} Finished: Manifest #${id} ${pathTag}`);
+		dlog(`${SB_SECT_END_OK}Finished: Manifest #${id} ${pathTag}`);
 	}
 
 	clogLoadedManifests(manPaths, okManifests);
@@ -188,6 +190,151 @@ async function readManifestFile(manPath: string): Promise<object> {
 	}
 }
 
+interface ShortcutsDataParseResult {
+	readonly totalCount: number;
+	readonly failCount: number;
+	readonly okShortcuts: Array<ShortcutData>;
+	readonly disabledShortcuts: Array<ShortcutData>;
+}
+
+// TODO Move all this to its own namespace, maybe its own file `shortcut-data.ts` or to `shortcut.ts`?
+function parseShortcutsToShortcutDataArray(
+	value: Array<unknown>,
+	parent?: ManifestData,
+): ShortcutsDataParseResult {
+	const manName = parent?.sourceName ?? 'Unknown';
+	const totalLen = value.length;
+	const okShortcuts: Array<ShortcutData> = [];
+	const disabledShortcuts: Array<ShortcutData> = [];
+	let failCount = 0;
+
+	for (const element of value) {
+		if (!isShortcutData(element)) {
+			clog(`  ${SB_ERR_SM} Invalid shortcut data found (Manifest: ${manName}):`);
+			if (isDebugActive()) {
+				console.log(element);
+			}
+			failCount++;
+
+			continue;
+		}
+
+		const isEnabled = new Shortcut(element).isEnabled;
+		const fmtTitle = quote(element.title);
+		const fmtTarget = fmtPath(element.target);
+		const fmtEnabled = yesNo(isEnabled);
+
+		vlog(`  ${SB_OK_SM} Valid shortcut data for title ${fmtTitle}`);
+		vlogList(
+			`     \u26AC `,
+			`From Manifest: ${manName}`,
+			`Title: ${fmtTitle}`,
+			`Target: ${fmtTarget}`,
+			`Enabled? ${fmtEnabled}`,
+		);
+
+		if (!isEnabled) {
+			disabledShortcuts.push(element);
+			continue;
+		}
+
+		okShortcuts.push(element);
+	}
+
+	return {
+		totalCount: totalLen,
+		failCount: failCount,
+		okShortcuts: okShortcuts,
+		disabledShortcuts: disabledShortcuts,
+	};
+}
+
+/**
+ * Reads the results of a {@link ShortcutsDataParseResult},
+ * logging important info to the appropriate levels,
+ * and returning a `boolean` which indicates whether
+ * the result was a pass or a fail (`true` or `false`.)
+ *
+ * @param result The result to validate.
+ * @param parent Provides a parent manifest name
+ *  for log messages.
+ * @returns Whether the given result passed or failed.
+ *  `true` is pass, `false` is fail.
+ */
+// TODO Move all this to its own namespace, maybe its own file `shortcut-data.ts` or to `shortcut.ts`?
+function validateShortcutsParseResultSuccess(
+	result: ShortcutsDataParseResult,
+	parent?: ManifestData,
+): boolean {
+	const manName = parent?.sourceName ?? 'Unknown';
+	const totalCount = result.totalCount;
+	const okCount = result.okShortcuts.length;
+	const failCount = result.failCount;
+	const disabledCount = result.disabledShortcuts.length;
+
+	// there is nothing to load; pass
+	if (totalCount <= 0) {
+		// none to load, so none are ok; pass
+		dlog(
+			`${SB_OK_LG} Loaded no shortcuts because there were none to load (Manifest: ${manName})`,
+		);
+		return true;
+	}
+
+	// there is something to load, catch special cases
+	if (totalCount > 0) {
+		// all are disabled
+		if (disabledCount === totalCount) {
+			// there are some, but they are all disabled; pass
+			dlog(
+				`${SB_WARN} All shortcuts from manifest ${manName} are disabled (${disabledCount} disabled)`,
+			);
+			return true;
+		}
+
+		if (failCount === totalCount) {
+			// all failed to load; fail
+			dlog(
+				`${SB_ERR_LG} All shortcuts from manifest ${manName} failed to load (${failCount} failed)`,
+			);
+			return false;
+		}
+
+		if (okCount === totalCount) {
+			// all were loaded; pass
+			dlog(
+				`${SB_OK_LG} All shortcuts from manifest ${manName} loaded successfully (${okCount} loaded)`,
+			);
+			return true;
+		}
+	}
+
+	// there is something to load
+	// the following wont reach: all disabled, all failed, all ok
+
+	// some were loaded, some failed
+	clog(
+		`${SB_WARN} Some shortcuts from manifest ${manName} failed to load (${okCount} ok, ${failCount} failed)`,
+	);
+
+	// if at least one was disabled
+	if (disabledCount > 0) {
+		dlog(
+			`  ${SB_OK_SM} Some shortcuts from manifest ${manName} were disabled (${disabledCount} disabled)`,
+		);
+	}
+
+	// if at least one failed
+	if (failCount > 0) {
+		clog(
+			`  ${SB_ERR_SM} Some shortcuts from manifest ${manName} failed to load (${failCount} failed)`,
+			`  - To view the failed shortcut, re-execute with the ${clr.italic('--debug')} flag`,
+		);
+	}
+
+	return true;
+}
+
 function parseManifestFileContentsToData(
 	filePath: string,
 	obj: object,
@@ -233,7 +380,7 @@ function parseManifestFileContentsToData(
 		throw new Error(`Manifest is not an object (Type: ${typeof document})`);
 	}
 
-	dlog(`${UNICODE_ARRW_RIGHT} Loading: Manifest ${fmtPathAsTag(filePath)}`);
+	dlog(`${SB_SECT_START}Loading: Manifest ${fmtPathAsTag(filePath)}`);
 
 	let hasShortcuts = false;
 
@@ -284,10 +431,6 @@ function parseManifestFileContentsToData(
 				break;
 			}
 			case 'shortcuts': {
-				const manName = data.sourceName; // TODO Replace with an id
-
-				// TODO Move all this to its own function, maybe its own file `shortcut-data.ts` or to `shortcut.ts`?
-
 				if (!Array.isArray(value)) {
 					clogConfigValueWrongType(
 						fullGivenKey,
@@ -305,125 +448,11 @@ function parseManifestFileContentsToData(
 					break;
 				}
 
-				// if (
-				// 	Array.isArray(value) &&
-				// 	!value.every(element => element instanceof Shortcut)
-				// ) {
-				// 	console.log(
-				// 		clr.red(`SHORTCUTS!!! ONE ELEMENT NOT A SHORTCUT: ${manName}`),
-				// 	);
+				const result = parseShortcutsToShortcutDataArray(value, data);
+				const { okShortcuts } = result;
+				const wasSuccessful = validateShortcutsParseResultSuccess(result, data);
 
-				// 	for (const element of value) {
-				// 		console.log(element as object);
-				// 	}
-
-				// 	break;
-				// }
-
-				// if (
-				// 	typeof value === 'object' &&
-				// 	Array.isArray(value) //&&
-				// 	// value.every(element => element instanceof Shortcut)
-				// ) {
-				// 	hasShortcuts = true;
-				// 	data.shortcuts = value;
-				// 	dlogConfigValueLoaded(resolved, value);
-				// 	break;
-				// }
-
-				const totalLen = value.length;
-
-				const okShortcuts: Array<ShortcutData> = [];
-				const disabledShortcuts: Array<ShortcutData> = [];
-				let failLen = 0;
-
-				for (const element of value) {
-					if (!isShortcutData(element)) {
-						clog(
-							`  ${SB_ERR_SM} Invalid shortcut data found (Manifest: ${manName}):`,
-						);
-						if (isDebugActive()) {
-							console.log(element);
-						}
-						failLen++;
-
-						continue;
-					}
-
-					const isEnabled = new Shortcut(element).isEnabled;
-
-					vlog(`  ${SB_OK_SM} Valid shortcut data for title ${element.title}`);
-					if (isVerbose()) {
-						clog(`    > From Manifest: ${manName}`);
-						clog(`    > Title: ${element.title}`);
-						clog(`    > Target: ${element.target}`);
-						clog(`    > Enabled? ${yesNo(isEnabled)}`);
-					}
-
-					if (!isEnabled) {
-						disabledShortcuts.push(element);
-						continue;
-					}
-
-					okShortcuts.push(element);
-				}
-
-				const okLen = okShortcuts.length;
-				const disabledLen = disabledShortcuts.length;
-				const diffTotalToDisabled = totalLen - disabledLen;
-				const enabledLen = diffTotalToDisabled <= 0 ? 0 : diffTotalToDisabled;
-
-				if (enabledLen <= 0 && totalLen > 0) {
-					dlog(
-						`${SB_OK_LG} All shortcuts were disabled in manifest ${manName} (${disabledLen} disabled)`,
-					);
-					break;
-				}
-
-				if (okLen === totalLen) {
-					// equal ok to total
-					if (totalLen <= 0) {
-						// none to load, so none are ok; pass
-						dlog(
-							`${SB_OK_LG} Loaded no shortcuts because there were none to load (Manifest: ${manName})`,
-						);
-					} else {
-						// all were loaded; pass
-						dlog(
-							`${SB_OK_LG} All shortcuts from manifest ${manName} loaded successfully (${okLen})`,
-						);
-					}
-				} else {
-					// inequal ok to total
-					if (okLen <= 0) {
-						// there were some to load, but none were ok; fail
-						dlog(
-							`${SB_ERR_LG} All shortcuts from manifest ${manName} failed to load (${totalLen} failed)`,
-						);
-					} else {
-						// some of the total were loaded, some failed
-						clog(
-							`${SB_WARN} Some shortcuts from manifest ${manName} failed to load (${okLen} ok, ${failLen} failed)`,
-						);
-
-						if (failLen > 0) {
-							// at least one failed
-							clog(
-								`  ${SB_ERR_SM} Some shortcuts from manifest ${manName} failed to load (${failLen} failed)`,
-								`  - To view the failed shortcut, re-execute with the ${clr.italic('--debug')} flag`,
-							);
-						}
-
-						if (disabledLen > 0) {
-							// at least one
-							dlog(
-								`  ${SB_OK_SM} Some shortcuts from manifest ${manName} were disabled (${disabledLen} disabled)`,
-							);
-						}
-					}
-				}
-
-				hasShortcuts = true;
+				hasShortcuts = wasSuccessful;
 				data.shortcuts = okShortcuts.map(each => new Shortcut(each), config);
 				vlogConfigValueLoaded(resolved, value);
 				break;

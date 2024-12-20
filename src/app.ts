@@ -7,11 +7,11 @@ import ConfigData from './type/config/ConfigData.js';
 import Shortcut from './type/shortcut/Shortcut.js';
 import { yesNo } from './utility/boolean.js';
 import { clog } from './utility/console.js';
-import { isVerbose } from './utility/debug.js';
+import { dlog, isVerbose } from './utility/debug.js';
 import { fmtPathAsTag, fmtPathWithExistsPrefix } from './utility/path.js';
 import { quote } from './utility/string-wrap.js';
 import { countNoun, possessivePronounFor } from './utility/string.js';
-import { SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from './utility/symbols.js';
+import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from './utility/symbols.js';
 
 async function processManifest(manifest: Manifest): Promise<void> {
 	// TODO Additionally validate if write path is valid, make folders if missing
@@ -155,12 +155,10 @@ export async function transformLoadedManifests(config: ConfigData): Promise<void
 		return;
 	}
 
-	const subject = countNoun(manLen, 'manifest');
+	const subject = countNoun(manLen, 'YAML manifest');
 	const pronoun = possessivePronounFor(manLen);
-	const object = countNoun(manLen, 'equivalent');
-	clog(
-		`${UNICODE_ARRW_RIGHT} Transforming: ${manLen} ${subject} into ${pronoun} JSON ${object}`,
-	);
+	const object = countNoun(manLen, 'JSON equivalent');
+	dlog(`${SB_SECT_START}Transforming: ${manLen} ${subject} into ${pronoun} ${object}`);
 
 	if (isVerbose()) {
 		for (const man of manifests) {
@@ -182,7 +180,9 @@ export async function transformLoadedManifests(config: ConfigData): Promise<void
 	}
 
 	// TODO More responsive print
-	clog(`${SB_OK_LG} Transformed: ${okLen} out of ${manLen} manifests into JSON output`);
+	dlog(
+		`${SB_SECT_END_OK}Transformed: ${okLen} out of ${manLen} manifests into JSON output`,
+	);
 }
 
 export async function startApp(): Promise<void> {

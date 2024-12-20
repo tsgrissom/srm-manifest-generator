@@ -8,7 +8,7 @@ import { clog } from '../utility/console.js';
 import { vlog } from '../utility/debug.js';
 import { fmtPath, fmtPathAsTag } from '../utility/path.js';
 import { quote } from '../utility/string-wrap.js';
-import { SB_ERR_LG, SB_OK_LG, SB_WARN, UNICODE_ARRW_RIGHT } from '../utility/symbols.js';
+import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../utility/symbols.js';
 import {
 	EXAMPLE_CONFIG_FILENAME,
 	EXAMPLE_CONFIG_PATH,
@@ -168,6 +168,8 @@ async function loadUserConfigData(): Promise<object> {
 	const tagExampleConfPath = fmtPathAsTag(EXAMPLE_CONFIG_PATH);
 	const tagUserConfPath = fmtPathAsTag(USER_CONFIG_PATH);
 
+	vlog(clr.magentaBright.underline(`CHECKING FOR CONFIGS`));
+
 	try {
 		exampleConfigHandle = await fs.promises.open(EXAMPLE_CONFIG_PATH, 'r');
 		vlog(`${SB_OK_LG} Example config exists ${tagExampleConfPath}`);
@@ -176,7 +178,7 @@ async function loadUserConfigData(): Promise<object> {
 		// TODO Maybe take input from user?
 		clog(
 			`${SB_WARN} Example config was missing from its typical location ${tagExampleConfPath}`,
-			`${clr.yellowBright(UNICODE_ARRW_RIGHT)}A new copy of the ${quote(EXAMPLE_CONFIG_FILENAME)} will be downloaded from GitHub...`,
+			`- A new copy of the ${quote(EXAMPLE_CONFIG_FILENAME)} will be downloaded from GitHub...`, // TODO Review this styling
 			`  > URL: ${fmtPath(EXAMPLE_CONFIG_URL)}`,
 			`  > Downloading To: ${fmtPath(EXAMPLE_CONFIG_PATH)}`,
 			`  > Then Copying To: ${fmtPath(USER_CONFIG_PATH)}`,

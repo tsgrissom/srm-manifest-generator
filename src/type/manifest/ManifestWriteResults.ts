@@ -12,7 +12,7 @@ interface ManifestWriteResults {
 	 * The Manifest instance whose shortcuts the output file's
 	 * contents are derived from.
 	 */
-	readonly manifest: Manifest;
+	readonly manifest: Manifest; // TODO Does this need to be here? I removed it from one use of ManifestWriteResults
 
 	/**
 	 * The contents of the output file in JSON form.

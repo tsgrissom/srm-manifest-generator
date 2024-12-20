@@ -129,7 +129,10 @@ export function countNoun(n: number, singular: string, plural?: string): string 
 		throw new Error(`Arg "singular" must be a non-empty string: "${singular}"`);
 	}
 
-	if (plural === undefined || (typeof plural === 'string' && plural.trim() === '')) {
+	if (
+		typeof plural === 'undefined' ||
+		(typeof plural === 'string' && plural.trim() === '')
+	) {
 		plural = '';
 	}
 

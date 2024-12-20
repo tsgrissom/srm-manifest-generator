@@ -4,7 +4,7 @@ import clr from 'chalk';
 
 import { fmtBool, yesNo } from './boolean.js';
 import { clog } from './console.js';
-import { dlog, isDebugActive, vlog } from './debug.js';
+import { dlog, isDebugActive, vlog, vlogList } from './debug.js';
 import { quote } from './string-wrap.js';
 import { getTypeDisplayName, indefiniteArticleFor } from './string.js';
 import {
@@ -12,8 +12,8 @@ import {
 	SB_ERR_SM,
 	SB_OK_LG,
 	SB_OK_SM,
+	SB_SECT_START,
 	SB_WARN,
-	UNICODE_ARRW_RIGHT,
 } from './symbols.js';
 
 import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME } from '../config/config.js';
@@ -99,7 +99,7 @@ export const clogConfigFatalErr = (msg: string): void => {
 // MARK: Section Logging
 
 export function dlogConfigSectionStart(sectionKey: string): void {
-	dlog(`${UNICODE_ARRW_RIGHT} Loading: Config section ${quote(sectionKey)}`);
+	dlog(`${SB_SECT_START}Loading: Config section ${quote(sectionKey)}`);
 }
 
 export const clogConfigFatalErrMissingRequiredSection = (sectionKey: string) =>
@@ -159,7 +159,9 @@ export function dlogConfigSectionOk(sectionKey: string): void {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fmtValueForLoadedLog = (value?: any): string => {
-	if (value === undefined) value = '';
+	if (typeof value === 'undefined') {
+		value = '';
+	}
 
 	let fmtValue = `${value}`;
 	if (typeof value === 'string') fmtValue = value !== '' ? quote(value) : '';
@@ -172,16 +174,20 @@ const fmtValueForLoadedLog = (value?: any): string => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const vlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any): void => {
 	const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
-	const usedAlias = givenKey !== resolvedKey;
+	const isAlias = givenKey !== resolvedKey;
+	const fmtValue = fmtValueForLoadedLog(value);
+	const fmtIsAlias = yesNo(isAlias);
+	const fmtGivenKey = quote(givenKey);
+	const fmtInternalKey = quote(resolvedKey);
 
 	vlog(`  ${SB_OK_SM} Key loaded ${quote(fullGivenKey)}`);
-	// TODO Make the below verbose logs
-	vlog(`    > Value: ${fmtValueForLoadedLog(value)}`);
-	vlog(`    > Alias used? ${yesNo(usedAlias)}`);
-	if (usedAlias) {
-		vlog(`    > Alias: ${quote(givenKey)}`);
-		vlog(`    > Actual: ${quote(resolvedKey)}`);
-	}
+	vlogList(
+		`     \u26AC `,
+		`Value: ${fmtValue}`,
+		`Given Key: ${fmtGivenKey}`,
+		`Internal Key: ${fmtInternalKey}`,
+		`Is Key Alias? ${fmtIsAlias}`,
+	);
 };
 
 export const clogConfigKeyUnknown = (fullGivenKey: string, config: UserConfig): void => {

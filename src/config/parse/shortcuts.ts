@@ -11,8 +11,9 @@ import { quote } from '../../utility/string-wrap.js';
 import {
 	SB_ERR_LG,
 	SB_OK_LG,
+	SB_SECT_END_OK,
+	SB_SECT_START,
 	SB_WARN,
-	UNICODE_ARRW_RIGHT,
 } from '../../utility/symbols.js';
 
 import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
@@ -48,9 +49,9 @@ function loadManifestShortcuts(
 
 	for (const [index, object] of objects.entries()) {
 		const id = index + 1;
-		dlog(`${UNICODE_ARRW_RIGHT} Creating: Shortcut #${id}`);
+		dlog(`${SB_SECT_START}Creating: Shortcut #${id}`);
 		const shortcut = makeShortcut(object, config);
-		dlog(`${SB_OK_LG} Created: Shortcut #${id} (${quote(shortcut.title)})`);
+		dlog(`${SB_SECT_END_OK}Created: Shortcut #${id} (${quote(shortcut.title)})`);
 		ok.push(shortcut);
 	}
 
