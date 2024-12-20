@@ -18,6 +18,8 @@ let expectedSc: { title: string; target: string; fullTargetPath: string };
 let mockManData: ManifestData;
 // let mockMan: Manifest;
 
+// TEST Typeguard unit tests
+
 beforeEach(() => {
 	mockScData = {
 		title: 'Some Game',

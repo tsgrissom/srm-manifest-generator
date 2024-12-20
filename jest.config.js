@@ -11,6 +11,7 @@ export default {
 	testMatch: ['<rootDir>/test/**/*.test.ts'], // Match test files in the test directory
 	testEnvironment: 'node',
 	extensionsToTreatAsEsm: ['.ts'],
+	modulePathIgnorePatterns: ['<rootDir>/package.json'],
 	transform: {
 		'^.+.tsx?$': ['ts-jest', { useESM: true }],
 		'^.+\\.m?js$': 'babel-jest',
