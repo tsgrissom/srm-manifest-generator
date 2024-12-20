@@ -1,8 +1,8 @@
-import Manifest from '../manifest/Manifest.js';
-import OutputMode from './OutputMode.js';
+import Manifest from '../../type/manifest/Manifest.js';
 
-// TODO jsdoc for everything
+// MARK: Interface: ConfigData
 
+// TODO jsdoc
 interface ConfigData {
 	search: {
 		manifests: Array<Manifest>;
@@ -32,4 +32,11 @@ interface ConfigData {
 	};
 }
 
-export default ConfigData;
+// MARK: Enum: OutputMode
+
+enum OutputMode {
+	Combine,
+	Spread,
+}
+
+export { ConfigData, OutputMode };

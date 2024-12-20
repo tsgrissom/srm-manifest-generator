@@ -5,15 +5,15 @@ import clr from 'chalk';
 
 import { dlogHeader } from '../util/debug.js';
 
-import ConfigData from '../type/config/ConfigData.js';
-import UserConfig from '../type/config/UserConfig.js';
+import { ConfigData } from './type/ConfigData.js';
+import { UserConfig } from './type/UserConfig.js';
 
-import { loadUserConfigData } from './load-data.js';
-import parseLogsSection from './parse/section/section-logs.js';
-import parseOtherSection from './parse/section/section-other.js';
-import parseOutputSection from './parse/section/section-output.js';
-import parseSearchSection from './parse/section/section-search.js';
-import parseValidateSection from './parse/section/section-validate.js';
+import { loadUserConfigData } from './loadFileData.js';
+import parseLogsSection from './parseLogsSection.js';
+import parseOtherSection from './parseOtherSection.js';
+import parseOutputSection from './parseOutputSection.js';
+import parseSearchSection from './parseSearchSection.js';
+import parseValidateSection from './parseValidateSection.js';
 
 export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml',
 	EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME),

@@ -1,26 +1,24 @@
 import clr from 'chalk';
 
-import {
-	clogConfigValueWrongType,
-	resolveKeyFromAlias,
-	vlogConfigValueLoaded,
-} from '../../util/config.js';
-import { clog } from '../../util/console.js';
-import { dlog, vlog } from '../../util/debug.js';
-import { quote } from '../../util/string-wrap.js';
+import { clog } from '../util/console.js';
+import { dlog, vlog } from '../util/debug.js';
+import { quote } from '../util/string-wrap.js';
 import {
 	SB_ERR_LG,
 	SB_OK_LG,
 	SB_SECT_END_OK,
 	SB_SECT_START,
 	SB_WARN,
-} from '../../util/symbols.js';
+} from '../util/symbols.js';
 
-import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
-import UserConfig from '../../type/config/UserConfig.js';
-import ManifestData from '../../type/manifest/ManifestData.js';
-import Shortcut from '../../type/shortcut/Shortcut.js';
-import { ShortcutData } from '../../type/shortcut/ShortcutData.js';
+import ManifestData from '../type/manifest/ManifestData.js';
+import Shortcut from '../type/shortcut/Shortcut.js';
+import { ShortcutData } from '../type/shortcut/ShortcutData.js';
+import { UserConfig } from './type/UserConfig.js';
+import { clogConfigValueWrongType, vlogConfigValueLoaded } from './util/logging.js';
+import { YamlKeyAliases, resolveKeyFromAlias } from './util/yamlKeys.js';
+
+// MARK: loadManifestShortcuts
 
 /**
  *
@@ -50,7 +48,7 @@ function loadManifestShortcuts(
 	for (const [index, object] of objects.entries()) {
 		const id = index + 1;
 		dlog(`${SB_SECT_START}Creating: Shortcut #${id}`);
-		const shortcut = makeShortcut(object, config);
+		const shortcut = createShortcutInstance(object, config);
 		dlog(`${SB_SECT_END_OK}Created: Shortcut #${id} (${quote(shortcut.title)})`);
 		ok.push(shortcut);
 	}
@@ -80,8 +78,10 @@ function loadManifestShortcuts(
 	return ok;
 }
 
-function makeShortcut(obj: object, config: UserConfig): Shortcut {
-	const keyAliases: ConfigKeyAliases = {
+// MARK: makeShortcut
+
+function createShortcutInstance(obj: object, config: UserConfig): Shortcut {
+	const keyAliases: YamlKeyAliases = {
 		title: 'title',
 		name: 'title',
 

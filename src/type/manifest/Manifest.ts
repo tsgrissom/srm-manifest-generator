@@ -27,7 +27,7 @@ import ManifestData from './ManifestData.js';
 import ManifestNameSource from './ManifestNameSource.js';
 import ManifestWriteResults from './ManifestWriteResults.js';
 
-import UserConfig from '../config/UserConfig.js';
+import { UserConfig } from '../../config/type/UserConfig.js';
 import Shortcut from '../shortcut/Shortcut.js';
 import { ShortcutExportData } from '../shortcut/ShortcutData.js';
 import EmptyManifestWriteResults from './ManifestEmptyWriteResults.js';

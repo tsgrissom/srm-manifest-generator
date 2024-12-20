@@ -1,12 +1,10 @@
-// TODO Look into substituting use of `any` in this file for `unknown` or `never`
-
+// MARK: GENERAL
 import clr from 'chalk';
-
-import { fmtBool, yesNo } from './boolean.js';
-import { clog } from './console.js';
-import { dlog, isDebugActive, vlog, vlogList } from './debug.js';
-import { quote } from './string-wrap.js';
-import { getTypeDisplayName, indefiniteArticleFor } from './string.js';
+import { fmtBool, yesNo } from '../../util/boolean.js';
+import { clog } from '../../util/console.js';
+import { dlog, isDebugActive, vlog, vlogList } from '../../util/debug.js';
+import { quote } from '../../util/string-wrap.js';
+import { getTypeDisplayName, indefiniteArticleFor } from '../../util/string.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -15,75 +13,11 @@ import {
 	SB_OK_SM,
 	SB_SECT_START,
 	SB_WARN,
-} from './symbols.js';
-
-import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME } from '../config/config.js';
-import ConfigKeyAliases from '../type/config/ConfigKeyAliases.js';
-import ConfigKeyPair from '../type/config/ConfigKeyPair.js';
-import UserConfig from '../type/config/UserConfig.js';
-
-// MARK: Utility
-
-/**
- * Resolves a {@link ConfigKeyPair} from the {@link givenKey} by searching the
- * {@link keyAliases} for a matching alias.
- *
- * @param keyAliases The map of alias to reference values for a given config section.
- * @param givenKey The key the user actually gave in an iteration over a section's
- *  contents.
- * @param sectionFullKey The full key that is being searched within for a given context.
- *  By default this value is empty, which represents top-level key searches. However,
- *  if used to search within levels which are any deeper, giving this value is important
- *  so the secondary full key values are inferred correctly automatically.
- * @returns A {@link ConfigKeyPair} containing the {@link ConfigKeyPair.resolvedKey}
- *  as well as the {@link givenKey} as {@link ConfigKeyPair.givenKey}.
- * @example
- */
-// TODO Example
-// TODO Write TEST
-export function resolveKeyFromAlias(
-	keyAliases: ConfigKeyAliases,
-	givenKey: string,
-	sectionFullKey: string | null,
-): ConfigKeyPair {
-	const upperKey = sectionFullKey === null ? '' : sectionFullKey;
-	return {
-		givenKey: givenKey,
-		resolvedKey: keyAliases[givenKey] || givenKey,
-		fullGivenKey: joinPathKeys(upperKey, givenKey),
-		fullResolvedKey: joinPathKeys(upperKey, givenKey),
-	};
-}
-
-/**
- * Joins a series of YAML path keys with '.' characters
- * in order to constructor a full key to a section, value,
- * etc.
- *
- * * If a key starts or ends with a '.' character, it will
- *   be ignored. Keys containing '.' inside will not be ignored
- *   because those might be multi-leveled keys themselves.
- * * If a key is empty or consists of only whitespace, it
- *   will be ignored
- * * Therefore, it's important to **check the returned value**
- *   for emptiness because an empty string could be returned
- *
- * @param keys The keys to join.
- * @returns The resulting joined key which points to a
- *  value which is found deeper than the top level of the
- *  document.
- */
-// TODO jsdoc + example
-// TODO Write TEST
-export function joinPathKeys(...keys: Array<string>): string {
-	return keys
-		.filter(k => !k.startsWith('.'))
-		.filter(k => !k.endsWith('.'))
-		.filter(k => k.trim() !== '')
-		.join('.');
-}
-
-// MARK: General Logs
+} from '../../util/symbols.js';
+import { USER_CONFIG_FILENAME } from '../loadFileData.js';
+import { USER_CONFIG_ATTRIBUTION } from '../parseConfigData.js';
+import { UserConfig } from '../type/UserConfig.js';
+import { ResolvedYamlKey } from './yamlKeys.js';
 
 // TODO Are these even used?
 
@@ -103,7 +37,7 @@ export function clogConfigFatalErr(str: string): void {
 	console.error(`${SB_ERR_LG} ${errUserAttribution} ` + clr.red(str));
 }
 
-// MARK: Section Logging
+// MARK: BY SECTION
 
 export function dlogConfigSectionStart(sectionKey: string): void {
 	sectionKey = quote(sectionKey);
@@ -183,7 +117,7 @@ function fmtValueForLoadedLog(value?: any): string {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function vlogConfigValueLoaded(resolvedPair: ConfigKeyPair, value?: any): void {
+export function vlogConfigValueLoaded(resolvedPair: ResolvedYamlKey, value?: any): void {
 	const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
 	const isAlias = givenKey !== resolvedKey;
 	const fmtValue = fmtValueForLoadedLog(value);

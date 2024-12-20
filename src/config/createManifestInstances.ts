@@ -2,17 +2,10 @@ import clr from 'chalk';
 import fs from 'node:fs/promises';
 import YAML from 'yaml';
 
-import { checkCross, yesNo } from '../../util/boolean.js';
-import {
-	clogConfigKeyUnknown,
-	clogConfigValueWrongType,
-	clogConfigWarn,
-	resolveKeyFromAlias,
-	vlogConfigValueLoaded,
-} from '../../util/config.js';
-import { clog } from '../../util/console.js';
-import { dlog, dlogHeader, isDebugActive, vlog, vlogList } from '../../util/debug.js';
-import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../util/path.js';
+import { checkCross, yesNo } from '../util/boolean.js';
+import { clog } from '../util/console.js';
+import { dlog, dlogHeader, isDebugActive, vlog, vlogList } from '../util/debug.js';
+import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../util/path.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -22,21 +15,28 @@ import {
 	SB_SECT_END_OK,
 	SB_SECT_START,
 	SB_WARN,
-} from '../../util/symbols.js';
+} from '../util/symbols.js';
+import {
+	clogConfigKeyUnknown,
+	clogConfigValueWrongType,
+	clogConfigWarn,
+	vlogConfigValueLoaded,
+} from './util/logging.js';
 
-import ConfigData from '../../type/config/ConfigData.js';
-import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
-import Manifest from '../../type/manifest/Manifest.js';
-import ManifestData from '../../type/manifest/ManifestData.js';
+import Manifest from '../type/manifest/Manifest.js';
+import ManifestData from '../type/manifest/ManifestData.js';
+import Shortcut from '../type/shortcut/Shortcut.js';
+import { isShortcutData, ShortcutData } from '../type/shortcut/ShortcutData.js';
+import { quote } from '../util/string-wrap.js';
+import loadManifestShortcuts from './createShortcutInstance.js';
+import { USER_CONFIG_FILENAME } from './loadFileData.js';
+import { ConfigData } from './type/ConfigData.js';
+import { UserConfig } from './type/UserConfig.js';
+import { resolveKeyFromAlias, YamlKeyAliases } from './util/yamlKeys.js';
 
-import UserConfig from '../../type/config/UserConfig.js';
-import Shortcut from '../../type/shortcut/Shortcut.js';
-import { isShortcutData, ShortcutData } from '../../type/shortcut/ShortcutData.js';
-import { quote } from '../../util/string-wrap.js';
-import { USER_CONFIG_FILENAME } from '../load-data.js';
-import loadManifestShortcuts from './shortcuts.js';
+// MARK: createManifestInstances
 
-async function makeManifests(
+async function createManifestInstances(
 	manPaths: Array<string>,
 	config: UserConfig,
 ): Promise<Array<Manifest>> {
@@ -79,12 +79,14 @@ async function makeManifests(
 		dlog(`${SB_SECT_END_OK}Finished: Manifest #${id} ${pathTag}`);
 	}
 
-	clogLoadedManifests(manPaths, okManifests);
+	logLoadedManifests(manPaths, okManifests);
 
 	return okManifests;
 }
 
-function clogLoadedManifests(
+// MARK: clogLoadedManifests
+
+function logLoadedManifests(
 	manifestPaths: Array<string>,
 	okManifests: Array<Manifest>,
 ): void {
@@ -119,6 +121,8 @@ function clogLoadedManifests(
 	}
 }
 
+// MARK: validateManifestPathExists
+
 async function validateManifestPathExists(filePath: string): Promise<boolean> {
 	const pathTag = fmtPath(filePath);
 
@@ -132,6 +136,8 @@ async function validateManifestPathExists(filePath: string): Promise<boolean> {
 
 	return true;
 }
+
+// MARK: validateManifestPathIsSupportedFilesystemType
 
 async function validateManifestPathIsSupportedFilesystemType(
 	filePath: string,
@@ -172,6 +178,8 @@ async function validateManifestPathIsSupportedFilesystemType(
 	return true;
 }
 
+// MARK: readManifestFile
+
 async function readManifestFile(manPath: string): Promise<object> {
 	const pathTag = fmtPathAsTag(manPath);
 
@@ -191,12 +199,16 @@ async function readManifestFile(manPath: string): Promise<object> {
 	}
 }
 
+// MARK: ShortcutsDataParseResult
+
 interface ShortcutsDataParseResult {
 	readonly totalCount: number;
 	readonly failCount: number;
 	readonly okShortcuts: Array<ShortcutData>;
 	readonly disabledShortcuts: Array<ShortcutData>;
 }
+
+// MARK: parseShortcutsToShortcutDataArray
 
 // TODO Move all this to its own namespace, maybe its own file `shortcut-data.ts` or to `shortcut.ts`?
 function parseShortcutsToShortcutDataArray(
@@ -249,6 +261,8 @@ function parseShortcutsToShortcutDataArray(
 		disabledShortcuts: disabledShortcuts,
 	};
 }
+
+// MARK: validateShortcutsParseResultSuccess
 
 /**
  * Reads the results of a {@link ShortcutsDataParseResult},
@@ -336,12 +350,14 @@ function validateShortcutsParseResultSuccess(
 	return true;
 }
 
+// MARK: parseManifestFileContentsToData
+
 function parseManifestFileContentsToData(
 	filePath: string,
 	obj: object,
 	config: UserConfig,
 ): ManifestData {
-	const keyAliases: ConfigKeyAliases = {
+	const keyAliases: YamlKeyAliases = {
 		sourceName: 'sourceName',
 		name: 'sourceName',
 
@@ -498,4 +514,4 @@ function parseManifestFileContentsToData(
 	return data;
 }
 
-export default makeManifests;
+export default createManifestInstances;

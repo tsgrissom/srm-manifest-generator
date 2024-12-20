@@ -2,8 +2,8 @@ import clr from 'chalk';
 
 import Manifest from './type/manifest/Manifest.js';
 
-import parseUserConfigData from './config/config.js';
-import ConfigData from './type/config/ConfigData.js';
+import parseUserConfigData from './config/parseConfigData.js';
+import { ConfigData } from './config/type/ConfigData.js';
 import { clog } from './util/console.js';
 import { dlog, isVerbose } from './util/debug.js';
 import { fmtPathAsTag } from './util/path.js';

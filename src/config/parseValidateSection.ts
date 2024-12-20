@@ -1,3 +1,5 @@
+import { quote } from '../util/string-wrap.js';
+import { UserConfig } from './type/UserConfig.js';
 import {
 	clogConfigKeyUnknown,
 	clogConfigValueWrongType,
@@ -5,16 +7,12 @@ import {
 	dlogConfigSectionStart,
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
-	resolveKeyFromAlias,
 	vlogConfigValueLoaded,
-} from '../../../util/config.js';
-import { quote } from '../../../util/string-wrap.js';
-
-import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
-import UserConfig from '../../../type/config/UserConfig.js';
+} from './util/logging.js';
+import { YamlKeyAliases, resolveKeyFromAlias } from './util/yamlKeys.js';
 
 const sectionKey = 'validate';
-const keyAliases: ConfigKeyAliases = {
+const keyAliases: YamlKeyAliases = {
 	filePaths: 'filePaths',
 	paths: 'filePaths',
 

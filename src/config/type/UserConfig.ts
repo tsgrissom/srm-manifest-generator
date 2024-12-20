@@ -1,7 +1,6 @@
+import Manifest from '../../type/manifest/Manifest.js';
 import { isDebugActive, isEnvVerbose, isProcessVerbose } from '../../util/debug.js';
-import Manifest from '../manifest/Manifest.js';
-import ConfigData from './ConfigData.js';
-import OutputMode from './OutputMode.js';
+import { ConfigData, OutputMode } from './ConfigData.js';
 
 class UserConfig implements ConfigData {
 	search: {
@@ -51,32 +50,32 @@ class UserConfig implements ConfigData {
 	// TODO constructor arg which sets options based on a given ConfigData? then falls back on the defaults?
 	// TODO jsdocs below
 
-	// MARK: "search"
+	// Section: search
 	public getManifestPaths = (): Array<string> =>
 		this.search.manifests.map(man => man.filePath);
 
-	// MARK: "output"
+	// Section: output
 	public shouldMinifyOutput = (): boolean => this.output.minify;
 	public getIndentSpaces = (): number => this.output.indentSpaces;
 	public getOutputMode = (): OutputMode => this.output.mode;
 
-	// MARK: "validate"
+	// Section: validate
 	public shouldValidateFilePaths = (): boolean => this.validate.filePaths;
 	public shouldValidateExecutables = (): boolean => this.validate.executables;
 	public shouldWarnUnknownConfigKey = (): boolean => this.validate.unknownConfigKeys;
 	public getValidExecutableExtensions = (): Array<string> =>
 		this.validate.executableExtensions;
 
-	// MARK: "other"
+	// Section: other
 	public shouldUseColor = (): boolean => this.other.useColor;
 	public isDebugActive = (): boolean => this.other.debug || isDebugActive(true);
 	public isVerboseActive = (): boolean =>
 		this.other.verbose || isEnvVerbose() || isProcessVerbose();
 
-	// MARK: "logs"
+	// Section: logs
 	public areLogsEnabled = (): boolean => this.logs.enabled;
 	public getLogOutputPath = (): string => this.logs.outputPath;
 	public getLogFilenameFormat = (): string => this.logs.nameFormat;
 }
 
-export default UserConfig;
+export { UserConfig };

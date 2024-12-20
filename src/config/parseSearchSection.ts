@@ -1,3 +1,8 @@
+import { clog } from '../util/console.js';
+import { quote } from '../util/string-wrap.js';
+import { SB_ERR_SM, SB_WARN } from '../util/symbols.js';
+import createManifestInstances from './createManifestInstances.js';
+import { UserConfig } from './type/UserConfig.js';
 import {
 	clogConfigFatalErrMissingRequiredSection,
 	clogConfigFatalErrRequiredSectionWrongType,
@@ -5,19 +10,12 @@ import {
 	clogConfigValueWrongType,
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
-	resolveKeyFromAlias,
 	vlogConfigValueLoaded,
-} from '../../../util/config.js';
-import { clog } from '../../../util/console.js';
-import { quote } from '../../../util/string-wrap.js';
-import { SB_ERR_SM, SB_WARN } from '../../../util/symbols.js';
-
-import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
-import UserConfig from '../../../type/config/UserConfig.js';
-import makeManifests from '../manifests.js';
+} from './util/logging.js';
+import { YamlKeyAliases, resolveKeyFromAlias } from './util/yamlKeys.js';
 
 const sectionKey = 'search';
-const keyAliases: ConfigKeyAliases = {
+const keyAliases: YamlKeyAliases = {
 	directories: 'scanDirectories',
 	scanFolders: 'scanDirectories',
 	folders: 'scanDirectories',
@@ -80,7 +78,10 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 					Array.isArray(value) &&
 					value.every(item => typeof item === 'string')
 				) {
-					config.search.manifests = await makeManifests(value, config);
+					config.search.manifests = await createManifestInstances(
+						value,
+						config,
+					);
 					vlogConfigValueLoaded(resolved, value);
 				} else {
 					if (!Array.isArray(value)) {

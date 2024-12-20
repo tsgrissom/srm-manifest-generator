@@ -15,9 +15,9 @@ import {
 	EXAMPLE_CONFIG_URL,
 	USER_CONFIG_FILENAME,
 	USER_CONFIG_PATH,
-} from './config.js';
+} from './parseConfigData.js';
 
-import ConfigData from '../type/config/ConfigData.js';
+import { ConfigData } from './type/ConfigData.js';
 
 /**
  * Attempts to download the example.config.yml from the project repository,
