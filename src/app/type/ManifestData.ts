@@ -1,4 +1,4 @@
-import Shortcut from '../shortcut/Shortcut.js';
+import Shortcut from '../type/Shortcut.js';
 
 // TODO jsdoc
 
@@ -9,4 +9,10 @@ interface ManifestData {
 	shortcuts: Array<Shortcut>;
 }
 
-export default ManifestData;
+// TODO jsdoc
+enum NameSource {
+	Attribute,
+	Filename,
+}
+
+export { ManifestData, NameSource };

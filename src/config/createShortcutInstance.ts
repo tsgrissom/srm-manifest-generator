@@ -3,9 +3,9 @@ import clr from 'chalk';
 import { clog } from '../util/logging/console.js';
 import { quote } from '../util/string/wrap.js';
 
-import ManifestData from '../app/manifest/ManifestData.js';
-import Shortcut from '../app/shortcut/Shortcut.js';
-import { ShortcutData } from '../app/shortcut/ShortcutData.js';
+import { ManifestData } from '../app/type/ManifestData.js';
+import Shortcut from '../app/type/Shortcut.js';
+import { ShortcutData } from '../app/type/ShortcutData.js';
 import { YamlKeyAliases, resolveKeyFromAlias } from '../util/file/yaml.js';
 import {
 	clogConfigValueWrongType,

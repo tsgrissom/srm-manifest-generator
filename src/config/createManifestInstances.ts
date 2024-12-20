@@ -11,10 +11,10 @@ import {
 } from '../util/logging/config.js';
 import { clog } from '../util/logging/console.js';
 
-import Manifest from '../app/manifest/Manifest.js';
-import ManifestData from '../app/manifest/ManifestData.js';
-import Shortcut from '../app/shortcut/Shortcut.js';
-import { isShortcutData, ShortcutData } from '../app/shortcut/ShortcutData.js';
+import { Manifest } from '../app/type/Manifest.js';
+import { ManifestData } from '../app/type/ManifestData.js';
+import Shortcut from '../app/type/Shortcut.js';
+import { isShortcutData, ShortcutData } from '../app/type/ShortcutData.js';
 import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../util/file/path.js';
 import { resolveKeyFromAlias, YamlKeyAliases } from '../util/file/yaml.js';
 import {

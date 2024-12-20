@@ -75,7 +75,7 @@ interface ResolvedYamlKey {
  * @example
  */
 // TODO Example
-// TODO Write TEST
+// TEST Unit
 function resolveKeyFromAlias(
 	keyAliases: YamlKeyAliases,
 	givenKey: string,
@@ -109,7 +109,7 @@ function resolveKeyFromAlias(
  *  document.
  */
 // TODO jsdoc + example
-// TODO Write TEST
+// TEST Unit
 function joinPathKeys(...keys: Array<string>): string {
 	return keys
 		.filter(k => !k.startsWith('.'))

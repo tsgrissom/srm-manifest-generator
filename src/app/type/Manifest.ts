@@ -6,10 +6,6 @@ import clr from 'chalk';
 import { clog } from '../../util/logging/console.js';
 import { quote } from '../../util/string/wrap.js';
 
-import ManifestData from './ManifestData.js';
-import ManifestNameSource from './ManifestNameSource.js';
-import ManifestWriteResults from './ManifestWriteResults.js';
-
 import { UserConfig } from '../../config/type/UserConfig.js';
 import {
 	basenameWithoutExtensions,
@@ -34,12 +30,13 @@ import {
 	UNICODE_WARN,
 	UNICODE_XMARK_LG,
 } from '../../util/string/symbols.js';
-import Shortcut from '../shortcut/Shortcut.js';
-import { ShortcutExportData } from '../shortcut/ShortcutData.js';
-import EmptyManifestWriteResults from './ManifestEmptyWriteResults.js';
+import Shortcut from '../type/Shortcut.js';
+import { ShortcutExportData } from '../type/ShortcutData.js';
+import { ManifestData, NameSource } from './ManifestData.js';
+
+// Class: MARK: Manifest
 
 // TODO getName by ManifestNameSource
-
 // TODO jsdoc
 class Manifest implements ManifestData {
 	// TODO jsdoc
@@ -84,13 +81,13 @@ class Manifest implements ManifestData {
 		// TODO Fill shortcuts
 	}
 
-	// MARK: Paths
+	// MARK: paths
 
 	public getWritePath(): string {
 		return this.outputPath;
 	}
 
-	// MARK: Names
+	// MARK: names
 
 	public getFileBasename(): string {
 		return path.basename(this.filePath);
@@ -127,11 +124,11 @@ class Manifest implements ManifestData {
 	 * @returns An enum representing the potential sources
 	 *  of a manifest's name.
 	 */
-	public getNameSource(): ManifestNameSource {
+	public getNameSource(): NameSource {
 		if (this.hasNameAttribute()) {
-			return ManifestNameSource.Attribute;
+			return NameSource.Attribute;
 		} else {
-			return ManifestNameSource.Filename;
+			return NameSource.Filename;
 		}
 	}
 
@@ -142,23 +139,23 @@ class Manifest implements ManifestData {
 	 */
 	public getNameSourceAsString(): string {
 		switch (this.getNameSource()) {
-			case ManifestNameSource.Attribute:
+			case NameSource.Attribute:
 				return 'Attribute';
-			case ManifestNameSource.Filename:
+			case NameSource.Filename:
 				return 'Filename';
 		}
 	}
 
 	public getName(): string {
 		switch (this.getNameSource()) {
-			case ManifestNameSource.Attribute:
+			case NameSource.Attribute:
 				return this.getNameAttribute();
-			case ManifestNameSource.Filename:
+			case NameSource.Filename:
 				return this.getFallbackName();
 		}
 	}
 
-	// MARK: Shortcuts
+	// MARK: shortcuts
 
 	public getEnabledShortcuts(): Array<Shortcut> {
 		return this.getShortcuts.filter(each => each.isEnabled);
@@ -172,7 +169,9 @@ class Manifest implements ManifestData {
 		return JSON.stringify(this.getExportData());
 	}
 
-	public async writeToOutput(): Promise<ManifestWriteResults> {
+	// MARK: write methods
+
+	public async writeToOutput(): Promise<WriteResults> {
 		const exportData = this.getExportData();
 		const writeData = JSON.stringify(exportData);
 		const writePath = this.getWritePath();
@@ -191,7 +190,7 @@ class Manifest implements ManifestData {
 				`${SB_WARN} Skipped Manifest ${quote(this.getName())}: No shortcuts which were both enabled and valid`,
 			);
 			// TODO Verbose print more info here
-			return new EmptyManifestWriteResults(this);
+			return new EmptyWriteResults(this);
 		}
 
 		try {
@@ -224,7 +223,7 @@ class Manifest implements ManifestData {
 	}
 
 	private calculatePrefixForResults(
-		results: ManifestWriteResults,
+		results: WriteResults,
 		config?: UserConfig,
 	): string {
 		const { nTotal, nOk, nDisabled } = results.stats;
@@ -265,7 +264,7 @@ class Manifest implements ManifestData {
 	}
 
 	private async dlogWriteResults(
-		results: ManifestWriteResults,
+		results: WriteResults,
 		config?: UserConfig,
 	): Promise<void> {
 		const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } =
@@ -325,7 +324,7 @@ class Manifest implements ManifestData {
 	}
 
 	public async logWriteResults(
-		results: ManifestWriteResults,
+		results: WriteResults,
 		config?: UserConfig,
 	): Promise<void> {
 		await this.dlogWriteResults(results);
@@ -407,4 +406,94 @@ class Manifest implements ManifestData {
 	}
 }
 
-export default Manifest;
+// MARK: ManifestWriteResults
+
+/**
+ * Represents the result of a Manifest write operation, including
+ * tracking the source Manifest instance, the output created
+ * from the manifest's shortcuts attribute, and statistics about
+ * the shortcuts.
+ */
+interface WriteResults {
+	/**
+	 * The Manifest instance whose shortcuts the output file's
+	 * contents are derived from.
+	 */
+	readonly manifest: Manifest; // TODO Does this need to be here? I removed it from one use of ManifestWriteResults
+
+	/**
+	 * The contents of the output file in JSON form.
+	 */
+	readonly outputData: Array<ShortcutExportData>;
+
+	/**
+	 * Statistics about the results of the parsing and writing
+	 * processess during the operation.
+	 */
+	readonly stats: {
+		/**
+		 * The total number of shortcuts found in the input file.
+		 * */
+		readonly nTotal: number;
+
+		/**
+		 * The number of shortcuts which were enabled by the input file.
+		 * To be enabled is the default behavior unless explicitly disabled.
+		 * */
+		readonly nEnabled: number;
+
+		/**
+		 * The number of shortcuts which were disabled by the input file.
+		 * This is opt-in behavior which only occurs if explicitly disabled.
+		 * The difference of {@link nTotal} minus {@link nEnabled}.
+		 * */
+		readonly nDisabled: number;
+
+		/**
+		 * The number of shortcuts which errored out during parsing, such as from
+		 * an invalid file path.
+		 */
+		readonly nInvalid: number;
+
+		readonly nValid: number;
+
+		/**
+		 * The number of shortcuts that were skipped before the write operation.
+		 * The sum of {@link nDisabled} and {@link nInvalid}.
+		 */
+		readonly nSkipped: number;
+
+		/**
+		 * The number of shortcuts that were enabled as well as passed validation
+		 * and were written to the output file.
+		 */
+		readonly nOk: number;
+	};
+}
+
+// MARK: emptyWriteResults
+
+/**
+ * Represents the results of a Manifest write operation when the Manifest
+ * instance has zero shortcuts to write to a file.
+ */
+class EmptyWriteResults implements WriteResults {
+	manifest: Manifest;
+	outputData: Array<ShortcutExportData>;
+	readonly stats = {
+		nTotal: 0,
+		nEnabled: 0,
+		nDisabled: 0,
+		nInvalid: 0,
+		nValid: 0,
+		nSkipped: 0,
+		nOk: 0,
+	};
+
+	constructor(emptyManifest: Manifest) {
+		this.manifest = emptyManifest;
+		this.outputData = [];
+	}
+}
+
+export { EmptyWriteResults, Manifest, WriteResults };

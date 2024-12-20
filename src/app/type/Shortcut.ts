@@ -5,7 +5,7 @@ import { quote } from '../../util/string/wrap.js';
 import { UserConfig } from '../../config/type/UserConfig.js';
 import { yesNo } from '../../util/boolean.js';
 import { fmtPathWithExistsPrefix } from '../../util/file/path.js';
-import ManifestData from '../manifest/ManifestData.js';
+import { ManifestData } from '../type/ManifestData.js';
 import { ShortcutData, ShortcutExportData } from './ShortcutData.js';
 
 // TODO jsdoc

@@ -5,6 +5,8 @@ import clr from 'chalk';
 import { ConfigData } from '../../config/type/ConfigData';
 import { SB_ERR_SM, SB_OK_SM } from '../string/symbols.js';
 
+// MARK: pathHasFileExtension
+
 /**
  * Checks if a given file path has a file extension. When `fileExt` is set to *,
  * including by default, the function will return true if there is any extension
@@ -29,7 +31,7 @@ import { SB_ERR_SM, SB_OK_SM } from '../string/symbols.js';
  *      }
  * );
  */
-// TODO TEST Unit
+// TODO Unit Test
 export function pathHasFileExtension(
 	filePath: string,
 	fileExt: string | Array<string> = '*',
@@ -54,6 +56,8 @@ export function pathHasFileExtension(
 	return false;
 }
 
+// MARK: replaceFileExtension
+
 /**
  * Within the given `fileName`, replaces the `findExt` with `replaceExt` if they are found.
  *
@@ -65,6 +69,7 @@ export function pathHasFileExtension(
  *
  * @returns The `fileName`, with a new file extension `replaceExt` if one in `findExt` was found.
  */
+// TODO Unit Test
 export function replaceFileExtension(
 	fileName: string,
 	findExt: string | Array<string>,
@@ -103,6 +108,8 @@ export function replaceFileExtension(
 	return fileName;
 }
 
+// MARK: normalizeFileExtension
+
 /**
  * Normalizes a file extension name by prepending a period to it if needed.
  *
@@ -113,6 +120,7 @@ export function replaceFileExtension(
  *
  * @returns The file extension in normalized form, with a period prepended to the input if it was missing.
  */
+// TODO Unit Test
 export function normalizeFileExtension(
 	extname: string,
 	excludeExts: string | Array<string> = ['*'],
@@ -131,6 +139,8 @@ export function normalizeFileExtension(
 	return `.${extname}`;
 }
 
+// MARK: basenameWithoutExtensions
+
 /**
  * Gets a file's basename with selected extensions removed.
  * If `iterate` is enabled, this process will be repeated until none of the extensions are present.
@@ -143,6 +153,7 @@ export function normalizeFileExtension(
  *
  * @example // TODO Write example
  */
+// TODO Unit Test
 export function basenameWithoutExtensions(
 	fileName: string,
 	extsToRemove: string | Array<string> = '*',
@@ -193,6 +204,8 @@ export function basenameWithoutExtensions(
 	return newName;
 }
 
+// MARK: fmtPath
+
 /**
  * Formats a given filepath to a better version for console.
  * Options available are to apply underline and/or apply
@@ -205,6 +218,7 @@ export function basenameWithoutExtensions(
  *  the given filepath if it not surrounded by them already.
  * @returns The formatted filepath with the options applied.
  */
+// TODO Unit Test
 export function fmtPath(filePath: string, useUnderline = true, useQuotes = true): string {
 	// TODO Replace with quote utility function
 	if (useQuotes && !filePath.startsWith('"')) filePath = '"' + filePath;
@@ -213,6 +227,8 @@ export function fmtPath(filePath: string, useUnderline = true, useQuotes = true)
 
 	return filePath;
 }
+
+// MARK: fmtPathWithExistsPrefix
 
 /**
  * Styles the given path according to if it is accessible or not.
@@ -230,6 +246,8 @@ export function fmtPath(filePath: string, useUnderline = true, useQuotes = true)
  *  resolved, which represents whether `filePath` was accessible
  *  or not.
  */
+// TODO jsdoc
+// TODO Unit Test
 export async function fmtPathWithExistsPrefix( // TODO Update jsdoc
 	filePath: string,
 	config?: ConfigData,
@@ -254,6 +272,10 @@ export async function fmtPathWithExistsPrefix( // TODO Update jsdoc
 	return prefix + filePath;
 }
 
+// MARK: fmtPathWithName
+
+// TODO jsdoc
+// TODO Unit Test
 export function fmtPathWithName(
 	filePath: string,
 	nickname: string,
@@ -265,6 +287,10 @@ export function fmtPathWithName(
 	return nickname + ': ' + filePath;
 }
 
+// MARK: fmtPathWithExistsAndName
+
+// TODO jsdoc
+// TODO Unit Test
 export async function fmtPathWithExistsAndName(
 	filePath: string,
 	nickname: string,
@@ -282,6 +308,10 @@ export async function fmtPathWithExistsAndName(
 	return prefix + nickname + ': ' + filePath + ' ' + suffix;
 }
 
+// MARK: fmtPathAsTag
+
+// TODO jsdoc
+// TODO Unit Test
 export function fmtPathAsTag(
 	filePath: string,
 	useUnderline = true,
@@ -295,7 +325,8 @@ export function fmtPathAsTag(
 	return '(' + innerPrefix + filePath + ')';
 }
 
-// TODO TEST Unit
+// TODO jsdoc
+// TODO Unit test
 export async function isPathAccessible(filePath: string): Promise<boolean> {
 	try {
 		await fs.access(filePath);

@@ -5,10 +5,10 @@ import mockFs from 'mock-fs';
 import FileSystem from 'mock-fs/lib/filesystem';
 import yaml from 'yaml';
 
-import Manifest from '../../../src/app/manifest/Manifest';
-import ManifestData from '../../../src/app/manifest/ManifestData';
-import Shortcut from '../../../src/app/shortcut/Shortcut';
-import { ShortcutData } from '../../../src/app/shortcut/ShortcutData';
+import { Manifest } from '../../../src/app/type/Manifest';
+import { ManifestData } from '../../../src/app/type/ManifestData';
+import Shortcut from '../../../src/app/type/Shortcut';
+import { ShortcutData } from '../../../src/app/type/ShortcutData';
 import { basenameWithoutExtensions } from '../../../src/util/file/path';
 
 const resourceDir = 'test/resource/Manifest';

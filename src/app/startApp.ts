@@ -6,7 +6,7 @@ import { clog } from '../util/logging/console.js';
 import { dlog, isVerbose } from '../util/logging/debug.js';
 import { countNoun, possessivePronounFor } from '../util/string/grammar.js';
 import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from '../util/string/symbols.js';
-import Manifest from './manifest/Manifest.js';
+import { Manifest } from './type/Manifest.js';
 
 async function processManifest(manifest: Manifest): Promise<void> {
 	// TODO Additionally validate if write path is valid, make folders if missing

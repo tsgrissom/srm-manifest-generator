@@ -1,4 +1,4 @@
-import Manifest from '../../app/manifest/Manifest.js';
+import { Manifest } from '../../app/type/Manifest.js';
 
 // MARK: Interface: ConfigData
 
