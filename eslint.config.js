@@ -8,6 +8,8 @@ const globalIgnoredFiles = {
 		'*.config.js', // TODO Figure out why this warns if removed
 		'out/**/*.js',
 		'test/**/*.js',
+		'src/bin/**/*.js',
+		'src/bin/**/*.mjs',
     ],
 };
 

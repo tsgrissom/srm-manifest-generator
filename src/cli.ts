@@ -3,10 +3,10 @@
 import chalk from 'chalk';
 import { hideBin } from 'yargs/helpers';
 import yargs from 'yargs/yargs';
-import { listLoadedManifests, listShortcutsOfLoadedManifests, startApp } from '../app.js';
-import parseUserConfigData from '../config/config.js';
-import { quote } from '../utility/string-wrap.js';
-import { delimitedList } from '../utility/string.js';
+import { listLoadedManifests, listShortcutsOfLoadedManifests, startApp } from './app.js';
+import parseUserConfigData from './config/config.js';
+import { quote } from './utility/string-wrap.js';
+import { delimitedList } from './utility/string.js';
 
 const ALIASES_MANIFEST = ['manifest', 'manifests', 'man', 'source', 'sources'];
 // prettier-ignore
