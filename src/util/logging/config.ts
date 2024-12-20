@@ -1,8 +1,7 @@
-// MARK: GENERAL
 import clr from 'chalk';
 import { USER_CONFIG_FILENAME } from '../../config/loadFileData.js';
 import { USER_CONFIG_ATTRIBUTION } from '../../config/parseConfigData.js';
-import { UserConfig } from '../../config/type/UserConfig.js';
+import { ConfigData } from '../../config/type/ConfigData.js';
 import { fmtBool, yesNo } from '../boolean.js';
 import { ResolvedYamlKey } from '../file/yaml.js';
 import { getTypeDisplayName, indefiniteArticleFor } from '../string/grammar.js';
@@ -18,6 +17,8 @@ import {
 import { quote } from '../string/wrap.js';
 import { clog } from './console.js';
 import { dlog, isDebugActive, vlog, vlogList } from './debug.js';
+
+// MARK: GENERIC
 
 // TODO Are these even used?
 
@@ -37,31 +38,20 @@ export function clogConfigFatalErr(str: string): void {
 	console.error(`${SB_ERR_LG} ${errUserAttribution} ` + clr.red(str));
 }
 
-// MARK: BY SECTION
+// MARK: SECTION HEADERS
 
 export function dlogConfigSectionStart(sectionKey: string): void {
 	sectionKey = quote(sectionKey);
 	dlog(`${SB_SECT_START}Loading: Config section ${sectionKey}`);
 }
 
-export function clogConfigFatalErrMissingRequiredSection(fullSectionKey: string): void {
-	fullSectionKey = clr.redBright(quote(fullSectionKey));
-	clogConfigFatalErr(`is missing required required section ${fullSectionKey}.`);
+export function dlogConfigSectionOk(sectionKey: string): void {
+	dlog(`${SB_OK_LG} Loaded: Config section ${quote(sectionKey)}`);
 }
 
-export function clogConfigFatalErrRequiredSectionWrongType(
-	sectionKey: string,
-	expectedType: string,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	value?: any,
-): void {
-	const typeOfValue = getTypeDisplayName(value);
-	const articleActualType = indefiniteArticleFor(typeOfValue);
-	const articleExpectedType = indefiniteArticleFor(expectedType);
+// MARK: LINT SECTIONS
 
-	const msg = `has an invalid required section: Value of ${clr.redBright(quote(sectionKey))} should be ${articleExpectedType} ${expectedType} but was ${articleActualType} ${typeOfValue}`;
-	clogConfigFatalErr(msg);
-}
+// NON-FATAL SECTION WARNS
 
 export function dlogConfigWarnMissingOptionalSection(sectionKey: string): void {
 	dlog(
@@ -99,10 +89,42 @@ export function dlogConfigWarnOptionalSectionSkippedWrongType(
 	dlogConfigWarnOptionalSectionSkipped(sectionKey, msg);
 }
 
-export function dlogConfigSectionOk(sectionKey: string): void {
-	dlog(`${SB_OK_LG} Loaded: Config section ${quote(sectionKey)}`);
+// FATAL SECTION ERRS
+
+export function clogConfigFatalErrMissingRequiredSection(fullSectionKey: string): void {
+	fullSectionKey = clr.redBright(quote(fullSectionKey));
+	clogConfigFatalErr(`is missing required required section ${fullSectionKey}.`);
 }
 
+export function clogConfigFatalErrRequiredSectionWrongType(
+	sectionKey: string,
+	expectedType: string,
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	value?: any,
+): void {
+	const typeOfValue = getTypeDisplayName(value);
+	const articleActualType = indefiniteArticleFor(typeOfValue);
+	const articleExpectedType = indefiniteArticleFor(expectedType);
+
+	const msg = `has an invalid required section: Value of ${clr.redBright(quote(sectionKey))} should be ${articleExpectedType} ${expectedType} but was ${articleActualType} ${typeOfValue}`;
+	clogConfigFatalErr(msg);
+}
+
+// MARK: LINT KEYS
+
+export function clogConfigKeyUnknown(fullGivenKey: string, config?: ConfigData): void {
+	const shouldWarn = config?.validate.unknownConfigKeys ?? true;
+
+	if (!shouldWarn) {
+		return;
+	}
+
+	clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
+}
+
+// MARK: LINT VALUES
+
+// TODO Move this to use unknown
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function fmtValueForLoadedLog(value?: any): string {
 	if (typeof value === 'undefined') {
@@ -116,6 +138,7 @@ function fmtValueForLoadedLog(value?: any): string {
 	return fmtValue;
 }
 
+// TODO Move this to use unknown
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function vlogConfigValueLoaded(resolvedPair: ResolvedYamlKey, value?: any): void {
 	const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
@@ -135,16 +158,12 @@ export function vlogConfigValueLoaded(resolvedPair: ResolvedYamlKey, value?: any
 	);
 }
 
-export function clogConfigKeyUnknown(fullGivenKey: string, config: UserConfig): void {
-	if (!config.shouldWarnUnknownConfigKey()) return;
-	clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
-}
-
+// TODO Move this to use unknown
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function clogConfigValueUnknown(fullGivenKey: string, value: any): void {
-	clog(
-		`  ${SB_WARN} Unknown value set for key ${quote(fullGivenKey)} (Value: ${value})`,
-	);
+export function clogConfigValueUnknown(fullGivenKey: string, value?: any): void {
+	const postfix = `(Value: ${fmtValueForLoadedLog(value)})`;
+
+	clog(`  ${SB_WARN} Unknown value set for key ${quote(fullGivenKey)} ${postfix}`);
 }
 
 function clogConfigValueErr(key: string, msg: string): void {
@@ -152,6 +171,7 @@ function clogConfigValueErr(key: string, msg: string): void {
 	let blob = `${prefix} Value of key ${quote(key)} ${msg}`;
 
 	if (isDebugActive()) {
+		// Pad left if debug
 		blob = `  ` + blob;
 	}
 

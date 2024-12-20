@@ -15,7 +15,7 @@ afterEach(() => {
 });
 
 describe('clog', () => {
-	it('logs messages to standard output stream', () => {
+	it('logs messages to stdout', () => {
 		clog('Hello, World!');
 		expect(logSpy).toHaveBeenCalledWith('Hello, World!');
 	});

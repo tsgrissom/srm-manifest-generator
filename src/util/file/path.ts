@@ -2,8 +2,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import clr from 'chalk';
-import { ConfigData } from '../../config/type/ConfigData';
+import { ConfigData } from '../../config/type/ConfigData.js';
 import { SB_ERR_SM, SB_OK_SM } from '../string/symbols.js';
+import { quote } from '../string/wrap.js';
 
 // MARK: pathHasFileExtension
 
@@ -36,8 +37,9 @@ export function pathHasFileExtension(
 	filePath: string,
 	fileExt: string | Array<string> = '*',
 ): boolean {
-	if (typeof fileExt === 'string' && fileExt.trim() === '')
-		throw new Error(`Arg fileExt cannot be an empty string: "${fileExt}"`);
+	if (typeof fileExt === 'string' && fileExt.trim() === '') {
+		throw new Error(`Arg "fileExt" cannot be an empty string: "${fileExt}"`);
+	}
 
 	const extname = path.extname(filePath);
 
@@ -159,12 +161,16 @@ export function basenameWithoutExtensions(
 	extsToRemove: string | Array<string> = '*',
 	iterate = true,
 ): string {
-	if (!Array.isArray(extsToRemove))
+	if (!Array.isArray(extsToRemove)) {
 		// TEST Unit
 		extsToRemove = [extsToRemove];
+	}
 
 	for (const [index, entry] of extsToRemove.entries()) {
-		if (typeof entry !== 'string') continue;
+		if (typeof entry !== 'string') {
+			continue;
+		}
+
 		extsToRemove[index] = normalizeFileExtension(entry);
 	}
 
@@ -175,7 +181,9 @@ export function basenameWithoutExtensions(
 		for (const extToRemove of extsToRemove) {
 			extFound = path.extname(newName);
 
-			if (!extFound || extFound === '') return newName;
+			if (!extFound || extFound === '') {
+				return newName;
+			}
 			// TODO Check each iteration and make sure there's still a string with content
 
 			if (extToRemove === '*' || extToRemove === extFound.toLowerCase()) {
@@ -190,7 +198,9 @@ export function basenameWithoutExtensions(
 		removedExt = false;
 		extFound = path.extname(newName);
 
-		if (!extFound || extFound === '') return newName;
+		if (!extFound || extFound === '') {
+			return newName;
+		}
 
 		for (const extToRemove of extsToRemove) {
 			if (extToRemove === '*' || extToRemove === extFound.toLowerCase()) {
@@ -220,10 +230,17 @@ export function basenameWithoutExtensions(
  */
 // TODO Unit Test
 export function fmtPath(filePath: string, useUnderline = true, useQuotes = true): string {
-	// TODO Replace with quote utility function
-	if (useQuotes && !filePath.startsWith('"')) filePath = '"' + filePath;
-	if (useQuotes && !filePath.endsWith('"')) filePath = filePath + '"';
-	if (useUnderline) filePath = clr.underline(filePath);
+	if (filePath.trim() === '') {
+		return filePath;
+	}
+
+	if (useQuotes) {
+		filePath = quote(filePath, false, false, false);
+	}
+
+	if (useUnderline) {
+		filePath = clr.underline(filePath);
+	}
 
 	return filePath;
 }
@@ -325,8 +342,19 @@ export function fmtPathAsTag(
 	return '(' + innerPrefix + filePath + ')';
 }
 
-// TODO jsdoc
-// TODO Unit test
+/**
+ * Checks if a given path is accessible according to Node's {@link fs.promises.access}.
+ *
+ * * A resolved value of `false` primarily indicates either the path does not exist, or
+ *   the user lacks permission to access the file.
+ * * Secondarily, other system errors could produce a `false` value, such as:
+ *   Network issues if the file is on a network drive, file system errors or corruption,
+ *   or insufficient system resources.
+ *
+ * @param filePath The filesystem path to check.
+ * @returns A `Promise` which resolves to a `boolean` value which indicates whether
+ *  the given {@link filePath} is accessible.
+ */
 export async function isPathAccessible(filePath: string): Promise<boolean> {
 	try {
 		await fs.access(filePath);
