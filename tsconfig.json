@@ -3,7 +3,6 @@
 		"target": "esnext",
 		"module": "esnext",
 		"moduleResolution": "node",
-		"rootDir": "src",
 		"outDir": "dist",
 		"strict": true,
 		"esModuleInterop": true,
@@ -14,6 +13,6 @@
 		"resolveJsonModule": true
 	},
 	// Keep test/**/* in both include and exclude for type-check without build files
-	"include": ["src/**/*"],
+	"include": ["src/**/*", "test/**/*"],
 	"exclude": ["node_modules", "dist"]
 }
