@@ -1,12 +1,9 @@
 import path from 'node:path';
 
-import clr from 'chalk';
-
-import { fmtBool } from '../../utility/boolean.js';
-import { clog } from '../../utility/console.js';
 import { quote } from '../../utility/string-wrap.js';
 
-import { SB_WARN } from '../../utility/symbols.js';
+import { yesNo } from '../../utility/boolean.js';
+import { fmtPathWithExistsPrefix } from '../../utility/path.js';
 import UserConfig from '../config/UserConfig.js';
 import ManifestData from '../manifest/ManifestData.js';
 import { ShortcutData, ShortcutExportData } from './ShortcutData.js';
@@ -44,14 +41,6 @@ class Shortcut implements ShortcutData {
 		this.title = data.title;
 		this.target = data.target;
 		this.enabled = data.enabled ?? true;
-
-		if (process.argv.includes('--list-shortcuts')) {
-			// TODO Decide fate
-			clog(clr.blue.underline(`LOADED SHORTCUT: ${quote(this.title)}`));
-			clog(` Title: ${quote(this.title)}`);
-			clog(` Target: ${quote(this.target)}`);
-			clog(` Enabled: ${fmtBool(this.enabled)}`);
-		}
 	}
 
 	/**
@@ -85,19 +74,35 @@ class Shortcut implements ShortcutData {
 
 	// TODO Method: isTargetPathRelative
 
-	public getFullTargetPath(manifest: ManifestData): string {
-		const baseDirectory = manifest.baseDirectory;
-		const targetPath = this.target;
-
+	public getFullTargetPathFromBaseDir(baseDirectory: string): string {
 		// TODO Absolute path support
-
-		if (!baseDirectory) {
+		// TODO Probably need more checks
+		if (baseDirectory.trim() === '') {
 			console.error(
-				`${SB_WARN} Could not construct full target path for Shortcut (${quote(this.title)}): Given Manifest's base directory is invalid`,
+				`Failed to construct full target path from empty string passed to parameter "baseDir"! (Shortcut: ${quote(this.title)}, baseDir: ${quote(baseDirectory)})`,
 			);
+			return '';
 		}
 
-		return path.join(manifest.baseDirectory, targetPath);
+		return path.join(baseDirectory, this.target);
+	}
+
+	public getFullTargetPath(manifest: ManifestData): string {
+		const baseDirectory = manifest.baseDirectory;
+		return this.getFullTargetPathFromBaseDir(baseDirectory);
+	}
+
+	public async formatAsListEntry(baseDirectory: string): Promise<Array<string>> {
+		const fmtTitle = quote(this.title);
+		const fullTarget = this.getFullTargetPathFromBaseDir(baseDirectory);
+		const fmtFullTarget = await fmtPathWithExistsPrefix(fullTarget);
+		const fmtIsEnabled = yesNo(this.enabled);
+
+		return [
+			` - Title: ${fmtTitle}`,
+			`   Target: ${fmtFullTarget}`,
+			`   Enabled? ${fmtIsEnabled}`,
+		];
 	}
 }
 

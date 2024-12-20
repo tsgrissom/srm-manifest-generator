@@ -18,7 +18,7 @@ export const UNICODE_ARRW_RIGHT = PlainSymbols.arrowRight.modern,
 	/** A plain, bigger x-mark unicode symbol */
 	UNICODE_XMARK_LG = PlainSymbols.xmarkLg.modern,
 	/** A plain warning sign unicode symbol */
-	UNICODE_WARN = PlainSymbols.warn.modern;
+	UNICODE_WARN = PlainSymbols.warn.modern; // TODO Remove all of above
 
 /** A small, bright green checkmark unicode symbol */
 export const SB_OK_SM = clr.greenBright(UNICODE_CHECK_SM),
@@ -32,7 +32,8 @@ export const SB_OK_SM = clr.greenBright(UNICODE_CHECK_SM),
 	SB_ERR_LG = clr.redBright(UNICODE_XMARK_LG),
 	SB_SECT_START = StyledSymbols.sectionStart.modern,
 	SB_SECT_END_OK = StyledSymbols.sectionEndOk.modern,
-	SB_SECT_END_ERR = StyledSymbols.sectionEndErr.modern;
+	SB_SECT_END_ERR = StyledSymbols.sectionEndErr.modern,
+	SB_BULLET = StyledSymbols.bullet.modern;
 
 // function test(): void {
 // 	clog(PlainSymbols.boxEmpty.modern);
@@ -44,8 +45,6 @@ export const SB_OK_SM = clr.greenBright(UNICODE_CHECK_SM),
 // 	clog(PlainSymbols.boxXmark.modern);
 
 // 	clog(chalk.red(PlainSymbols.boxXmark.modern));
-
-// 	clog('\u26AC Testing this as a delimiter');
 
 // 	clog('\u26CC');
 

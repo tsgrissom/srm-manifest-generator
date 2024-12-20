@@ -8,6 +8,7 @@ import { dlog, isDebugActive, vlog, vlogList } from './debug.js';
 import { quote } from './string-wrap.js';
 import { getTypeDisplayName, indefiniteArticleFor } from './string.js';
 import {
+	SB_BULLET,
 	SB_ERR_LG,
 	SB_ERR_SM,
 	SB_OK_LG,
@@ -192,7 +193,7 @@ export function vlogConfigValueLoaded(resolvedPair: ConfigKeyPair, value?: any):
 
 	vlog(`  ${SB_OK_SM} Key loaded ${quote(fullGivenKey)}`);
 	vlogList(
-		`     \u26AC `,
+		`     ${SB_BULLET} `,
 		`Value: ${fmtValue}`,
 		`Given Key: ${fmtGivenKey}`,
 		`Internal Key: ${fmtInternalKey}`,

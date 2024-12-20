@@ -13,6 +13,6 @@
 		"experimentalDecorators": true,
 		"resolveJsonModule": true
 	},
-	"include": ["src/**/*", "test/**/*"],
-	"exclude": ["node_modules", "out", "dist"]
+	"include": ["src/**/*", "test/**/*", "src/bin/commands/**/*"],
+	"exclude": ["node_modules", "out"]
 }

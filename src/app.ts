@@ -4,12 +4,9 @@ import Manifest from './type/manifest/Manifest.js';
 
 import parseUserConfigData from './config/config.js';
 import ConfigData from './type/config/ConfigData.js';
-import Shortcut from './type/shortcut/Shortcut.js';
-import { yesNo } from './utility/boolean.js';
 import { clog } from './utility/console.js';
 import { dlog, isVerbose } from './utility/debug.js';
-import { fmtPathAsTag, fmtPathWithExistsPrefix } from './utility/path.js';
-import { quote } from './utility/string-wrap.js';
+import { fmtPathAsTag } from './utility/path.js';
 import { countNoun, possessivePronounFor } from './utility/string.js';
 import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from './utility/symbols.js';
 
@@ -36,13 +33,6 @@ async function processManifest(manifest: Manifest): Promise<void> {
 	}
 }
 
-function fmtManifestAsListEntry(manifest: Manifest): string {
-	let item = ' - ';
-	item += manifest.getName();
-	// TODO Display some sort of status
-	return item;
-}
-
 export function listLoadedManifests(config: ConfigData): void {
 	const { manifests } = config.search;
 	const manLen = manifests.length;
@@ -55,24 +45,8 @@ export function listLoadedManifests(config: ConfigData): void {
 	clog(`${clr.magentaBright.bold('Configured Manifests (' + manLen + ')')}`);
 
 	for (const man of manifests) {
-		clog(fmtManifestAsListEntry(man));
+		clog(man.formatAsListEntry());
 	}
-}
-
-async function fmtShortcutAsListEntry(
-	shortcut: Shortcut,
-	parentManifest: Manifest,
-): Promise<Array<string>> {
-	const fmtTitle = quote(shortcut.getTitle);
-	const fullTarget = shortcut.getFullTargetPath(parentManifest);
-	const fmtFullTarget = await fmtPathWithExistsPrefix(fullTarget);
-	const fmtIsEnabled = yesNo(shortcut.isEnabled);
-
-	return [
-		` - Title: ${fmtTitle}`,
-		`   Target: ${fmtFullTarget}`,
-		`   Enabled? ${fmtIsEnabled}`,
-	];
 }
 
 export async function listShortcutsOfLoadedManifests(config: ConfigData): Promise<void> {
@@ -134,7 +108,7 @@ export async function listShortcutsOfLoadedManifests(config: ConfigData): Promis
 		}
 
 		for (const sc of enabledShortcuts) {
-			const lines = await fmtShortcutAsListEntry(sc, man);
+			const lines = await sc.formatAsListEntry(man.getBaseDirectory);
 			lines.forEach(line => clog(line));
 		}
 	}
@@ -162,7 +136,7 @@ export async function transformLoadedManifests(config: ConfigData): Promise<void
 
 	if (isVerbose()) {
 		for (const man of manifests) {
-			clog(fmtManifestAsListEntry(man));
+			clog(man.formatAsListEntry());
 		}
 	}
 

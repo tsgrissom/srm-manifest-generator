@@ -75,6 +75,13 @@ const StyledSymbols: Record<string, UnicodeModeMap> = {
 		description:
 			'A sharp, bright red, right-facing arrow indicating failure at the end of a section',
 	},
+	/** A small, hollow dot used as a list bulletpoint */
+	bullet: {
+		modern: '\u26AC',
+		compatibility: '\u26AC',
+		disabled: '*',
+		description: 'A small, hollow dot used as a list bulletpoint',
+	},
 };
 
 export default StyledSymbols;

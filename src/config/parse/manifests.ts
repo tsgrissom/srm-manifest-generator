@@ -14,6 +14,7 @@ import { clog } from '../../utility/console.js';
 import { dlog, dlogHeader, isDebugActive, vlog, vlogList } from '../../utility/debug.js';
 import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path.js';
 import {
+	SB_BULLET,
 	SB_ERR_LG,
 	SB_ERR_SM,
 	SB_OK_LG,
@@ -226,7 +227,7 @@ function parseShortcutsToShortcutDataArray(
 
 		vlog(`  ${SB_OK_SM} Valid shortcut data for title ${fmtTitle}`);
 		vlogList(
-			`     \u26AC `,
+			`     ${SB_BULLET} `,
 			`From Manifest: ${manName}`,
 			`Title: ${fmtTitle}`,
 			`Target: ${fmtTarget}`,

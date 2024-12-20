@@ -12,6 +12,7 @@ import {
 } from '../../utility/path.js';
 import { quote } from '../../utility/string-wrap.js';
 import {
+	SB_BULLET,
 	SB_ERR_LG,
 	SB_ERR_SM,
 	SB_OK_LG,
@@ -209,6 +210,13 @@ class Manifest implements ManifestData {
 		}
 	}
 
+	public formatAsListEntry(): string {
+		let item = ' - ';
+		item += this.getName();
+		// TODO Display some sort of status
+		return item;
+	}
+
 	private calculatePrefixForResults(
 		results: ManifestWriteResults,
 		config?: UserConfig,
@@ -316,7 +324,7 @@ class Manifest implements ManifestData {
 	): Promise<void> {
 		await this.dlogWriteResults(results);
 
-		const { manifest, stats } = results;
+		const { manifest, stats, outputData } = results;
 		const { nTotal, nOk, nDisabled, nInvalid } = stats;
 		const useColor = config?.shouldUseColor() ?? true;
 		const prefix = this.calculatePrefixForResults(results, config);
@@ -325,13 +333,22 @@ class Manifest implements ManifestData {
 		const sourceName = useColor ? clr.magentaBright(quotedName) : quotedName;
 		const fromSource = 'from source ' + sourceName;
 
-		let writeRatio = `${stats.nOk}/${stats.nTotal} shortcuts`;
-		writeRatio = useColor ? clr.cyanBright(writeRatio) : writeRatio;
+		let writeRatio = `${nOk}/${nTotal}`;
+
+		if (useColor) {
+			if (nOk <= 0 && nTotal > 0) {
+				writeRatio = clr.redBright(writeRatio);
+			} else {
+				writeRatio = clr.cyanBright(writeRatio);
+			}
+		}
+
+		const writeQuantity = `${writeRatio} shortcuts`;
 
 		let header = prefix + ` `;
 
 		if (nOk > 0) {
-			header += `Created ${writeRatio} ${fromSource}`;
+			header += `Created ${writeQuantity} ${fromSource}`;
 		} else {
 			header += `Wrote nothing ` + fromSource;
 		}
@@ -373,6 +390,12 @@ class Manifest implements ManifestData {
 				clog(`  ${SB_WARN} All shortcuts were disabled ${disabledToAll}`);
 			} else {
 				clog(`  ${SB_WARN} Some shortcuts were disabled ${disabledToAll}`);
+			}
+		}
+
+		if (process.argv.includes('--list-shortcuts')) {
+			for (const sc of outputData) {
+				clog(`   ${SB_BULLET} ${quote(sc.title)}`);
 			}
 		}
 	}

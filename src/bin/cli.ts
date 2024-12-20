@@ -9,26 +9,10 @@ import { quote } from '../utility/string-wrap.js';
 import { delimitedList } from '../utility/string.js';
 
 const ALIASES_MANIFEST = ['manifest', 'manifests', 'man', 'source', 'sources'];
-const ALIASES_SHORTCUT = [
-	'shortcut',
-	'shortcuts',
-	'sc',
-	'short',
-	'titles',
-	'title',
-	'games',
-	'game',
-	'roms',
-	'rom',
-];
-const ALIASES_LIST_CATEGORIES = [
-	'categories',
-	'category',
-	'types',
-	'type',
-	'options',
-	'option',
-];
+// prettier-ignore
+const ALIASES_SHORTCUT = ['shortcut', 'shortcuts', 'sc', 'short', 'titles', 'title', 'games', 'game', 'roms', 'rom'];
+// prettier-ignore
+const ALIASES_LIST_CATEGORIES = ['categories', 'category', 'types', 'type', 'options', 'option'];
 
 const LIST_ALL_CATEGORIES = Array.from(
 	new Set([...ALIASES_LIST_CATEGORIES, ...ALIASES_MANIFEST, ...ALIASES_SHORTCUT]),
@@ -41,7 +25,7 @@ await yargs(hideBin(process.argv))
 	.scriptName('srmg')
 	.command(
 		'list [category]',
-		'list things recognized by srm manifest generator',
+		'list things srm generator recognizes',
 		yargs => {
 			return yargs.positional('category', {
 				desc: 'the kind of things to list',
@@ -67,10 +51,18 @@ await yargs(hideBin(process.argv))
 	)
 	.command(
 		'run',
-		'run srm manifest generator transformations',
+		'run transformations',
 		yargs => {},
 		async argv => {
 			await startApp();
+		},
+	)
+	.command(
+		'shortcuts',
+		'display and interact with shortcuts',
+		yargs => {},
+		async argv => {
+			await listShortcuts();
 		},
 	)
 	.demandCommand(1, 'You must enter at least one command')
