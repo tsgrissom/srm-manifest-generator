@@ -40,11 +40,11 @@ import UserConfig from '../type/config/UserConfig.js';
  */
 // TODO Example
 // TODO Write TEST
-export const resolveKeyFromAlias = (
+export function resolveKeyFromAlias(
 	keyAliases: ConfigKeyAliases,
 	givenKey: string,
 	sectionFullKey: string | null,
-): ConfigKeyPair => {
+): ConfigKeyPair {
 	const upperKey = sectionFullKey === null ? '' : sectionFullKey;
 	return {
 		givenKey: givenKey,
@@ -52,7 +52,7 @@ export const resolveKeyFromAlias = (
 		fullGivenKey: joinPathKeys(upperKey, givenKey),
 		fullResolvedKey: joinPathKeys(upperKey, givenKey),
 	};
-};
+}
 
 /**
  * Joins a series of YAML path keys with '.' characters
@@ -74,62 +74,72 @@ export const resolveKeyFromAlias = (
  */
 // TODO jsdoc + example
 // TODO Write TEST
-export const joinPathKeys = (...keys: Array<string>): string => {
+export function joinPathKeys(...keys: Array<string>): string {
 	return keys
 		.filter(k => !k.startsWith('.'))
 		.filter(k => !k.endsWith('.'))
 		.filter(k => k.trim() !== '')
 		.join('.');
-};
+}
 
 // MARK: General Logs
 
-export const clogConfigSucc = (emphasis: boolean, msg: string) =>
-	void clog(`  ` + (emphasis ? SB_OK_LG : SB_OK_SM) + ` ${msg}`); // TODO Support changing whitespace prefix?
+// TODO Are these even used?
 
-export const clogConfigWarn = (msg: string) =>
-	void console.warn(` ${SB_WARN} ${USER_CONFIG_ATTRIBUTION}: ${msg}`);
-// TODO Check out where these old styles are used and replace
+// TODO jsdoc
+export function clogConfigSucc(str: string, emphasize = false): void {
+	clog(`  ` + (emphasize ? SB_OK_LG : SB_OK_SM) + ` ${str}`);
+	// TODO Support changing whitespace prefix?
+}
 
-export const clogConfigFatalErr = (msg: string): void => {
+export function clogConfigWarn(str: string): void {
+	console.warn(` ${SB_WARN} ${USER_CONFIG_ATTRIBUTION}: ${str}`);
+	// TODO Check out where these old styles are used and replace
+}
+
+export function clogConfigFatalErr(str: string): void {
 	const errUserAttribution = clr.red(`User `) + clr.redBright(USER_CONFIG_FILENAME);
-	console.error(`${SB_ERR_LG} ${errUserAttribution} ` + clr.red(msg));
-};
+	console.error(`${SB_ERR_LG} ${errUserAttribution} ` + clr.red(str));
+}
 
 // MARK: Section Logging
 
 export function dlogConfigSectionStart(sectionKey: string): void {
-	dlog(`${SB_SECT_START}Loading: Config section ${quote(sectionKey)}`);
+	sectionKey = quote(sectionKey);
+	dlog(`${SB_SECT_START}Loading: Config section ${sectionKey}`);
 }
 
-export const clogConfigFatalErrMissingRequiredSection = (sectionKey: string) =>
-	void clogConfigFatalErr(
-		`is missing required required section ${clr.redBright(quote(sectionKey))}.`,
-	);
+export function clogConfigFatalErrMissingRequiredSection(fullSectionKey: string): void {
+	fullSectionKey = clr.redBright(quote(fullSectionKey));
+	clogConfigFatalErr(`is missing required required section ${fullSectionKey}.`);
+}
 
-export const clogConfigFatalErrRequiredSectionWrongType = (
+export function clogConfigFatalErrRequiredSectionWrongType(
 	sectionKey: string,
 	expectedType: string,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	value?: any,
-): void => {
+): void {
 	const typeOfValue = getTypeDisplayName(value);
 	const articleActualType = indefiniteArticleFor(typeOfValue);
 	const articleExpectedType = indefiniteArticleFor(expectedType);
 
 	const msg = `has an invalid required section: Value of ${clr.redBright(quote(sectionKey))} should be ${articleExpectedType} ${expectedType} but was ${articleActualType} ${typeOfValue}`;
 	clogConfigFatalErr(msg);
-};
+}
 
-export const dlogConfigWarnMissingOptionalSection = (sectionKey: string) =>
-	void dlog(
+export function dlogConfigWarnMissingOptionalSection(sectionKey: string): void {
+	dlog(
 		`${SB_WARN} ${USER_CONFIG_ATTRIBUTION} is missing optional section ${quote(sectionKey)}`,
 	);
+}
 
-export const dlogConfigWarnOptionalSectionSkipped = (
+export function dlogConfigWarnOptionalSectionSkipped(
 	sectionKey: string,
 	reason: string,
-): void => dlog(`${SB_ERR_LG} Skipped section ${quote(sectionKey)}: ${reason}`);
+): void {
+	dlog(`${SB_ERR_LG} Skipped section ${quote(sectionKey)}: ${reason}`);
+}
 
 /*
  * TODO jsdoc
@@ -138,27 +148,28 @@ export const dlogConfigWarnOptionalSectionSkipped = (
  * - expectedType="mapping" and value=[1,2,3] -> "should be a mapping but was an array"
  * - expectedType="object" and value = {} -> "should be an object but was an object"
  */
-export const dlogConfigWarnOptionalSectionSkippedWrongType = (
+export function dlogConfigWarnOptionalSectionSkippedWrongType(
 	sectionKey: string,
 	expectedType: string,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	value?: any,
-): void => {
+): void {
 	// Various terms used to describe an object when it is serialized to JSON or YAML
 	const typeOfValue = getTypeDisplayName(value);
 	const articleActualType = indefiniteArticleFor(typeOfValue);
 	const articleExpectedType = indefiniteArticleFor(expectedType);
 
+	// TODO Rewrite long line
 	const msg = `Value of ${quote(sectionKey)} should be ${articleExpectedType} ${expectedType} but was ${articleActualType} ${typeOfValue}`;
 	dlogConfigWarnOptionalSectionSkipped(sectionKey, msg);
-};
+}
 
 export function dlogConfigSectionOk(sectionKey: string): void {
 	dlog(`${SB_OK_LG} Loaded: Config section ${quote(sectionKey)}`);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const fmtValueForLoadedLog = (value?: any): string => {
+function fmtValueForLoadedLog(value?: any): string {
 	if (typeof value === 'undefined') {
 		value = '';
 	}
@@ -167,12 +178,11 @@ const fmtValueForLoadedLog = (value?: any): string => {
 	if (typeof value === 'string') fmtValue = value !== '' ? quote(value) : '';
 	else if (typeof value === 'boolean') fmtValue = fmtBool(value);
 	// TODO More type fmts
-
 	return fmtValue;
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const vlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any): void => {
+export function vlogConfigValueLoaded(resolvedPair: ConfigKeyPair, value?: any): void {
 	const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
 	const isAlias = givenKey !== resolvedKey;
 	const fmtValue = fmtValueForLoadedLog(value);
@@ -188,18 +198,19 @@ export const vlogConfigValueLoaded = (resolvedPair: ConfigKeyPair, value?: any):
 		`Internal Key: ${fmtInternalKey}`,
 		`Is Key Alias? ${fmtIsAlias}`,
 	);
-};
+}
 
-export const clogConfigKeyUnknown = (fullGivenKey: string, config: UserConfig): void => {
+export function clogConfigKeyUnknown(fullGivenKey: string, config: UserConfig): void {
 	if (!config.shouldWarnUnknownConfigKey()) return;
 	clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
-};
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const clogConfigValueUnknown = (fullGivenKey: string, value: any) =>
-	void clog(
+export function clogConfigValueUnknown(fullGivenKey: string, value: any): void {
+	clog(
 		`  ${SB_WARN} Unknown value set for key ${quote(fullGivenKey)} (Value: ${value})`,
 	);
+}
 
 function clogConfigValueErr(key: string, msg: string): void {
 	const prefix = isDebugActive() ? SB_ERR_SM : `${SB_ERR_LG} Config:`;
@@ -212,13 +223,13 @@ function clogConfigValueErr(key: string, msg: string): void {
 	clog(blob);
 }
 
-export const clogConfigValueWrongType = (
+export function clogConfigValueWrongType(
 	key: string,
 	expectedType: string,
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	value?: any,
 	displayValue = true,
-): void => {
+): void {
 	const valuef = fmtValueForLoadedLog(value);
 	let msg = `must be ${indefiniteArticleFor(expectedType)} ${expectedType} but was`;
 
@@ -228,4 +239,4 @@ export const clogConfigValueWrongType = (
 	if (displayValue) msg += ` (Value: ${valuef})`;
 
 	clogConfigValueErr(key, `${msg}`);
-};
+}
