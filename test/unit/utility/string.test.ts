@@ -5,8 +5,8 @@ import {
 	indefiniteArticleFor,
 	isCapitalized,
 	startsWithVowel,
-} from '../../src/utility/string';
-import { setOfEmptyStrings, setOfWhitespaceStrings } from '../resource/test-values';
+} from '../../../src/utility/string';
+import { setOfEmptyStrings, setOfWhitespaceStrings } from '../../helpers';
 
 // MARK: Fn isCapitalized
 

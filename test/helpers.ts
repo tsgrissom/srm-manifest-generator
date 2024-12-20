@@ -1,6 +1,8 @@
 import path from 'node:path';
 import tmp from 'tmp';
 
+// MARK: Helper Functions
+
 const getYamlPostfix = (randomizedExt = true): string => {
 	if (randomizedExt) {
 		return Math.random() < 0.5 ? '.yml' : '.yaml';
@@ -24,3 +26,14 @@ export const tmpFileNameManifestYml = (prefix?: string, randomizedExt = true): s
 	postfix += getYamlPostfix(randomizedExt);
 	return tmpFileName(prefix, postfix);
 };
+
+// MARK: Value Sets
+
+export const setOfFalsy = [false, null, undefined, NaN, ''];
+export const setOfNonBooleans = [[], {}, 'string', 42, 3.14];
+export const setOfNonNumbers = [false, true, null, undefined, NaN, 'string'];
+export const setOfNonArrays = [null, undefined, NaN, {}, 'string', 42, 3.14];
+export const setOfNonStrings = [null, undefined, NaN, [], {}, 42, 3.14];
+
+export const setOfEmptyStrings = ['', ' ', '   ', '    '];
+export const setOfWhitespaceStrings = [' ', '   ', '    '];

@@ -44,7 +44,6 @@
 		"cli": "npm run build && npm link && srmg",
 		"clean": "npm run clean:dist",
 		"clean:dist": "rimraf ./dist",
-		"clean:test": "rimraf -i -g ./test/**/*.js -g ./test/**/*.js.map",
 		"prebuild": "npm run clean",
 		"build": "tsc",
 		"build:noclean": "tsc",

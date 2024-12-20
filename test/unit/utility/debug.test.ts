@@ -7,7 +7,7 @@ import {
 	isProcessDebugging,
 	isProcessVerbose,
 	isVerbose,
-} from '../../src/utility/debug';
+} from '../../../src/utility/debug';
 
 const originalArgv = [...process.argv];
 const originalEnv = { ...process.env };

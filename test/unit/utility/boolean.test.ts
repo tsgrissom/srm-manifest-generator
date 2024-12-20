@@ -1,6 +1,6 @@
 import clr from 'chalk';
-import { fmtBool, formattedBoolean } from '../../src/utility/boolean';
-import { setOfNonBooleans } from '../resource/test-values';
+import { fmtBool, formattedBoolean } from '../../../src/utility/boolean';
+import { setOfNonBooleans } from '../../helpers';
 
 describe('Function: formattedBoolean()', () => {
 	test.each(setOfNonBooleans)('throws err if arg "b" is non-boolean: %p', value => {
