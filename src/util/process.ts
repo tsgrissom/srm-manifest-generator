@@ -1,12 +1,71 @@
 import { exec } from 'node:child_process';
 
-import { joinPathKeys } from '../config/util/yamlKeys.js'; // TODO Replace
-import { delimitedList } from './string.js';
+import { joinPathKeys } from './file/yaml.js'; // TODO Replace
+import { delimitedList } from './string/grammar.js';
 
-import FindProcessCommand from './type/FindProcessCommand.js';
-import { defaultOptions, FindProcessOptions } from './type/FindProcessOptions.js';
+// MARK: FindProcessCommand
 
-// MARK: Fn doArgsInclude
+// TODO Condense FindProcessCommand into a single object, omitting current supportedPlatforms list
+interface FindProcessCommand {
+	command: string;
+	processName: string;
+	shell?: string;
+}
+
+// MARK: FindProcessOptions
+
+/**
+ * Options for the {@link isProcessRunning} function,
+ * enumerating the supported platforms to search for
+ * a process on, including the command to execute,
+ * the process name to search for, and any special
+ * shell to use.
+ *
+ * Default: {@link defaultOptions}
+ */
+interface FindProcessOptions {
+	/**
+	 * List of process platforms ({@link process.platform}) to
+	 * support, the name of which must correspond to a key in
+	 * the {@link settings}.
+	 */
+	supportedPlatforms: Array<string>;
+	/**
+	 * The options for a given platform, including the command
+	 * to execute, the process name to search for, and any
+	 * special shell to use.
+	 */
+	settings: Record<string, FindProcessCommand>;
+}
+
+// MARK: defaultOptions
+
+/**
+ * A set of default {@link FindProcessOptions} which support
+ * the following platforms:
+ *
+ * - `win32` (Windows)
+ * - `darwin` (macOS)
+ * - `linux` (Linux)
+ */
+const defaultOptions: FindProcessOptions = {
+	supportedPlatforms: ['win32', 'darwin', 'linux'],
+	settings: {
+		win32: { command: 'tasklist', processName: 'steam.exe' },
+		darwin: {
+			command: 'ps aux | grep [S]team',
+			processName: 'steam',
+			shell: '/bin/sh',
+		},
+		linux: {
+			command: 'ps aux | grep [s]team',
+			processName: 'steam',
+			shell: '/bin/sh',
+		},
+	},
+};
+
+// MARK: doArgsInclude
 
 /**
  * Checks if any one of the given values within `argsToFind` can
@@ -42,7 +101,7 @@ const doArgsInclude = (
 	return false;
 };
 
-// MARK: Fn doesPlatformExist
+// MARK: doesPlatformExist
 
 /** A list of recognized Node platforms for use with {@link doesPlatformExist} */
 const KNOWN_NODE_PLATFORMS = [
@@ -96,7 +155,7 @@ function validatePlatformSupportedByFindProcessOptions(
 	return true;
 }
 
-// MARK: Fn getProcessStatus
+// MARK: getProcessStatus
 
 async function getProcessStatus(
 	platformCommandOptions: FindProcessCommand,
@@ -124,7 +183,7 @@ async function getProcessStatus(
 	});
 }
 
-// MARK: Fn isProcessRunning
+// MARK: isProcessRunning
 
 /**
  * Checks if a process is running on the system, with support for flexible Node
@@ -167,4 +226,12 @@ async function isProcessRunning(platformOptions = defaultOptions): Promise<boole
 	return await getProcessStatus(platformOptions.settings[platform]);
 }
 
-export { doArgsInclude, doesPlatformExist, isProcessRunning, KNOWN_NODE_PLATFORMS };
+export {
+	defaultOptions,
+	doArgsInclude,
+	doesPlatformExist,
+	FindProcessCommand,
+	FindProcessOptions,
+	isProcessRunning,
+	KNOWN_NODE_PLATFORMS,
+};

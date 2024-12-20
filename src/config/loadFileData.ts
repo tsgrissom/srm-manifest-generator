@@ -4,11 +4,8 @@ import https from 'node:https';
 import clr from 'chalk';
 import yaml from 'yaml';
 
-import { clog } from '../util/console.js';
-import { vlog } from '../util/debug.js';
-import { fmtPath, fmtPathAsTag } from '../util/path.js';
-import { quote } from '../util/string-wrap.js';
-import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../util/symbols.js';
+import { clog } from '../util/logging/console.js';
+import { quote } from '../util/string/wrap.js';
 import {
 	EXAMPLE_CONFIG_FILENAME,
 	EXAMPLE_CONFIG_PATH,
@@ -17,6 +14,9 @@ import {
 	USER_CONFIG_PATH,
 } from './parseConfigData.js';
 
+import { fmtPath, fmtPathAsTag } from '../util/file/path.js';
+import { vlog } from '../util/logging/debug.js';
+import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../util/string/symbols.js';
 import { ConfigData } from './type/ConfigData.js';
 
 /**

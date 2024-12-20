@@ -1,5 +1,9 @@
-import Manifest from '../../type/manifest/Manifest.js';
-import { isDebugActive, isEnvVerbose, isProcessVerbose } from '../../util/debug.js';
+import Manifest from '../../app/manifest/Manifest.js';
+import {
+	isDebugActive,
+	isEnvVerbose,
+	isProcessVerbose,
+} from '../../util/logging/debug.js';
 import { ConfigData, OutputMode } from './ConfigData.js';
 
 class UserConfig implements ConfigData {

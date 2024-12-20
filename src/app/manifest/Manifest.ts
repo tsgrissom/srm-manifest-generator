@@ -3,14 +3,26 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { clog } from '../../util/console.js';
-import { dlog, dlogList, isDebugActive, vlog, vlogList } from '../../util/debug.js';
+import { clog } from '../../util/logging/console.js';
+import { quote } from '../../util/string/wrap.js';
+
+import ManifestData from './ManifestData.js';
+import ManifestNameSource from './ManifestNameSource.js';
+import ManifestWriteResults from './ManifestWriteResults.js';
+
+import { UserConfig } from '../../config/type/UserConfig.js';
 import {
 	basenameWithoutExtensions,
 	fmtPath,
 	fmtPathWithExistsAndName,
-} from '../../util/path.js';
-import { quote } from '../../util/string-wrap.js';
+} from '../../util/file/path.js';
+import {
+	dlog,
+	dlogList,
+	isDebugActive,
+	vlog,
+	vlogList,
+} from '../../util/logging/debug.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -21,13 +33,7 @@ import {
 	UNICODE_CHECK_LG,
 	UNICODE_WARN,
 	UNICODE_XMARK_LG,
-} from '../../util/symbols.js';
-
-import ManifestData from './ManifestData.js';
-import ManifestNameSource from './ManifestNameSource.js';
-import ManifestWriteResults from './ManifestWriteResults.js';
-
-import { UserConfig } from '../../config/type/UserConfig.js';
+} from '../../util/string/symbols.js';
 import Shortcut from '../shortcut/Shortcut.js';
 import { ShortcutExportData } from '../shortcut/ShortcutData.js';
 import EmptyManifestWriteResults from './ManifestEmptyWriteResults.js';

@@ -30,9 +30,9 @@
 		"linux"
 	],
 	"type": "module",
-	"main": "./src/index.ts",
+	"main": "./src/app/main.ts",
 	"bin": {
-		"srmg": "dist/src/cli.js"
+		"srmg": "dist/src/cli/main.js"
 	},
 	"scripts": {
 		"start": "tsx .",
@@ -47,7 +47,7 @@
 		"prebuild": "npm run clean",
 		"build": "tsc",
 		"build:noclean": "tsc",
-		"postbuild": "chmod +x ./dist/src/cli.js",
+		"postbuild": "chmod +x ./dist/src/cli/main.js",
 		"postuninstall": "npm unlink . && npm run clean:dist",
 		"lint": "eslint",
 		"lint:test": "eslint test",

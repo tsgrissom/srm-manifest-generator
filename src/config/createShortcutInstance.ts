@@ -1,22 +1,25 @@
 import clr from 'chalk';
 
-import { clog } from '../util/console.js';
-import { dlog, vlog } from '../util/debug.js';
-import { quote } from '../util/string-wrap.js';
+import { clog } from '../util/logging/console.js';
+import { quote } from '../util/string/wrap.js';
+
+import ManifestData from '../app/manifest/ManifestData.js';
+import Shortcut from '../app/shortcut/Shortcut.js';
+import { ShortcutData } from '../app/shortcut/ShortcutData.js';
+import { YamlKeyAliases, resolveKeyFromAlias } from '../util/file/yaml.js';
+import {
+	clogConfigValueWrongType,
+	vlogConfigValueLoaded,
+} from '../util/logging/config.js';
+import { dlog, vlog } from '../util/logging/debug.js';
 import {
 	SB_ERR_LG,
 	SB_OK_LG,
 	SB_SECT_END_OK,
 	SB_SECT_START,
 	SB_WARN,
-} from '../util/symbols.js';
-
-import ManifestData from '../type/manifest/ManifestData.js';
-import Shortcut from '../type/shortcut/Shortcut.js';
-import { ShortcutData } from '../type/shortcut/ShortcutData.js';
+} from '../util/string/symbols.js';
 import { UserConfig } from './type/UserConfig.js';
-import { clogConfigValueWrongType, vlogConfigValueLoaded } from './util/logging.js';
-import { YamlKeyAliases, resolveKeyFromAlias } from './util/yamlKeys.js';
 
 // MARK: loadManifestShortcuts
 

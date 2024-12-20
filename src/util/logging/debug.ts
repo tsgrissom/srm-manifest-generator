@@ -1,7 +1,6 @@
 import clr from 'chalk';
-
+import { doArgsInclude } from '../process.js';
 import { clog } from './console.js';
-import { doArgsInclude } from './process.js';
 
 const FLAGS_DEBUG = ['-D', '--debug', '--debugging'],
 	FLAGS_VERBOSE = ['-v', '--verbose'];

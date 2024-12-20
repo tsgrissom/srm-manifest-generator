@@ -3,11 +3,10 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { dlogHeader } from '../util/debug.js';
-
 import { ConfigData } from './type/ConfigData.js';
 import { UserConfig } from './type/UserConfig.js';
 
+import { dlogHeader } from '../util/logging/debug.js';
 import { loadUserConfigData } from './loadFileData.js';
 import parseLogsSection from './parseLogsSection.js';
 import parseOtherSection from './parseOtherSection.js';

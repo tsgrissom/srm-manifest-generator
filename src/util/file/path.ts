@@ -2,10 +2,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import clr from 'chalk';
-
-import { SB_ERR_SM, SB_OK_SM } from './symbols.js';
-
-import { ConfigData } from '../config/type/ConfigData.js';
+import { ConfigData } from '../../config/type/ConfigData';
+import { SB_ERR_SM, SB_OK_SM } from '../string/symbols.js';
 
 /**
  * Checks if a given file path has a file extension. When `fileExt` is set to *,

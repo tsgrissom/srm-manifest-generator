@@ -1,5 +1,4 @@
-import { OutputMode } from './type/ConfigData.js';
-import { UserConfig } from './type/UserConfig.js';
+import { YamlKeyAliases, resolveKeyFromAlias } from '../util/file/yaml.js';
 import {
 	clogConfigKeyUnknown,
 	clogConfigValueUnknown,
@@ -9,8 +8,9 @@ import {
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
 	vlogConfigValueLoaded,
-} from './util/logging.js';
-import { YamlKeyAliases, resolveKeyFromAlias } from './util/yamlKeys.js';
+} from '../util/logging/config.js';
+import { OutputMode } from './type/ConfigData.js';
+import { UserConfig } from './type/UserConfig.js';
 
 const sectionKey = 'output';
 const keyAliases: YamlKeyAliases = {

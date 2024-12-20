@@ -1,7 +1,13 @@
 import clr from 'chalk';
 
-import PlainSymbols from './type/PlainSymbols.js';
-import StyledSymbols from './type/StyledSymbols.js';
+import PlainSymbols from './PlainSymbols.js';
+import StyledSymbols from './StyledSymbols.js';
+
+// MARK: Plain Symbols
+
+// MARK: Styled Symbols
+
+// MARK: Hardcoded Symbols
 
 // TODO Phase out hardcoded symbol constants
 

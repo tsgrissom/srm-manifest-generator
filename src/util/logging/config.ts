@@ -1,10 +1,11 @@
 // MARK: GENERAL
 import clr from 'chalk';
-import { fmtBool, yesNo } from '../../util/boolean.js';
-import { clog } from '../../util/console.js';
-import { dlog, isDebugActive, vlog, vlogList } from '../../util/debug.js';
-import { quote } from '../../util/string-wrap.js';
-import { getTypeDisplayName, indefiniteArticleFor } from '../../util/string.js';
+import { USER_CONFIG_FILENAME } from '../../config/loadFileData.js';
+import { USER_CONFIG_ATTRIBUTION } from '../../config/parseConfigData.js';
+import { UserConfig } from '../../config/type/UserConfig.js';
+import { fmtBool, yesNo } from '../boolean.js';
+import { ResolvedYamlKey } from '../file/yaml.js';
+import { getTypeDisplayName, indefiniteArticleFor } from '../string/grammar.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -13,11 +14,10 @@ import {
 	SB_OK_SM,
 	SB_SECT_START,
 	SB_WARN,
-} from '../../util/symbols.js';
-import { USER_CONFIG_FILENAME } from '../loadFileData.js';
-import { USER_CONFIG_ATTRIBUTION } from '../parseConfigData.js';
-import { UserConfig } from '../type/UserConfig.js';
-import { ResolvedYamlKey } from './yamlKeys.js';
+} from '../string/symbols.js';
+import { quote } from '../string/wrap.js';
+import { clog } from './console.js';
+import { dlog, isDebugActive, vlog, vlogList } from './debug.js';
 
 // TODO Are these even used?
 

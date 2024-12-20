@@ -1,14 +1,12 @@
 import clr from 'chalk';
-
-import Manifest from './type/manifest/Manifest.js';
-
-import parseUserConfigData from './config/parseConfigData.js';
-import { ConfigData } from './config/type/ConfigData.js';
-import { clog } from './util/console.js';
-import { dlog, isVerbose } from './util/debug.js';
-import { fmtPathAsTag } from './util/path.js';
-import { countNoun, possessivePronounFor } from './util/string.js';
-import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from './util/symbols.js';
+import parseUserConfigData from '../config/parseConfigData.js';
+import { ConfigData } from '../config/type/ConfigData.js';
+import { fmtPathAsTag } from '../util/file/path.js';
+import { clog } from '../util/logging/console.js';
+import { dlog, isVerbose } from '../util/logging/debug.js';
+import { countNoun, possessivePronounFor } from '../util/string/grammar.js';
+import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from '../util/string/symbols.js';
+import Manifest from './manifest/Manifest.js';
 
 async function processManifest(manifest: Manifest): Promise<void> {
 	// TODO Additionally validate if write path is valid, make folders if missing

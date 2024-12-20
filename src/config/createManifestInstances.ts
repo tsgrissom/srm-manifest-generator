@@ -3,9 +3,27 @@ import fs from 'node:fs/promises';
 import YAML from 'yaml';
 
 import { checkCross, yesNo } from '../util/boolean.js';
-import { clog } from '../util/console.js';
-import { dlog, dlogHeader, isDebugActive, vlog, vlogList } from '../util/debug.js';
-import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../util/path.js';
+import {
+	clogConfigKeyUnknown,
+	clogConfigValueWrongType,
+	clogConfigWarn,
+	vlogConfigValueLoaded,
+} from '../util/logging/config.js';
+import { clog } from '../util/logging/console.js';
+
+import Manifest from '../app/manifest/Manifest.js';
+import ManifestData from '../app/manifest/ManifestData.js';
+import Shortcut from '../app/shortcut/Shortcut.js';
+import { isShortcutData, ShortcutData } from '../app/shortcut/ShortcutData.js';
+import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../util/file/path.js';
+import { resolveKeyFromAlias, YamlKeyAliases } from '../util/file/yaml.js';
+import {
+	dlog,
+	dlogHeader,
+	isDebugActive,
+	vlog,
+	vlogList,
+} from '../util/logging/debug.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -15,24 +33,12 @@ import {
 	SB_SECT_END_OK,
 	SB_SECT_START,
 	SB_WARN,
-} from '../util/symbols.js';
-import {
-	clogConfigKeyUnknown,
-	clogConfigValueWrongType,
-	clogConfigWarn,
-	vlogConfigValueLoaded,
-} from './util/logging.js';
-
-import Manifest from '../type/manifest/Manifest.js';
-import ManifestData from '../type/manifest/ManifestData.js';
-import Shortcut from '../type/shortcut/Shortcut.js';
-import { isShortcutData, ShortcutData } from '../type/shortcut/ShortcutData.js';
-import { quote } from '../util/string-wrap.js';
+} from '../util/string/symbols.js';
+import { quote } from '../util/string/wrap.js';
 import loadManifestShortcuts from './createShortcutInstance.js';
 import { USER_CONFIG_FILENAME } from './loadFileData.js';
 import { ConfigData } from './type/ConfigData.js';
 import { UserConfig } from './type/UserConfig.js';
-import { resolveKeyFromAlias, YamlKeyAliases } from './util/yamlKeys.js';
 
 // MARK: createManifestInstances
 

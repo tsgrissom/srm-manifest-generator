@@ -5,7 +5,7 @@ import {
 	normalizeFileExtension,
 	pathHasFileExtension,
 	replaceFileExtension,
-} from '../../../src/util/path';
+} from '../../../src/util/file/path';
 import { setOfEmptyStrings, setOfNonStrings } from '../../helpers';
 
 // TODO fn setup
