@@ -2,7 +2,6 @@ import path from 'node:path';
 
 import clr from 'chalk';
 import mockFs from 'mock-fs';
-
 import {
 	basenameWithoutExtensions,
 	fmtPath,
@@ -10,8 +9,8 @@ import {
 	normalizeFileExtension,
 	pathHasFileExtension,
 	replaceFileExtension,
-} from '../../../src/util/file/path';
-import { setOfEmptyStrings, setOfNonStrings } from '../../helpers';
+} from '../../../../src/util/file/path';
+import { setOfEmptyStrings, setOfNonStrings } from '../../../helpers';
 
 const tmpPath = 'tmp/path.test';
 const existentFilePath = path.join(tmpPath, 'exists.txt');

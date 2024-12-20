@@ -4,10 +4,10 @@ import {
 	clogConfigSucc,
 	clogConfigValueUnknown,
 	clogConfigWarn,
-} from '../../../src/util/logging/config';
+} from '../../../../src/util/logging/config';
 
-import configWarnUnknownKeyOff from '../../resource/json/configWarnUnknownKeyOff';
-import configWarnUnknownKeyOn from '../../resource/json/configWarnUnknownKeyOn';
+import configWarnUnknownKeyOff from '../../../resource/json/configWarnUnknownKeyOff';
+import configWarnUnknownKeyOn from '../../../resource/json/configWarnUnknownKeyOn';
 
 let logSpy: jest.SpyInstance;
 let errorSpy: jest.SpyInstance;

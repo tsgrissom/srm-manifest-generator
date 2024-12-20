@@ -11,10 +11,9 @@ import {
 	unquote,
 	unwrap,
 	wrap,
-} from '../../../src/util/string/wrap';
+} from '../../../../src/util/string/wrap';
 
-// MARK: Fn startsButDoesNotEndWith
-
+// MARK: startsButDoesNotEndWith
 describe('Function: startsButDoesNotEndWith', () => {
 	test.each([
 		// str, sequence, expected
@@ -27,8 +26,7 @@ describe('Function: startsButDoesNotEndWith', () => {
 	});
 });
 
-// MARK: Fn endsButDoesNotStartWith
-
+// MARK: endsButDoesNotStartWith
 describe('Function: endsButDoesNotStartWith', () => {
 	test.each([
 		// str, sequence, expected
@@ -41,8 +39,7 @@ describe('Function: endsButDoesNotStartWith', () => {
 	});
 });
 
-// MARK: Fn isWrapped
-
+// MARK: isWrapped
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isWrapped', () => {
 	test.each([
@@ -59,8 +56,7 @@ describe('Function: isWrapped', () => {
 	});
 });
 
-// MARK: Fn wrap
-
+// MARK: wrap
 // TODO
 describe('Function: wrap', () => {
 	it('throws err when empty str for arg "sequence"', () => {
@@ -85,8 +81,7 @@ describe('Function: wrap', () => {
 	);
 });
 
-// MARK: Fn unwrap
-
+// MARK: unwrap
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: unwrap', () => {
 	it('throws err when empty str for arg "sequence"', () => {
@@ -108,8 +103,7 @@ describe('Function: unwrap', () => {
 	);
 });
 
-// MARK: Fn isSingleQuoted
-
+// MARK: isSingleQuoted
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isSingleQuoted', () => {
 	test.each([
@@ -125,8 +119,7 @@ describe('Function: isSingleQuoted', () => {
 	});
 });
 
-// MARK: Fn isDoubleQuoted
-
+// MARK: isDoubleQuoted
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isDoubleQuoted', () => {
 	test.each([
@@ -142,8 +135,7 @@ describe('Function: isDoubleQuoted', () => {
 	});
 });
 
-// MARK: Fn isQuoted
-
+// MARK: isQuoted
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: isQuoted()', () => {
 	test.each([
@@ -170,8 +162,7 @@ describe('Function: isQuoted()', () => {
 	);
 });
 
-// MARK: Fn singleQuote
-
+// MARK: singleQuote
 describe('Function: singleQuote()', () => {
 	test.each([
 		// expected, str, force, fixPartialWrap
@@ -193,8 +184,7 @@ describe('Function: singleQuote()', () => {
 	);
 });
 
-// MARK: Fn doubleQuote
-
+// MARK: doubleQuote
 describe('Function: doubleQuote()', () => {
 	test.each([
 		// expected, str, force, fixPartialWrap
@@ -217,8 +207,7 @@ describe('Function: doubleQuote()', () => {
 	);
 });
 
-// MARK: Fn quote
-
+// MARK: quote
 describe('Function: quote()', () => {
 	test.each([
 		// str, useSingleQuotes, force, fixPartialWrap, expected
@@ -244,7 +233,7 @@ describe('Function: quote()', () => {
 	);
 });
 
-// MARK: Fn unquote
+// MARK: unquote
 describe('Function: unquote()', () => {
 	test.each([
 		// str, useSingleQuotes, removePartialWrap, expected

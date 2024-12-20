@@ -1,3 +1,5 @@
+// MARK: Fn isCapitalized
+
 import {
 	capitalize,
 	delimitedList,
@@ -5,10 +7,8 @@ import {
 	indefiniteArticleFor,
 	isCapitalized,
 	startsWithVowel,
-} from '../../../src/util/string/grammar';
-import { setOfEmptyStrings, setOfWhitespaceStrings } from '../../helpers';
-
-// MARK: Fn isCapitalized
+} from '../../../../src/util/string/grammar';
+import { setOfEmptyStrings, setOfWhitespaceStrings } from '../../../helpers';
 
 describe('Function: isCapitalized', () => {
 	test.each(setOfEmptyStrings)('returns false given empty str', value => {

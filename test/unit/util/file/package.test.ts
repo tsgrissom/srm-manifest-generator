@@ -1,4 +1,4 @@
-import { getPackageJson, isExpectedPackageJson } from '../../../src/util/file/package';
+import { getPackageJson, isExpectedPackageJson } from '../../../../src/util/file/package';
 
 const invalidPackageJsonSamples = [
 	{},
