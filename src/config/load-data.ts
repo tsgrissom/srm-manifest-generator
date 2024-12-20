@@ -4,11 +4,11 @@ import https from 'node:https';
 import clr from 'chalk';
 import yaml from 'yaml';
 
-import { clog } from '../utility/console.js';
-import { vlog } from '../utility/debug.js';
-import { fmtPath, fmtPathAsTag } from '../utility/path.js';
-import { quote } from '../utility/string-wrap.js';
-import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../utility/symbols.js';
+import { clog } from '../util/console.js';
+import { vlog } from '../util/debug.js';
+import { fmtPath, fmtPathAsTag } from '../util/path.js';
+import { quote } from '../util/string-wrap.js';
+import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../util/symbols.js';
 import {
 	EXAMPLE_CONFIG_FILENAME,
 	EXAMPLE_CONFIG_PATH,

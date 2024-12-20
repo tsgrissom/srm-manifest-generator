@@ -11,7 +11,7 @@ import {
 	unquote,
 	unwrap,
 	wrap,
-} from '../../../src/utility/string-wrap';
+} from '../../../src/util/string-wrap';
 
 // MARK: Fn startsButDoesNotEndWith
 

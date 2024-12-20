@@ -1,4 +1,4 @@
-import { clog, clogErr, clogList, clogWarn } from '../../../src/utility/console';
+import { clog, clogErr, clogList, clogWarn } from '../../../src/util/console';
 
 let logSpy: jest.SpyInstance;
 let errorSpy: jest.SpyInstance;

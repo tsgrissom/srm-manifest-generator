@@ -32,7 +32,7 @@
 	"type": "module",
 	"main": "./src/index.ts",
 	"bin": {
-		"srmg": "dist/cli.js"
+		"srmg": "dist/src/cli.js"
 	},
 	"scripts": {
 		"start": "tsx .",

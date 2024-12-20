@@ -1,9 +1,9 @@
 import path from 'node:path';
 
-import { quote } from '../../utility/string-wrap.js';
+import { quote } from '../../util/string-wrap.js';
 
-import { yesNo } from '../../utility/boolean.js';
-import { fmtPathWithExistsPrefix } from '../../utility/path.js';
+import { yesNo } from '../../util/boolean.js';
+import { fmtPathWithExistsPrefix } from '../../util/path.js';
 import UserConfig from '../config/UserConfig.js';
 import ManifestData from '../manifest/ManifestData.js';
 import { ShortcutData, ShortcutExportData } from './ShortcutData.js';

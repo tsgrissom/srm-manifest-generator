@@ -4,17 +4,17 @@ import {
 	clogConfigValueWrongType,
 	resolveKeyFromAlias,
 	vlogConfigValueLoaded,
-} from '../../utility/config.js';
-import { clog } from '../../utility/console.js';
-import { dlog, vlog } from '../../utility/debug.js';
-import { quote } from '../../utility/string-wrap.js';
+} from '../../util/config.js';
+import { clog } from '../../util/console.js';
+import { dlog, vlog } from '../../util/debug.js';
+import { quote } from '../../util/string-wrap.js';
 import {
 	SB_ERR_LG,
 	SB_OK_LG,
 	SB_SECT_END_OK,
 	SB_SECT_START,
 	SB_WARN,
-} from '../../utility/symbols.js';
+} from '../../util/symbols.js';
 
 import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
 import UserConfig from '../../type/config/UserConfig.js';

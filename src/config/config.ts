@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { dlogHeader } from '../utility/debug.js';
+import { dlogHeader } from '../util/debug.js';
 
 import ConfigData from '../type/config/ConfigData.js';
 import UserConfig from '../type/config/UserConfig.js';

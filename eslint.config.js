@@ -7,6 +7,7 @@ const globalIgnoredFiles = {
 	ignores: [
 		'*.config.js', // TODO Figure out why this warns if removed
 		'dist/**/*.js',
+		'test/**/*.js'
     ],
 };
 

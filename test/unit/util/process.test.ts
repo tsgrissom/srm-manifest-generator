@@ -6,7 +6,7 @@ import {
 	doesPlatformExist,
 	isProcessRunning,
 	KNOWN_NODE_PLATFORMS,
-} from '../../../src/utility/process';
+} from '../../../src/util/process';
 
 describe('Function: doArgsInclude()', () => {
 	let originalArgv: Array<string>;

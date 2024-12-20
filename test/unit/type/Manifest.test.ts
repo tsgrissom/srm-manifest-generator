@@ -5,7 +5,7 @@ import mockFs from 'mock-fs';
 import FileSystem from 'mock-fs/lib/filesystem';
 import yaml from 'yaml';
 
-import { basenameWithoutExtensions } from '../../../src/utility/path';
+import { basenameWithoutExtensions } from '../../../src/util/path';
 
 import Manifest from '../../../src/type/manifest/Manifest';
 import ManifestData from '../../../src/type/manifest/ManifestData';

@@ -5,7 +5,7 @@ import {
 	indefiniteArticleFor,
 	isCapitalized,
 	startsWithVowel,
-} from '../../../src/utility/string';
+} from '../../../src/util/string';
 import { setOfEmptyStrings, setOfWhitespaceStrings } from '../../helpers';
 
 // MARK: Fn isCapitalized

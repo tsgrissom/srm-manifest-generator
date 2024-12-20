@@ -7,10 +7,10 @@ import {
 	dlogConfigSectionStart,
 	resolveKeyFromAlias,
 	vlogConfigValueLoaded,
-} from '../../../utility/config.js';
-import { clog } from '../../../utility/console.js';
-import { quote } from '../../../utility/string-wrap.js';
-import { SB_ERR_SM, SB_WARN } from '../../../utility/symbols.js';
+} from '../../../util/config.js';
+import { clog } from '../../../util/console.js';
+import { quote } from '../../../util/string-wrap.js';
+import { SB_ERR_SM, SB_WARN } from '../../../util/symbols.js';
 
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
 import UserConfig from '../../../type/config/UserConfig.js';

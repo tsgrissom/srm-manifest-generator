@@ -1,5 +1,5 @@
 import clr from 'chalk';
-import { fmtBool, formattedBoolean } from '../../../src/utility/boolean';
+import { fmtBool, formattedBoolean } from '../../../src/util/boolean';
 import { setOfNonBooleans } from '../../helpers';
 
 describe('Function: formattedBoolean()', () => {

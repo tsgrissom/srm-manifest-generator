@@ -2,17 +2,17 @@ import clr from 'chalk';
 import fs from 'node:fs/promises';
 import YAML from 'yaml';
 
-import { checkCross, yesNo } from '../../utility/boolean.js';
+import { checkCross, yesNo } from '../../util/boolean.js';
 import {
 	clogConfigKeyUnknown,
 	clogConfigValueWrongType,
 	clogConfigWarn,
 	resolveKeyFromAlias,
 	vlogConfigValueLoaded,
-} from '../../utility/config.js';
-import { clog } from '../../utility/console.js';
-import { dlog, dlogHeader, isDebugActive, vlog, vlogList } from '../../utility/debug.js';
-import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../utility/path.js';
+} from '../../util/config.js';
+import { clog } from '../../util/console.js';
+import { dlog, dlogHeader, isDebugActive, vlog, vlogList } from '../../util/debug.js';
+import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../../util/path.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -22,7 +22,7 @@ import {
 	SB_SECT_END_OK,
 	SB_SECT_START,
 	SB_WARN,
-} from '../../utility/symbols.js';
+} from '../../util/symbols.js';
 
 import ConfigData from '../../type/config/ConfigData.js';
 import ConfigKeyAliases from '../../type/config/ConfigKeyAliases.js';
@@ -32,7 +32,7 @@ import ManifestData from '../../type/manifest/ManifestData.js';
 import UserConfig from '../../type/config/UserConfig.js';
 import Shortcut from '../../type/shortcut/Shortcut.js';
 import { isShortcutData, ShortcutData } from '../../type/shortcut/ShortcutData.js';
-import { quote } from '../../utility/string-wrap.js';
+import { quote } from '../../util/string-wrap.js';
 import { USER_CONFIG_FILENAME } from '../load-data.js';
 import loadManifestShortcuts from './shortcuts.js';
 

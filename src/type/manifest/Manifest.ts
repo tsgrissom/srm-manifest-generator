@@ -3,14 +3,14 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { clog } from '../../utility/console.js';
-import { dlog, dlogList, isDebugActive, vlog, vlogList } from '../../utility/debug.js';
+import { clog } from '../../util/console.js';
+import { dlog, dlogList, isDebugActive, vlog, vlogList } from '../../util/debug.js';
 import {
 	basenameWithoutExtensions,
 	fmtPath,
 	fmtPathWithExistsAndName,
-} from '../../utility/path.js';
-import { quote } from '../../utility/string-wrap.js';
+} from '../../util/path.js';
+import { quote } from '../../util/string-wrap.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -21,7 +21,7 @@ import {
 	UNICODE_CHECK_LG,
 	UNICODE_WARN,
 	UNICODE_XMARK_LG,
-} from '../../utility/symbols.js';
+} from '../../util/symbols.js';
 
 import ManifestData from './ManifestData.js';
 import ManifestNameSource from './ManifestNameSource.js';

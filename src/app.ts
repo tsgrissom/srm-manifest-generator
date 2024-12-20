@@ -4,11 +4,11 @@ import Manifest from './type/manifest/Manifest.js';
 
 import parseUserConfigData from './config/config.js';
 import ConfigData from './type/config/ConfigData.js';
-import { clog } from './utility/console.js';
-import { dlog, isVerbose } from './utility/debug.js';
-import { fmtPathAsTag } from './utility/path.js';
-import { countNoun, possessivePronounFor } from './utility/string.js';
-import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from './utility/symbols.js';
+import { clog } from './util/console.js';
+import { dlog, isVerbose } from './util/debug.js';
+import { fmtPathAsTag } from './util/path.js';
+import { countNoun, possessivePronounFor } from './util/string.js';
+import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from './util/symbols.js';
 
 async function processManifest(manifest: Manifest): Promise<void> {
 	// TODO Additionally validate if write path is valid, make folders if missing

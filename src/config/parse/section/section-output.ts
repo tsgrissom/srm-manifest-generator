@@ -8,7 +8,7 @@ import {
 	dlogConfigWarnOptionalSectionSkippedWrongType,
 	resolveKeyFromAlias,
 	vlogConfigValueLoaded,
-} from '../../../utility/config.js';
+} from '../../../util/config.js';
 
 import ConfigKeyAliases from '../../../type/config/ConfigKeyAliases.js';
 import OutputMode from '../../../type/config/OutputMode.js';
