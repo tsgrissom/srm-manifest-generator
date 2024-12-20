@@ -93,7 +93,7 @@ describe('Function: isProcessRunning()', () => {
 	});
 
 	it('resolves to be truthy if platformOptions undefined', async () => {
-		await expect(isProcessRunning(undefined as any)).resolves.toBeTruthy();
+		await expect(isProcessRunning()).resolves.toBeTruthy();
 	});
 
 	it('throws err if platformOptions is non-object', async () => {

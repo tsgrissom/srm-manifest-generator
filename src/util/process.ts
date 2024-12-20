@@ -27,7 +27,10 @@ import { defaultOptions, FindProcessOptions } from './type/FindProcessOptions.js
  * }
  */
 // TEST Unit
-const doArgsInclude = (argsToSearch: Array<string> = process.argv, ...argsToFind: Array<string>): boolean => {
+const doArgsInclude = (
+	argsToSearch: Array<string> = process.argv,
+	...argsToFind: Array<string>
+): boolean => {
 	if (argsToSearch === process.argv && argsToSearch.length <= 2) return false;
 	if (argsToFind.length === 0) return false;
 
@@ -51,7 +54,7 @@ const KNOWN_NODE_PLATFORMS = [
 	'sunos',
 	'win32',
 	'cygwin',
-	'netbsd'
+	'netbsd',
 ];
 
 /**
@@ -69,7 +72,7 @@ function doesPlatformExist(platform: string): boolean {
 
 function validatePlatformSupportedByFindProcessOptions(
 	platform: string,
-	platformOptions: FindProcessOptions
+	platformOptions: FindProcessOptions,
 ): boolean {
 	// TODO Validate is supported platform exists in Node
 	const key = platformOptions.settings[platform];
@@ -78,7 +81,7 @@ function validatePlatformSupportedByFindProcessOptions(
 
 	if (!key) {
 		throw new Error(
-			`Platform ${platform} was missing for a platform listed at ${supportedKey} (Expected: ${fullKey})`
+			`Platform ${platform} was missing for a platform listed at ${supportedKey} (Expected: ${fullKey})`,
 		);
 	}
 
@@ -95,7 +98,9 @@ function validatePlatformSupportedByFindProcessOptions(
 
 // MARK: Fn getProcessStatus
 
-async function getProcessStatus(platformCommandOptions: FindProcessCommand): Promise<boolean> {
+async function getProcessStatus(
+	platformCommandOptions: FindProcessCommand,
+): Promise<boolean> {
 	const { command, processName, shell } = platformCommandOptions;
 	return new Promise((resolve, reject) => {
 		exec(command, { shell: shell }, (err, stdout, stderr) => {
@@ -125,9 +130,9 @@ async function getProcessStatus(platformCommandOptions: FindProcessCommand): Pro
  * Checks if a process is running on the system, with support for flexible Node
  * `process.platform`-based multiplatform support. See example below for example
  * options object.
- * 
+ *
  * Example: {@link FindProcessDefaultOptions}
- * 
+ *
  * @param platformOptions Indicates the commands for finding a process on a given system. See example.
  * @returns Promise which resolves to a boolean which indicates whether the given
  * process is running on the system.
@@ -147,18 +152,19 @@ async function isProcessRunning(platformOptions = defaultOptions): Promise<boole
 
 	const { supportedPlatforms } = platformOptions;
 
-	const okSupportedPlatforms = platformOptions.supportedPlatforms
-		.filter(each => validatePlatformSupportedByFindProcessOptions(each, platformOptions));
+	const okSupportedPlatforms = platformOptions.supportedPlatforms.filter(each =>
+		validatePlatformSupportedByFindProcessOptions(each, platformOptions),
+	);
 
 	const { platform } = process;
 
 	if (!okSupportedPlatforms.includes(platform)) {
 		throw new Error(
-			`Your platform (${platform}) is unsupported. Supported platforms: ${delimitedList(supportedPlatforms)}`
+			`Your platform (${platform}) is unsupported. Supported platforms: ${delimitedList(supportedPlatforms)}`,
 		);
 	}
 
 	return await getProcessStatus(platformOptions.settings[platform]);
 }
 
-export { KNOWN_NODE_PLATFORMS, doArgsInclude, doesPlatformExist, isProcessRunning };
+export { doArgsInclude, doesPlatformExist, isProcessRunning, KNOWN_NODE_PLATFORMS };
