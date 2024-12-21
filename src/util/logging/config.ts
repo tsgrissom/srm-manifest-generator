@@ -5,6 +5,7 @@ import { ConfigData } from '../../config/type/ConfigData.js';
 import { fmtBool, yesNo } from '../boolean.js';
 import { ResolvedYamlKey } from '../file/yaml.js';
 import { getTypeDisplayName, indefiniteArticleFor } from '../string/grammar.js';
+import { quote } from '../string/quote.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -14,7 +15,6 @@ import {
 	SB_SECT_START,
 	SB_WARN,
 } from '../string/symbols.js';
-import { quote } from '../string/wrap.js';
 import { clog } from './console.js';
 import { dlog, isDebugActive, vlog, vlogList } from './debug.js';
 

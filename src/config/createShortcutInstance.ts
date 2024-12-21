@@ -1,7 +1,7 @@
 import clr from 'chalk';
 
 import { clog } from '../util/logging/console.js';
-import { quote } from '../util/string/wrap.js';
+import { quote } from '../util/string/quote.js';
 
 import { ManifestData } from '../app/type/ManifestData.js';
 import Shortcut from '../app/type/Shortcut.js';

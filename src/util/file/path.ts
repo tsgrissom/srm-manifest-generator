@@ -3,8 +3,8 @@ import path from 'node:path';
 
 import clr from 'chalk';
 import { ConfigData } from '../../config/type/ConfigData.js';
+import { quote } from '../string/quote.js';
 import { SB_ERR_SM, SB_OK_SM } from '../string/symbols.js';
-import { quote } from '../string/wrap.js';
 
 // MARK: pathHasFileExtension
 

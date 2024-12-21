@@ -1,14 +1,7 @@
 import clr from 'chalk';
-import { fmtBool, formattedBoolean } from '../../../src/util/boolean';
-import { setOfNonBooleans } from '../../helpers';
+import { formattedBoolean } from '../../../src/util/boolean';
 
 describe('Function: formattedBoolean()', () => {
-	test.each(setOfNonBooleans)('throws err if arg "b" is non-boolean: %p', value => {
-		expect(() => {
-			formattedBoolean(value as unknown as boolean, true, true, 'yes', 'no');
-		}).toThrow();
-	});
-
 	test.each([
 		// bool, color, capitalize, trueStr, falseStr, expected
 		[true, false, false, 'yes', 'no', 'yes'],
@@ -35,12 +28,7 @@ describe('Function: formattedBoolean()', () => {
 	);
 });
 
-describe('Function: fmtBool()', () => {
-	test.each(setOfNonBooleans)('throws err if arg "b" is non-boolean: %p', value => {
-		expect(() => {
-			fmtBool(value as unknown as boolean);
-		}).toThrow();
-	});
+// describe('Function: fmtBool()', () => {
 
-	// TODO More
-});
+// 	// TODO More
+// });

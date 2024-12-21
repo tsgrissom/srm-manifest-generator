@@ -8,7 +8,7 @@ import {
 	dlogConfigWarnOptionalSectionSkippedWrongType,
 	vlogConfigValueLoaded,
 } from '../util/logging/config.js';
-import { quote } from '../util/string/wrap.js';
+import { quote } from '../util/string/quote.js';
 import { UserConfig } from './type/UserConfig.js';
 
 const sectionKey = 'validate';

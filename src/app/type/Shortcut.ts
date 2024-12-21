@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { quote } from '../../util/string/wrap.js';
+import { quote } from '../../util/string/quote.js';
 
 import { UserConfig } from '../../config/type/UserConfig.js';
 import { yesNo } from '../../util/boolean.js';

@@ -9,8 +9,8 @@ import {
 	vlogConfigValueLoaded,
 } from '../util/logging/config.js';
 import { clog } from '../util/logging/console.js';
+import { quote } from '../util/string/quote.js';
 import { SB_ERR_SM, SB_WARN } from '../util/string/symbols.js';
-import { quote } from '../util/string/wrap.js';
 import createManifestInstances from './createManifestInstances.js';
 import { UserConfig } from './type/UserConfig.js';
 

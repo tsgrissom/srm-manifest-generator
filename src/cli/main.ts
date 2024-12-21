@@ -16,8 +16,8 @@ import { BoolFmtPreset, fmtBool, yesNo } from '../util/boolean.js';
 import { fmtPath } from '../util/file/path.js';
 import { clog, clogList } from '../util/logging/console.js';
 import { delimitedList } from '../util/string/grammar.js';
+import { quote } from '../util/string/quote.js';
 import { SB_ERR_LG } from '../util/string/symbols.js';
-import { quote } from '../util/string/wrap.js';
 
 // General Constants
 

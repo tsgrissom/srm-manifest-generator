@@ -24,6 +24,7 @@ import {
 	vlog,
 	vlogList,
 } from '../util/logging/debug.js';
+import { quote } from '../util/string/quote.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -34,7 +35,6 @@ import {
 	SB_SECT_START,
 	SB_WARN,
 } from '../util/string/symbols.js';
-import { quote } from '../util/string/wrap.js';
 import loadManifestShortcuts from './createShortcutInstance.js';
 import { USER_CONFIG_FILENAME } from './loadFileData.js';
 import { ConfigData } from './type/ConfigData.js';

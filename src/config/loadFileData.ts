@@ -5,7 +5,7 @@ import clr from 'chalk';
 import yaml from 'yaml';
 
 import { clog } from '../util/logging/console.js';
-import { quote } from '../util/string/wrap.js';
+import { quote } from '../util/string/quote.js';
 import {
 	EXAMPLE_CONFIG_FILENAME,
 	EXAMPLE_CONFIG_PATH,
