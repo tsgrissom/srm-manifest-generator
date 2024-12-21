@@ -52,7 +52,7 @@ describe('Function: isWrapped', () => {
 		[`'Partial Quoted (single, lead)`, `'`, false],
 		[`Partial Quoted (single, trail)'`, `'`, false],
 	])('returns expected for given input parameters', (str, sequence, expected) => {
-		expect(isWrapped(str, sequence)).toBe(expected);
+		expect(isWrapped({ str: str, seq: sequence })).toBe(expected);
 	});
 });
 
@@ -60,7 +60,7 @@ describe('Function: isWrapped', () => {
 // TODO
 describe('Function: wrap', () => {
 	it('throws err when empty str for arg "sequence"', () => {
-		expect(() => wrap('string', '')).toThrow();
+		expect(() => wrap({ str: `string`, seq: `` })).toThrow();
 	});
 
 	test.each([
@@ -76,7 +76,9 @@ describe('Function: wrap', () => {
 	])(
 		'returns expected for given input parameters',
 		(str, sequence, force, fixPartialWrap, expected) => {
-			expect(wrap(str, sequence, force, fixPartialWrap)).toBe(expected);
+			expect(wrap({ str: str, seq: sequence }, force, fixPartialWrap)).toBe(
+				expected,
+			);
 		},
 	);
 });
@@ -85,7 +87,7 @@ describe('Function: wrap', () => {
 // TODO Rewrite to use collapsed syntax (array)
 describe('Function: unwrap', () => {
 	it('throws err when empty str for arg "sequence"', () => {
-		expect(() => unwrap('string', '')).toThrow();
+		expect(() => unwrap({ str: 'string', seq: '' })).toThrow();
 	});
 
 	test.each([
@@ -98,7 +100,7 @@ describe('Function: unwrap', () => {
 	])(
 		'returns expected for given input parameters',
 		(str, sequence, removePartialWrap, expected) => {
-			expect(unwrap(str, sequence, removePartialWrap)).toBe(expected);
+			expect(unwrap({ str: str, seq: sequence }, removePartialWrap)).toBe(expected);
 		},
 	);
 });
