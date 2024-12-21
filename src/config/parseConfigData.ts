@@ -3,7 +3,6 @@ import path from 'node:path';
 
 import clr from 'chalk';
 
-import { ConfigData } from './type/ConfigData.js';
 import { UserConfig } from './type/UserConfig.js';
 
 import { dlogHeader } from '../util/logging/debug.js';
@@ -50,7 +49,8 @@ async function loadData(): Promise<object> {
 	}
 }
 
-async function parseUserConfigData(): Promise<ConfigData> {
+// TODO Consider re-doing with typeguard
+async function parseUserConfigData(): Promise<UserConfig> {
 	const userConfigData = await loadData();
 
 	if (!userConfigData) {

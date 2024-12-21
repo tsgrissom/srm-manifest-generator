@@ -6,6 +6,15 @@ import {
 } from '../../util/logging/debug.js';
 import { ConfigData, OutputMode } from './ConfigData.js';
 
+// TODO Location should be customizable with env var
+// TODO Track load messages like Value of key must be x but was y issues so they can be printed on demand instead of automatically every time
+// TODO Re-write interface to support current type definition as well as metadata about the key/value and its role (name, desc, default)
+// TODO Move "other" into "log.console" and move current "logs" to "log.file"
+// TODO Change "output" into "transform"
+// TODO Change "search.scanDirectories" to "search.inDirectories" + "search.scanRecursively" to "search.recursively"
+// TODO Change "validate.executables" to be a section, contains "validate.executables.enabled" + "validate.executables.acceptedExtensions"
+// TODO Fix property privacy + add getters
+// TODO jsdocs
 class UserConfig implements ConfigData {
 	search: {
 		manifests: Array<Manifest>;
