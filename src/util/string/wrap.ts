@@ -8,6 +8,13 @@ export interface WrapOperationParams {
 	seq: string;
 }
 
+// TODO jsdocs
+export interface QuoteOperationOptions {
+	singleQuotes: boolean;
+	force: boolean;
+	partialWrap: boolean;
+}
+
 // MARK: startsButDoesNotEndWith
 /**
  * Checks if a string starts with but does not end with a sequence
@@ -247,16 +254,16 @@ export function doubleQuote(str: string, force = false, fixPartialWrap = false):
  */
 export function quote(
 	str: string,
-	useSingleQuotes = false,
-	force = false,
-	fixPartialWrap = false,
+	options: QuoteOperationOptions = {
+		singleQuotes: false,
+		force: false,
+		partialWrap: false,
+	},
 ): string {
-	if ((isDoubleQuoted(str) || (isSingleQuoted(str) && useSingleQuotes)) && !force) {
-		return str;
-	}
+	const { singleQuotes, force, partialWrap } = options;
 
-	const sequence = useSingleQuotes ? `'` : `"`;
-	return wrap({ str: str, seq: sequence }, force, fixPartialWrap);
+	const sequence = singleQuotes ? `'` : `"`;
+	return wrap({ str: str, seq: sequence }, force, partialWrap);
 }
 
 // MARK: unquote
@@ -273,25 +280,18 @@ export function quote(
  */
 export function unquote(
 	str: string,
-	useSingleQuotes = false,
-	removePartialWrap = false,
+	options: QuoteOperationOptions = {
+		singleQuotes: false,
+		force: false,
+		partialWrap: false,
+	},
 ): string {
-	const sequence = useSingleQuotes ? `'` : `"`;
+	const { singleQuotes, partialWrap } = options;
+	const sequence = singleQuotes ? `'` : `"`;
 
-	if (useSingleQuotes && isWrapped({ str: str, seq: `"` })) {
-		return unwrap({ str: str, seq: `"` }, removePartialWrap);
+	if (isWrapped({ str: str, seq: `"` }) && singleQuotes) {
+		return unwrap({ str: str, seq: `"` }, partialWrap);
 	}
 
-	if (!isQuoted(str, useSingleQuotes)) {
-		if (startsButDoesNotEndWith(str, sequence) && removePartialWrap) {
-			return str.substring(sequence.length);
-		}
-		if (endsButDoesNotStartWith(str, sequence) && removePartialWrap) {
-			return str.substring(0, str.length - sequence.length);
-		}
-
-		return str;
-	}
-
-	return unwrap({ str: str, seq: sequence }, removePartialWrap);
+	return unwrap({ str: str, seq: sequence }, partialWrap);
 }

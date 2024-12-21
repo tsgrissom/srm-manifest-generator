@@ -214,7 +214,7 @@ describe('Function: quote()', () => {
 	test.each([
 		// str, useSingleQuotes, force, fixPartialWrap, expected
 		[`string`, false, false, false, `"string"`], // non-quoted -> double-quoted
-		[`string`, true, false, false, `'string'`], // non-quoted -> single-quoted
+		[`string`, true, false, false, `'string'`],
 		[`"string"`, false, true, false, `""string""`], // double-quoted -> force double-quoted
 		[`'string'`, true, true, false, `''string''`], // single-quoted -> force single-quoted
 		[`"string"`, true, true, false, `'"string"'`], // double-quoted -> nested mixed quotes, outer single, inner double
@@ -230,7 +230,12 @@ describe('Function: quote()', () => {
 	])(
 		'returns expected for given input parameters',
 		(str, useSingleQuotes, force, fixPartialWrap, expected) => {
-			expect(quote(str, useSingleQuotes, force, fixPartialWrap)).toBe(expected);
+			const result = quote(str, {
+				singleQuotes: useSingleQuotes,
+				force: force,
+				partialWrap: fixPartialWrap,
+			});
+			expect(result).toBe(expected);
 		},
 	);
 });
@@ -262,8 +267,14 @@ describe('Function: unquote()', () => {
 		[`string'`, true, true, `string`], // trail-only single-quote -> useSingleQuotes + removePartialWrap on -> partial quote removed
 	])(
 		'[str=%p | useSingleQuotes=%p | removePartialWrap=%p | expected=%p] returns expected for given input parameters',
-		(str, useSingleQuotes, removePartialWrap, expected) => {
-			expect(unquote(str, useSingleQuotes, removePartialWrap)).toBe(expected);
+		(str, singleQuotes, partialUnwrap, expected) => {
+			expect(
+				unquote(str, {
+					singleQuotes: singleQuotes,
+					force: false,
+					partialWrap: partialUnwrap,
+				}),
+			).toBe(expected);
 		},
 	);
 });

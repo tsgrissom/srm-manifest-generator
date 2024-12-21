@@ -235,7 +235,11 @@ export function fmtPath(filePath: string, useUnderline = true, useQuotes = true)
 	}
 
 	if (useQuotes) {
-		filePath = quote(filePath, false, false, false);
+		filePath = quote(filePath, {
+			singleQuotes: false,
+			force: false,
+			partialWrap: false,
+		});
 	}
 
 	if (useUnderline) {
