@@ -87,7 +87,7 @@ function formattedBoolean(
 }
 
 // TODO jsdoc
-const fmtBool = (b: boolean, options: BoolFmtOptions = BoolFmtPreset.TrueFalse) =>
+const fmtBool = (b: boolean, options: BoolFmtOptions = BoolFmtPreset.TrueFalse): string =>
 	formattedBoolean(
 		b,
 		options.color,

@@ -27,12 +27,9 @@ const pluginTsCustomizations = {
 	plugins: { pluginTs },
 	/** @see https://typescript-eslint.io/rules/ */ // TODO Review rules
 	rules: {
+		'@typescript-eslint/class-methods-use-this': 'warn',
 		'@typescript-eslint/consistent-generic-constructors': ['warn', 'type-annotation'],
 		'@typescript-eslint/dot-notation': 'warn',
-		'@typescript-eslint/explicit-member-accessibility': [
-			'error',
-			{ accessibility: 'explicit' },
-		],
 		'@typescript-eslint/max-params': ['warn', { max: 3 }],
 		'@typescript-eslint/no-confusing-non-null-assertion': 'warn',
 		'@typescript-eslint/no-unused-vars': 'warn',
@@ -40,11 +37,14 @@ const pluginTsCustomizations = {
 
 		'@typescript-eslint/array-type': ['error', { default: 'generic' }], // TODO Change?
 		'@typescript-eslint/class-literal-property-style': ['error', 'getters'],
-		'@typescript-eslint/class-methods-use-this': 'error',
 		'@typescript-eslint/explicit-function-return-type': [
 			'error',
 			{ allowConciseArrowFunctionExpressionsStartingWithVoid: true },
 		],
+		// '@typescript-eslint/explicit-member-accessibility': [
+		// 	'error',
+		// 	{ accessibility: 'explicit' },
+		// ],
 	},
 };
 
