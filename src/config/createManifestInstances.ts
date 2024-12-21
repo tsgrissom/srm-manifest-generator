@@ -78,7 +78,7 @@ async function createManifestInstances(
 
 		const object = await readManifestFile(manPath);
 		const data = parseManifestFileContentsToData(manPath, object, config);
-		const instance = new Manifest(manPath, data);
+		const instance = new Manifest(manPath, data, config);
 
 		okManifests.push(instance);
 

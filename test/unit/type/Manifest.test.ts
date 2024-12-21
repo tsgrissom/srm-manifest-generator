@@ -75,7 +75,7 @@ afterEach(() => {
 // MARK: Mock FS
 
 test('mock fs should be created', () => {
-	expect(fs.existsSync(mockManifest.filePath)).toBe(true);
+	expect(fs.existsSync(mockManifest.getFilePath)).toBe(true);
 });
 
 describe('Class: Manifest', () => {
@@ -129,7 +129,11 @@ describe('Class: Manifest', () => {
 		it('returns basename w/o exts when ok manifest without name attr', () => {
 			mockManifest.sourceName = '';
 			const actual = mockManifest.getName();
-			const expected = basenameWithoutExtensions(mockManifest.filePath, '*', true);
+			const expected = basenameWithoutExtensions(
+				mockManifest.getFilePath,
+				'*',
+				true,
+			);
 			expect(actual).toBe(expected);
 		});
 	});

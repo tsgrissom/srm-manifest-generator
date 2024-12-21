@@ -146,7 +146,7 @@ export async function transformLoadedManifests(config: ConfigData): Promise<void
 			okLen++;
 		} catch {
 			console.error(
-				clr.red(`Error processing manifest ${fmtPathAsTag(man.filePath)}`),
+				clr.red(`Error processing manifest ${fmtPathAsTag(man.getFilePath)}`),
 			);
 		}
 	}

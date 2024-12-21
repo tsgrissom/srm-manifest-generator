@@ -157,7 +157,7 @@ function displayUserConfigSection(key: string, obj: object): void {
 
 			const manPaths = innerValue
 				.map(each => each as Manifest)
-				.map(man => man.filePath);
+				.map(man => man.getFilePath);
 
 			clog(`  manifests:`);
 			clogList(`   - `, ...manPaths);

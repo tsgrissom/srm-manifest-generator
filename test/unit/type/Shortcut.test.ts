@@ -38,12 +38,7 @@ beforeEach(() => {
 		outputPath: '/mock/output/dir',
 		shortcuts: [mockSc],
 	};
-	// mockMan = new Manifest(
-	// 	path.join(pathSubdirManifests, 'mocked-manifest.manifest.yml'),
-	// 	mockManData,
-	// );
 
-	// TODO Make this more dynamic as well or do away with it altogether
 	const config: FileSystem.DirectoryItems = {
 		'test/resource/Shortcut': {
 			manifests: {

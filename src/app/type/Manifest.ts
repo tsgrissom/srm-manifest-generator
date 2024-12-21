@@ -37,10 +37,10 @@ import { ManifestData, NameSource } from './ManifestData.js';
 // Class: MARK: Manifest
 
 // TODO getName by ManifestNameSource
-// TODO jsdoc
+// TODO jsdocs
 class Manifest implements ManifestData {
-	// TODO jsdoc
-	filePath: string;
+	private filePath: string;
+	private config?: UserConfig;
 
 	sourceName: string;
 	baseDirectory: string;
@@ -71,9 +71,12 @@ class Manifest implements ManifestData {
 	 * Constructs a new Manifest instance.
 	 * @param filePath The filepath of this Manifest's source file. Not read in the constructor, but used as a fallback name if name attribute is not set inside the file.
 	 * @param data The object to parse into a Manifest instance.
+	 * @param config The config data to use in this Manifest's operations.
 	 */
-	constructor(filePath: string, data: ManifestData) {
+	constructor(filePath: string, data: ManifestData, config?: UserConfig) {
 		this.filePath = filePath;
+		this.config = config;
+
 		this.sourceName = data.sourceName;
 		this.baseDirectory = data.baseDirectory;
 		this.outputPath = data.outputPath;
@@ -222,12 +225,9 @@ class Manifest implements ManifestData {
 		return item;
 	}
 
-	private calculatePrefixForResults(
-		results: WriteResults,
-		config?: UserConfig,
-	): string {
+	private calculatePrefixForResults(results: WriteResults): string {
 		const { nTotal, nOk, nDisabled } = results.stats;
-		const useColor = config?.shouldUseColor() ?? true;
+		const useColor = this.config?.shouldUseColor() ?? true;
 
 		const ok = useColor ? SB_OK_LG : UNICODE_CHECK_LG; // TODO withColor check
 		const err = useColor ? SB_ERR_LG : UNICODE_XMARK_LG;
@@ -332,7 +332,7 @@ class Manifest implements ManifestData {
 		const { manifest, stats, outputData } = results;
 		const { nTotal, nOk, nDisabled, nInvalid } = stats;
 		const useColor = config?.shouldUseColor() ?? true;
-		const prefix = this.calculatePrefixForResults(results, config);
+		const prefix = this.calculatePrefixForResults(results);
 		const quotedName = quote(manifest.getName());
 		const writePath = manifest.getWritePath();
 		const sourceName = useColor ? clr.magentaBright(quotedName) : quotedName;

@@ -65,7 +65,7 @@ class UserConfig implements ConfigData {
 
 	// Section: search
 	public getManifestPaths = (): Array<string> =>
-		this.search.manifests.map(man => man.filePath);
+		this.search.manifests.map(man => man.getFilePath);
 
 	// Section: output
 	public shouldMinifyOutput = (): boolean => this.output.minify;
