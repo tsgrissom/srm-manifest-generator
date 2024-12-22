@@ -178,6 +178,7 @@ function clogConfigValueErr(key: string, msg: string): void {
 	clog(blob);
 }
 
+// eslint-disable-next-line @typescript-eslint/max-params
 export function clogConfigValueWrongType(
 	key: string,
 	expectedType: string,

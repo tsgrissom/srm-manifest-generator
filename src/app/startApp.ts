@@ -112,9 +112,9 @@ export async function listShortcutsOfLoadedManifests(config: ConfigData): Promis
 	}
 }
 
-export function listShortcutsOfGivenManifest(manifest: Manifest): void {
-	// TODO
-}
+// export function listShortcutsOfGivenManifest(manifest: Manifest): void {
+// 	// TODO
+// }
 
 export async function transformLoadedManifests(config: ConfigData): Promise<void> {
 	const { manifests } = config.search;

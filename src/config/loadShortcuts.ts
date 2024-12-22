@@ -24,7 +24,6 @@ import {
 	SB_SECT_START,
 	SB_WARN,
 } from '../util/string/symbols.js';
-import { ConfigData } from './type/ConfigData.js';
 import { UserConfig } from './type/UserConfig.js';
 
 // MARK: ParsedObjectsIntoShortcutDataResult
@@ -41,7 +40,7 @@ interface ParsedObjectsIntoShortcutDataResult {
 function parseObjectsIntoArrayOfShortcutData(
 	arr: Array<unknown>,
 	parent?: ManifestData,
-	config?: ConfigData,
+	// config?: ConfigData,
 ): ParsedObjectsIntoShortcutDataResult {
 	const manName = parent?.sourceName ?? 'Unknown';
 

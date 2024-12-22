@@ -148,7 +148,7 @@ async function validateManifestPathIsSupportedFilesystemType(
 				`Unsupported filesystem type (Supported: File or Folder) was set as a manifest path in the user ${USER_CONFIG_FILENAME}.`,
 			);
 
-		const { scanDirectories, scanRecursively } = config.search;
+		const { scanDirectories } = config.search;
 
 		if (stats.isFile()) {
 			return true;
@@ -231,7 +231,7 @@ function loadShortcuts(
 		sourceName,
 	);
 
-	const { validShortcuts, invalidShortcuts } = resultOfParse;
+	const { validShortcuts } = resultOfParse;
 	const nAll = validShortcuts.length;
 
 	vlog(`  ${nAll} total shortcuts in this manifest`);

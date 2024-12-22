@@ -11,7 +11,6 @@ import {
 import { Manifest } from '../app/type/Manifest.js';
 import parseUserConfigData from '../config/loadConfig.js';
 import { USER_CONFIG_PATH } from '../config/readFile.js';
-import { ConfigData } from '../config/type/ConfigData.js';
 import { BoolFmtPreset, fmtBool, yesNo } from '../util/boolean.js';
 import { fmtPath } from '../util/file/path.js';
 import { clog, clogList } from '../util/logging/console.js';
@@ -60,7 +59,7 @@ await yargs(hideBin(process.argv))
 		async () => {
 			const config = await parseUserConfigData();
 			displayUserConfig(config);
-			displayUserConfigInstructions(config);
+			displayUserConfigInstructions();
 		},
 	)
 	.command(
@@ -175,7 +174,8 @@ function displayUserConfig(config?: object): void {
 	}
 
 	const configWithoutFunctions = Object.fromEntries(
-		Object.entries(config).filter(([key, value]) => typeof value !== 'function'),
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		Object.entries(config).filter(([_, value]) => typeof value !== 'function'),
 	);
 
 	clog('', clr.magentaBright.bold(`CURRENT USER CONFIG`));
@@ -189,7 +189,7 @@ function displayUserConfig(config?: object): void {
 	clog('');
 }
 
-function displayUserConfigInstructions(config?: ConfigData): void {
+function displayUserConfigInstructions(): void {
 	const wasFound = true; // TODO Dynamic
 	const configPath = USER_CONFIG_PATH;
 	let lineLocation = wasFound ? ` - Location: ` : ` - Location set to: `;
