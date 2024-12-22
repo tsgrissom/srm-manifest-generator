@@ -14,8 +14,8 @@ import {
 	USER_CONFIG_PATH,
 } from './loadConfig.js';
 
-import { fmtPath, fmtPathAsTag } from '../util/file/path.js';
 import { vlog } from '../util/logging/debug.js';
+import * as fmt from '../util/string/format.js';
 import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../util/string/symbols.js';
 import { ConfigData } from './type/ConfigData.js';
 
@@ -43,7 +43,7 @@ async function downloadExampleConfig(): Promise<boolean> {
 				if (response.statusCode !== 200)
 					return reject(
 						new Error(
-							`Failed to grab "${EXAMPLE_CONFIG_FILENAME}" from ${fmtPath(EXAMPLE_CONFIG_URL)}". Status code: ${response.statusCode}`,
+							`Failed to grab "${EXAMPLE_CONFIG_FILENAME}" from ${fmt.path(EXAMPLE_CONFIG_URL)}". Status code: ${response.statusCode}`,
 						),
 					);
 
@@ -64,13 +64,13 @@ async function downloadExampleConfig(): Promise<boolean> {
 
 				fileStreamExample.on('finish', () => {
 					clog(
-						`${SB_OK_LG} Restored "${EXAMPLE_CONFIG_FILENAME}" from GitHub ${fmtPathAsTag(EXAMPLE_CONFIG_PATH)}`,
+						`${SB_OK_LG} Restored "${EXAMPLE_CONFIG_FILENAME}" from GitHub ${fmt.pathAsTag(EXAMPLE_CONFIG_PATH)}`,
 					);
 					onStreamFinish();
 				});
 				fileStreamUser.on('finish', () => {
 					clog(
-						`${SB_OK_LG} Copied "${EXAMPLE_CONFIG_FILENAME}" to ${fmtPath(USER_CONFIG_PATH)}`,
+						`${SB_OK_LG} Copied "${EXAMPLE_CONFIG_FILENAME}" to ${fmt.path(USER_CONFIG_PATH)}`,
 					);
 					onStreamFinish();
 				});
@@ -128,7 +128,7 @@ async function copyExampleConfigToUserConfigPath(): Promise<void> {
 	try {
 		const exampleConfigFile = await fs.promises.readFile(EXAMPLE_CONFIG_PATH, 'utf8');
 		await fs.promises.writeFile(USER_CONFIG_PATH, exampleConfigFile, 'utf8');
-		clog(`${SB_OK_LG} Example config copied to ${fmtPath(USER_CONFIG_PATH)}`);
+		clog(`${SB_OK_LG} Example config copied to ${fmt.path(USER_CONFIG_PATH)}`);
 	} catch (err) {
 		console.error(
 			`${SB_ERR_LG} Failed to copy example config to ${USER_CONFIG_PATH}:`,
@@ -165,8 +165,8 @@ async function loadUserConfigData(): Promise<object> {
 	let exampleConfigHandle;
 	let userConfigHandle;
 
-	const tagExampleConfPath = fmtPathAsTag(EXAMPLE_CONFIG_PATH);
-	const tagUserConfPath = fmtPathAsTag(USER_CONFIG_PATH);
+	const tagExampleConfPath = fmt.pathAsTag(EXAMPLE_CONFIG_PATH);
+	const tagUserConfPath = fmt.pathAsTag(USER_CONFIG_PATH);
 
 	vlog(clr.magentaBright.underline(`CHECKING FOR CONFIGS`));
 
@@ -179,9 +179,9 @@ async function loadUserConfigData(): Promise<object> {
 		clog(
 			`${SB_WARN} Example config was missing from its typical location ${tagExampleConfPath}`,
 			`- A new copy of the ${quote(EXAMPLE_CONFIG_FILENAME)} will be downloaded from GitHub...`, // TODO Review this styling
-			`  > URL: ${fmtPath(EXAMPLE_CONFIG_URL)}`,
-			`  > Downloading To: ${fmtPath(EXAMPLE_CONFIG_PATH)}`,
-			`  > Then Copying To: ${fmtPath(USER_CONFIG_PATH)}`,
+			`  > URL: ${fmt.path(EXAMPLE_CONFIG_URL)}`,
+			`  > Downloading To: ${fmt.path(EXAMPLE_CONFIG_PATH)}`,
+			`  > Then Copying To: ${fmt.path(USER_CONFIG_PATH)}`,
 		);
 
 		await downloadExampleConfig();

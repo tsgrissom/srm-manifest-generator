@@ -7,11 +7,7 @@ import { clog } from '../../util/logging/console.js';
 import { quote } from '../../util/string/quote.js';
 
 import { UserConfig } from '../../config/type/UserConfig.js';
-import {
-	basenameWithoutExtensions,
-	fmtPath,
-	fmtPathWithExistsAndName,
-} from '../../util/file/path.js';
+import { basenameWithoutExtensions } from '../../util/file/path.js';
 import {
 	dlog,
 	dlogList,
@@ -19,6 +15,7 @@ import {
 	vlog,
 	vlogList,
 } from '../../util/logging/debug.js';
+import * as fmt from '../../util/string/format.js';
 import {
 	SB_BULLET,
 	SB_ERR_LG,
@@ -247,18 +244,18 @@ class Manifest implements ManifestData {
 			results.stats;
 
 		const name = quote(this.name);
-		const fmtBaseDirPath = await fmtPathWithExistsAndName(
+		const fmtBaseDirPath = await fmt.pathWithNameAndExists(
 			this.baseDirectory,
 			'Base Directory',
 			config,
 		);
-		const fmtSourceFilePath = await fmtPathWithExistsAndName(
+		const fmtSourceFilePath = await fmt.pathWithNameAndExists(
 			this.filePath,
 			'Source File',
 			config,
 		);
-		const fmtOutputPath = await fmtPathWithExistsAndName(this.outputPath, 'Output');
-		const fmtWriteFilePath = await fmtPathWithExistsAndName(
+		const fmtOutputPath = await fmt.pathWithNameAndExists(this.outputPath, 'Output');
+		const fmtWriteFilePath = await fmt.pathWithNameAndExists(
 			this.writePath,
 			'Write File',
 			config,
@@ -343,12 +340,12 @@ class Manifest implements ManifestData {
 		}
 
 		if (nOk > 0) {
-			dlog(`  ${SB_OK_SM} Wrote new file to ${fmtPath(this.writePath)}`);
+			dlog(`  ${SB_OK_SM} Wrote new file to ${fmt.path(this.writePath)}`);
 
 			vlog(
-				`    - Source File: ${fmtPath(this.filePath)}`,
-				`    - Output Path: ${fmtPath(this.outputPath)}`,
-				`    - File Written To: ${fmtPath(this.writePath)}`,
+				`    - Source File: ${fmt.path(this.filePath)}`,
+				`    - Output Path: ${fmt.path(this.outputPath)}`,
+				`    - File Written To: ${fmt.path(this.writePath)}`,
 			);
 		}
 

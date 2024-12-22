@@ -1,6 +1,12 @@
 import clr from 'chalk';
 
+import { ConfigData } from '../../config/type/ConfigData.js';
+import { isPathAccessible } from '../file/path.js';
 import * as str from './grammar.js';
+import { quote } from './quote.js';
+import { SB_ERR_SM, SB_OK_SM } from './symbols.js';
+
+// MARK: BOOLEAN
 
 // TODO Benchmark is it faster to store four string values: trueLowerStr trueUpperStr falseLowerStr and falseUpperStr or current?
 export interface BoolFmtOptions {
@@ -81,3 +87,137 @@ export const yesNo = (b: boolean): string => bool(b, boolPresets.YesNo);
 export const enabledDisabled = (b: boolean): string =>
 	bool(b, boolPresets.EnabledDisabled);
 export const checkCross = (b: boolean): string => bool(b, boolPresets.CheckCross);
+
+// MARK: PATH
+
+// MARK: path
+
+/**
+ * Formats a given filepath to a better version for console.
+ * Options available are to apply underline and/or apply
+ * quotations, both of which are enabled by default.
+ *
+ * @param filePath The filepath to format.
+ * @param useUnderline Whether to apply underline formatting
+ *  to the given filepath.
+ * @param useQuotes Whether to apply quotation marks to the
+ *  the given filepath if it not surrounded by them already.
+ * @returns The formatted filepath with the options applied.
+ */
+// TODO Unit Test
+export function path(filePath: string, useUnderline = true, useQuotes = true): string {
+	if (filePath.trim() === '') {
+		return filePath;
+	}
+
+	if (useQuotes) {
+		filePath = quote(filePath, {
+			singleQuotes: false,
+			force: false,
+			partialWrap: false,
+		});
+	}
+
+	if (useUnderline) {
+		filePath = clr.underline(filePath);
+	}
+
+	return filePath;
+}
+
+// MARK: pathWithExists
+
+/**
+ * Styles the given path according to if it is accessible or not.
+ * If the path is accessible, a green checkmark prefix is applied.
+ * Otherwise, a red x-mark prefix is applied.
+ *
+ * * This function uses `fs.access` to determine if the path is
+ *   accessible or not
+ * * This means that if the user does not have permissions to
+ *   access the file, it will appear with the red x-mark, even
+ *   if the path exists in the system
+ *
+ * @param filePath The filepath to check for accessibility.
+ * @returns A Promise which unwraps to a `boolean` value if
+ *  resolved, which represents whether `filePath` was accessible
+ *  or not.
+ */
+// TODO jsdoc
+// TODO Unit Test
+export async function pathWithExists( // TODO Update jsdoc
+	filePath: string,
+	config?: ConfigData,
+	usePrefix = true,
+	useSimplePrefix = true,
+	useUnderline = true,
+	useQuotes = true,
+): Promise<string> {
+	if (useUnderline || useQuotes) filePath = path(filePath, useUnderline, useQuotes);
+	if (!(config?.validate.filePaths ?? true)) return filePath;
+
+	let prefixOk = '',
+		prefixErr = '';
+	if (usePrefix) {
+		prefixOk = useSimplePrefix ? SB_OK_SM + ' ' : '(' + SB_OK_SM + ') ';
+		prefixErr = useSimplePrefix ? SB_ERR_SM + ' ' : '(' + SB_ERR_SM + ') ';
+	}
+
+	const accessible = await isPathAccessible(filePath);
+	const prefix = usePrefix ? (accessible ? prefixOk : prefixErr) : ' ';
+
+	return prefix + filePath;
+}
+
+// MARK: pathWithName
+
+// TODO jsdoc
+// TODO Unit Test
+export function pathWithName(
+	filePath: string,
+	nickname: string,
+	useUnderline = true,
+	useQuotes = true,
+): string {
+	if (useUnderline || useQuotes) filePath = path(filePath, useUnderline, useQuotes);
+
+	return nickname + ': ' + filePath;
+}
+
+// MARK: pathWithNameAndExists
+
+// TODO jsdoc
+// TODO Unit Test
+export async function pathWithNameAndExists(
+	filePath: string,
+	nickname: string,
+	config?: ConfigData,
+	prefix = ' ',
+	useUnderline = true,
+	useQuotes = true,
+): Promise<string> {
+	if (useUnderline || useQuotes) filePath = path(filePath, useUnderline, useQuotes);
+	if (!(config?.validate.filePaths ?? true)) return filePath;
+
+	const accessible = await isPathAccessible(filePath);
+	const suffix = accessible ? SB_OK_SM : SB_ERR_SM;
+
+	return prefix + nickname + ': ' + filePath + ' ' + suffix;
+}
+
+// MARK: pathAsTag
+
+// TODO jsdoc
+// TODO Unit Test
+export function pathAsTag(
+	filePath: string,
+	useUnderline = true,
+	useQuotes = true,
+	innerPrefix = 'Path',
+): string {
+	if (useUnderline || useQuotes) filePath = path(filePath, useUnderline, useQuotes);
+
+	innerPrefix = innerPrefix !== '' ? innerPrefix + ': ' : '';
+
+	return '(' + innerPrefix + filePath + ')';
+}

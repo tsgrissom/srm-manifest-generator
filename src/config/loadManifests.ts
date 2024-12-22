@@ -14,9 +14,10 @@ import clr from 'chalk';
 import { Manifest } from '../app/type/Manifest.js';
 import { ManifestData } from '../app/type/ManifestData.js';
 import Shortcut from '../app/type/Shortcut.js';
-import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../util/file/path.js';
+import { basenameWithoutExtensions } from '../util/file/path.js';
 import { resolveKeyFromAlias, YamlKeyAliases } from '../util/file/yaml.js';
 import { dlog, dlogHeader, vlog } from '../util/logging/debug.js';
+import * as fmt from '../util/string/format.js';
 import {
 	SB_ERR_LG,
 	SB_OK_LG,
@@ -51,7 +52,7 @@ async function createManifestInstances(
 
 	for (const [index, manPath] of manPaths.entries()) {
 		const id = index + 1;
-		const pathTag = fmtPathAsTag(manPath);
+		const pathTag = fmt.pathAsTag(manPath);
 		dlog(`${SB_SECT_START}Starting: Manifest #${id} ${pathTag}`);
 
 		const exists = await validateManifestPathExists(manPath);
@@ -120,7 +121,7 @@ function logLoadedManifests(
 
 // MARK: validateManifestPathExists
 async function validateManifestPathExists(filePath: string): Promise<boolean> {
-	const pathTag = fmtPath(filePath);
+	const pathTag = fmt.path(filePath);
 
 	try {
 		await fs.access(filePath).catch(() => {
@@ -138,7 +139,7 @@ async function validateManifestPathIsSupportedFilesystemType(
 	filePath: string,
 	config: ConfigData,
 ): Promise<boolean> {
-	const pathTag = fmtPathAsTag(filePath);
+	const pathTag = fmt.pathAsTag(filePath);
 
 	try {
 		const stats = await fs.stat(filePath);
@@ -175,7 +176,7 @@ async function validateManifestPathIsSupportedFilesystemType(
 
 // MARK: readManifestFile
 async function readManifestFile(manPath: string): Promise<object> {
-	const pathTag = fmtPathAsTag(manPath);
+	const pathTag = fmt.pathAsTag(manPath);
 
 	if (!manPath) {
 		throw new Error(`Arg filePath was invalid: ${manPath}`);
@@ -291,7 +292,7 @@ function parseManifestFileContentsToData(
 		throw new Error(`Manifest is not an object (Type: ${typeof document})`);
 	}
 
-	dlog(`${SB_SECT_START}Loading: Manifest ${fmtPathAsTag(filePath)}`);
+	dlog(`${SB_SECT_START}Loading: Manifest ${fmt.pathAsTag(filePath)}`);
 
 	let hasShortcuts = false;
 
@@ -376,7 +377,7 @@ function parseManifestFileContentsToData(
 		}
 	}
 
-	const pathTag = fmtPathAsTag(filePath);
+	const pathTag = fmt.pathAsTag(filePath);
 	const hasSourceName = data.sourceName.trim() !== '';
 	const hasBaseDirectory = data.baseDirectory.trim() !== '';
 	const hasOutputPath = data.outputPath.trim() !== '';

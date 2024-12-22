@@ -6,13 +6,13 @@ import { quote } from '../util/string/quote.js';
 import { ManifestData } from '../app/type/ManifestData.js';
 import Shortcut from '../app/type/Shortcut.js';
 import { isShortcutData, ShortcutData } from '../app/type/ShortcutData.js';
-import { fmtPath } from '../util/file/path.js';
 import { resolveKeyFromAlias, YamlKeyAliases } from '../util/file/yaml.js';
 import {
 	clogConfigValueWrongType,
 	vlogConfigValueLoaded,
 } from '../util/logging/config.js';
 import { dlog, vlog, vlogList } from '../util/logging/debug.js';
+import * as fmt from '../util/string/format.js';
 import { yesNo } from '../util/string/format.js';
 import {
 	SB_BULLET,
@@ -84,7 +84,7 @@ function parseObjectsIntoArrayOfShortcutData(
 
 		const isEnabled = element.enabled ?? true;
 		const fmtTitle = quote(element.title);
-		const fmtTarget = fmtPath(element.target);
+		const fmtTarget = fmt.path(element.target);
 		const fmtEnabled = yesNo(isEnabled);
 
 		vlog(`  ${SB_OK_SM} Valid shortcut data for title ${fmtTitle}`);

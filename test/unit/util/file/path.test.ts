@@ -1,10 +1,8 @@
 import path from 'node:path';
 
-import clr from 'chalk';
 import mockFs from 'mock-fs';
 import {
 	basenameWithoutExtensions,
-	fmtPath,
 	isPathAccessible,
 	normalizeFileExtension,
 	pathHasFileExtension,
@@ -70,26 +68,6 @@ describe('Function: basenameWithoutExtensions', () => {
 			const actual = path.extname(result);
 			const expected = '';
 			expect(actual).toBe(expected);
-		},
-	);
-});
-
-// MARK: fmtPath
-describe(`Function: fmtPath`, () => {
-	test.each(setOfEmptyStrings)(`returns given str if empty: %p`, value => {
-		expect(fmtPath(value)).toBe(value);
-	});
-
-	test.each([
-		// filePath, useUnderline, useQuotes, expected
-		['str', false, false, 'str'],
-		['str', true, true, clr.underline(`"str"`)],
-		['str', false, true, `"str"`],
-		['str', true, false, clr.underline(`str`)],
-	])(
-		`returns expected for given input parameters`,
-		(filePath, useUnderline, useQuotes, expected) => {
-			expect(fmtPath(filePath, useUnderline, useQuotes)).toBe(expected);
 		},
 	);
 });

@@ -3,7 +3,7 @@ import path from 'node:path';
 import { quote } from '../../util/string/quote.js';
 
 import { UserConfig } from '../../config/type/UserConfig.js';
-import { fmtPathWithExistsPrefix } from '../../util/file/path.js';
+import * as fmt from '../../util/string/format.js';
 import { yesNo } from '../../util/string/format.js';
 import { ManifestData } from '../type/ManifestData.js';
 import { ShortcutData, ShortcutExportData } from './ShortcutData.js';
@@ -119,7 +119,7 @@ class Shortcut implements ShortcutData {
 	public async formatAsListEntry(baseDirectory: string): Promise<Array<string>> {
 		const fmtTitle = quote(this.title);
 		const fullTarget = this.getFullTargetPathFromBaseDir(baseDirectory);
-		const fmtFullTarget = await fmtPathWithExistsPrefix(fullTarget);
+		const fmtFullTarget = await fmt.pathWithExists(fullTarget);
 		const fmtIsEnabled = yesNo(this.enabled);
 
 		return [

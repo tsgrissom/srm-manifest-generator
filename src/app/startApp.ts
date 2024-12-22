@@ -1,9 +1,9 @@
 import clr from 'chalk';
 import parseUserConfigData from '../config/loadConfig.js';
 import { ConfigData } from '../config/type/ConfigData.js';
-import { fmtPathAsTag } from '../util/file/path.js';
 import { clog } from '../util/logging/console.js';
 import { dlog, isVerbose } from '../util/logging/debug.js';
+import * as fmt from '../util/string/format.js';
 import { countNoun, possessivePronounFor } from '../util/string/grammar.js';
 import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from '../util/string/symbols.js';
 import { Manifest } from './type/Manifest.js';
@@ -146,7 +146,7 @@ export async function transformLoadedManifests(config: ConfigData): Promise<void
 			okLen++;
 		} catch {
 			console.error(
-				clr.red(`Error processing manifest ${fmtPathAsTag(man.filePath)}`),
+				clr.red(`Error processing manifest ${fmt.pathAsTag(man.filePath)}`),
 			);
 		}
 	}
