@@ -2,8 +2,8 @@ import clr from 'chalk';
 import { USER_CONFIG_ATTRIBUTION } from '../../config/loadConfig.js';
 import { USER_CONFIG_FILENAME } from '../../config/readFile.js';
 import { ConfigData } from '../../config/type/ConfigData.js';
-import { fmtBool, yesNo } from '../boolean.js';
 import { ResolvedYamlKey } from '../file/yaml.js';
+import * as fmt from '../string/format.js';
 import { getTypeDisplayName, indefiniteArticleFor } from '../string/grammar.js';
 import { quote } from '../string/quote.js';
 import {
@@ -133,7 +133,7 @@ function fmtValueForLoadedLog(value?: any): string {
 
 	let fmtValue = `${value}`;
 	if (typeof value === 'string') fmtValue = value !== '' ? quote(value) : '';
-	else if (typeof value === 'boolean') fmtValue = fmtBool(value);
+	else if (typeof value === 'boolean') fmtValue = fmt.bool(value);
 	// TODO More type fmts
 	return fmtValue;
 }
@@ -144,7 +144,7 @@ export function vlogConfigValueLoaded(resolvedPair: ResolvedYamlKey, value?: any
 	const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
 	const isAlias = givenKey !== resolvedKey;
 	const fmtValue = fmtValueForLoadedLog(value);
-	const fmtIsAlias = yesNo(isAlias);
+	const fmtIsAlias = fmt.yesNo(isAlias);
 	const fmtGivenKey = quote(givenKey);
 	const fmtInternalKey = quote(resolvedKey);
 

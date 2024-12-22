@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import YAML from 'yaml';
 
-import { checkCross } from '../util/boolean.js';
 import {
 	clogConfigKeyUnknown,
 	clogConfigValueWrongType,
@@ -9,6 +8,7 @@ import {
 	vlogConfigValueLoaded,
 } from '../util/logging/config.js';
 import { clog } from '../util/logging/console.js';
+import { checkCross } from '../util/string/format.js';
 
 import clr from 'chalk';
 import { Manifest } from '../app/type/Manifest.js';

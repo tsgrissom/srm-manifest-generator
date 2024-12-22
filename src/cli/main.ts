@@ -11,9 +11,9 @@ import {
 import { Manifest } from '../app/type/Manifest.js';
 import parseUserConfigData from '../config/loadConfig.js';
 import { USER_CONFIG_PATH } from '../config/readFile.js';
-import { BoolFmtPreset, fmtBool, yesNo } from '../util/boolean.js';
 import { fmtPath } from '../util/file/path.js';
 import { clog, clogList } from '../util/logging/console.js';
+import * as fmt from '../util/string/format.js';
 import { delimitedList } from '../util/string/grammar.js';
 import { quote } from '../util/string/quote.js';
 import { SB_ERR_LG } from '../util/string/symbols.js';
@@ -118,7 +118,7 @@ await yargs(hideBin(process.argv))
 function fmtPretty(value?: unknown): string {
 	switch (typeof value) {
 		case 'boolean':
-			return fmtBool(value, BoolFmtPreset.EnabledDisabled);
+			return fmt.bool(value, fmt.boolPresets.enabledDisabled);
 		case 'number':
 			return clr.cyanBright(value);
 		case 'object':
@@ -198,7 +198,7 @@ function displayUserConfigInstructions(): void {
 
 	clog(
 		clr.magentaBright.bold(`INSTRUCTIONS FOR USER CONFIG`),
-		` - Was found? ${yesNo(wasFound)}`,
+		` - Was found? ${fmt.yesNo(wasFound)}`,
 		lineLocation,
 		``,
 	);

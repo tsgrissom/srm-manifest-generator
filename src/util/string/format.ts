@@ -1,9 +1,9 @@
 import clr from 'chalk';
 
-import { capitalize as strCapitalize } from './string/grammar.js';
+import * as str from './grammar.js';
 
 // TODO Benchmark is it faster to store four string values: trueLowerStr trueUpperStr falseLowerStr and falseUpperStr or current?
-interface BoolFmtOptions {
+export interface BoolFmtOptions {
 	/** Whether the formatted boolean should be color-coded */
 	color: boolean;
 	/** Whether the boolean value-dependent string should have its first letter capitalized */
@@ -16,7 +16,7 @@ interface BoolFmtOptions {
 
 // TODO Unit test
 // TODO jsdoc
-const BoolFmtPreset: Record<string, BoolFmtOptions> = {
+export const boolPresets: Record<string, BoolFmtOptions> = {
 	/** "true" / "false" - color on, capitalize off */
 	TrueFalse: { color: true, capitalize: false, trueStr: 'true', falseStr: 'false' },
 	/** "Yes" / "No" - color on, capitalize off */
@@ -57,50 +57,27 @@ const BoolFmtPreset: Record<string, BoolFmtOptions> = {
 /**
  * Formats a given `boolean` into a prettier string with context-dependent
  * formatting as well as options for color-coding and auto-capitalization.
- *
- * This is the abstract version of my boolean formatter. See {@link fmtBool} for
- * a version with extensible options mappings ({@link BoolFmtOptions}) as well as
- * presets ({@link BoolFmtPreset}).
- *
- * @param b The boolean value to format into a pretty string.
- * @param color Whether color-coding should be used on the string.
- * @param capitalize Whether to capitalize the first letter of the string.
- * @param trueStr The string to start with if the given boolean value is true.
- * @param falseStr The string to start with if the given boolean value is false.
- * @returns The final formatted string.
  */
-function formattedBoolean(
+// TODO jsdoc
+export function bool(
 	b: boolean,
-	color: boolean,
-	capitalize: boolean,
-	trueStr: string,
-	falseStr: string,
+	options: BoolFmtOptions = boolPresets.TrueFalse,
 ): string {
-	let str = b ? trueStr : falseStr;
-	if (capitalize) str = strCapitalize(str);
-	if (!color) return str;
-	return b ? clr.green(str) : clr.red(str);
+	const { capitalize, color, trueStr, falseStr } = options;
+	let s = b ? trueStr : falseStr;
+
+	if (capitalize) {
+		s = str.capitalize(s);
+	}
+
+	if (!color) {
+		return s;
+	}
+
+	return b ? clr.green(s) : clr.red(s);
 }
 
-// TODO jsdoc
-const fmtBool = (b: boolean, options: BoolFmtOptions = BoolFmtPreset.TrueFalse): string =>
-	formattedBoolean(
-		b,
-		options.color,
-		options.capitalize,
-		options.trueStr,
-		options.falseStr,
-	);
-const yesNo = (b: boolean): string => fmtBool(b, BoolFmtPreset.YesNo);
-const enabledDisabled = (b: boolean): string => fmtBool(b, BoolFmtPreset.EnabledDisabled);
-const checkCross = (b: boolean): string => fmtBool(b, BoolFmtPreset.CheckCross);
-
-export {
-	BoolFmtOptions,
-	BoolFmtPreset,
-	checkCross,
-	enabledDisabled,
-	fmtBool,
-	formattedBoolean,
-	yesNo,
-};
+export const yesNo = (b: boolean): string => bool(b, boolPresets.YesNo);
+export const enabledDisabled = (b: boolean): string =>
+	bool(b, boolPresets.EnabledDisabled);
+export const checkCross = (b: boolean): string => bool(b, boolPresets.CheckCross);
