@@ -11,8 +11,8 @@ interface ManifestData {
 
 // TODO jsdoc
 enum NameSource {
-	Attribute,
-	Filename,
+	Attribute = 'Attribute',
+	Filename = 'Filename',
 }
 
 export { ManifestData, NameSource };

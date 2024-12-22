@@ -66,6 +66,10 @@ describe('Class: Shortcut', () => {
 			expect(() => new Shortcut(mockScData)).toThrow();
 		});
 
+		// TODO Infer title from target
+
+		it.todo(`throws err if from data w/ empty target`);
+
 		it('does not throw err if instantiated with undefined config arg', () => {
 			expect(() => new Shortcut(mockScData, undefined)).not.toThrow();
 		});
@@ -98,37 +102,36 @@ describe('Class: Shortcut', () => {
 		});
 	});
 
-	// FIXME Appears broken on macOS
-	describe('Method: isTargetPathAbsolute()', () => {
+	describe('Property: hasAbsoluteTarget', () => {
 		it('returns false if target path is empty', () => {
 			mockSc.target = '';
-			expect(mockSc.isTargetPathAbsolute()).toBe(false);
+			expect(mockSc.hasAbsoluteTarget).toBe(false);
 		});
 
 		it('returns true if target path is absolute', () => {
 			mockSc.target = '/some/absolute/path';
-			expect(mockSc.isTargetPathAbsolute()).toBe(true);
+			expect(mockSc.hasAbsoluteTarget).toBe(true);
 
 			if (process.platform === 'win32') {
 				// TODO Maybe mock this?
 				mockSc.target = 'C:\\Some\\Absolute\\Path';
-				expect(mockSc.isTargetPathAbsolute()).toBe(true);
+				expect(mockSc.hasAbsoluteTarget).toBe(true);
 			}
 		});
 
 		it('returns false if target path is relative', () => {
 			mockSc.target = './some/relative/path';
-			expect(mockSc.isTargetPathAbsolute()).toBe(false);
+			expect(mockSc.hasAbsoluteTarget).toBe(false);
 			mockSc.target = 'some/relative/path';
-			expect(mockSc.isTargetPathAbsolute()).toBe(false);
+			expect(mockSc.hasAbsoluteTarget).toBe(false);
 			mockSc.target = '.\\some\\relative\\path';
-			expect(mockSc.isTargetPathAbsolute()).toBe(false);
+			expect(mockSc.hasAbsoluteTarget).toBe(false);
 			mockSc.target = 'some\\relative\\path';
-			expect(mockSc.isTargetPathAbsolute()).toBe(false);
+			expect(mockSc.hasAbsoluteTarget).toBe(false);
 		});
 	});
 
-	// TEST Method: isTargetPathRelative
+	// TODO TEST Property: hasRelativeTarget
 
 	describe('Method: getFullTargetPath()', () => {
 		it('returns expected full target path', () => {
@@ -136,18 +139,18 @@ describe('Class: Shortcut', () => {
 		});
 	});
 
-	describe('Method: isEnabled()', () => {
+	describe('Property: isEnabled', () => {
 		it('returns true when enabled is true', () => {
-			expect(mockSc.isEnabled).toBe(true);
+			expect(mockSc.enabled).toBe(true);
 		});
 
 		it('returns false when enabled is false', () => {
 			mockSc.enabled = false;
-			expect(mockSc.isEnabled).toBe(false);
+			expect(mockSc.enabled).toBe(false);
 		});
 	});
 
-	describe('Method: isDisabled()', () => {
+	describe('Property: isDisabled', () => {
 		it('returns true when enabled is false', () => {
 			mockSc.enabled = false;
 			expect(mockSc.isDisabled).toBe(true);

@@ -75,7 +75,7 @@ afterEach(() => {
 // MARK: Mock FS
 
 test('mock fs should be created', () => {
-	expect(fs.existsSync(mockManifest.getFilePath)).toBe(true);
+	expect(fs.existsSync(mockManifest.filePath)).toBe(true);
 });
 
 describe('Class: Manifest', () => {
@@ -87,23 +87,23 @@ describe('Class: Manifest', () => {
 
 	// MARK: Mtd hasNameAttribute
 
-	describe('Method: hasNameAttribute()', () => {
+	describe('Property: hasNameAttribute', () => {
 		it('returns true when valid manifest', () => {
 			mockManifest.sourceName = 'Some Source';
-			expect(mockManifest.hasNameAttribute()).toBe(true);
+			expect(mockManifest.hasSourceNameAttribute).toBe(true);
 		});
 
 		it('returns false when no name attribute manifest', () => {
 			mockManifest.sourceName = '';
-			expect(mockManifest.hasNameAttribute()).toBe(false);
+			expect(mockManifest.hasSourceNameAttribute).toBe(false);
 		});
 	});
 
 	// MARK: Mtd getFileBasename
 
-	describe('Method: getFileBasename()', () => {
+	describe('Property: fileBasename', () => {
 		it('returns str not equal to instance.filePath when valid manifest', () => {
-			const fileBasename = mockManifest.getFileBasename();
+			const fileBasename = mockManifest.fileBasename;
 			const filePath = path.join(pathSubdirManifests, 'mock-manifest.manifest.yml');
 			expect(fileBasename).not.toBe(filePath);
 		});
@@ -111,7 +111,8 @@ describe('Class: Manifest', () => {
 
 	// MARK: Mtd getName
 
-	describe('Method: getName()', () => {
+	// TODO Rewrite
+	describe('Property: name', () => {
 		test.each(['Something', 'Another', 'A Manifest'])(
 			'returns given str when ok instance made with sourceName value: %p',
 			value => {
@@ -122,19 +123,14 @@ describe('Class: Manifest', () => {
 					mockData,
 				);
 
-				expect(mockInstance.getName()).toBe(value);
+				expect(mockInstance.name).toBe(value);
 			},
 		);
 
 		it('returns basename w/o exts when ok manifest without name attr', () => {
 			mockManifest.sourceName = '';
-			const actual = mockManifest.getName();
-			const expected = basenameWithoutExtensions(
-				mockManifest.getFilePath,
-				'*',
-				true,
-			);
-			expect(actual).toBe(expected);
+			const expected = basenameWithoutExtensions(mockManifest.filePath, '*', true);
+			expect(mockManifest.name).toBe(expected);
 		});
 	});
 });

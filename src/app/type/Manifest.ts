@@ -34,38 +34,18 @@ import Shortcut from '../type/Shortcut.js';
 import { ShortcutExportData } from '../type/ShortcutData.js';
 import { ManifestData, NameSource } from './ManifestData.js';
 
-// Class: MARK: Manifest
+// MARK: Manifest
 
 // TODO getName by ManifestNameSource
 // TODO jsdocs
 class Manifest implements ManifestData {
-	private filePath: string;
-	private config?: UserConfig;
+	private _filePath: string;
+	private _config?: UserConfig;
 
-	sourceName: string;
-	baseDirectory: string;
-	outputPath: string;
-	shortcuts: Array<Shortcut>;
-
-	public get getFilePath(): string {
-		return this.filePath;
-	}
-
-	public get getSourceName(): string {
-		return this.sourceName;
-	}
-
-	public get getBaseDirectory(): string {
-		return this.baseDirectory;
-	}
-
-	public get getOutputPath(): string {
-		return this.outputPath;
-	}
-
-	public get getShortcuts(): Array<Shortcut> {
-		return this.shortcuts;
-	}
+	private _sourceName: string;
+	private _baseDirectory: string;
+	private _outputPath: string;
+	private _shortcuts: Array<Shortcut>;
 
 	/**
 	 * Constructs a new Manifest instance.
@@ -74,47 +54,43 @@ class Manifest implements ManifestData {
 	 * @param config The config data to use in this Manifest's operations.
 	 */
 	constructor(filePath: string, data: ManifestData, config?: UserConfig) {
-		this.filePath = filePath;
-		this.config = config;
+		this._filePath = filePath;
+		this._config = config;
 
-		this.sourceName = data.sourceName;
-		this.baseDirectory = data.baseDirectory;
-		this.outputPath = data.outputPath;
-		this.shortcuts = data.shortcuts;
-		// TODO Fill shortcuts
+		this._sourceName = data.sourceName;
+		this._baseDirectory = data.baseDirectory;
+		this._outputPath = data.outputPath;
+		this._shortcuts = data.shortcuts;
 	}
 
-	// MARK: paths
+	// MARK: getters + setters
 
-	public getWritePath(): string {
-		return this.outputPath;
+	public get filePath(): string {
+		return this._filePath;
 	}
 
-	// MARK: names
-
-	public getFileBasename(): string {
-		return path.basename(this.filePath);
+	public get fileBasename(): string {
+		return path.basename(this._filePath);
 	}
 
-	public getFallbackName(): string {
+	public get fallbackName(): string {
 		return basenameWithoutExtensions(
-			this.filePath,
+			this._filePath,
 			['.yml', '.yaml', '.manifest', '.example'],
 			true,
 		);
 	}
 
-	public hasNameAttribute(): boolean {
-		if (!this.sourceName) return false;
-
-		return this.sourceName.trim() !== '';
+	public get hasSourceNameAttribute(): boolean {
+		return !!this._sourceName?.trim();
 	}
 
-	// TODO jsdoc
-	public getNameAttribute(): string {
-		if (!this.sourceName || this.sourceName.trim() === '') return '';
+	public get sourceName(): string {
+		return this._sourceName;
+	}
 
-		return this.sourceName;
+	public set sourceName(str: string) {
+		this._sourceName = str;
 	}
 
 	/**
@@ -127,60 +103,60 @@ class Manifest implements ManifestData {
 	 * @returns An enum representing the potential sources
 	 *  of a manifest's name.
 	 */
-	public getNameSource(): NameSource {
-		if (this.hasNameAttribute()) {
-			return NameSource.Attribute;
-		} else {
-			return NameSource.Filename;
-		}
+	public get nameSource(): NameSource {
+		return this.hasSourceNameAttribute ? NameSource.Attribute : NameSource.Filename;
 	}
 
-	/**
-	 * Get the string representation of the Manifest instance's {@link ManifestNameSource}
-	 * @returns A `string` representing the value of {@link getNameSource},
-	 *  which is a {@link ManifestNameSource}.
-	 */
-	public getNameSourceAsString(): string {
-		switch (this.getNameSource()) {
+	public get name(): string {
+		switch (this.nameSource) {
 			case NameSource.Attribute:
-				return 'Attribute';
+				return this.sourceName;
 			case NameSource.Filename:
-				return 'Filename';
+				return this.fallbackName;
 		}
 	}
 
-	public getName(): string {
-		switch (this.getNameSource()) {
-			case NameSource.Attribute:
-				return this.getNameAttribute();
-			case NameSource.Filename:
-				return this.getFallbackName();
-		}
+	public get baseDirectory(): string {
+		return this._baseDirectory;
 	}
 
-	// MARK: shortcuts
-
-	public getEnabledShortcuts(): Array<Shortcut> {
-		return this.getShortcuts.filter(each => each.isEnabled);
+	public get outputPath(): string {
+		return this._outputPath;
 	}
+
+	public get writePath(): string {
+		// TODO Calculate write path
+		return this._outputPath;
+	}
+
+	public get shortcuts(): Array<Shortcut> {
+		return this._shortcuts;
+	}
+
+	public get enabledShortcuts(): Array<Shortcut> {
+		return this.shortcuts.filter(sc => sc.enabled);
+	}
+
+	// MARK: Methods
 
 	public getExportData(): Array<ShortcutExportData> {
-		return this.getEnabledShortcuts().map(each => each.getExportData(this));
+		return this.enabledShortcuts.map(each => each.getExportData(this));
 	}
 
 	public getExportString(): string {
 		return JSON.stringify(this.getExportData());
 	}
 
-	// MARK: write methods
+	// TODO containsShortcut?
 
+	// TODO Should all this code below actually be here in the instance? Should it be its own namespace or even class `ManifestWriter`? `JsonManifestWriter`?
 	public async writeToOutput(): Promise<WriteResults> {
 		const exportData = this.getExportData();
 		const writeData = JSON.stringify(exportData);
-		const writePath = this.getWritePath();
+		const writePath = this.writePath;
 
-		const nTotal = this.getShortcuts.length,
-			nEnabled = this.getEnabledShortcuts().length,
+		const nTotal = this.shortcuts.length,
+			nEnabled = this.enabledShortcuts.length,
 			nDisabled = nTotal - nEnabled,
 			nSkipped = 0,
 			nInvalid = 0,
@@ -190,7 +166,7 @@ class Manifest implements ManifestData {
 
 		if (nOk === 0) {
 			clog(
-				`${SB_WARN} Skipped Manifest ${quote(this.getName())}: No shortcuts which were both enabled and valid`,
+				`${SB_WARN} Skipped Manifest ${quote(this.name)}: No shortcuts which were both enabled and valid`,
 			);
 			// TODO Verbose print more info here
 			return new EmptyWriteResults(this);
@@ -213,21 +189,21 @@ class Manifest implements ManifestData {
 			};
 		} catch {
 			throw new Error(
-				`Failed to write manifest to output file (Name: ${this.getName()})`,
+				`Failed to write manifest to output file (Name: ${this.name})`,
 			);
 		}
 	}
 
 	public formatAsListEntry(): string {
 		let item = ' - ';
-		item += this.getName();
+		item += this.name;
 		// TODO Display some sort of status
 		return item;
 	}
 
 	private calculatePrefixForResults(results: WriteResults): string {
 		const { nTotal, nOk, nDisabled } = results.stats;
-		const useColor = this.config?.shouldUseColor() ?? true;
+		const useColor = this._config?.shouldUseColor() ?? true;
 
 		const ok = useColor ? SB_OK_LG : UNICODE_CHECK_LG; // TODO withColor check
 		const err = useColor ? SB_ERR_LG : UNICODE_XMARK_LG;
@@ -270,23 +246,20 @@ class Manifest implements ManifestData {
 		const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } =
 			results.stats;
 
-		const name = quote(this.getName());
+		const name = quote(this.name);
 		const fmtBaseDirPath = await fmtPathWithExistsAndName(
-			this.getBaseDirectory,
+			this.baseDirectory,
 			'Base Directory',
 			config,
 		);
 		const fmtSourceFilePath = await fmtPathWithExistsAndName(
-			this.getFilePath,
+			this.filePath,
 			'Source File',
 			config,
 		);
-		const fmtOutputPath = await fmtPathWithExistsAndName(
-			this.getOutputPath,
-			'Output',
-		);
+		const fmtOutputPath = await fmtPathWithExistsAndName(this.outputPath, 'Output');
 		const fmtWriteFilePath = await fmtPathWithExistsAndName(
-			this.getWritePath(),
+			this.writePath,
 			'Write File',
 			config,
 		);
@@ -298,9 +271,9 @@ class Manifest implements ManifestData {
 		vlogList(
 			`    `,
 			`Manifest Name: ${name}`,
-			`Name from Attribute: ${quote(this.getNameAttribute())}`,
-			`Name from Filename: ${quote(this.getFallbackName())}`,
-			`Name Used: ${this.getNameSourceAsString()}`,
+			`Name from Attribute: ${quote(this.sourceName)}`,
+			`Name from Filename: ${quote(this.fallbackName)}`,
+			`Name Used: ${this.name}`,
 		);
 
 		vlog(`  ` + clr.underline(`PATHS`));
@@ -333,8 +306,7 @@ class Manifest implements ManifestData {
 		const { nTotal, nOk, nDisabled, nInvalid } = stats;
 		const useColor = config?.shouldUseColor() ?? true;
 		const prefix = this.calculatePrefixForResults(results);
-		const quotedName = quote(manifest.getName());
-		const writePath = manifest.getWritePath();
+		const quotedName = quote(manifest.name);
 		const sourceName = useColor ? clr.magentaBright(quotedName) : quotedName;
 		const fromSource = 'from source ' + sourceName;
 
@@ -371,12 +343,12 @@ class Manifest implements ManifestData {
 		}
 
 		if (nOk > 0) {
-			dlog(`  ${SB_OK_SM} Wrote new file to ${fmtPath(writePath)}`);
+			dlog(`  ${SB_OK_SM} Wrote new file to ${fmtPath(this.writePath)}`);
 
 			vlog(
 				`    - Source File: ${fmtPath(this.filePath)}`,
-				`    - Output Path: ${fmtPath(this.getOutputPath)}`,
-				`    - File Written To: ${fmtPath(writePath)}`,
+				`    - Output Path: ${fmtPath(this.outputPath)}`,
+				`    - File Written To: ${fmtPath(this.writePath)}`,
 			);
 		}
 
@@ -408,6 +380,7 @@ class Manifest implements ManifestData {
 
 // MARK: ManifestWriteResults
 
+// TODO Could become `JsonManifestWriteResult`, a part of `ManifestWriter` class/namespace
 /**
  * Represents the result of a Manifest write operation, including
  * tracking the source Manifest instance, the output created
@@ -473,6 +446,7 @@ interface WriteResults {
 
 // MARK: emptyWriteResults
 
+// TODO Should be a const probably
 /**
  * Represents the results of a Manifest write operation when the Manifest
  * instance has zero shortcuts to write to a file.

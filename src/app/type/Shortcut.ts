@@ -10,37 +10,67 @@ import { ShortcutData, ShortcutExportData } from './ShortcutData.js';
 
 // TODO jsdoc
 class Shortcut implements ShortcutData {
-	private config?: UserConfig;
+	private _config?: UserConfig;
 
-	title: string;
-	target: string;
-	enabled: boolean;
-
-	public get getTitle(): string {
-		return this.title;
-	}
-
-	public get isEnabled(): boolean {
-		return this.enabled;
-	}
-
-	public get isDisabled(): boolean {
-		return !this.enabled;
-	}
+	private _title: string;
+	private _target: string;
+	private _enabled: boolean;
 
 	constructor(data: ShortcutData, config?: UserConfig) {
-		// TODO Accept config in constructor, check validity of executable
-
+		// TODO Make this check for target
+		// TODO Infer title from target if there is none
 		if (data.title.trim() === '') {
 			throw new Error(
 				`Cannot construct Shortcut from ShortcutData with empty str title`,
 			);
 		}
 
-		this.config = config;
-		this.title = data.title;
-		this.target = data.target;
-		this.enabled = data.enabled ?? true;
+		this._config = config;
+		this._title = data.title;
+		this._target = data.target;
+		this._enabled = data.enabled ?? true;
+	}
+
+	// MARK: getters + setters
+
+	public get title(): string {
+		return this._title;
+	}
+
+	public set title(str: string) {
+		this._title = str;
+	}
+
+	public get target(): string {
+		return this._target;
+	}
+
+	public set target(str: string) {
+		this._target = str;
+	}
+
+	public get hasAbsoluteTarget(): boolean {
+		return path.isAbsolute(this._target);
+	}
+
+	public get hasRelativeTarget(): boolean {
+		return !path.isAbsolute(this._target);
+	}
+
+	public get enabled(): boolean {
+		return this._enabled;
+	}
+
+	public set enabled(b: boolean) {
+		this._enabled = b;
+	}
+
+	public get isEnabled(): boolean {
+		return this._enabled;
+	}
+
+	public get isDisabled(): boolean {
+		return !this._enabled;
 	}
 
 	/**
@@ -67,12 +97,6 @@ class Shortcut implements ShortcutData {
 	public getExportString(manifest: ManifestData): string {
 		return JSON.stringify(this.getExportData(manifest));
 	}
-
-	public isTargetPathAbsolute(): boolean {
-		return path.isAbsolute(this.target);
-	}
-
-	// TODO Method: isTargetPathRelative
 
 	public getFullTargetPathFromBaseDir(baseDirectory: string): string {
 		// TODO Absolute path support

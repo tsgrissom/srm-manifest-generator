@@ -22,13 +22,6 @@ import {
 import { UserConfig } from './type/UserConfig.js';
 
 // MARK: loadManifestShortcuts
-
-/**
- *
- * @param manifest
- * @param object The value of a given manifest's shortcuts field.
- * @returns
- */
 function loadManifestShortcuts(
 	manifest: ManifestData,
 	objects: Array<object>,
@@ -51,7 +44,17 @@ function loadManifestShortcuts(
 	for (const [index, object] of objects.entries()) {
 		const id = index + 1;
 		dlog(`${SB_SECT_START}Creating: Shortcut #${id}`);
+		console.log(
+			clr.bgMagenta('AT loadManifestShortcuts: Before createShortcutInstance'),
+		);
+		console.log(object);
 		const shortcut = createShortcutInstance(object, config);
+		console.log(
+			clr.bgMagenta(
+				'AT loadManifestShortcuts: After createShortcutInstance, before push shortcut to array',
+			),
+		);
+		console.log(shortcut);
 		dlog(`${SB_SECT_END_OK}Created: Shortcut #${id} (${quote(shortcut.title)})`);
 		ok.push(shortcut);
 	}
@@ -81,12 +84,11 @@ function loadManifestShortcuts(
 	return ok;
 }
 
-// MARK: makeShortcut
-
+// MARK: createShortcutInstance
 function createShortcutInstance(obj: object, config: UserConfig): Shortcut {
 	const keyAliases: YamlKeyAliases = {
-		title: 'title',
-		name: 'title',
+		title: '_title',
+		name: '_title',
 
 		target: 'target',
 		exec: 'target',
@@ -116,11 +118,15 @@ function createShortcutInstance(obj: object, config: UserConfig): Shortcut {
 	}
 
 	for (const [key, value] of Object.entries(document)) {
-		const resolved = resolveKeyFromAlias(keyAliases, key, null);
+		const resolved = resolveKeyFromAlias(keyAliases, key);
 		const { fullGivenKey, resolvedKey } = resolved;
+
+		// TODO Based on where I left off, shortcut title bug observations:
+		// * Doesn't hit the green bg logs below, meaning resolve key from alias is not succeeding for some reason
 
 		switch (resolvedKey) {
 			case 'title': {
+				console.log(clr.bgGreen('HIT SHORTCUT KEY RESOLVED "title"'));
 				if (typeof value !== 'string') {
 					clogConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
@@ -133,6 +139,7 @@ function createShortcutInstance(obj: object, config: UserConfig): Shortcut {
 				break;
 			}
 			case 'target': {
+				console.log(clr.bgGreen('HIT SHORTCUT KEY RESOLVED "target"'));
 				if (typeof value !== 'string') {
 					clogConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
@@ -145,6 +152,7 @@ function createShortcutInstance(obj: object, config: UserConfig): Shortcut {
 				break;
 			}
 			case 'enabled': {
+				console.log(clr.bgGreen('HIT SHORTCUT KEY RESOLVED "enabled"'));
 				if (typeof value !== 'boolean') {
 					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
@@ -155,6 +163,7 @@ function createShortcutInstance(obj: object, config: UserConfig): Shortcut {
 				break;
 			}
 			case 'disabled': {
+				console.log(clr.bgGreen('HIT SHORTCUT KEY RESOLVED "disabled"'));
 				if (typeof value !== 'boolean') {
 					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
@@ -173,6 +182,9 @@ function createShortcutInstance(obj: object, config: UserConfig): Shortcut {
 	}
 
 	// TODO Lint data after the fact
+
+	console.log(clr.bgRedBright('BEFORE LEAVE createShortcutInstance'));
+	console.log(data);
 
 	return new Shortcut(data, config);
 }

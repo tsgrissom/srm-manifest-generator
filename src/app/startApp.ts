@@ -16,7 +16,7 @@ async function processManifest(manifest: Manifest): Promise<void> {
 
 	if (!Array.isArray(shortcuts))
 		throw new Error(
-			`Manifest (${manifest.getName()} requires a key "shortcuts" which is a list of paths, but the user config is set to a non-array type`,
+			`Manifest (${manifest.name} requires a key "shortcuts" which is a list of paths, but the user config is set to a non-array type`,
 		);
 
 	// TODO Move much of this logic elsewhere so these things can be triggered on demand
@@ -26,7 +26,7 @@ async function processManifest(manifest: Manifest): Promise<void> {
 		await manifest.logWriteResults(writeResults);
 	} catch {
 		throw new Error(
-			`An error occurred while writing an output manifest (Manifest: ${manifest.getName()})`,
+			`An error occurred while writing an output manifest (Manifest: ${manifest.name})`,
 		);
 	}
 }
@@ -62,7 +62,7 @@ export async function listShortcutsOfLoadedManifests(config: ConfigData): Promis
 	let allScLen = 0;
 
 	for (const man of manifests) {
-		const scLen = man.getEnabledShortcuts().length;
+		const scLen = man.enabledShortcuts.length;
 		allScLen += scLen;
 	}
 
@@ -88,12 +88,12 @@ export async function listShortcutsOfLoadedManifests(config: ConfigData): Promis
 
 	for (const man of manifests) {
 		// TODO Replace with index identifier
-		clog(`${clr.magentaBright.bold(`Manifest "${man.getName()}"`)}`);
+		clog(`${clr.magentaBright.bold(`Manifest "${man.name}"`)}`);
 
-		const allScLen = man.getShortcuts.length;
-		const enabledShortcuts = man.getEnabledShortcuts();
+		const allScLen = man.shortcuts.length;
+		const enabledLen = man.enabledShortcuts.length;
 
-		if (enabledShortcuts.length <= 0) {
+		if (enabledLen <= 0) {
 			if (allScLen <= 0) {
 				clog(` ${SB_WARN} There are no configured shortcuts for this manifest`);
 			} else {
@@ -105,8 +105,8 @@ export async function listShortcutsOfLoadedManifests(config: ConfigData): Promis
 			continue;
 		}
 
-		for (const sc of enabledShortcuts) {
-			const lines = await sc.formatAsListEntry(man.getBaseDirectory);
+		for (const sc of man.enabledShortcuts) {
+			const lines = await sc.formatAsListEntry(man.baseDirectory);
 			lines.forEach(line => clog(line));
 		}
 	}
@@ -146,7 +146,7 @@ export async function transformLoadedManifests(config: ConfigData): Promise<void
 			okLen++;
 		} catch {
 			console.error(
-				clr.red(`Error processing manifest ${fmtPathAsTag(man.getFilePath)}`),
+				clr.red(`Error processing manifest ${fmtPathAsTag(man.filePath)}`),
 			);
 		}
 	}

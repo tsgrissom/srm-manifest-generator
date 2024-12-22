@@ -60,7 +60,7 @@ interface ResolvedYamlKey {
 // MARK: FUNCTIONS
 
 /**
- * Resolves a {@link ResolvedConfigKey} from the {@link givenKey} by searching the
+ * Resolves a {@link ResolvedYamlKey} from the {@link givenKey} by searching the
  * {@link keyAliases} for a matching alias.
  *
  * @param keyAliases The map of alias to reference values for a given config section.
@@ -70,8 +70,8 @@ interface ResolvedYamlKey {
  *  By default this value is empty, which represents top-level key searches. However,
  *  if used to search within levels which are any deeper, giving this value is important
  *  so the secondary full key values are inferred correctly automatically.
- * @returns A {@link ResolvedConfigKey} containing the {@link ResolvedConfigKey.resolvedKey}
- *  as well as the {@link givenKey} as {@link ResolvedConfigKey.givenKey}.
+ * @returns A {@link ResolvedYamlKey} containing the {@link ResolvedYamlKey.resolvedKey}
+ *  as well as the {@link givenKey} as {@link ResolvedYamlKey.resolvedKey}.
  * @example
  */
 // TODO Example
@@ -79,9 +79,9 @@ interface ResolvedYamlKey {
 function resolveKeyFromAlias(
 	keyAliases: YamlKeyAliases,
 	givenKey: string,
-	sectionFullKey: string | null,
+	sectionFullKey?: string,
 ): ResolvedYamlKey {
-	const upperKey = sectionFullKey === null ? '' : sectionFullKey;
+	const upperKey = sectionFullKey ?? '';
 	return {
 		givenKey: givenKey,
 		resolvedKey: keyAliases[givenKey] || givenKey,

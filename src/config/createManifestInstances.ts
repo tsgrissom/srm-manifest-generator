@@ -35,7 +35,6 @@ import {
 	SB_SECT_START,
 	SB_WARN,
 } from '../util/string/symbols.js';
-import loadManifestShortcuts from './createShortcutInstance.js';
 import { USER_CONFIG_FILENAME } from './loadFileData.js';
 import { ConfigData } from './type/ConfigData.js';
 import { UserConfig } from './type/UserConfig.js';
@@ -238,7 +237,7 @@ function parseShortcutsToShortcutDataArray(
 			continue;
 		}
 
-		const isEnabled = new Shortcut(element).isEnabled;
+		const isEnabled = new Shortcut(element).enabled;
 		const fmtTitle = quote(element.title);
 		const fmtTarget = fmtPath(element.target);
 		const fmtEnabled = yesNo(isEnabled);
@@ -408,7 +407,7 @@ function parseManifestFileContentsToData(
 	let hasShortcuts = false;
 
 	for (const [key, value] of Object.entries(document)) {
-		const resolved = resolveKeyFromAlias(keyAliases, key, null);
+		const resolved = resolveKeyFromAlias(keyAliases, key);
 		const { fullGivenKey, resolvedKey } = resolved;
 
 		switch (resolvedKey) {
@@ -511,11 +510,6 @@ function parseManifestFileContentsToData(
 		throw new Error(`Manifest is missing a root directory attribute ${pathTag}`);
 	if (!hasOutputPath)
 		throw new Error(`Manifest is missing an output directory attribute ${pathTag}`);
-
-	if (hasShortcuts) {
-		const value = data.shortcuts;
-		data.shortcuts = loadManifestShortcuts(data, value, config);
-	}
 
 	return data;
 }
