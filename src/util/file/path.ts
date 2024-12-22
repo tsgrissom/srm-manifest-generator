@@ -64,7 +64,7 @@ export function pathHasFileExtension(
  *
  * @returns The `fileName`, with a new file extension `replaceExt` if one in `findExt` was found.
  */
-// TODO Unit Test
+// TEST Unit
 export function replaceFileExtension(
 	fileName: string,
 	findExt: string | Array<string>,
@@ -78,7 +78,10 @@ export function replaceFileExtension(
 		findExt = [findExt];
 	}
 
+	// TODO Options: normalize, add if no extension found, repeat
+
 	const normalized = findExt.map(ext => normalizeFileExtension(ext));
+	replaceExt = normalizeFileExtension(replaceExt);
 
 	for (const toRemove of normalized) {
 		const extname = path.extname(fileName);
@@ -88,12 +91,26 @@ export function replaceFileExtension(
 		}
 
 		if (extname === toRemove) {
-			return path.basename(fileName, toRemove);
+			fileName = path.basename(fileName, toRemove);
 		}
 	}
 
-	return fileName;
+	return fileName + replaceExt;
 }
+
+interface ReplaceExtensionOptions {
+	extsToFind?: string | Array<string>;
+	extsToIgnore?: string | Array<string>;
+	replaceWith: string;
+	normalizeInputs: boolean;
+	iterations?: number;
+}
+
+// TODO removeFileExtension
+export function removeFileExtension(
+	str: string,
+	options?: ReplaceExtensionOptions,
+): string {}
 
 // MARK: normalizeFileExtension
 
@@ -102,28 +119,30 @@ export function replaceFileExtension(
  *
  * @param extname The file extension to normalize.
  * @param excludeExts A string or string array which decides which extension names should be ignored.
- * * Default is `*` which does not mean "ignore all file extensions", but to avoid prepending the extname if
- *   it is string literal `*`.
  *
  * @returns The file extension in normalized form, with a period prepended to the input if it was missing.
  */
-// TODO Unit Test
+// TEST Unit
 export function normalizeFileExtension(
 	extname: string,
-	excludeExts: string | Array<string> = ['*'],
+	excludeExts: string | Array<string> = [],
 ): string {
-	if (typeof excludeExts === 'string') {
-		if (excludeExts === '') {
-			excludeExts = [''];
-		} else {
-			excludeExts = [excludeExts];
-		}
+	// TODO Options: exclude, normalizeExcluded
+	if (extname.trim() === '') {
+		return '';
 	}
 
-	if (extname.startsWith('.')) return extname;
-	if (excludeExts.includes(extname.toLowerCase())) return extname;
+	if (typeof excludeExts === 'string') {
+		excludeExts = [excludeExts];
+	}
 
-	return `.${extname}`;
+	excludeExts = excludeExts.map(ext => normalizeFileExtension(ext));
+
+	if (extname.startsWith('.') || excludeExts.includes(extname)) {
+		return extname;
+	}
+
+	return '.' + extname;
 }
 
 // MARK: basenameWithoutExtensions
@@ -133,70 +152,64 @@ export function normalizeFileExtension(
  * If `iterate` is enabled, this process will be repeated until none of the extensions are present.
  *
  * @param fileName The filename to remove the extensions from.
- * @param extsToRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
+ * @param toRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
  * @param iterate Should the basename be iteraviley modified until all of the listed extensions are gone?
  *
  * @returns The final filename after being stripped of some selected extensions, if they were present.
  *
  * @example // TODO Write example
  */
-// TODO Unit Test
+// TEST Unit
 export function basenameWithoutExtensions(
 	fileName: string,
-	extsToRemove: string | Array<string> = '*',
+	toRemove: string | Array<string> = '*',
 	iterate = true,
 ): string {
-	if (!Array.isArray(extsToRemove)) {
-		// TEST Unit
-		extsToRemove = [extsToRemove];
+	// TODO Options: current, ignoreCase, repeat count (0 for infinite)
+	if (!Array.isArray(toRemove)) {
+		toRemove = [toRemove];
 	}
 
-	for (const [index, entry] of extsToRemove.entries()) {
-		if (typeof entry !== 'string') {
-			continue;
-		}
+	toRemove = toRemove.map(rm => normalizeFileExtension(rm));
 
-		extsToRemove[index] = normalizeFileExtension(entry);
-	}
-
-	let newName = path.basename(fileName);
+	fileName = path.basename(fileName);
 	let extFound;
 
 	if (!iterate) {
-		for (const extToRemove of extsToRemove) {
-			extFound = path.extname(newName);
+		for (const rm of toRemove) {
+			extFound = path.extname(fileName);
 
 			if (!extFound || extFound === '') {
-				return newName;
+				return fileName;
 			}
 			// TODO Check each iteration and make sure there's still a string with content
 
-			if (extToRemove === '*' || extToRemove === extFound.toLowerCase()) {
-				return path.basename(newName, extFound);
+			if (rm === '*' || rm === extFound.toLowerCase()) {
+				return path.basename(fileName, extFound);
 			}
 		}
 	}
 
-	let removedExt = false;
+	let didRemove = false;
 
 	do {
-		removedExt = false;
-		extFound = path.extname(newName);
+		didRemove = false;
+		extFound = path.extname(fileName);
 
 		if (!extFound || extFound === '') {
-			return newName;
+			return fileName;
 		}
 
-		for (const extToRemove of extsToRemove) {
+		for (const extToRemove of toRemove) {
 			if (extToRemove === '*' || extToRemove === extFound.toLowerCase()) {
-				newName = path.basename(newName, extFound);
-				removedExt = true;
+				fileName = path.basename(fileName, extFound);
+				didRemove = true;
 				break;
 			}
 		}
-	} while (removedExt);
+	} while (didRemove);
 
-	return newName;
+	return fileName;
 }
 
 /**
