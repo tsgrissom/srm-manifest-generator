@@ -130,7 +130,7 @@ describe('Function: replaceFileExtension()', () => {
 		expect(() => replaceFileExtension('manifest.yml', value, '.json')).toThrow();
 	});
 
-	// TODO TEST Functionality
+	// TEST Functionality
 });
 
 // MARK: isPathAccessible

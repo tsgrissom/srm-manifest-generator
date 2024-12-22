@@ -61,8 +61,6 @@ export function pathHasFileExtension(
  * @param fileName The filename you want to find and replace the extension of.
  * @param findExt The extensions you want to replace if found.
  * @param replaceExt The new extension to append to `fileName`.
- * @param normalize Default: `true`. Should extensions be checked to ensure they have a period at
- * the beginning, with one added if they do not?
  *
  * @returns The `fileName`, with a new file extension `replaceExt` if one in `findExt` was found.
  */
@@ -71,34 +69,26 @@ export function replaceFileExtension(
 	fileName: string,
 	findExt: string | Array<string>,
 	replaceExt: string,
-	normalize = true,
 ): string {
-	if (!fileName || typeof fileName !== 'string')
-		throw new TypeError(`Arg fileName must be a string: ${fileName}`);
-	if (!findExt || (typeof findExt !== 'string' && !Array.isArray(findExt)))
-		// TEST And make sure this doesn't have unexpected behavior
-		throw new TypeError(`Arg findExt must be a string or an array: ${fileName}`);
-	if (typeof findExt === 'string' && findExt.trim() === '')
-		throw new Error(`Arg findExt cannot be an empty string`);
-
-	const extsToRemove = [];
-
 	if (typeof findExt === 'string') {
-		findExt = normalize ? normalizeFileExtension(findExt) : findExt;
-		extsToRemove.push(findExt);
-	} else {
-		const normalized = findExt.map(entry =>
-			normalize ? normalizeFileExtension(entry) : entry,
-		);
-		extsToRemove.push(...normalized);
+		if (findExt.trim() === '') {
+			throw new Error(`Arg "findExt" cannot be an empty string: "${findExt}"`);
+		}
+
+		findExt = [findExt];
 	}
 
-	for (const remExt of extsToRemove) {
-		const extname = path.extname(fileName);
-		if (!extname || extname === '') return fileName;
+	const normalized = findExt.map(ext => normalizeFileExtension(ext));
 
-		if (extname === remExt) {
-			return path.basename(fileName, remExt);
+	for (const toRemove of normalized) {
+		const extname = path.extname(fileName);
+
+		if (!extname || extname === '') {
+			return fileName;
+		}
+
+		if (extname === toRemove) {
+			return path.basename(fileName, toRemove);
 		}
 	}
 
