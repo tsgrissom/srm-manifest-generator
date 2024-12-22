@@ -9,7 +9,7 @@ import {
 	startApp,
 } from '../app/startApp.js';
 import { Manifest } from '../app/type/Manifest.js';
-import { USER_CONFIG_PATH } from '../config/loadFileData.js';
+import { USER_CONFIG_PATH } from '../config/loadConfigData.js';
 import parseUserConfigData from '../config/parseConfigData.js';
 import { ConfigData } from '../config/type/ConfigData.js';
 import { BoolFmtPreset, fmtBool, yesNo } from '../util/boolean.js';
@@ -206,12 +206,12 @@ function displayUserConfigInstructions(config?: ConfigData): void {
 
 function listCategories(unknownGiven?: string): void {
 	if (unknownGiven !== undefined) {
-		console.log(clr.red(`Unknown list category: ${quote(unknownGiven)}`));
-		console.log(
+		clog(
+			clr.red(`Unknown list category: ${quote(unknownGiven)}`),
 			clr.red(`Valid categories: ${delimitedList(cmdListRecommendedCategories)}`),
 		);
 	} else {
-		console.log(`Valid categories: ${delimitedList(cmdListRecommendedCategories)}`);
+		clog(`Valid categories: ${delimitedList(cmdListRecommendedCategories)}`);
 	}
 }
 

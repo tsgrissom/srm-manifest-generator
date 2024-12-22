@@ -6,7 +6,7 @@ import clr from 'chalk';
 import { UserConfig } from './type/UserConfig.js';
 
 import { dlogHeader } from '../util/logging/debug.js';
-import { loadUserConfigData } from './loadFileData.js';
+import { loadUserConfigData } from './loadConfigData.js';
 import parseLogsSection from './parseLogsSection.js';
 import parseOtherSection from './parseOtherSection.js';
 import parseOutputSection from './parseOutputSection.js';

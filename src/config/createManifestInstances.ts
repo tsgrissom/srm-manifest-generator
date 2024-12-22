@@ -1,8 +1,7 @@
-import clr from 'chalk';
 import fs from 'node:fs/promises';
 import YAML from 'yaml';
 
-import { checkCross, yesNo } from '../util/boolean.js';
+import { checkCross } from '../util/boolean.js';
 import {
 	clogConfigKeyUnknown,
 	clogConfigValueWrongType,
@@ -11,36 +10,30 @@ import {
 } from '../util/logging/config.js';
 import { clog } from '../util/logging/console.js';
 
+import clr from 'chalk';
 import { Manifest } from '../app/type/Manifest.js';
 import { ManifestData } from '../app/type/ManifestData.js';
 import Shortcut from '../app/type/Shortcut.js';
-import { isShortcutData, ShortcutData } from '../app/type/ShortcutData.js';
 import { basenameWithoutExtensions, fmtPath, fmtPathAsTag } from '../util/file/path.js';
 import { resolveKeyFromAlias, YamlKeyAliases } from '../util/file/yaml.js';
+import { dlog, dlogHeader, vlog } from '../util/logging/debug.js';
 import {
-	dlog,
-	dlogHeader,
-	isDebugActive,
-	vlog,
-	vlogList,
-} from '../util/logging/debug.js';
-import { quote } from '../util/string/quote.js';
-import {
-	SB_BULLET,
 	SB_ERR_LG,
-	SB_ERR_SM,
 	SB_OK_LG,
-	SB_OK_SM,
 	SB_SECT_END_OK,
 	SB_SECT_START,
 	SB_WARN,
 } from '../util/string/symbols.js';
-import { USER_CONFIG_FILENAME } from './loadFileData.js';
+import {
+	createShortcutsFromData,
+	parseObjectsIntoArrayOfShortcutData,
+	validateParseShortcutObjectsIntoDataSuccessful,
+} from './createShortcutInstance.js';
+import { USER_CONFIG_FILENAME } from './loadConfigData.js';
 import { ConfigData } from './type/ConfigData.js';
 import { UserConfig } from './type/UserConfig.js';
 
 // MARK: createManifestInstances
-
 async function createManifestInstances(
 	manPaths: Array<string>,
 	config: UserConfig,
@@ -90,7 +83,6 @@ async function createManifestInstances(
 }
 
 // MARK: clogLoadedManifests
-
 function logLoadedManifests(
 	manifestPaths: Array<string>,
 	okManifests: Array<Manifest>,
@@ -127,7 +119,6 @@ function logLoadedManifests(
 }
 
 // MARK: validateManifestPathExists
-
 async function validateManifestPathExists(filePath: string): Promise<boolean> {
 	const pathTag = fmtPath(filePath);
 
@@ -143,7 +134,6 @@ async function validateManifestPathExists(filePath: string): Promise<boolean> {
 }
 
 // MARK: validateManifestPathIsSupportedFilesystemType
-
 async function validateManifestPathIsSupportedFilesystemType(
 	filePath: string,
 	config: ConfigData,
@@ -184,7 +174,6 @@ async function validateManifestPathIsSupportedFilesystemType(
 }
 
 // MARK: readManifestFile
-
 async function readManifestFile(manPath: string): Promise<object> {
 	const pathTag = fmtPathAsTag(manPath);
 
@@ -204,163 +193,63 @@ async function readManifestFile(manPath: string): Promise<object> {
 	}
 }
 
-// MARK: ShortcutsDataParseResult
-
-interface ShortcutsDataParseResult {
-	readonly totalCount: number;
-	readonly failCount: number;
-	readonly okShortcuts: Array<ShortcutData>;
-	readonly disabledShortcuts: Array<ShortcutData>;
-}
-
-// MARK: parseShortcutsToShortcutDataArray
-
-// TODO Move all this to its own namespace, maybe its own file `shortcut-data.ts` or to `shortcut.ts`?
-function parseShortcutsToShortcutDataArray(
-	value: Array<unknown>,
-	parent?: ManifestData,
-): ShortcutsDataParseResult {
-	const manName = parent?.sourceName ?? 'Unknown';
-	const totalLen = value.length;
-	const okShortcuts: Array<ShortcutData> = [];
-	const disabledShortcuts: Array<ShortcutData> = [];
-	let failCount = 0;
-
-	for (const element of value) {
-		if (!isShortcutData(element)) {
-			clog(`  ${SB_ERR_SM} Invalid shortcut data found (Manifest: ${manName}):`);
-			if (isDebugActive()) {
-				console.log(element);
-			}
-			failCount++;
-
-			continue;
-		}
-
-		const isEnabled = new Shortcut(element).enabled;
-		const fmtTitle = quote(element.title);
-		const fmtTarget = fmtPath(element.target);
-		const fmtEnabled = yesNo(isEnabled);
-
-		vlog(`  ${SB_OK_SM} Valid shortcut data for title ${fmtTitle}`);
-		vlogList(
-			`     ${SB_BULLET} `,
-			`From Manifest: ${manName}`,
-			`Title: ${fmtTitle}`,
-			`Target: ${fmtTarget}`,
-			`Enabled? ${fmtEnabled}`,
-		);
-
-		if (!isEnabled) {
-			disabledShortcuts.push(element);
-			continue;
-		}
-
-		okShortcuts.push(element);
-	}
-
-	return {
-		totalCount: totalLen,
-		failCount: failCount,
-		okShortcuts: okShortcuts,
-		disabledShortcuts: disabledShortcuts,
+interface LoadManifestShortcutsResult {
+	hasShortcuts: boolean;
+	loadedShortcuts: Array<Shortcut>;
+	invalidShortcuts: Array<object>;
+	count: {
+		nonObjects: number;
 	};
 }
 
-// MARK: validateShortcutsParseResultSuccess
+// MARK: loadShortcuts
+function loadShortcuts(
+	arr: Array<unknown>,
+	sourceName = 'Unknown',
+	config?: UserConfig,
+): LoadManifestShortcutsResult {
+	dlog('');
+	dlog(clr.cyanBright.underline(`LOADING SHORTCUTS FROM MANIFEST ${sourceName}`));
 
-/**
- * Reads the results of a {@link ShortcutsDataParseResult},
- * logging important info to the appropriate levels,
- * and returning a `boolean` which indicates whether
- * the result was a pass or a fail (`true` or `false`.)
- *
- * @param result The result to validate.
- * @param parent Provides a parent manifest name
- *  for log messages.
- * @returns Whether the given result passed or failed.
- *  `true` is pass, `false` is fail.
- */
-// TODO Move all this to its own namespace, maybe its own file `shortcut-data.ts` or to `shortcut.ts`?
-function validateShortcutsParseResultSuccess(
-	result: ShortcutsDataParseResult,
-	parent?: ManifestData,
-): boolean {
-	const manName = parent?.sourceName ?? 'Unknown';
-	const totalCount = result.totalCount;
-	const okCount = result.okShortcuts.length;
-	const failCount = result.failCount;
-	const disabledCount = result.disabledShortcuts.length;
+	const result: LoadManifestShortcutsResult = {
+		hasShortcuts: false,
+		loadedShortcuts: [],
+		invalidShortcuts: [],
+		count: {
+			nonObjects: 0,
+		},
+	};
 
-	// there is nothing to load; pass
-	if (totalCount <= 0) {
-		// none to load, so none are ok; pass
-		dlog(
-			`${SB_OK_LG} Loaded no shortcuts because there were none to load (Manifest: ${manName})`,
-		);
-		return true;
+	if (arr.length === 0) {
+		dlog(`  ${SB_WARN} There were no shortcuts to load from manifest ${sourceName}`);
+		return result;
 	}
 
-	// there is something to load, catch special cases
-	if (totalCount > 0) {
-		// all are disabled
-		if (disabledCount === totalCount) {
-			// there are some, but they are all disabled; pass
-			dlog(
-				`${SB_WARN} All shortcuts from manifest ${manName} are disabled (${disabledCount} disabled)`,
-			);
-			return true;
-		}
-
-		if (failCount === totalCount) {
-			// all failed to load; fail
-			dlog(
-				`${SB_ERR_LG} All shortcuts from manifest ${manName} failed to load (${failCount} failed)`,
-			);
-			return false;
-		}
-
-		if (okCount === totalCount) {
-			// all were loaded; pass
-			dlog(
-				`${SB_OK_LG} All shortcuts from manifest ${manName} loaded successfully (${okCount} loaded)`,
-			);
-			return true;
-		}
-	}
-
-	// there is something to load
-	// the following wont reach: all disabled, all failed, all ok
-
-	// some were loaded, some failed
-	clog(
-		`${SB_WARN} Some shortcuts from manifest ${manName} failed to load (${okCount} ok, ${failCount} failed)`,
+	const resultOfParse = parseObjectsIntoArrayOfShortcutData(arr);
+	result.hasShortcuts = validateParseShortcutObjectsIntoDataSuccessful(
+		resultOfParse,
+		sourceName,
 	);
 
-	// if at least one was disabled
-	if (disabledCount > 0) {
-		dlog(
-			`  ${SB_OK_SM} Some shortcuts from manifest ${manName} were disabled (${disabledCount} disabled)`,
-		);
-	}
+	const { validShortcuts, invalidShortcuts } = resultOfParse;
+	const nAll = validShortcuts.length;
 
-	// if at least one failed
-	if (failCount > 0) {
-		clog(
-			`  ${SB_ERR_SM} Some shortcuts from manifest ${manName} failed to load (${failCount} failed)`,
-			`  - To view the failed shortcut, re-execute with the ${clr.italic('--debug')} flag`,
-		);
-	}
+	vlog(`  ${nAll} total shortcuts in this manifest`);
 
-	return true;
+	const okShortcuts: Array<Shortcut> = createShortcutsFromData(validShortcuts, config);
+
+	result.loadedShortcuts = okShortcuts;
+	result.invalidShortcuts = resultOfParse.invalidShortcuts;
+	result.count.nonObjects = resultOfParse.count.nonObjects;
+
+	return result;
 }
 
 // MARK: parseManifestFileContentsToData
-
 function parseManifestFileContentsToData(
 	filePath: string,
 	obj: object,
-	config: UserConfig,
+	config?: UserConfig,
 ): ManifestData {
 	const keyAliases: YamlKeyAliases = {
 		sourceName: 'sourceName',
@@ -470,12 +359,14 @@ function parseManifestFileContentsToData(
 					break;
 				}
 
-				const result = parseShortcutsToShortcutDataArray(value, data);
-				const { okShortcuts } = result;
-				const wasSuccessful = validateShortcutsParseResultSuccess(result, data);
+				const resultOfLoadShortcuts = loadShortcuts(
+					value,
+					data.sourceName,
+					config,
+				);
 
-				hasShortcuts = wasSuccessful;
-				data.shortcuts = okShortcuts.map(each => new Shortcut(each), config);
+				hasShortcuts = resultOfLoadShortcuts.hasShortcuts;
+				data.shortcuts = resultOfLoadShortcuts.loadedShortcuts;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
@@ -497,7 +388,8 @@ function parseManifestFileContentsToData(
 		`  ${checkCross(hasShortcuts)} Has optional attribute "shortcuts"?`,
 	);
 
-	// Fallback om filename
+	// Fallback on filename
+	// TODO This doesn't need to be here, or it should be elsewhere
 	if (!hasSourceName)
 		data.sourceName = basenameWithoutExtensions(
 			filePath,
