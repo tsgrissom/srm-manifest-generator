@@ -6,12 +6,12 @@ import clr from 'chalk';
 import { UserConfig } from './type/UserConfig.js';
 
 import { dlogHeader } from '../util/logging/debug.js';
-import { loadUserConfigData } from './loadConfigData.js';
-import parseLogsSection from './parseLogsSection.js';
-import parseOtherSection from './parseOtherSection.js';
-import parseOutputSection from './parseOutputSection.js';
-import parseSearchSection from './parseSearchSection.js';
-import parseValidateSection from './parseValidateSection.js';
+import parseLogsSection from './parseSection/logs.js';
+import parseOtherSection from './parseSection/other.js';
+import parseOutputSection from './parseSection/output.js';
+import parseSearchSection from './parseSection/search.js';
+import parseValidateSection from './parseSection/validate.js';
+import { loadUserConfigData } from './readFile.js';
 
 export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml',
 	EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME),

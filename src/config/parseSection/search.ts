@@ -1,4 +1,4 @@
-import { YamlKeyAliases, resolveKeyFromAlias } from '../util/file/yaml.js';
+import { YamlKeyAliases, resolveKeyFromAlias } from '../../util/file/yaml.js';
 import {
 	clogConfigFatalErrMissingRequiredSection,
 	clogConfigFatalErrRequiredSectionWrongType,
@@ -7,12 +7,12 @@ import {
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
 	vlogConfigValueLoaded,
-} from '../util/logging/config.js';
-import { clog } from '../util/logging/console.js';
-import { quote } from '../util/string/quote.js';
-import { SB_ERR_SM, SB_WARN } from '../util/string/symbols.js';
-import createManifestInstances from './createManifestInstances.js';
-import { UserConfig } from './type/UserConfig.js';
+} from '../../util/logging/config.js';
+import { clog } from '../../util/logging/console.js';
+import { quote } from '../../util/string/quote.js';
+import { SB_ERR_SM, SB_WARN } from '../../util/string/symbols.js';
+import createManifestInstances from '../loadManifests.js';
+import { UserConfig } from '../type/UserConfig.js';
 
 const sectionKey = 'search';
 const keyAliases: YamlKeyAliases = {

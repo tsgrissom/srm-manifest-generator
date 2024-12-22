@@ -1,5 +1,5 @@
 import clr from 'chalk';
-import parseUserConfigData from '../config/parseConfigData.js';
+import parseUserConfigData from '../config/loadConfig.js';
 import { ConfigData } from '../config/type/ConfigData.js';
 import { fmtPathAsTag } from '../util/file/path.js';
 import { clog } from '../util/logging/console.js';

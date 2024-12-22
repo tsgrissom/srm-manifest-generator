@@ -28,8 +28,8 @@ import {
 	createShortcutsFromData,
 	parseObjectsIntoArrayOfShortcutData,
 	validateParseShortcutObjectsIntoDataSuccessful,
-} from './createShortcutInstance.js';
-import { USER_CONFIG_FILENAME } from './loadConfigData.js';
+} from './loadShortcuts.js';
+import { USER_CONFIG_FILENAME } from './readFile.js';
 import { ConfigData } from './type/ConfigData.js';
 import { UserConfig } from './type/UserConfig.js';
 

@@ -12,7 +12,7 @@ import {
 	EXAMPLE_CONFIG_URL,
 	USER_CONFIG_FILENAME,
 	USER_CONFIG_PATH,
-} from './parseConfigData.js';
+} from './loadConfig.js';
 
 import { fmtPath, fmtPathAsTag } from '../util/file/path.js';
 import { vlog } from '../util/logging/debug.js';

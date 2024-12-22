@@ -1,4 +1,4 @@
-import { YamlKeyAliases, resolveKeyFromAlias } from '../util/file/yaml.js';
+import { YamlKeyAliases, resolveKeyFromAlias } from '../../util/file/yaml.js';
 import {
 	clogConfigKeyUnknown,
 	clogConfigValueWrongType,
@@ -7,19 +7,19 @@ import {
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
 	vlogConfigValueLoaded,
-} from '../util/logging/config.js';
-import { UserConfig } from './type/UserConfig.js';
+} from '../../util/logging/config.js';
+import { UserConfig } from '../type/UserConfig.js';
 
-const sectionKey = 'logs';
+const sectionKey = 'other';
 const keyAliases: YamlKeyAliases = {
-	enable: 'enabled',
-	output: 'outputPath',
-	outputFile: 'outputPath',
-	fileName: 'nameFormat',
-	format: 'nameFormat',
+	useColor: 'useColor',
+	debug: 'debug',
+	debugging: 'debug',
+	verbose: 'verbose',
+	verbosity: 'verbose',
 };
 
-function parseLogsSection(data: object, config: UserConfig): UserConfig {
+function parseOtherSection(data: object, config: UserConfig): UserConfig {
 	if (!Object.keys(data).includes(sectionKey)) {
 		dlogConfigWarnMissingOptionalSection(sectionKey);
 		return config;
@@ -39,33 +39,33 @@ function parseLogsSection(data: object, config: UserConfig): UserConfig {
 		const { fullGivenKey, resolvedKey } = resolved;
 
 		switch (resolvedKey) {
-			case 'enabled': {
+			case 'debug': {
 				if (typeof value !== 'boolean') {
 					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.logs.enabled = value;
+				config.other.debug = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
-			case 'outputPath': {
-				if (typeof value !== 'string') {
-					clogConfigValueWrongType(fullGivenKey, 'string', value);
+			case 'useColor': {
+				if (typeof value !== 'boolean') {
+					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.logs.outputPath = value;
+				config.other.useColor = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
-			case 'nameFormat': {
-				if (typeof value !== 'string') {
-					clogConfigValueWrongType(fullGivenKey, 'string', value);
+			case 'verbose': {
+				if (typeof value !== 'boolean') {
+					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.logs.nameFormat = value;
+				config.other.verbose = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
@@ -80,4 +80,4 @@ function parseLogsSection(data: object, config: UserConfig): UserConfig {
 	return config;
 }
 
-export default parseLogsSection;
+export default parseOtherSection;

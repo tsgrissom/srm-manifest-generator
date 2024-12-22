@@ -1,6 +1,6 @@
 import clr from 'chalk';
-import { USER_CONFIG_FILENAME } from '../../config/loadConfigData.js';
-import { USER_CONFIG_ATTRIBUTION } from '../../config/parseConfigData.js';
+import { USER_CONFIG_ATTRIBUTION } from '../../config/loadConfig.js';
+import { USER_CONFIG_FILENAME } from '../../config/readFile.js';
 import { ConfigData } from '../../config/type/ConfigData.js';
 import { fmtBool, yesNo } from '../boolean.js';
 import { ResolvedYamlKey } from '../file/yaml.js';

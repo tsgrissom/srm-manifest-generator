@@ -9,8 +9,8 @@ import {
 	startApp,
 } from '../app/startApp.js';
 import { Manifest } from '../app/type/Manifest.js';
-import { USER_CONFIG_PATH } from '../config/loadConfigData.js';
-import parseUserConfigData from '../config/parseConfigData.js';
+import parseUserConfigData from '../config/loadConfig.js';
+import { USER_CONFIG_PATH } from '../config/readFile.js';
 import { ConfigData } from '../config/type/ConfigData.js';
 import { BoolFmtPreset, fmtBool, yesNo } from '../util/boolean.js';
 import { fmtPath } from '../util/file/path.js';
