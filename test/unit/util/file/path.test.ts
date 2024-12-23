@@ -6,7 +6,6 @@ import {
 	isPathAccessible,
 	normalizeFileExtension,
 	pathHasFileExtension,
-	replaceFileExtension,
 } from '../../../../src/util/file/path';
 import { setOfEmptyStrings, setOfNonStrings } from '../../../helpers';
 
@@ -125,11 +124,9 @@ describe('Function: pathHasFileExtension()', () => {
 
 // MARK: replaceFileExtension
 describe('Function: replaceFileExtension()', () => {
-	// Param: findExt
-	test.each(setOfEmptyStrings)('throws err when empty str findExt arg: %p', value => {
-		expect(() => replaceFileExtension('manifest.yml', value, '.json')).toThrow();
-	});
-
+	// Param: extsToFind
+	// Param: extsToIgnore
+	// etc
 	// TEST Functionality
 });
 

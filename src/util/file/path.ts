@@ -53,97 +53,254 @@ export function pathHasFileExtension(
 	return false;
 }
 
-// MARK: replaceFileExtension
-
-/**
- * Within the given `fileName`, replaces the `findExt` with `replaceExt` if they are found.
- *
- * @param fileName The filename you want to find and replace the extension of.
- * @param findExt The extensions you want to replace if found.
- * @param replaceExt The new extension to append to `fileName`.
- *
- * @returns The `fileName`, with a new file extension `replaceExt` if one in `findExt` was found.
- */
-// TEST Unit
-export function replaceFileExtension(
-	fileName: string,
-	findExt: string | Array<string>,
-	replaceExt: string,
-): string {
-	if (typeof findExt === 'string') {
-		if (findExt.trim() === '') {
-			throw new Error(`Arg "findExt" cannot be an empty string: "${findExt}"`);
-		}
-
-		findExt = [findExt];
-	}
-
-	// TODO Options: normalize, add if no extension found, repeat
-
-	const normalized = findExt.map(ext => normalizeFileExtension(ext));
-	replaceExt = normalizeFileExtension(replaceExt);
-
-	for (const toRemove of normalized) {
-		const extname = path.extname(fileName);
-
-		if (!extname || extname === '') {
-			return fileName;
-		}
-
-		if (extname === toRemove) {
-			fileName = path.basename(fileName, toRemove);
-		}
-	}
-
-	return fileName + replaceExt;
-}
-
-interface ReplaceExtensionOptions {
-	extsToFind?: string | Array<string>;
-	extsToIgnore?: string | Array<string>;
-	replaceWith: string;
-	normalizeInputs: boolean;
-	iterations?: number;
-}
-
-// TODO removeFileExtension
-export function removeFileExtension(
-	str: string,
-	options?: ReplaceExtensionOptions,
-): string {}
-
 // MARK: normalizeFileExtension
 
 /**
  * Normalizes a file extension name by prepending a period to it if needed.
  *
  * @param extname The file extension to normalize.
- * @param excludeExts A string or string array which decides which extension names should be ignored.
+ * @param extsToIgnore A string or string array which decides which extension names should be ignored.
  *
  * @returns The file extension in normalized form, with a period prepended to the input if it was missing.
  */
 // TEST Unit
 export function normalizeFileExtension(
 	extname: string,
-	excludeExts: string | Array<string> = [],
+	extsToIgnore: string | Array<string> = [],
 ): string {
-	// TODO Options: exclude, normalizeExcluded
+	// SECTION: Normalize args
+
+	// Param: extname
 	if (extname.trim() === '') {
 		return '';
 	}
 
-	if (typeof excludeExts === 'string') {
-		excludeExts = [excludeExts];
+	if (extname === '*') {
+		return '*';
 	}
 
-	excludeExts = excludeExts.map(ext => normalizeFileExtension(ext));
+	// Param: excludeExts
+	if (typeof extsToIgnore === 'string') {
+		if (extsToIgnore === '') {
+			extsToIgnore = [];
+		} else if (extsToIgnore === '*') {
+			console.error(
+				`Arg "extsToIgnore" of replaceFileExtension cannot be a wildcard. It will be ignored.`,
+			);
+			extsToIgnore = [];
+		} else {
+			extsToIgnore = extsToIgnore.startsWith('.')
+				? [extsToIgnore]
+				: ['.' + extsToIgnore];
+		}
+	} else {
+		if (!Array.isArray(extsToIgnore)) {
+			throw new Error(`Unexpected! Expected arg "extsToFind" to be an array`);
+		}
 
-	if (extname.startsWith('.') || excludeExts.includes(extname)) {
+		if (extsToIgnore.includes('*')) {
+			console.error(
+				`Arg "extsToIgnore" of replaceFileExtension cannot be a wildcard. It will be ignored.`,
+			);
+			extsToIgnore = [];
+		} else {
+			extsToIgnore = extsToIgnore
+				.map(toIgnore => normalizeFileExtension(toIgnore))
+				.filter(toIgnore => toIgnore !== '');
+		}
+	}
+
+	if (extname.startsWith('.') || extsToIgnore.includes(extname)) {
 		return extname;
+	} else {
+		return '.' + extname;
+	}
+}
+
+export interface ReplaceExtensionOptions {
+	extsToFind?: string | Array<string>;
+	extsToIgnore?: string | Array<string>;
+	replaceWith: string;
+	repetitions?: number;
+}
+
+// MARK: replaceFileExtension
+export function replaceFileExtension(
+	fileName: string,
+	options: ReplaceExtensionOptions,
+): string {
+	const { repetitions } = options;
+	let { extsToFind, extsToIgnore, replaceWith } = options;
+
+	// SECTION: Normalize arguments
+
+	// Param: fileName
+
+	if (fileName === '') {
+		return '';
 	}
 
-	return '.' + extname;
+	fileName = normalizeFileExtension(fileName);
+
+	// Param: extsToIgnore
+
+	if (typeof extsToIgnore === 'undefined') {
+		// none provided means none should be ignored
+		extsToIgnore = [];
+	} else if (typeof extsToFind === 'string') {
+		// sanitize the string + normalize to equivalent array
+		if (extsToIgnore === '*') {
+			console.error(
+				`Arg "extsToIgnore" of replaceFileExtension cannot be a wildcard. It will be ignored.`,
+			);
+			extsToIgnore = [];
+		} else if (extsToIgnore === '') {
+			extsToIgnore = [];
+		} else {
+			extsToIgnore = [normalizeFileExtension(extsToIgnore as string)];
+		}
+	} else {
+		// is an array, but to be type-safe
+		if (!Array.isArray(extsToIgnore)) {
+			throw new Error(`Unexpected! Expected arg "extsToIgnore" to be an array`);
+		} else {
+			if (extsToIgnore.includes('')) {
+				extsToIgnore = [];
+			} else if (extsToIgnore.includes('*')) {
+				console.error(
+					`Arg "extsToIgnore" of replaceFileExtension cannot be a wildcard. It will be ignored.`,
+				);
+				extsToIgnore = [];
+			} else {
+				extsToIgnore = extsToIgnore.map(element =>
+					normalizeFileExtension(element),
+				);
+			}
+		}
+	}
+
+	// Param: extsToFind
+	// If extsToFind is any of the following, it becomes a wildcard str literal "*":
+	// - An empty array or an array containing an empty string literal ""
+	// - The string literal ""
+	// - Undefined
+
+	if (typeof extsToFind === 'undefined') {
+		extsToFind = '*';
+	} else if (typeof extsToFind === 'string') {
+		if (extsToFind === '' || extsToFind === '*') {
+			extsToFind = '*';
+		} else {
+			extsToFind = [normalizeFileExtension(extsToFind)];
+		}
+	} else {
+		// is an array
+		if (!Array.isArray(extsToFind)) {
+			throw new Error(`Unexpected! Expected arg "extsToFind" to be an array`);
+		}
+
+		if (extsToFind.length === 0) {
+			extsToFind = '*';
+		} else {
+			// at least one value in the array
+			if (extsToFind.includes('') || extsToFind.includes('*')) {
+				extsToFind = '*';
+			} else {
+				// does not contain empty str or wildcard
+				// filter out contradictions + map normalized values
+
+				extsToFind = extsToFind
+					.map(toFind => normalizeFileExtension(toFind))
+					.filter(toFind => {
+						const isContradictory =
+							(toFind !== '*' && extsToIgnore.includes(toFind)) ||
+							extsToIgnore.includes(toFind);
+						if (isContradictory) {
+							console.warn(
+								`Args "extsToIgnore" and "extsToFind" both contain value "${toFind}". The value will be ignored and unexpected behavior may occur.`,
+							);
+							return false;
+						}
+						return true;
+					});
+			}
+		}
+	}
+
+	// Param: iterations
+
+	enum ShouldRepeat {
+		Never,
+		NumberOfTimes,
+		Infinitely,
+	}
+
+	let shouldRepeat: ShouldRepeat = ShouldRepeat.Never;
+	let nRepetitions = 0;
+
+	// if undefined, 0, or 1, do once and done
+	// if < 0, do as many times until no extensions found
+	// if > 0, do x amount of times and done
+
+	if (typeof repetitions === 'undefined') {
+		shouldRepeat = ShouldRepeat.Never;
+		nRepetitions = 0;
+	} else if (typeof repetitions === 'number') {
+		if (repetitions < 0) {
+			shouldRepeat = ShouldRepeat.Infinitely;
+			nRepetitions = -1;
+		} else if (repetitions === 0) {
+			shouldRepeat = ShouldRepeat.Never;
+			nRepetitions = 0;
+		} else {
+			shouldRepeat = ShouldRepeat.NumberOfTimes;
+			nRepetitions = repetitions;
+		}
+	}
+
+	// Param: replaceWith
+	replaceWith = normalizeFileExtension(replaceWith);
+
+	// SECTION: Start replacement
+
+	let didRemove = false;
+	let lastFound = '';
+	let doneRepetitions = -1;
+
+	const isToFindWildcard = typeof extsToFind === 'string' && extsToFind === '*';
+	const isIgnored = (str: string): boolean => extsToIgnore.includes(str);
+	const isToFind = (str: string): boolean => extsToFind.includes(str);
+	const doesExtMatchOptions = (str: string): boolean =>
+		(isToFindWildcard && !isIgnored(str)) || (isToFind(str) && !isIgnored(str));
+
+	do {
+		didRemove = false;
+		lastFound = path.extname(fileName);
+
+		if (!lastFound || lastFound === '') {
+			// no extensions found, finish
+			return fileName + replaceWith;
+		}
+
+		if (doesExtMatchOptions(lastFound)) {
+			fileName = path.basename(fileName, lastFound);
+			didRemove = true;
+			doneRepetitions++;
+		}
+	} while (
+		(shouldRepeat && didRemove) ||
+		(shouldRepeat === ShouldRepeat.NumberOfTimes && doneRepetitions !== nRepetitions)
+	);
+
+	return fileName + replaceWith;
 }
+
+// MARK: removeFileExtension
+// TODO removeFileExtension
+// export function removeFileExtension(
+// 	str: string,
+// 	options?: ReplaceExtensionOptions,
+// ): string {}
 
 // MARK: basenameWithoutExtensions
 
