@@ -2,7 +2,6 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 // MARK: pathHasFileExtension
-
 /**
  * Checks if a given file path has a file extension. When `fileExt` is set to *,
  * including by default, the function will return true if there is any extension
@@ -54,16 +53,6 @@ export function pathHasFileExtension(
 }
 
 // MARK: normalizeFileExtension
-
-/**
- * Normalizes a file extension name by prepending a period to it if needed.
- *
- * @param extname The file extension to normalize.
- * @param extsToIgnore A string or string array which decides which extension names should be ignored.
- *
- * @returns The file extension in normalized form, with a period prepended to the input if it was missing.
- */
-// TEST Unit
 export function normalizeFileExtension(
 	extname: string,
 	extsToIgnore: string | Array<string> = [],
@@ -80,6 +69,7 @@ export function normalizeFileExtension(
 	}
 
 	// Param: excludeExts
+	// - errors on wildcard argument "*"
 	if (typeof extsToIgnore === 'string') {
 		if (extsToIgnore === '') {
 			extsToIgnore = [];
@@ -135,7 +125,6 @@ export function replaceFileExtension(
 	// SECTION: Normalize arguments
 
 	// Param: fileName
-
 	if (fileName === '') {
 		return '';
 	}
@@ -143,17 +132,14 @@ export function replaceFileExtension(
 	fileName = normalizeFileExtension(fileName);
 
 	// Param: extsToIgnore
-
+	// - errors on wildcard argument "*"
 	if (typeof extsToIgnore === 'undefined') {
 		// none provided means none should be ignored
 		extsToIgnore = [];
 	} else if (typeof extsToFind === 'string') {
 		// sanitize the string + normalize to equivalent array
 		if (extsToIgnore === '*') {
-			console.error(
-				`Arg "extsToIgnore" of replaceFileExtension cannot be a wildcard. It will be ignored.`,
-			);
-			extsToIgnore = [];
+			throw new Error(`Arg "extsToIgnore" cannot be a wildcard`);
 		} else if (extsToIgnore === '') {
 			extsToIgnore = [];
 		} else {
@@ -167,10 +153,7 @@ export function replaceFileExtension(
 			if (extsToIgnore.includes('')) {
 				extsToIgnore = [];
 			} else if (extsToIgnore.includes('*')) {
-				console.error(
-					`Arg "extsToIgnore" of replaceFileExtension cannot be a wildcard. It will be ignored.`,
-				);
-				extsToIgnore = [];
+				throw new Error(`Arg "extsToIgnore" cannot be a wildcard`);
 			} else {
 				extsToIgnore = extsToIgnore.map(element =>
 					normalizeFileExtension(element),
@@ -180,11 +163,11 @@ export function replaceFileExtension(
 	}
 
 	// Param: extsToFind
+	// - accepts wildcard argument "*" which means the function wil match any extension present
 	// If extsToFind is any of the following, it becomes a wildcard str literal "*":
 	// - An empty array or an array containing an empty string literal ""
 	// - The string literal ""
 	// - Undefined
-
 	if (typeof extsToFind === 'undefined') {
 		extsToFind = '*';
 	} else if (typeof extsToFind === 'string') {
@@ -212,12 +195,12 @@ export function replaceFileExtension(
 				extsToFind = extsToFind
 					.map(toFind => normalizeFileExtension(toFind))
 					.filter(toFind => {
-						const isContradictory =
+						if (
 							(toFind !== '*' && extsToIgnore.includes(toFind)) ||
-							extsToIgnore.includes(toFind);
-						if (isContradictory) {
+							extsToIgnore.includes(toFind)
+						) {
 							console.warn(
-								`Args "extsToIgnore" and "extsToFind" both contain value "${toFind}". The value will be ignored and unexpected behavior may occur.`,
+								`Conflicting value "${toFind}" found in both "extsToFind" and "extsToIgnore". It will be ignored.`,
 							);
 							return false;
 						}
@@ -228,7 +211,9 @@ export function replaceFileExtension(
 	}
 
 	// Param: iterations
-
+	// - if undefined, 0, or 1, do once and done
+	// - if < 0, do as many times until no extensions found
+	// - if > 0, do x amount of times and done
 	enum ShouldRepeat {
 		Never,
 		NumberOfTimes,
@@ -237,10 +222,6 @@ export function replaceFileExtension(
 
 	let shouldRepeat: ShouldRepeat = ShouldRepeat.Never;
 	let nRepetitions = 0;
-
-	// if undefined, 0, or 1, do once and done
-	// if < 0, do as many times until no extensions found
-	// if > 0, do x amount of times and done
 
 	if (typeof repetitions === 'undefined') {
 		shouldRepeat = ShouldRepeat.Never;
@@ -259,10 +240,10 @@ export function replaceFileExtension(
 	}
 
 	// Param: replaceWith
+	// - Accepting value "" is intended behavior which means "remove the extension"
 	replaceWith = normalizeFileExtension(replaceWith);
 
 	// SECTION: Start replacement
-
 	let didRemove = false;
 	let lastFound = '';
 	let doneRepetitions = -1;
@@ -274,6 +255,12 @@ export function replaceFileExtension(
 		(isToFindWildcard && !isIgnored(str)) || (isToFind(str) && !isIgnored(str));
 
 	do {
+		if (doneRepetitions > 25) {
+			throw new Error(
+				`Unexpected! Do-while looped an excessive number of times and was broken`,
+			);
+		}
+
 		didRemove = false;
 		lastFound = path.extname(fileName);
 
@@ -288,8 +275,11 @@ export function replaceFileExtension(
 			doneRepetitions++;
 		}
 	} while (
-		(shouldRepeat && didRemove) ||
-		(shouldRepeat === ShouldRepeat.NumberOfTimes && doneRepetitions !== nRepetitions)
+		// prettier-ignore
+		shouldRepeat !== ShouldRepeat.Never && (
+			(shouldRepeat === ShouldRepeat.Infinitely && didRemove) ||
+			(shouldRepeat === ShouldRepeat.NumberOfTimes && doneRepetitions < nRepetitions)
+		)
 	);
 
 	return fileName + replaceWith;
