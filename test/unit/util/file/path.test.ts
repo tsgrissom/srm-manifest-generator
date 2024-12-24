@@ -98,45 +98,17 @@ describe(`Function: removeFileExtension()`, () => {
 
 // MARK: basenameWithoutExtensions
 describe('Function: basenameWithoutExtensions', () => {
-	const okExtsToRemove = ['.yml', '.yaml'];
-	const okFilenamesWithExtensions = [
-		'Manifest.example.yml',
-		'Something.yml',
-		'Some Filename.yml',
-	];
-
-	const inputFileNameToExpected = [['Manifest.yml', 'Manifest.yml']];
-
-	it('removes all file extensions when no params', () => {
-		expect(basenameWithoutExtensions('Manifest.yml')).toBe('Manifest');
+	it('removes one extension when no params', () => {
+		expect(basenameWithoutExtensions('str.yml')).toBe('str');
+		expect(basenameWithoutExtensions('Some Filename.txt')).toBe('Some Filename');
 	});
 
-	// test.each([
-	// 	{
-	// 		params: {
-	// 			fileName: 'Manifest.example.manifest.yml',
-	// 			extToRemove: ['.yml', '.yaml', '.manifest', '.example'],
-	// 			iterate: true,
-	// 		},
-	// 		expected: 'Manifest',
-	// 	},
-	// 	// TODO: More cases
-	// ])('returns expected given valid manifest file name', ({ params, expected }) => {
-	// 	// const paramRepetitions = params.iterate ? -1 : 0;
-	// 	// // const result = basenameWithoutExtensions(params.fileName, {
-	// 	// // 	extToFind: params.extsToRemove,
-	// 	// // });
-	// 	// expect(result).toBe(expected);
-	// });
+	it('removes all extensions when no params', () => {
+		expect(basenameWithoutExtensions('str.manifest.yml')).toBe('str');
+		expect(basenameWithoutExtensions('Some Filename.manifest.yml')).toBe(
+			'Some Filename',
+		);
+	});
 
-	test.each(okFilenamesWithExtensions)(
-		'returns str whose path.basename equals empty str when filenames w/ exts given as fileName arg + wildcard given as extsToRemove arg',
-		value => {
-			// const result = basenameWithoutExtensions(value, '*', true);
-			const result = basenameWithoutExtensions(value);
-			const actual = path.extname(result);
-			const expected = '';
-			expect(actual).toBe(expected);
-		},
-	);
+	// TEST More coverage
 });
