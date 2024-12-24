@@ -5,9 +5,8 @@ import {
 	basenameWithoutExtensions,
 	isPathAccessible,
 	normalizeFileExtension,
-	pathHasFileExtension,
 } from '../../../../src/util/file/path';
-import { setOfEmptyStrings, setOfNonStrings } from '../../../helpers';
+import { setOfNonStrings } from '../../../helpers';
 
 const tmpPath = 'tmp/path.test';
 const existentFilePath = path.join(tmpPath, 'exists.txt');
@@ -24,6 +23,77 @@ beforeEach(() => {
 
 afterEach(() => {
 	mockFs.restore();
+});
+
+// MARK: isPathAccessible
+describe(`Function: isPathAccessible()`, () => {
+	it('resolves true given existing dir path', async () => {
+		await expect(isPathAccessible(tmpPath)).resolves.toBe(true);
+	});
+
+	it('resolves true given existing file path', async () => {
+		await expect(isPathAccessible(existentFilePath)).resolves.toBe(true);
+	});
+
+	it('resolves false given non-existent dir path', async () => {
+		await expect(isPathAccessible(nonExistentDirPath)).resolves.toBe(false);
+	});
+
+	it('resolves false given non-existent file path', async () => {
+		await expect(isPathAccessible(nonExistentFilePath)).resolves.toBe(false);
+	});
+});
+
+// MARK: normalizeFileExtension
+describe('Function: normalizeFileExtension()', () => {
+	test.each(setOfNonStrings)(
+		'throws err when param extname passed a non-str: %p',
+		value => {
+			expect(() => normalizeFileExtension(value as unknown as string)).toThrow();
+		},
+	);
+
+	// TODO TEST param excludeExts
+
+	test.each([
+		// input, expected
+		['yml', '.yml'],
+		['yaml', '.yaml'],
+		['json', '.json'],
+		['jsonc', '.jsonc'],
+	])(
+		'returns expected for given input (Input: %p, Expected: %p)',
+		(input, expected) => {
+			expect(normalizeFileExtension(input)).toBe(expected);
+		},
+	);
+
+	test.each(['.yml', '.yaml', '.json', '.jsonc'])(
+		'returns given str when already has period prefix: %p',
+		value => {
+			expect(normalizeFileExtension(value)).toBe(value);
+		},
+	);
+});
+
+// MARK: pathHasFileExtension
+describe('Function: hasFileExtension()', () => {
+	// TEST Params
+	// Param: fileName
+	// Param: fileExt
+	// TEST Functionality
+});
+
+// MARK: replaceFileExtension
+describe('Function: replaceFileExtension()', () => {
+	// Param: extsToFind
+	// Param: extsToIgnore
+	// etc
+	// TEST Functionality
+});
+
+describe(`Function: removeFileExtension()`, () => {
+	// TEST Functionality
 });
 
 // MARK: basenameWithoutExtensions
@@ -69,82 +139,4 @@ describe('Function: basenameWithoutExtensions', () => {
 			expect(actual).toBe(expected);
 		},
 	);
-});
-
-// MARK: normalizeFileExtension
-describe('Function: normalizeFileExtension()', () => {
-	test.each(setOfNonStrings)(
-		'throws err when param extname passed a non-str: %p',
-		value => {
-			expect(() => normalizeFileExtension(value as unknown as string)).toThrow();
-		},
-	);
-
-	// TODO TEST param excludeExts
-
-	test.each([
-		// input, expected
-		['yml', '.yml'],
-		['yaml', '.yaml'],
-		['json', '.json'],
-		['jsonc', '.jsonc'],
-	])(
-		'returns expected for given input (Input: %p, Expected: %p)',
-		(input, expected) => {
-			expect(normalizeFileExtension(input)).toBe(expected);
-		},
-	);
-
-	test.each(['.yml', '.yaml', '.json', '.jsonc'])(
-		'returns given str when already has period prefix: %p',
-		value => {
-			expect(normalizeFileExtension(value)).toBe(value);
-		},
-	);
-});
-
-// MARK: pathHasFileExtension
-describe('Function: pathHasFileExtension()', () => {
-	// Param: fileName
-
-	test.each(setOfNonStrings)('throws err when non-str filePath arg: %p', value => {
-		expect(() => pathHasFileExtension(value as unknown as string)).toThrow();
-	});
-
-	// Param: fileExt
-
-	test.each(setOfEmptyStrings)('throws err when empty str fileExt arg: %p', value => {
-		expect(() =>
-			pathHasFileExtension('manifest.yml', value as unknown as string),
-		).toThrow();
-	});
-
-	// TODO TEST Functionality
-});
-
-// MARK: replaceFileExtension
-describe('Function: replaceFileExtension()', () => {
-	// Param: extsToFind
-	// Param: extsToIgnore
-	// etc
-	// TEST Functionality
-});
-
-// MARK: isPathAccessible
-describe(`Function: isPathAccessible()`, () => {
-	it('resolves true given existing dir path', async () => {
-		await expect(isPathAccessible(tmpPath)).resolves.toBe(true);
-	});
-
-	it('resolves true given existing file path', async () => {
-		await expect(isPathAccessible(existentFilePath)).resolves.toBe(true);
-	});
-
-	it('resolves false given non-existent dir path', async () => {
-		await expect(isPathAccessible(nonExistentDirPath)).resolves.toBe(false);
-	});
-
-	it('resolves false given non-existent file path', async () => {
-		await expect(isPathAccessible(nonExistentFilePath)).resolves.toBe(false);
-	});
 });

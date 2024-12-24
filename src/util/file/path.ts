@@ -1,19 +1,46 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+// MARK: isPathAccessible
+/**
+ * Checks if a given path is accessible according to Node's {@link fs.promises.access}.
+ *
+ * * A resolved value of `false` primarily indicates either the path does not exist, or
+ *   the user lacks permission to access the file.
+ * * Secondarily, other system errors could produce a `false` value, such as:
+ *   Network issues if the file is on a network drive, file system errors or corruption,
+ *   or insufficient system resources.
+ *
+ * @param filePath The filesystem path to check.
+ * @returns A `Promise` which resolves to a `boolean` value which indicates whether
+ *  the given {@link filePath} is accessible.
+ */
+export async function isPathAccessible(filePath: string): Promise<boolean> {
+	try {
+		await fs.access(filePath);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+// TODO Fn numberOfFileExtensions
+
+// TODO Fn getFileExtension
+
 // MARK: pathHasFileExtension
 /**
- * Checks if a given file path has a file extension. When `fileExt` is set to *,
+ * Checks if a given file path has a file extension. When {@link extToFind} is set to *,
  * including by default, the function will return true if there is any extension
  * present in the given file path.
  *
- * Optionally, set `fileExt` to a single file extension to only return true if
+ * Optionally, set {@link extToFind} to a single file extension to only return true if
  * that single extension is present. Further, you can specify an array of
  * file extensions so the function returns true if any of the given extensions are
  * found.
  *
  * @param filePath The filepath to check for the given extensions.
- * @param fileExt String or array of strings indicating which extensions to search for. Set to
+ * @param extToFind String or array of strings indicating which extensions to search for. Set to
  * "*" or keep at default value to return true for the presence of any extension.
  * @returns Whether the given file extensions were found for the given filepath.
  *
@@ -22,31 +49,66 @@ import path from 'node:path';
  * const jsonExts = ['.json', '.jsonc'];
  * ['A file.json', 'Something in jsonc.jsonc']
  *      .forEach(each => {
- *          console.log(doesPathHaveFileExtension(each, jsonExts)); // true 2x
+ *          console.log(hasFileExtension(each, jsonExts)); // true 2x
  *      }
  * );
  */
 // TODO Unit Test
-export function pathHasFileExtension(
+export function hasFileExtension(
 	filePath: string,
-	fileExt: string | Array<string> = '*',
+	extToFind: string | Array<string> = '*',
 ): boolean {
-	if (typeof fileExt === 'string' && fileExt.trim() === '') {
-		throw new Error(`Arg "fileExt" cannot be an empty string: "${fileExt}"`);
+	// SECTION: Normalize args
+
+	// Param: filePath
+	if (filePath.trim() === '') {
+		return false;
 	}
 
-	const extname = path.extname(filePath);
+	// Param: extToFind
+	if (typeof extToFind === 'string') {
+		if (extToFind.startsWith('.') && extToFind.endsWith('.')) {
+			throw new Error(`Arg "extname" is an invalid file extension`);
+		}
 
-	if (typeof fileExt === 'string') {
-		if (fileExt === '*' && (!extname || extname === '')) {
-			return true;
+		if (extToFind === '') {
+			extToFind = '*';
+		}
+
+		if (extToFind !== '*') {
+			extToFind = normalizeFileExtension(extToFind);
 		}
 	} else {
-		for (const findExt of fileExt) {
-			if (extname === findExt.toLowerCase()) {
-				return true;
-			}
+		// is an array, but to be type-safe
+		if (!Array.isArray(extToFind)) {
+			throw new Error(`Unexpected! Expected arg "extsToIgnore" to be an array`);
 		}
+
+		if (extToFind.includes('') || extToFind.includes('*')) {
+			extToFind = '*';
+		} else {
+			extToFind = extToFind.map(toFind => normalizeFileExtension(toFind));
+		}
+	}
+
+	// SECTION: Do check
+
+	const ext = path.extname(filePath);
+
+	if (!ext) {
+		return false;
+	}
+
+	if (typeof extToFind === 'string') {
+		if (extToFind === '*') {
+			return true;
+		}
+
+		return ext === extToFind;
+	}
+
+	if (Array.isArray(extToFind)) {
+		return extToFind.includes(ext);
 	}
 
 	return false;
@@ -74,10 +136,7 @@ export function normalizeFileExtension(
 		if (extsToIgnore === '') {
 			extsToIgnore = [];
 		} else if (extsToIgnore === '*') {
-			console.error(
-				`Arg "extsToIgnore" of replaceFileExtension cannot be a wildcard. It will be ignored.`,
-			);
-			extsToIgnore = [];
+			throw new Error(`Arg "extsToIgnore" cannot be a wildcard`);
 		} else {
 			extsToIgnore = extsToIgnore.startsWith('.')
 				? [extsToIgnore]
@@ -89,10 +148,7 @@ export function normalizeFileExtension(
 		}
 
 		if (extsToIgnore.includes('*')) {
-			console.error(
-				`Arg "extsToIgnore" of replaceFileExtension cannot be a wildcard. It will be ignored.`,
-			);
-			extsToIgnore = [];
+			throw new Error(`Arg "extsToIgnore" cannot be a wildcard`);
 		} else {
 			extsToIgnore = extsToIgnore
 				.map(toIgnore => normalizeFileExtension(toIgnore))
@@ -246,7 +302,7 @@ export function replaceFileExtension(
 	// SECTION: Start replacement
 	let didRemove = false;
 	let lastFound = '';
-	let doneRepetitions = -1;
+	let nIterations = 0;
 
 	const isToFindWildcard = typeof extsToFind === 'string' && extsToFind === '*';
 	const isIgnored = (str: string): boolean => extsToIgnore.includes(str);
@@ -255,7 +311,7 @@ export function replaceFileExtension(
 		(isToFindWildcard && !isIgnored(str)) || (isToFind(str) && !isIgnored(str));
 
 	do {
-		if (doneRepetitions > 25) {
+		if (nIterations > 25) {
 			throw new Error(
 				`Unexpected! Do-while looped an excessive number of times and was broken`,
 			);
@@ -264,7 +320,7 @@ export function replaceFileExtension(
 		didRemove = false;
 		lastFound = path.extname(fileName);
 
-		if (!lastFound || lastFound === '') {
+		if (!lastFound) {
 			// no extensions found, finish
 			return fileName + replaceWith;
 		}
@@ -272,13 +328,13 @@ export function replaceFileExtension(
 		if (doesExtMatchOptions(lastFound)) {
 			fileName = path.basename(fileName, lastFound);
 			didRemove = true;
-			doneRepetitions++;
+			nIterations++;
 		}
 	} while (
 		// prettier-ignore
 		shouldRepeat !== ShouldRepeat.Never && (
 			(shouldRepeat === ShouldRepeat.Infinitely && didRemove) ||
-			(shouldRepeat === ShouldRepeat.NumberOfTimes && doneRepetitions < nRepetitions)
+			(shouldRepeat === ShouldRepeat.NumberOfTimes && nIterations < (nRepetitions + 1))
 		)
 	);
 
@@ -286,11 +342,25 @@ export function replaceFileExtension(
 }
 
 // MARK: removeFileExtension
-// TODO removeFileExtension
-// export function removeFileExtension(
-// 	str: string,
-// 	options?: ReplaceExtensionOptions,
-// ): string {}
+export function removeFileExtension(
+	fileName: string,
+	options?: ReplaceExtensionOptions,
+): string {
+	const defaultOptions = {
+		extsToFind: [],
+		extsToIgnore: [],
+		replaceWith: '',
+		repetitions: -1,
+	};
+
+	if (typeof options === 'undefined') {
+		options = defaultOptions;
+	}
+
+	options.replaceWith = '';
+
+	return replaceFileExtension(fileName, options);
+}
 
 // MARK: basenameWithoutExtensions
 
@@ -357,26 +427,4 @@ export function basenameWithoutExtensions(
 	} while (didRemove);
 
 	return fileName;
-}
-
-/**
- * Checks if a given path is accessible according to Node's {@link fs.promises.access}.
- *
- * * A resolved value of `false` primarily indicates either the path does not exist, or
- *   the user lacks permission to access the file.
- * * Secondarily, other system errors could produce a `false` value, such as:
- *   Network issues if the file is on a network drive, file system errors or corruption,
- *   or insufficient system resources.
- *
- * @param filePath The filesystem path to check.
- * @returns A `Promise` which resolves to a `boolean` value which indicates whether
- *  the given {@link filePath} is accessible.
- */
-export async function isPathAccessible(filePath: string): Promise<boolean> {
-	try {
-		await fs.access(filePath);
-		return true;
-	} catch {
-		return false;
-	}
 }
