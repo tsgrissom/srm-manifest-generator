@@ -391,12 +391,7 @@ function parseManifestFileContentsToData(
 
 	// Fallback on filename
 	// TODO This doesn't need to be here, or it should be elsewhere
-	if (!hasSourceName)
-		data.sourceName = basenameWithoutExtensions(
-			filePath,
-			['.yml', '.yaml', '.manifest'],
-			true,
-		);
+	if (!hasSourceName) data.sourceName = basenameWithoutExtensions(filePath);
 	// Make sure required attributes are present
 	// TODO Soft fail these
 	if (!hasBaseDirectory)

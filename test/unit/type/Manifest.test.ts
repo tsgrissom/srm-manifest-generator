@@ -129,7 +129,7 @@ describe('Class: Manifest', () => {
 
 		it('returns basename w/o exts when ok manifest without name attr', () => {
 			mockManifest.sourceName = '';
-			const expected = basenameWithoutExtensions(mockManifest.filePath, '*', true);
+			const expected = basenameWithoutExtensions(mockManifest.filePath);
 			expect(mockManifest.name).toBe(expected);
 		});
 	});

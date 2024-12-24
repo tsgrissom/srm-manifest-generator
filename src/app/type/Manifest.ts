@@ -71,11 +71,7 @@ class Manifest implements ManifestData {
 	}
 
 	public get fallbackName(): string {
-		return basenameWithoutExtensions(
-			this._filePath,
-			['.yml', '.yaml', '.manifest', '.example'],
-			true,
-		);
+		return basenameWithoutExtensions(this._filePath);
 	}
 
 	public get hasSourceNameAttribute(): boolean {

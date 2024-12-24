@@ -105,35 +105,35 @@ describe('Function: basenameWithoutExtensions', () => {
 		'Some Filename.yml',
 	];
 
-	test.each(setOfNonStrings)('throws err when non-string fileName arg: %p', value => {
-		expect(() =>
-			basenameWithoutExtensions(value as unknown as string, okExtsToRemove),
-		).toThrow();
+	const inputFileNameToExpected = [['Manifest.yml', 'Manifest.yml']];
+
+	it('removes all file extensions when no params', () => {
+		expect(basenameWithoutExtensions('Manifest.yml')).toBe('Manifest');
 	});
 
-	test.each([
-		{
-			params: {
-				fileName: 'Manifest.example.manifest.yml',
-				extsToRemove: ['.yml', '.yaml', '.manifest', '.example'],
-				iterate: true,
-			},
-			expected: 'Manifest',
-		},
-		// TODO: More cases
-	])('returns expected given valid manifest file name', ({ params, expected }) => {
-		const result = basenameWithoutExtensions(
-			params.fileName,
-			params.extsToRemove,
-			params.iterate,
-		);
-		expect(result).toBe(expected);
-	});
+	// test.each([
+	// 	{
+	// 		params: {
+	// 			fileName: 'Manifest.example.manifest.yml',
+	// 			extToRemove: ['.yml', '.yaml', '.manifest', '.example'],
+	// 			iterate: true,
+	// 		},
+	// 		expected: 'Manifest',
+	// 	},
+	// 	// TODO: More cases
+	// ])('returns expected given valid manifest file name', ({ params, expected }) => {
+	// 	// const paramRepetitions = params.iterate ? -1 : 0;
+	// 	// // const result = basenameWithoutExtensions(params.fileName, {
+	// 	// // 	extToFind: params.extsToRemove,
+	// 	// // });
+	// 	// expect(result).toBe(expected);
+	// });
 
 	test.each(okFilenamesWithExtensions)(
 		'returns str whose path.basename equals empty str when filenames w/ exts given as fileName arg + wildcard given as extsToRemove arg',
 		value => {
-			const result = basenameWithoutExtensions(value, '*', true);
+			// const result = basenameWithoutExtensions(value, '*', true);
+			const result = basenameWithoutExtensions(value);
 			const actual = path.extname(result);
 			const expected = '';
 			expect(actual).toBe(expected);

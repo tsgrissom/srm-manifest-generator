@@ -1,6 +1,30 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+// MARK: TYPES
+
+export interface RemoveExtensionOptions {
+	extToFind?: string | Array<string>;
+	extToIgnore?: string | Array<string>;
+	repetitions?: number;
+}
+
+export interface ReplaceExtensionOptions extends RemoveExtensionOptions {
+	extToFind?: string | Array<string>;
+	extToIgnore?: string | Array<string>;
+	replaceWith: string;
+	repetitions?: number;
+}
+
+export const defaultReplaceExtensionOptions: ReplaceExtensionOptions = {
+	extToFind: [],
+	extToIgnore: [],
+	replaceWith: '',
+	repetitions: -1,
+};
+
+// MARK: FUNCTIONS
+
 // MARK: isPathAccessible
 /**
  * Checks if a given path is accessible according to Node's {@link fs.promises.access}.
@@ -117,7 +141,7 @@ export function hasFileExtension(
 // MARK: normalizeFileExtension
 export function normalizeFileExtension(
 	extname: string,
-	extsToIgnore: string | Array<string> = [],
+	extToIgnore: string | Array<string> = [],
 ): string {
 	// SECTION: Normalize args
 
@@ -132,42 +156,39 @@ export function normalizeFileExtension(
 
 	// Param: excludeExts
 	// - errors on wildcard argument "*"
-	if (typeof extsToIgnore === 'string') {
-		if (extsToIgnore === '') {
-			extsToIgnore = [];
-		} else if (extsToIgnore === '*') {
-			throw new Error(`Arg "extsToIgnore" cannot be a wildcard`);
+	if (typeof extToIgnore === 'string') {
+		if (extToIgnore === '') {
+			extToIgnore = [];
+		} else if (extToIgnore === '*') {
+			throw new Error(`Arg "extToIgnore" cannot be a wildcard`);
 		} else {
-			extsToIgnore = extsToIgnore.startsWith('.')
-				? [extsToIgnore]
-				: ['.' + extsToIgnore];
+			if (extToIgnore.startsWith('.') && extToIgnore.endsWith('.')) {
+				throw new Error(`Arg "extToIgnore" is an invalid file extension`);
+			}
+
+			extToIgnore = extToIgnore.startsWith('.')
+				? [extToIgnore]
+				: ['.' + extToIgnore];
 		}
 	} else {
-		if (!Array.isArray(extsToIgnore)) {
-			throw new Error(`Unexpected! Expected arg "extsToFind" to be an array`);
+		if (!Array.isArray(extToIgnore)) {
+			throw new Error(`Unexpected! Expected arg "extToIgnore" to be an array`);
 		}
 
-		if (extsToIgnore.includes('*')) {
-			throw new Error(`Arg "extsToIgnore" cannot be a wildcard`);
+		if (extToIgnore.includes('*')) {
+			throw new Error(`Arg "extToIgnore" cannot be a wildcard`);
 		} else {
-			extsToIgnore = extsToIgnore
+			extToIgnore = extToIgnore
 				.map(toIgnore => normalizeFileExtension(toIgnore))
 				.filter(toIgnore => toIgnore !== '');
 		}
 	}
 
-	if (extname.startsWith('.') || extsToIgnore.includes(extname)) {
+	if (extname.startsWith('.') || extToIgnore.includes(extname)) {
 		return extname;
 	} else {
 		return '.' + extname;
 	}
-}
-
-export interface ReplaceExtensionOptions {
-	extsToFind?: string | Array<string>;
-	extsToIgnore?: string | Array<string>;
-	replaceWith: string;
-	repetitions?: number;
 }
 
 // MARK: replaceFileExtension
@@ -176,7 +197,7 @@ export function replaceFileExtension(
 	options: ReplaceExtensionOptions,
 ): string {
 	const { repetitions } = options;
-	let { extsToFind, extsToIgnore, replaceWith } = options;
+	let { extToFind, extToIgnore, replaceWith } = options;
 
 	// SECTION: Normalize arguments
 
@@ -185,35 +206,33 @@ export function replaceFileExtension(
 		return '';
 	}
 
-	fileName = normalizeFileExtension(fileName);
+	// fileName = normalizeFileExtension(fileName);
 
 	// Param: extsToIgnore
 	// - errors on wildcard argument "*"
-	if (typeof extsToIgnore === 'undefined') {
+	if (typeof extToIgnore === 'undefined') {
 		// none provided means none should be ignored
-		extsToIgnore = [];
-	} else if (typeof extsToFind === 'string') {
+		extToIgnore = [];
+	} else if (typeof extToFind === 'string') {
 		// sanitize the string + normalize to equivalent array
-		if (extsToIgnore === '*') {
-			throw new Error(`Arg "extsToIgnore" cannot be a wildcard`);
-		} else if (extsToIgnore === '') {
-			extsToIgnore = [];
+		if (extToIgnore === '*') {
+			throw new Error(`Arg "extToIgnore" cannot be a wildcard`);
+		} else if (extToIgnore === '') {
+			extToIgnore = [];
 		} else {
-			extsToIgnore = [normalizeFileExtension(extsToIgnore as string)];
+			extToIgnore = [normalizeFileExtension(extToIgnore as string)];
 		}
 	} else {
 		// is an array, but to be type-safe
-		if (!Array.isArray(extsToIgnore)) {
-			throw new Error(`Unexpected! Expected arg "extsToIgnore" to be an array`);
+		if (!Array.isArray(extToIgnore)) {
+			throw new Error(`Unexpected! Expected arg "extToIgnore" to be an array`);
 		} else {
-			if (extsToIgnore.includes('')) {
-				extsToIgnore = [];
-			} else if (extsToIgnore.includes('*')) {
-				throw new Error(`Arg "extsToIgnore" cannot be a wildcard`);
+			if (extToIgnore.includes('')) {
+				extToIgnore = [];
+			} else if (extToIgnore.includes('*')) {
+				throw new Error(`Arg "extToIgnore" cannot be a wildcard`);
 			} else {
-				extsToIgnore = extsToIgnore.map(element =>
-					normalizeFileExtension(element),
-				);
+				extToIgnore = extToIgnore.map(element => normalizeFileExtension(element));
 			}
 		}
 	}
@@ -224,39 +243,39 @@ export function replaceFileExtension(
 	// - An empty array or an array containing an empty string literal ""
 	// - The string literal ""
 	// - Undefined
-	if (typeof extsToFind === 'undefined') {
-		extsToFind = '*';
-	} else if (typeof extsToFind === 'string') {
-		if (extsToFind === '' || extsToFind === '*') {
-			extsToFind = '*';
+	if (typeof extToFind === 'undefined') {
+		extToFind = '*';
+	} else if (typeof extToFind === 'string') {
+		if (extToFind === '' || extToFind === '*') {
+			extToFind = '*';
 		} else {
-			extsToFind = [normalizeFileExtension(extsToFind)];
+			extToFind = [normalizeFileExtension(extToFind)];
 		}
 	} else {
 		// is an array
-		if (!Array.isArray(extsToFind)) {
-			throw new Error(`Unexpected! Expected arg "extsToFind" to be an array`);
+		if (!Array.isArray(extToFind)) {
+			throw new Error(`Unexpected! Expected arg "extToFind" to be an array`);
 		}
 
-		if (extsToFind.length === 0) {
-			extsToFind = '*';
+		if (extToFind.length === 0) {
+			extToFind = '*';
 		} else {
 			// at least one value in the array
-			if (extsToFind.includes('') || extsToFind.includes('*')) {
-				extsToFind = '*';
+			if (extToFind.includes('') || extToFind.includes('*')) {
+				extToFind = '*';
 			} else {
 				// does not contain empty str or wildcard
 				// filter out contradictions + map normalized values
 
-				extsToFind = extsToFind
+				extToFind = extToFind
 					.map(toFind => normalizeFileExtension(toFind))
 					.filter(toFind => {
 						if (
-							(toFind !== '*' && extsToIgnore.includes(toFind)) ||
-							extsToIgnore.includes(toFind)
+							(toFind !== '*' && extToIgnore.includes(toFind)) ||
+							extToIgnore.includes(toFind)
 						) {
 							console.warn(
-								`Conflicting value "${toFind}" found in both "extsToFind" and "extsToIgnore". It will be ignored.`,
+								`Conflicting value "${toFind}" found in both "extToFind" and "extToIgnore". It will be ignored.`,
 							);
 							return false;
 						}
@@ -304,9 +323,10 @@ export function replaceFileExtension(
 	let lastFound = '';
 	let nIterations = 0;
 
-	const isToFindWildcard = typeof extsToFind === 'string' && extsToFind === '*';
-	const isIgnored = (str: string): boolean => extsToIgnore.includes(str);
-	const isToFind = (str: string): boolean => extsToFind.includes(str);
+	const isToFindWildcard = typeof extToFind === 'string' && extToFind === '*';
+	const isIgnored = (str: string): boolean => extToIgnore.includes(str);
+	const isToFind = (str: string): boolean =>
+		isToFindWildcard || extToFind.includes(str);
 	const doesExtMatchOptions = (str: string): boolean =>
 		(isToFindWildcard && !isIgnored(str)) || (isToFind(str) && !isIgnored(str));
 
@@ -342,89 +362,20 @@ export function replaceFileExtension(
 }
 
 // MARK: removeFileExtension
+// TODO jsdoc
 export function removeFileExtension(
 	fileName: string,
-	options?: ReplaceExtensionOptions,
+	options: RemoveExtensionOptions = defaultReplaceExtensionOptions,
 ): string {
-	const defaultOptions = {
-		extsToFind: [],
-		extsToIgnore: [],
-		replaceWith: '',
-		repetitions: -1,
-	};
-
-	if (typeof options === 'undefined') {
-		options = defaultOptions;
-	}
-
-	options.replaceWith = '';
-
-	return replaceFileExtension(fileName, options);
+	return replaceFileExtension(fileName, { ...options, replaceWith: '' });
 }
 
 // MARK: basenameWithoutExtensions
-
-/**
- * Gets a file's basename with selected extensions removed.
- * If `iterate` is enabled, this process will be repeated until none of the extensions are present.
- *
- * @param fileName The filename to remove the extensions from.
- * @param toRemove The selected extensions to remove from the filename. Can be "*" to remove any extension.
- * @param iterate Should the basename be iteraviley modified until all of the listed extensions are gone?
- *
- * @returns The final filename after being stripped of some selected extensions, if they were present.
- *
- * @example // TODO Write example
- */
-// TEST Unit
+// TODO jsdoc
 export function basenameWithoutExtensions(
 	fileName: string,
-	toRemove: string | Array<string> = '*',
-	iterate = true,
+	options: RemoveExtensionOptions = defaultReplaceExtensionOptions,
 ): string {
-	// TODO Options: current, ignoreCase, repeat count (0 for infinite)
-	if (!Array.isArray(toRemove)) {
-		toRemove = [toRemove];
-	}
-
-	toRemove = toRemove.map(rm => normalizeFileExtension(rm));
-
-	fileName = path.basename(fileName);
-	let extFound;
-
-	if (!iterate) {
-		for (const rm of toRemove) {
-			extFound = path.extname(fileName);
-
-			if (!extFound || extFound === '') {
-				return fileName;
-			}
-			// TODO Check each iteration and make sure there's still a string with content
-
-			if (rm === '*' || rm === extFound.toLowerCase()) {
-				return path.basename(fileName, extFound);
-			}
-		}
-	}
-
-	let didRemove = false;
-
-	do {
-		didRemove = false;
-		extFound = path.extname(fileName);
-
-		if (!extFound || extFound === '') {
-			return fileName;
-		}
-
-		for (const extToRemove of toRemove) {
-			if (extToRemove === '*' || extToRemove === extFound.toLowerCase()) {
-				fileName = path.basename(fileName, extFound);
-				didRemove = true;
-				break;
-			}
-		}
-	} while (didRemove);
-
-	return fileName;
+	const basename = path.basename(fileName);
+	return removeFileExtension(basename, options);
 }
