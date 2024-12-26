@@ -16,12 +16,25 @@ import { UserConfig } from '../type/UserConfig.js';
 
 const sectionKey = 'search';
 const keyAliases: YamlKeyAliases = {
-	directories: 'scanDirectories',
-	scanFolders: 'scanDirectories',
-	folders: 'scanDirectories',
-	recursively: 'scanRecursively',
-	recursive: 'scanRecursively',
+	// Aliases for key "withinDirectories"
+	dirs: 'withinDirectories',
+	directories: 'withinDirectories',
+	folders: 'withinDirectories',
+	withinDirs: 'withinDirectories',
+	withinFolders: 'withinDirectories',
+	inDirectories: 'withinDirectories',
+	inDirs: 'withinDirectories',
+	inFolders: 'withinDirectories',
+	scanDirectories: 'withinDirectories',
+	scanDirs: 'withinDirectories',
+	scanFolders: 'withinDirectories',
+	// Aliases for key "recursively"
+	recursive: 'recursively',
+	scanRecursively: 'recursively',
+	// Aliases for key "manifests"
 	sources: 'manifests',
+	manifestPaths: 'manifests',
+	manifestsPaths: 'manifests',
 };
 
 async function parseSearchSection(data: object, config: UserConfig): Promise<UserConfig> {
@@ -44,29 +57,27 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 		const { fullGivenKey, resolvedKey, fullResolvedKey } = resolved;
 
 		switch (resolvedKey) {
-			case 'scanDirectories': {
+			case 'withinDirectories': {
 				if (typeof value !== 'boolean') {
 					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.search.scanDirectories = value;
+				config.search.withinDirectories = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
-			case 'scanRecursively': {
+			case 'recursively': {
 				if (typeof value !== 'boolean') {
 					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.search.scanRecursively = value;
+				config.search.recursively = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case `manifests`: {
-				// TODO Maybe load manifests later, elsewhere
-				// Maybe here we can just validate paths if needed, then have makeManifests in the UserConfig on demand?
 				if (!value) {
 					console.log(
 						`${SB_WARN} No manifest paths were provided at config key ${quote(fullResolvedKey)} so no manifests were loaded`,

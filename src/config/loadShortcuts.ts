@@ -184,7 +184,7 @@ function validateParseShortcutObjectsIntoDataSuccessful(
 }
 
 // MARK: createShortcutFromData
-function createShortcutFromData(rawData: ShortcutData, config?: UserConfig): Shortcut {
+function createShortcutFromData(rawData: ShortcutData, config: UserConfig): Shortcut {
 	const keyAliases: YamlKeyAliases = {
 		title: 'title',
 		name: 'title',
@@ -269,7 +269,7 @@ function createShortcutFromData(rawData: ShortcutData, config?: UserConfig): Sho
 				break;
 			}
 			default: {
-				if (config?.shouldWarnUnknownConfigKey() ?? true) {
+				if (config.shouldWarnUnknownConfigKey) {
 					clog(`  ${SB_WARN} Unknown key set at ${quote(fullGivenKey)}`);
 				}
 			}
@@ -281,7 +281,7 @@ function createShortcutFromData(rawData: ShortcutData, config?: UserConfig): Sho
 
 function createShortcutsFromData(
 	arr: Array<ShortcutData>,
-	config?: UserConfig,
+	config: UserConfig,
 ): Array<Shortcut> {
 	const shortcuts: Array<Shortcut> = [];
 

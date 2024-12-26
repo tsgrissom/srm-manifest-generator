@@ -1,4 +1,8 @@
-import { YamlKeyAliases, resolveKeyFromAlias } from '../../util/file/yaml.js';
+import {
+	YamlKeyAliases,
+	joinPathKeys,
+	resolveKeyFromAlias,
+} from '../../util/file/yaml.js';
 import {
 	clogConfigKeyUnknown,
 	clogConfigValueWrongType,
@@ -11,42 +15,49 @@ import {
 import { quote } from '../../util/string/quote.js';
 import { UserConfig } from '../type/UserConfig.js';
 
-const sectionKey = 'validate';
-const keyAliases: YamlKeyAliases = {
-	filePaths: 'filePaths',
-	paths: 'filePaths',
-
-	executables: 'executables',
-	exes: 'executables',
-
-	executableExtensions: 'executableExtensions',
-	acceptedExecutables: 'executableExtensions',
-
-	unknownConfigKey: 'unknownConfigKeys',
-	configKey: 'unknownConfigKeys',
-	configKeys: 'unknownConfigKeys',
-	unknownKey: 'unknownConfigKeys',
-	unknownKeys: 'unknownConfigKeys',
-};
+const topLevelSectionKey = 'validate';
 
 function parseValidateSection(data: object, config: UserConfig): UserConfig {
-	if (!Object.keys(data).includes(sectionKey)) {
-		dlogConfigWarnMissingOptionalSection(sectionKey);
+	const keyAliases: YamlKeyAliases = {
+		// Aliases for key "configKeys"
+		configKey: 'configKeys',
+		unknownConfigKey: 'configKeys',
+		unknownConfigKeys: 'configKeys',
+		unknownKey: 'configKeys',
+		unknownKeys: 'configKeys',
+		// Aliases for key "filePaths"
+		filePath: 'filePaths',
+		path: 'filePaths',
+		paths: 'filePaths',
+		// Aliases for subsection key "executables"
+		executable: 'executables',
+		exec: 'executables',
+		execs: 'executables',
+		exe: 'executables',
+		exes: 'executables',
+	};
+
+	if (!Object.keys(data).includes(topLevelSectionKey)) {
+		dlogConfigWarnMissingOptionalSection(topLevelSectionKey);
 		return config;
 	}
 
-	const section = (data as Record<string, unknown>)[sectionKey];
+	const section = (data as Record<string, unknown>)[topLevelSectionKey];
 
 	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
-		dlogConfigWarnOptionalSectionSkippedWrongType(sectionKey, 'section', section);
+		dlogConfigWarnOptionalSectionSkippedWrongType(
+			topLevelSectionKey,
+			'section',
+			section,
+		);
 		return config;
 	}
 
-	dlogConfigSectionStart(sectionKey);
+	dlogConfigSectionStart(topLevelSectionKey);
 
 	for (const [key, value] of Object.entries(section)) {
-		const resolved = resolveKeyFromAlias(keyAliases, key, sectionKey);
-		const { fullGivenKey, resolvedKey } = resolved;
+		const resolved = resolveKeyFromAlias(keyAliases, key, topLevelSectionKey);
+		const { fullGivenKey, resolvedKey, givenKey } = resolved;
 
 		switch (resolvedKey) {
 			case 'filePaths': {
@@ -60,26 +71,96 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 				break;
 			}
 			case 'executables': {
-				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+				if (typeof value !== 'object' || Array.isArray(value)) {
+					clogConfigValueWrongType(fullGivenKey, 'section', value);
 					break;
 				}
 
-				config.validate.executables = value;
-				vlogConfigValueLoaded(resolved, value);
+				// TODO Warn if this subsection is missing
+
+				config = parseSubsectionExecutables(givenKey, value as object, config);
 				break;
 			}
-			case 'unknownConfigKeys': {
+			case 'configKeys': {
 				if (typeof value !== 'boolean') {
 					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.validate.unknownConfigKeys = value;
+				config.validate.configKeys = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'executableExtensions': {
+			}
+			default: {
+				clogConfigKeyUnknown(fullGivenKey, config);
+			}
+		}
+	}
+
+	dlogConfigSectionOk(topLevelSectionKey);
+
+	return config;
+}
+
+function parseSubsectionExecutables(
+	givenSubsectionKey: string,
+	data: object,
+	config: UserConfig,
+): UserConfig {
+	const fullSubsectionKey = joinPathKeys(topLevelSectionKey, givenSubsectionKey);
+	const keyAliases: YamlKeyAliases = {
+		// Aliases for key "enabled"
+		enable: 'enabled',
+		// TODO Disable key
+		// Aliases for key "acceptedExtensions"
+		accepted: 'acceptedExtensions',
+		acceptedExt: 'acceptedExtensions',
+		acceptedExtensions: 'acceptedExtensions',
+		acceptable: 'acceptedExtensions',
+		acceptableExtensions: 'acceptedExtensions',
+		accept: 'acceptedExtensions',
+		acceptExtensions: 'acceptedExtensions',
+		validExt: 'acceptedExtensions',
+		validExtension: 'acceptedExtensions',
+		validExtensions: 'acceptedExtensions',
+		okExt: 'acceptedExtensions',
+		okExtension: 'acceptedExtensions',
+		okExtensions: 'acceptedExtensions',
+		executableExtension: 'acceptedExtensions',
+		executableExtensions: 'acceptedExtensions',
+	};
+
+	const section = data as Record<string, unknown>;
+
+	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
+		dlogConfigWarnOptionalSectionSkippedWrongType(
+			fullSubsectionKey,
+			'section',
+			section,
+		);
+		return config;
+	}
+
+	dlogConfigSectionStart(fullSubsectionKey);
+
+	for (const [key, value] of Object.entries(section)) {
+		const resolved = resolveKeyFromAlias(keyAliases, key, fullSubsectionKey);
+		const { fullGivenKey, resolvedKey } = resolved;
+
+		switch (resolvedKey) {
+			case 'enabled': {
+				if (typeof value !== 'boolean') {
+					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					break;
+				}
+
+				config.validate.executables.enabled = value;
+				vlogConfigValueLoaded(resolved, value);
+				break;
+			}
+			case 'acceptedExtensions': {
 				if (
 					typeof value !== 'object' ||
 					(!Array.isArray(value) && typeof value !== 'string')
@@ -92,6 +173,7 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 					break;
 				}
 
+				// TODO Test normalization
 				let normalized: Array<string>;
 
 				if (typeof value === 'string') {
@@ -108,17 +190,12 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 					);
 				}
 
-				config.validate.executableExtensions = normalized;
+				config.validate.executables.acceptedExtensions = normalized;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
-			default: {
-				clogConfigKeyUnknown(fullGivenKey, config);
-			}
 		}
 	}
-
-	dlogConfigSectionOk(sectionKey);
 
 	return config;
 }

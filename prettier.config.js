@@ -3,16 +3,24 @@
  * @type {import("prettier").Config}
  */
 const config = {
-    arrowParens: 'avoid',
-    bracketSpacing: true,
-    printWidth: 90,
-    semi: true,
-    singleQuote: true,
-    trailingComma: 'all',
-    tabWidth: 4,
-    useTabs: true,
+	arrowParens: 'avoid',
+	bracketSpacing: true,
+	printWidth: 90,
+	semi: true,
+	singleQuote: true,
+	trailingComma: 'all',
+	tabWidth: 4,
+	useTabs: true,
 
-    plugins: ['prettier-plugin-organize-imports'],
+	overrides: {
+		files: ['*.yml'],
+		options: {
+			tabWidth: 2,
+			useTabs: false,
+		},
+	},
+
+	plugins: ['prettier-plugin-organize-imports'],
 };
 
 export default config;

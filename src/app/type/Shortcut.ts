@@ -10,6 +10,7 @@ import { ShortcutData, ShortcutExportData } from './ShortcutData.js';
 
 // TODO jsdoc
 class Shortcut implements ShortcutData {
+	// TODO Make instanced config mandatory
 	private _config?: UserConfig;
 
 	private _title: string;
@@ -116,10 +117,14 @@ class Shortcut implements ShortcutData {
 		return this.getFullTargetPathFromBaseDir(baseDirectory);
 	}
 
-	public async formatAsListEntry(baseDirectory: string): Promise<Array<string>> {
+	// TODO Replace param config with instance config once done
+	public async formatAsListEntry(
+		baseDirectory: string,
+		config: UserConfig,
+	): Promise<Array<string>> {
 		const fmtTitle = quote(this.title);
 		const fullTarget = this.getFullTargetPathFromBaseDir(baseDirectory);
-		const fmtFullTarget = await fmt.pathWithExists(fullTarget); // TODO Pass config
+		const fmtFullTarget = await fmt.pathWithExists(fullTarget, config);
 		const fmtIsEnabled = yesNo(this.enabled);
 
 		return [

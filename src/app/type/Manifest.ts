@@ -37,6 +37,7 @@ import { ManifestData, NameSource } from './ManifestData.js';
 // TODO jsdocs
 class Manifest implements ManifestData {
 	private _filePath: string;
+	// TODO Mandate instanced config
 	private _config?: UserConfig;
 
 	private _sourceName: string;
@@ -196,7 +197,7 @@ class Manifest implements ManifestData {
 
 	private calculatePrefixForResults(results: WriteResults): string {
 		const { nTotal, nOk, nDisabled } = results.stats;
-		const useColor = this._config?.shouldUseColor() ?? true;
+		const useColor = this._config?.shouldConsoleUseColor;
 
 		const ok = useColor ? SB_OK_LG : UNICODE_CHECK_LG; // TODO withColor check
 		const err = useColor ? SB_ERR_LG : UNICODE_XMARK_LG;
@@ -234,7 +235,7 @@ class Manifest implements ManifestData {
 
 	private async dlogWriteResults(
 		results: WriteResults,
-		config?: UserConfig,
+		config: UserConfig,
 	): Promise<void> {
 		const { nTotal, nOk, nEnabled, nDisabled, nValid, nInvalid, nSkipped } =
 			results.stats;
@@ -250,7 +251,11 @@ class Manifest implements ManifestData {
 			'Source File',
 			config,
 		);
-		const fmtOutputPath = await fmt.pathWithNameAndExists(this.outputPath, 'Output');
+		const fmtOutputPath = await fmt.pathWithNameAndExists(
+			this.outputPath,
+			'Output',
+			config,
+		);
 		const fmtWriteFilePath = await fmt.pathWithNameAndExists(
 			this.writePath,
 			'Write File',
@@ -291,13 +296,13 @@ class Manifest implements ManifestData {
 
 	public async logWriteResults(
 		results: WriteResults,
-		config?: UserConfig,
+		config: UserConfig,
 	): Promise<void> {
-		await this.dlogWriteResults(results);
+		await this.dlogWriteResults(results, config);
 
 		const { manifest, stats, outputData } = results;
 		const { nTotal, nOk, nDisabled, nInvalid } = stats;
-		const useColor = config?.shouldUseColor() ?? true;
+		const useColor = this._config?.shouldConsoleUseColor;
 		const prefix = this.calculatePrefixForResults(results);
 		const quotedName = quote(manifest.name);
 		const sourceName = useColor ? clr.magentaBright(quotedName) : quotedName;

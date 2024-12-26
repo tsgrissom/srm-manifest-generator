@@ -1,7 +1,7 @@
 import clr from 'chalk';
 import { USER_CONFIG_ATTRIBUTION } from '../../config/loadConfig.js';
 import { USER_CONFIG_FILENAME } from '../../config/readFile.js';
-import { ConfigData } from '../../config/type/ConfigData.js';
+import { UserConfig } from '../../config/type/UserConfig.js';
 import { ResolvedYamlKey } from '../file/yaml.js';
 import * as fmt from '../string/format.js';
 import { getTypeDisplayName, indefiniteArticleFor } from '../string/grammar.js';
@@ -112,10 +112,8 @@ export function clogConfigFatalErrRequiredSectionWrongType(
 
 // MARK: LINT KEYS
 
-export function clogConfigKeyUnknown(fullGivenKey: string, config?: ConfigData): void {
-	const shouldWarn = config?.validate.unknownConfigKeys ?? true;
-
-	if (!shouldWarn) {
+export function clogConfigKeyUnknown(fullGivenKey: string, config: UserConfig): void {
+	if (!config.validate.configKeys) {
 		return;
 	}
 

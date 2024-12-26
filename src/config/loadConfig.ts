@@ -6,10 +6,9 @@ import clr from 'chalk';
 import { UserConfig } from './type/UserConfig.js';
 
 import { dlogHeader } from '../util/logging/debug.js';
-import parseLogsSection from './parseSection/logs.js';
-import parseOtherSection from './parseSection/other.js';
-import parseOutputSection from './parseSection/output.js';
+import parseLogSection from './parseSection/log.js';
 import parseSearchSection from './parseSection/search.js';
+import parseTransformSection from './parseSection/transform.js';
 import parseValidateSection from './parseSection/validate.js';
 import { loadUserConfigData } from './readFile.js';
 
@@ -90,10 +89,10 @@ async function parseUserConfigData(): Promise<UserConfig> {
 
 	let userConfig = new UserConfig();
 
-	userConfig = parseOutputSection(userConfigData, userConfig);
+	// Order is important
 	userConfig = parseValidateSection(userConfigData, userConfig);
-	userConfig = parseOtherSection(userConfigData, userConfig);
-	userConfig = parseLogsSection(userConfigData, userConfig);
+	userConfig = parseLogSection(userConfigData, userConfig);
+	userConfig = parseTransformSection(userConfigData, userConfig);
 	userConfig = await parseSearchSection(userConfigData, userConfig);
 
 	return userConfig;

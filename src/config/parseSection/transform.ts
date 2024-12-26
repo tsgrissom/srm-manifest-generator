@@ -15,13 +15,15 @@ import { UserConfig } from '../type/UserConfig.js';
 const sectionKey = 'output';
 const keyAliases: YamlKeyAliases = {
 	minification: 'minify',
-	indentationSpaces: 'indentSpaces',
-	indentLevel: 'indentSpaces',
+	indentSpaces: 'indentationSpaces',
+	indentLevel: 'indentationSpaces',
+	indentationLevel: 'indentationSpaces',
+	indent: 'indentationSpaces',
 	outputMode: 'mode',
 	spreadMode: 'mode',
 };
 
-function parseOutputSection(data: object, config: UserConfig): UserConfig {
+function parseTransformSection(data: object, config: UserConfig): UserConfig {
 	if (!Object.keys(data).includes(sectionKey)) {
 		dlogConfigWarnMissingOptionalSection(sectionKey);
 		return config;
@@ -47,17 +49,19 @@ function parseOutputSection(data: object, config: UserConfig): UserConfig {
 					break;
 				}
 
-				config.output.minify = value;
+				config.transform.minify = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
-			case 'indentSpaces': {
+			case 'indentationSpaces': {
 				if (typeof value !== 'number') {
 					clogConfigValueWrongType(fullGivenKey, 'number', value);
 					break;
 				}
 
-				config.output.indentSpaces = value;
+				// TODO Check for invalid values
+
+				config.transform.indentationSpaces = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
@@ -69,9 +73,11 @@ function parseOutputSection(data: object, config: UserConfig): UserConfig {
 
 				const valueLow = value.toLowerCase();
 
-				if (valueLow === 'combine') config.output.mode = OutputMode.Combine;
-				else if (valueLow === 'spread') config.output.mode = OutputMode.Spread;
-				else {
+				if (valueLow === 'combine') {
+					config.transform.mode = OutputMode.Combine;
+				} else if (valueLow === 'spread') {
+					config.transform.mode = OutputMode.Spread;
+				} else {
 					clogConfigValueUnknown(fullGivenKey, value);
 					break;
 				}
@@ -90,4 +96,4 @@ function parseOutputSection(data: object, config: UserConfig): UserConfig {
 	return config;
 }
 
-export default parseOutputSection;
+export default parseTransformSection;

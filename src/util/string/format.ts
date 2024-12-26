@@ -83,37 +83,30 @@ export function bool(
 	return b ? clr.green(s) : clr.red(s);
 }
 
+// TODO jsdoc
 export const yesNo = (b: boolean): string => bool(b, boolPresets.YesNo);
+// TODO jsdoc
 export const enabledDisabled = (b: boolean): string =>
 	bool(b, boolPresets.EnabledDisabled);
+// TODO jsdoc
 export const checkCross = (b: boolean): string => bool(b, boolPresets.CheckCross);
 
 // MARK: PATH
 
+// TODO jsdoc
 export interface PathFmtOptions {
 	useUnderline: boolean;
 	useQuotes: boolean;
 }
 
+// TODO jsdoc
 export const defaultPathFmtOptions: PathFmtOptions = {
 	useUnderline: true,
 	useQuotes: true,
 };
 
 // MARK: path
-
-/**
- * Formats a given filepath to a better version for console.
- * Options available are to apply underline and/or apply
- * quotations, both of which are enabled by default.
- *
- * @param filePath The filepath to format.
- * @param useUnderline Whether to apply underline formatting
- *  to the given filepath.
- * @param useQuotes Whether to apply quotation marks to the
- *  the given filepath if it not surrounded by them already.
- * @returns The formatted filepath with the options applied.
- */
+// TODO jsdoc
 // TODO Unit Test
 export function path(
 	filePath: string,
@@ -141,37 +134,18 @@ export function path(
 }
 
 // MARK: pathWithExists
-
-/**
- * Styles the given path according to if it is accessible or not.
- * If the path is accessible, a green checkmark prefix is applied.
- * Otherwise, a red x-mark prefix is applied.
- *
- * * This function uses `fs.access` to determine if the path is
- *   accessible or not
- * * This means that if the user does not have permissions to
- *   access the file, it will appear with the red x-mark, even
- *   if the path exists in the system
- *
- * @param filePath The filepath to check for accessibility.
- * @returns A Promise which unwraps to a `boolean` value if
- *  resolved, which represents whether `filePath` was accessible
- *  or not.
- */
 // TODO jsdoc
 // TODO Unit Test
 export async function pathWithExists( // TODO Update jsdoc
 	filePath: string,
-	config?: UserConfig,
+	config: UserConfig,
 	options: PathFmtOptions = defaultPathFmtOptions,
 ): Promise<string> {
-	const shouldValidatePaths = config?.shouldValidateFilePaths() ?? true;
-
 	if (options.useUnderline || options.useQuotes) {
 		filePath = path(filePath, options);
 	}
 
-	if (!shouldValidatePaths) {
+	if (!config.shouldValidateFilePaths) {
 		return filePath;
 	}
 
@@ -206,17 +180,15 @@ export function pathWithName(
 export async function pathWithNameAndExists(
 	filePath: string,
 	nickname: string,
-	config?: UserConfig,
+	config: UserConfig,
 	tabPrefix = ' ',
 	options: PathFmtOptions = defaultPathFmtOptions,
 ): Promise<string> {
-	const shouldValidatePaths = config?.shouldValidateFilePaths() ?? true;
-
 	if (options.useUnderline || options.useQuotes) {
 		filePath = path(filePath, options);
 	}
 
-	if (!shouldValidatePaths) {
+	if (!config.shouldValidateFilePaths) {
 		return filePath;
 	}
 

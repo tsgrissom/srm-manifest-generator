@@ -2,34 +2,47 @@ import { Manifest } from '../../app/type/Manifest.js';
 
 // MARK: Interface: ConfigData
 
-// TODO jsdoc
-interface ConfigData {
-	search: {
-		manifests: Array<Manifest>;
-		scanDirectories: boolean;
-		scanRecursively: boolean;
+// TODO jsdocs
+
+interface ConfigSearchSection {
+	manifests: Array<Manifest>;
+	withinDirectories: boolean;
+	recursively: boolean;
+}
+
+interface ConfigValidateSection {
+	configKeys: boolean;
+	filePaths: boolean;
+	executables: {
+		enabled: boolean;
+		acceptedExtensions: Array<string>;
 	};
-	output: {
-		minify: boolean;
-		indentSpaces: number;
-		mode: OutputMode;
-	};
-	validate: {
-		filePaths: boolean;
-		executables: boolean;
-		unknownConfigKeys: boolean;
-		executableExtensions: Array<string>;
-	};
-	other: {
+}
+
+interface ConfigTransformSection {
+	minify: boolean;
+	indentationSpaces: number;
+	mode: OutputMode;
+}
+
+interface ConfigLogSection {
+	console: {
 		useColor: boolean;
 		debug: boolean;
 		verbose: boolean;
 	};
-	logs: {
+	file: {
 		enabled: boolean;
 		outputPath: string;
 		nameFormat: string;
 	};
+}
+
+interface ConfigData {
+	search: ConfigSearchSection;
+	validate: ConfigValidateSection;
+	transform: ConfigTransformSection;
+	log: ConfigLogSection;
 }
 
 // MARK: Enum: OutputMode
@@ -39,4 +52,11 @@ enum OutputMode {
 	Spread,
 }
 
-export { ConfigData, OutputMode };
+export {
+	ConfigData,
+	ConfigLogSection,
+	ConfigSearchSection,
+	ConfigTransformSection,
+	ConfigValidateSection,
+	OutputMode,
+};

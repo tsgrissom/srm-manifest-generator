@@ -1,3 +1,5 @@
+import parseValidateSection from '../../../../src/config/parseSection/validate';
+import { UserConfig } from '../../../../src/config/type/UserConfig';
 import {
 	clogConfigFatalErr,
 	clogConfigKeyUnknown,
@@ -6,8 +8,8 @@ import {
 	clogConfigWarn,
 } from '../../../../src/util/logging/config';
 
-import configWarnUnknownKeyOff from '../../../resource/json/configWarnUnknownKeyOff';
-import configWarnUnknownKeyOn from '../../../resource/json/configWarnUnknownKeyOn';
+import configDataValidateConfigKeysOff from '../../../resource/json/configValidateConfigKeysOff';
+import configDataValidateConfigKeysOn from '../../../resource/json/configValidateConfigKeysOn';
 
 let logSpy: jest.SpyInstance;
 let errorSpy: jest.SpyInstance;
@@ -77,18 +79,30 @@ describe(`Function: clogConfigKeyUnknown()`, () => {
 	// it.todo('logs to stdout if enabled by config');
 	it.todo('logs to stdout if config is undefined');
 
+	let configValidateConfigKeysOff: UserConfig;
+	let configValidateConfigKeysOn: UserConfig;
+
+	beforeEach(() => {
+		configValidateConfigKeysOff = new UserConfig();
+		configValidateConfigKeysOff = parseValidateSection(
+			configDataValidateConfigKeysOff,
+			configValidateConfigKeysOff,
+		);
+
+		configValidateConfigKeysOn = new UserConfig();
+		configValidateConfigKeysOn = parseValidateSection(
+			configDataValidateConfigKeysOn,
+			configValidateConfigKeysOn,
+		);
+	});
+
 	it('does not log to stdout if disabled by config', () => {
-		clogConfigKeyUnknown('some.full.key', configWarnUnknownKeyOff);
+		clogConfigKeyUnknown('some.full.key', configValidateConfigKeysOff);
 		expect(logSpy).not.toHaveBeenCalled();
 	});
 
 	it('logs to to stdout if enabled by config', () => {
-		clogConfigKeyUnknown('some.full.key', configWarnUnknownKeyOn);
-		expect(logSpy).toHaveBeenCalled();
-	});
-
-	it('logs to to stdout if config undefined', () => {
-		clogConfigKeyUnknown('some.full.key', undefined);
+		clogConfigKeyUnknown('some.full.key', configValidateConfigKeysOn);
 		expect(logSpy).toHaveBeenCalled();
 	});
 });

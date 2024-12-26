@@ -1,6 +1,6 @@
 import clr from 'chalk';
 import parseUserConfigData from '../config/loadConfig.js';
-import { ConfigData } from '../config/type/ConfigData.js';
+import { UserConfig } from '../config/type/UserConfig.js';
 import { clog } from '../util/logging/console.js';
 import { dlog, isVerbose } from '../util/logging/debug.js';
 import * as fmt from '../util/string/format.js';
@@ -8,7 +8,7 @@ import { countNoun, possessivePronounFor } from '../util/string/grammar.js';
 import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from '../util/string/symbols.js';
 import { Manifest } from './type/Manifest.js';
 
-async function processManifest(manifest: Manifest): Promise<void> {
+async function processManifest(manifest: Manifest, config: UserConfig): Promise<void> {
 	// TODO Additionally validate if write path is valid, make folders if missing
 	// TODO If it's a file, write to the file, but if it's a folder, write the file inside of the folder, maybe based on the input file's name
 
@@ -23,7 +23,7 @@ async function processManifest(manifest: Manifest): Promise<void> {
 
 	try {
 		const writeResults = await manifest.writeToOutput();
-		await manifest.logWriteResults(writeResults);
+		await manifest.logWriteResults(writeResults, config);
 	} catch {
 		throw new Error(
 			`An error occurred while writing an output manifest (Manifest: ${manifest.name})`,
@@ -31,8 +31,8 @@ async function processManifest(manifest: Manifest): Promise<void> {
 	}
 }
 
-export function listLoadedManifests(config: ConfigData): void {
-	const { manifests } = config.search;
+export function listLoadedManifests(config: UserConfig): void {
+	const { manifests } = config;
 	const manLen = manifests.length;
 
 	if (manLen <= 0) {
@@ -47,7 +47,7 @@ export function listLoadedManifests(config: ConfigData): void {
 	}
 }
 
-export async function listShortcutsOfLoadedManifests(config: ConfigData): Promise<void> {
+export async function listShortcutsOfLoadedManifests(config: UserConfig): Promise<void> {
 	const { manifests } = config.search;
 	const manLen = manifests.length;
 	const SB_HINT = clr.yellow('!');
@@ -106,7 +106,7 @@ export async function listShortcutsOfLoadedManifests(config: ConfigData): Promis
 		}
 
 		for (const sc of man.enabledShortcuts) {
-			const lines = await sc.formatAsListEntry(man.baseDirectory);
+			const lines = await sc.formatAsListEntry(man.baseDirectory, config);
 			lines.forEach(line => clog(line));
 		}
 	}
@@ -116,8 +116,8 @@ export async function listShortcutsOfLoadedManifests(config: ConfigData): Promis
 // 	// TODO
 // }
 
-export async function transformLoadedManifests(config: ConfigData): Promise<void> {
-	const { manifests } = config.search;
+export async function transformLoadedManifests(config: UserConfig): Promise<void> {
+	const { manifests } = config;
 	const manLen = manifests.length;
 
 	if (manLen <= 0) {
@@ -142,7 +142,7 @@ export async function transformLoadedManifests(config: ConfigData): Promise<void
 
 	for (const man of manifests) {
 		try {
-			await processManifest(man);
+			await processManifest(man, config);
 			okLen++;
 		} catch {
 			console.error(

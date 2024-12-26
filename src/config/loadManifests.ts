@@ -149,12 +149,10 @@ async function validateManifestPathIsSupportedFilesystemType(
 				`Unsupported filesystem type (Supported: File or Folder) was set as a manifest path in the user ${USER_CONFIG_FILENAME}.`,
 			);
 
-		const { scanDirectories } = config.search;
-
 		if (stats.isFile()) {
 			return true;
 		} else if (stats.isDirectory()) {
-			if (!scanDirectories) {
+			if (!config.search.withinDirectories) {
 				clogConfigWarn(
 					`Manifests file path list contains a path pointing to a directory, but scanning directories is disabled by the user's ${USER_CONFIG_FILENAME}. The following path will be skipped: ${filePath}`,
 				);
@@ -207,7 +205,7 @@ interface LoadManifestShortcutsResult {
 function loadShortcuts(
 	arr: Array<unknown>,
 	sourceName = 'Unknown',
-	config?: UserConfig,
+	config: UserConfig,
 ): LoadManifestShortcutsResult {
 	dlog('');
 	dlog(clr.cyanBright.underline(`LOADING SHORTCUTS FROM MANIFEST ${sourceName}`));
@@ -250,7 +248,7 @@ function loadShortcuts(
 function parseManifestFileContentsToData(
 	filePath: string,
 	obj: object,
-	config?: UserConfig,
+	config: UserConfig,
 ): ManifestData {
 	const keyAliases: YamlKeyAliases = {
 		sourceName: 'sourceName',
