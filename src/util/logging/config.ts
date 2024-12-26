@@ -1,6 +1,5 @@
 import clr from 'chalk';
-import { USER_CONFIG_ATTRIBUTION } from '../../config/loadConfig.js';
-import { USER_CONFIG_FILENAME } from '../../config/readFile.js';
+import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME } from '../../config/loadConfig.js';
 import { UserConfig } from '../../config/type/UserConfig.js';
 import { ResolvedYamlKey } from '../file/yaml.js';
 import * as fmt from '../string/format.js';

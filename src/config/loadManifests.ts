@@ -30,9 +30,9 @@ import {
 	parseObjectsIntoArrayOfShortcutData,
 	validateParseShortcutObjectsIntoDataSuccessful,
 } from './loadShortcuts.js';
-import { USER_CONFIG_FILENAME } from './readFile.js';
 import { ConfigData } from './type/ConfigData.js';
 import { UserConfig } from './type/UserConfig.js';
+import { USER_CONFIG_FILENAME } from './loadConfig.js';
 
 // MARK: createManifestInstances
 async function createManifestInstances(

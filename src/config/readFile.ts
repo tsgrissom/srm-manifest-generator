@@ -19,6 +19,7 @@ import * as fmt from '../util/string/format.js';
 import { SB_ERR_LG, SB_OK_LG, SB_WARN } from '../util/string/symbols.js';
 import { ConfigData } from './type/ConfigData.js';
 
+// MARK: downloadExampleConfig
 /**
  * Attempts to download the example.config.yml from the project repository,
  * writing its contents into the local `./config/example` folder.
@@ -106,6 +107,7 @@ async function downloadExampleConfig(): Promise<boolean> {
 	});
 }
 
+// MARK: copyExampleConfigToUserConfigPath
 /**
  * Attempts to copy the file at {@link EXAMPLE_CONFIG_PATH} to the
  * {@link USER_CONFIG_PATH}.
@@ -118,7 +120,7 @@ async function copyExampleConfigToUserConfigPath(): Promise<void> {
 		await fs.promises.access(USER_CONFIG_PATH);
 		throw new Error(
 			clr.red(
-				`copyExampleConfigToUserConfigPath was invoked but ${USER_CONFIG_PATH} already exists`,
+				`Unexpected: copyExampleConfigToUserConfigPath was invoked but ${USER_CONFIG_PATH} already exists`,
 			),
 		);
 	} catch {
@@ -161,7 +163,7 @@ async function copyExampleConfigToUserConfigPath(): Promise<void> {
  *   resolved, or otherwise rejects when all fallback methods are
  *   exhausted or unhandled errors occur.
  */
-async function loadUserConfigData(): Promise<object> {
+export async function loadUserConfigData(): Promise<object> {
 	let exampleConfigHandle;
 	let userConfigHandle;
 
@@ -224,11 +226,7 @@ async function loadUserConfigData(): Promise<object> {
 	return configData;
 }
 
-export {
-	EXAMPLE_CONFIG_FILENAME,
-	EXAMPLE_CONFIG_PATH,
-	EXAMPLE_CONFIG_URL,
-	loadUserConfigData,
-	USER_CONFIG_FILENAME,
-	USER_CONFIG_PATH,
-};
+export async function loadExampleConfigData(): Promise<ConfigData> {
+	const fileContents = await fs.promises.readFile(EXAMPLE_CONFIG_PATH, 'utf8');
+	return JSON.parse(fileContents) as ConfigData;
+}

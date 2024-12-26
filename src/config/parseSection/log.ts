@@ -47,11 +47,12 @@ function parseSubsectionConsole(data: object, config: UserConfig): UserConfig {
 	const sectionKey = 'console';
 	const fullSubsectionKey = joinPathKeys(topLevelSectionKey, sectionKey);
 	const keyAliases: YamlKeyAliases = {
-		useColor: 'useColor',
-		withColor: 'useColor',
-		debug: 'debug',
+		// Aliases for key "withColor"
+		useColor: 'withColor',
+		color: 'withColor',
+		// Aliases for key "debug"
 		debugging: 'debug',
-		verbose: 'verbose',
+		// Aliases for key "verbose"
 		verbosity: 'verbose',
 	};
 
@@ -88,13 +89,13 @@ function parseSubsectionConsole(data: object, config: UserConfig): UserConfig {
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
-			case 'useColor': {
+			case 'withColor': {
 				if (typeof value !== 'boolean') {
 					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.log.console.useColor = value;
+				config.log.console.withColor = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}

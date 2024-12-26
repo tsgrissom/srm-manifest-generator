@@ -4,59 +4,67 @@ import { Manifest } from '../../app/type/Manifest.js';
 
 // TODO jsdocs
 
-interface ConfigSearchSection {
+interface ConfigData {
+	search: ConfigSectionSearch;
+	validate: ConfigSectionValidate;
+	transform: ConfigSectionTransform;
+	log: ConfigSectionLog;
+}
+
+// MARK: Section: Search
+interface ConfigSectionSearch {
 	manifests: Array<Manifest>;
 	withinDirectories: boolean;
 	recursively: boolean;
 }
 
-interface ConfigValidateSection {
+// MARK: Section: Validate
+interface ConfigSectionValidate {
 	configKeys: boolean;
 	filePaths: boolean;
-	executables: {
-		enabled: boolean;
-		acceptedExtensions: Array<string>;
-	};
+	executables: ConfigSectionValidateSubsectionExecutables;
 }
 
-interface ConfigTransformSection {
+interface ConfigSectionValidateSubsectionExecutables {
+	enabled: boolean;
+	acceptedExtensions: Array<string>;
+}
+
+// MARK: Section: Transform
+interface ConfigSectionTransform {
 	minify: boolean;
 	indentationSpaces: number;
 	mode: OutputMode;
 }
-
-interface ConfigLogSection {
-	console: {
-		useColor: boolean;
-		debug: boolean;
-		verbose: boolean;
-	};
-	file: {
-		enabled: boolean;
-		outputPath: string;
-		nameFormat: string;
-	};
-}
-
-interface ConfigData {
-	search: ConfigSearchSection;
-	validate: ConfigValidateSection;
-	transform: ConfigTransformSection;
-	log: ConfigLogSection;
-}
-
-// MARK: Enum: OutputMode
 
 enum OutputMode {
 	Combine,
 	Spread,
 }
 
+// MARK: Section: Log
+interface ConfigSectionLog {
+	console: ConfigSectionLogSubsectionConsole;
+	file: ConfigSectionLogSubsectionFile
+}
+
+interface ConfigSectionLogSubsectionConsole {
+	withColor: boolean;
+	debug: boolean;
+	verbose: boolean;
+}
+
+interface ConfigSectionLogSubsectionFile {
+	enabled: boolean;
+	outputPath: string;
+	nameFormat: string;
+}
+
 export {
 	ConfigData,
-	ConfigLogSection,
-	ConfigSearchSection,
-	ConfigTransformSection,
-	ConfigValidateSection,
+	ConfigSectionLog,
+	ConfigSectionSearch,
+	ConfigSectionTransform,
+	ConfigSectionValidate,
 	OutputMode,
 };

@@ -9,8 +9,7 @@ import {
 	startApp,
 } from '../app/startApp.js';
 import { Manifest } from '../app/type/Manifest.js';
-import parseUserConfigData from '../config/loadConfig.js';
-import { USER_CONFIG_PATH } from '../config/readFile.js';
+import parseUserConfigData, { USER_CONFIG_PATH } from '../config/loadConfig.js';
 import { clog, clogList } from '../util/logging/console.js';
 import * as fmt from '../util/string/format.js';
 import { delimitedList } from '../util/string/grammar.js';

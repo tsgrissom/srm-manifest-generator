@@ -21,7 +21,7 @@ const data: ConfigData = {
 	},
 	log: {
 		console: {
-			useColor: false,
+			withColor: false,
 			debug: false,
 			verbose: false,
 		},

@@ -6,10 +6,10 @@ import {
 } from '../../util/logging/debug.js';
 import {
 	ConfigData,
-	ConfigLogSection,
-	ConfigSearchSection,
-	ConfigTransformSection,
-	ConfigValidateSection,
+	ConfigSectionLog,
+	ConfigSectionSearch,
+	ConfigSectionTransform,
+	ConfigSectionValidate,
 	OutputMode,
 } from './ConfigData.js';
 
@@ -21,25 +21,25 @@ import {
 // TODO jsdocs
 class UserConfig implements ConfigData {
 	private _section: {
-		search: ConfigSearchSection;
-		validate: ConfigValidateSection;
-		transform: ConfigTransformSection;
-		log: ConfigLogSection;
+		search: ConfigSectionSearch;
+		validate: ConfigSectionValidate;
+		transform: ConfigSectionTransform;
+		log: ConfigSectionLog;
 	};
 
-	public get search(): ConfigSearchSection {
+	public get search(): ConfigSectionSearch {
 		return this._section.search;
 	}
 
-	public get validate(): ConfigValidateSection {
+	public get validate(): ConfigSectionValidate {
 		return this._section.validate;
 	}
 
-	public get transform(): ConfigTransformSection {
+	public get transform(): ConfigSectionTransform {
 		return this._section.transform;
 	}
 
-	public get log(): ConfigLogSection {
+	public get log(): ConfigSectionLog {
 		return this._section.log;
 	}
 
@@ -65,7 +65,7 @@ class UserConfig implements ConfigData {
 			},
 			log: {
 				console: {
-					useColor: true,
+					withColor: true,
 					debug: false,
 					verbose: false,
 				},
@@ -133,7 +133,7 @@ class UserConfig implements ConfigData {
 	// Section: Log
 
 	public get shouldConsoleUseColor(): boolean {
-		return this.log.console.useColor ?? true;
+		return this.log.console.withColor ?? true;
 	}
 
 	public get isDebugging(): boolean {
