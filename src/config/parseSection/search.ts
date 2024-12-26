@@ -3,7 +3,7 @@ import {
 	clogConfigFatalErrMissingRequiredSection,
 	clogConfigFatalErrRequiredSectionWrongType,
 	clogConfigKeyUnknown,
-	clogConfigValueWrongType,
+	logConfigValueWrongType,
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
 	vlogConfigValueLoaded,
@@ -12,6 +12,7 @@ import { clog } from '../../util/logging/console.js';
 import { quote } from '../../util/string/quote.js';
 import { SB_ERR_SM, SB_WARN } from '../../util/string/symbols.js';
 import createManifestInstances from '../loadManifests.js';
+import { ConfigData } from '../type/ConfigData.js';
 import { UserConfig } from '../type/UserConfig.js';
 
 const sectionKey = 'search';
@@ -37,13 +38,13 @@ const keyAliases: YamlKeyAliases = {
 	manifestsPaths: 'manifests',
 };
 
-async function parseSearchSection(data: object, config: UserConfig): Promise<UserConfig> {
-	if (!Object.keys(data).includes(sectionKey)) {
+async function parseSearchSection(rawData: object, parsedData: ConfigData): Promise<ConfigData> {
+	if (!Object.keys(rawData).includes(sectionKey)) {
 		clogConfigFatalErrMissingRequiredSection(sectionKey);
 		process.exit();
 	}
 
-	const section = (data as Record<string, unknown>)[sectionKey];
+	const section = (rawData as Record<string, unknown>)[sectionKey];
 
 	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
 		clogConfigFatalErrRequiredSectionWrongType(sectionKey, 'section', section);
@@ -59,21 +60,21 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 		switch (resolvedKey) {
 			case 'withinDirectories': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.search.withinDirectories = value;
+				parsedData.search.withinDirectories = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'recursively': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.search.recursively = value;
+				parsedData.search.recursively = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
@@ -89,14 +90,15 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 					Array.isArray(value) &&
 					value.every(item => typeof item === 'string')
 				) {
-					config.search.manifests = await createManifestInstances(
+					// TODO Shouldn't be using new UserConfig here, but once manifests load at a later step this can be removed
+					parsedData.search.manifests = await createManifestInstances(
 						value,
-						config,
+						new UserConfig(parsedData),
 					);
 					vlogConfigValueLoaded(resolved, value);
 				} else {
 					if (!Array.isArray(value)) {
-						clogConfigValueWrongType(fullGivenKey, 'array of strings', value); // TODO Probably want a custom print here
+						logConfigValueWrongType(fullGivenKey, 'array of strings', value); // TODO Probably want a custom print here
 					} else {
 						clog(
 							`   ${SB_ERR_SM} Values inside array value of key ${quote(fullResolvedKey)} must all be strings, but at least one was a non-string`,
@@ -107,14 +109,14 @@ async function parseSearchSection(data: object, config: UserConfig): Promise<Use
 				break;
 			}
 			default: {
-				clogConfigKeyUnknown(fullGivenKey, config);
+				clogConfigKeyUnknown(fullGivenKey, parsedData);
 			}
 		}
 	}
 
 	dlogConfigSectionOk(sectionKey);
 
-	return config;
+	return parsedData;
 }
 
 export default parseSearchSection;

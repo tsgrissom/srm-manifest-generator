@@ -4,67 +4,58 @@ import { Manifest } from '../../app/type/Manifest.js';
 
 // TODO jsdocs
 
-interface ConfigData {
-	search: ConfigSectionSearch;
-	validate: ConfigSectionValidate;
-	transform: ConfigSectionTransform;
-	log: ConfigSectionLog;
+export interface ConfigData {
+	search: ConfigDataSectionSearch;
+	validate: ConfigDataSectionValidate;
+	transform: ConfigDataSectionTransform;
+	log: ConfigDataSectionLog;
 }
 
 // MARK: Section: Search
-interface ConfigSectionSearch {
+export interface ConfigDataSectionSearch {
 	manifests: Array<Manifest>;
 	withinDirectories: boolean;
 	recursively: boolean;
 }
 
 // MARK: Section: Validate
-interface ConfigSectionValidate {
+export interface ConfigDataSectionValidate {
 	configKeys: boolean;
 	filePaths: boolean;
-	executables: ConfigSectionValidateSubsectionExecutables;
+	executables: ConfigDataSectionValidateSubsectionExecutables;
 }
 
-interface ConfigSectionValidateSubsectionExecutables {
+export interface ConfigDataSectionValidateSubsectionExecutables {
 	enabled: boolean;
 	acceptedExtensions: Array<string>;
 }
 
 // MARK: Section: Transform
-interface ConfigSectionTransform {
+export interface ConfigDataSectionTransform {
 	minify: boolean;
 	indentationSpaces: number;
-	mode: OutputMode;
+	outputMode: OutputMode;
 }
 
-enum OutputMode {
-	Combine,
-	Spread,
+export enum OutputMode {
+	Combine = 'Combine',
+	Spread = 'Spread',
 }
 
 // MARK: Section: Log
-interface ConfigSectionLog {
-	console: ConfigSectionLogSubsectionConsole;
-	file: ConfigSectionLogSubsectionFile
+export interface ConfigDataSectionLog {
+	console: ConfigDataSectionLogSubsectionConsole;
+	file: ConfigDataSectionLogSubsectionFile
 }
 
-interface ConfigSectionLogSubsectionConsole {
+export interface ConfigDataSectionLogSubsectionConsole {
 	withColor: boolean;
 	debug: boolean;
 	verbose: boolean;
 }
 
-interface ConfigSectionLogSubsectionFile {
+export interface ConfigDataSectionLogSubsectionFile {
 	enabled: boolean;
 	outputPath: string;
 	nameFormat: string;
 }
-
-export {
-	ConfigData,
-	ConfigSectionLog,
-	ConfigSectionSearch,
-	ConfigSectionTransform,
-	ConfigSectionValidate,
-	OutputMode,
-};

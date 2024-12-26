@@ -232,6 +232,5 @@ export function delimitedList(items: string | Array<string>, delimiter = ', '): 
  */
 // TODO Custom color for true/false? A lighter green/red to distinguish from ansi green/red
 // TODO Move to `type.ts`?
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getTypeDisplayName = (value?: any): string =>
+export const getTypeDisplayName = (value: unknown): string =>
 	Array.isArray(value) ? 'array' : `${typeof value}`;

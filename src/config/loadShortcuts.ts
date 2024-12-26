@@ -8,7 +8,7 @@ import Shortcut from '../app/type/Shortcut.js';
 import { isShortcutData, ShortcutData } from '../app/type/ShortcutData.js';
 import { resolveKeyFromAlias, YamlKeyAliases } from '../util/file/yaml.js';
 import {
-	clogConfigValueWrongType,
+	logConfigValueWrongType,
 	vlogConfigValueLoaded,
 } from '../util/logging/config.js';
 import { dlog, vlog, vlogList } from '../util/logging/debug.js';
@@ -226,7 +226,7 @@ function createShortcutFromData(rawData: ShortcutData, config: UserConfig): Shor
 		switch (resolvedKey) {
 			case 'title': {
 				if (typeof value !== 'string') {
-					clogConfigValueWrongType(fullGivenKey, 'string', value);
+					logConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
 				}
 
@@ -238,7 +238,7 @@ function createShortcutFromData(rawData: ShortcutData, config: UserConfig): Shor
 			}
 			case 'target': {
 				if (typeof value !== 'string') {
-					clogConfigValueWrongType(fullGivenKey, 'string', value);
+					logConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
 				}
 
@@ -250,7 +250,7 @@ function createShortcutFromData(rawData: ShortcutData, config: UserConfig): Shor
 			}
 			case 'enabled': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
@@ -260,7 +260,7 @@ function createShortcutFromData(rawData: ShortcutData, config: UserConfig): Shor
 			}
 			case 'disabled': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 

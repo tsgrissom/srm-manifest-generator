@@ -3,7 +3,7 @@ import YAML from 'yaml';
 
 import {
 	clogConfigKeyUnknown,
-	clogConfigValueWrongType,
+	logConfigValueWrongType,
 	clogConfigWarn,
 	vlogConfigValueLoaded,
 } from '../util/logging/config.js';
@@ -313,7 +313,7 @@ function parseManifestFileContentsToData(
 			case 'sourceName': {
 				if (typeof value !== 'string') {
 					// Not a failure for Manifest
-					clogConfigValueWrongType(fullGivenKey, 'string', value);
+					logConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
 				}
 
@@ -327,7 +327,7 @@ function parseManifestFileContentsToData(
 				if (typeof value !== 'string') {
 					// Manifest fails
 					// TODO Soft fail this manifest only
-					clogConfigValueWrongType(fullGivenKey, 'string', value);
+					logConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
 				}
 
@@ -341,7 +341,7 @@ function parseManifestFileContentsToData(
 				if (typeof value !== 'string') {
 					// Manifest fails
 					// TODO Soft fail this manifest only
-					clogConfigValueWrongType(fullGivenKey, 'string', value);
+					logConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
 				}
 
@@ -353,7 +353,7 @@ function parseManifestFileContentsToData(
 			}
 			case 'shortcuts': {
 				if (!Array.isArray(value)) {
-					clogConfigValueWrongType(
+					logConfigValueWrongType(
 						fullGivenKey,
 						'array of shortcut objects',
 						value,

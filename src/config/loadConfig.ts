@@ -11,6 +11,8 @@ import parseSearchSection from './parseSection/search.js';
 import parseTransformSection from './parseSection/transform.js';
 import parseValidateSection from './parseSection/validate.js';
 import { loadUserConfigData } from './readFile.js';
+import { ConfigData } from './type/ConfigData.js';
+import { createDefaultConfigData } from './type/DefaultConfig.js';
 
 export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml',
 	EXAMPLE_CONFIG_PATH = path.join('config', 'example', EXAMPLE_CONFIG_FILENAME),
@@ -48,11 +50,19 @@ async function loadData(): Promise<object> {
 	}
 }
 
+async function parseSections(rawData: object, parsedData: ConfigData): Promise<ConfigData> {
+	parsedData = parseValidateSection(rawData, parsedData);
+	parsedData = parseLogSection(rawData, parsedData);
+	parsedData = parseTransformSection(rawData, parsedData);
+	parsedData = await parseSearchSection(rawData, parsedData);
+	return parsedData;
+}
+
 // TODO Consider re-doing with typeguard
 async function parseUserConfigData(): Promise<UserConfig> {
-	const userConfigData = await loadData();
+	const rawData = await loadData();
 
-	if (!userConfigData) {
+	if (!rawData) {
 		const userConfName = clr.redBright(USER_CONFIG_FILENAME);
 
 		// TODO Test and see how this looks
@@ -68,13 +78,13 @@ async function parseUserConfigData(): Promise<UserConfig> {
 		process.exit();
 	}
 
-	const isObject = typeof userConfigData === 'object';
-	const isArray = Array.isArray(userConfigData);
+	const isObject = typeof rawData === 'object';
+	const isArray = Array.isArray(rawData);
 
 	if (!isObject || isArray) {
 		if (!isObject) {
 			logConfErrMalformed(
-				`Expected file contents to be of type object, but was actually a ${typeof userConfigData}`,
+				`Expected file contents to be of type object, but was actually a ${typeof rawData}`,
 			);
 		} else if (isArray) {
 			logConfErrMalformed(
@@ -87,15 +97,9 @@ async function parseUserConfigData(): Promise<UserConfig> {
 
 	dlogHeader('LOADING USER CONFIG');
 
-	let userConfig = new UserConfig();
-
-	// Order is important
-	userConfig = parseValidateSection(userConfigData, userConfig);
-	userConfig = parseLogSection(userConfigData, userConfig);
-	userConfig = parseTransformSection(userConfigData, userConfig);
-	userConfig = await parseSearchSection(userConfigData, userConfig);
-
-	return userConfig;
+	let parsedData: ConfigData = createDefaultConfigData();
+	parsedData = await parseSections(rawData, parsedData);
+	return new UserConfig(parsedData);
 }
 
 export default parseUserConfigData;

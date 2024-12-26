@@ -5,45 +5,47 @@ import {
 } from '../../util/file/yaml.js';
 import {
 	clogConfigKeyUnknown,
-	clogConfigValueWrongType,
+	logConfigValueWrongType,
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
 	vlogConfigValueLoaded,
 } from '../../util/logging/config.js';
-import { UserConfig } from '../type/UserConfig.js';
+import { ConfigData } from '../type/ConfigData.js';
 
 const topLevelSectionKey = 'log';
 
-function parseLogSection(data: object, config: UserConfig): UserConfig {
-	if (!Object.keys(data).includes(topLevelSectionKey)) {
+// MARK: Top Section
+function parseLogSection(rawData: object, parsedData: ConfigData): ConfigData {
+	if (!Object.keys(rawData).includes(topLevelSectionKey)) {
 		dlogConfigWarnMissingOptionalSection(topLevelSectionKey);
-		return config;
+		return parsedData;
 	}
 
-	const section = (data as Record<string, unknown>)[topLevelSectionKey];
+	const section = (rawData as Record<string, unknown>)[topLevelSectionKey];
 
-	if (typeof section !== 'object' || Array.isArray(data) || section === null) {
+	if (typeof section !== 'object' || Array.isArray(rawData) || section === null) {
 		dlogConfigWarnOptionalSectionSkippedWrongType(
 			topLevelSectionKey,
 			'section',
 			section,
 		);
-		return config;
+		return parsedData;
 	}
 
 	dlogConfigSectionStart(topLevelSectionKey);
 
-	config = parseSubsectionConsole(section, config);
-	config = parseSubsectionFile(section, config);
+	parsedData = parseSubsectionConsole(section, parsedData);
+	parsedData = parseSubsectionFile(section, parsedData);
 
 	dlogConfigSectionOk(topLevelSectionKey);
 
-	return config;
+	return parsedData;
 }
 
-function parseSubsectionConsole(data: object, config: UserConfig): UserConfig {
+// MARK: Console Subsect
+function parseSubsectionConsole(rawData: object, parsedData: ConfigData): ConfigData {
 	const sectionKey = 'console';
 	const fullSubsectionKey = joinPathKeys(topLevelSectionKey, sectionKey);
 	const keyAliases: YamlKeyAliases = {
@@ -56,12 +58,12 @@ function parseSubsectionConsole(data: object, config: UserConfig): UserConfig {
 		verbosity: 'verbose',
 	};
 
-	if (!Object.keys(data).includes(sectionKey)) {
+	if (!Object.keys(rawData).includes(sectionKey)) {
 		dlogConfigWarnMissingOptionalSection(fullSubsectionKey);
-		return config;
+		return parsedData;
 	}
 
-	const section = (data as Record<string, unknown>)[sectionKey];
+	const section = (rawData as Record<string, unknown>)[sectionKey];
 
 	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
 		dlogConfigWarnOptionalSectionSkippedWrongType(
@@ -69,7 +71,7 @@ function parseSubsectionConsole(data: object, config: UserConfig): UserConfig {
 			'section',
 			section,
 		);
-		return config;
+		return parsedData;
 	}
 
 	dlogConfigSectionStart(fullSubsectionKey);
@@ -81,44 +83,45 @@ function parseSubsectionConsole(data: object, config: UserConfig): UserConfig {
 		switch (resolvedKey) {
 			case 'debug': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.log.console.debug = value;
+				parsedData.log.console.debug = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'withColor': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.log.console.withColor = value;
+				parsedData.log.console.withColor = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'verbose': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.log.console.verbose = value;
+				parsedData.log.console.verbose = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {
-				clogConfigKeyUnknown(fullGivenKey, config);
+				clogConfigKeyUnknown(fullGivenKey, parsedData);
 			}
 		}
 	}
 
-	return config;
+	return parsedData;
 }
 
-function parseSubsectionFile(data: object, config: UserConfig): UserConfig {
+// MARK: File Subsect
+function parseSubsectionFile(rawData: object, parsedData: ConfigData): ConfigData {
 	const sectionKey = 'file';
 	const fullSubsectionKey = joinPathKeys(topLevelSectionKey, sectionKey);
 	const keyAliases: YamlKeyAliases = {
@@ -129,12 +132,12 @@ function parseSubsectionFile(data: object, config: UserConfig): UserConfig {
 		format: 'nameFormat',
 	};
 
-	if (!Object.keys(data).includes(sectionKey)) {
+	if (!Object.keys(rawData).includes(sectionKey)) {
 		dlogConfigWarnMissingOptionalSection(fullSubsectionKey);
-		return config;
+		return parsedData;
 	}
 
-	const section = (data as Record<string, unknown>)[sectionKey];
+	const section = (rawData as Record<string, unknown>)[sectionKey];
 
 	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
 		dlogConfigWarnOptionalSectionSkippedWrongType(
@@ -142,7 +145,7 @@ function parseSubsectionFile(data: object, config: UserConfig): UserConfig {
 			'section',
 			section,
 		);
-		return config;
+		return parsedData;
 	}
 
 	dlogConfigSectionStart(fullSubsectionKey);
@@ -154,41 +157,41 @@ function parseSubsectionFile(data: object, config: UserConfig): UserConfig {
 		switch (resolvedKey) {
 			case 'enabled': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.log.file.enabled = value;
+				parsedData.log.file.enabled = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'outputPath': {
 				if (typeof value !== 'string') {
-					clogConfigValueWrongType(fullGivenKey, 'string', value);
+					logConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
 				}
 
-				config.log.file.outputPath = value;
+				parsedData.log.file.outputPath = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'nameFormat': {
 				if (typeof value !== 'string') {
-					clogConfigValueWrongType(fullGivenKey, 'string', value);
+					logConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
 				}
 
-				config.log.file.nameFormat = value;
+				parsedData.log.file.nameFormat = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			default: {
-				clogConfigKeyUnknown(fullGivenKey, config);
+				clogConfigKeyUnknown(fullGivenKey, parsedData);
 			}
 		}
 	}
 
-	return config;
+	return parsedData;
 }
 
 export default parseLogSection;

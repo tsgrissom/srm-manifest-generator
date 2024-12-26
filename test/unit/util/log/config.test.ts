@@ -1,19 +1,29 @@
-import parseValidateSection from '../../../../src/config/parseSection/validate';
+import { ConfigData } from '../../../../src/config/type/ConfigData';
+import { defaultConfigData } from '../../../../src/config/type/DefaultConfig';
 import { UserConfig } from '../../../../src/config/type/UserConfig';
 import {
 	clogConfigFatalErr,
 	clogConfigKeyUnknown,
-	clogConfigSucc,
-	clogConfigValueUnknown,
+	logConfigValueUnknown,
 	clogConfigWarn,
 } from '../../../../src/util/logging/config';
-
-import configDataValidateConfigKeysOff from '../../../resource/json/configValidateConfigKeysOff';
-import configDataValidateConfigKeysOn from '../../../resource/json/configValidateConfigKeysOn';
 
 let logSpy: jest.SpyInstance;
 let errorSpy: jest.SpyInstance;
 let warnSpy: jest.SpyInstance;
+
+const confValidateConfigKeysOff: Partial<ConfigData> = {
+	validate: {
+		...defaultConfigData.validate,
+		configKeys: false
+	}
+};
+const confValidateConfigKeysOn: Partial<ConfigData> = {
+	validate: {
+		...defaultConfigData.validate,
+		configKeys: true
+	}
+};
 
 beforeEach(() => {
 	logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
@@ -26,14 +36,6 @@ afterEach(() => {
 });
 
 // MARK: GENERIC
-
-describe(`Function: clogConfigSucc()`, () => {
-	it('logs to stdout', () => {
-		clogConfigSucc('str', true);
-		clogConfigSucc('str', false);
-		expect(logSpy).toHaveBeenCalledTimes(2);
-	});
-});
 
 describe(`Function: clogConfigWarn()`, () => {
 	it('logs to stderr at level warn', () => {
@@ -83,17 +85,8 @@ describe(`Function: clogConfigKeyUnknown()`, () => {
 	let configValidateConfigKeysOn: UserConfig;
 
 	beforeEach(() => {
-		configValidateConfigKeysOff = new UserConfig();
-		configValidateConfigKeysOff = parseValidateSection(
-			configDataValidateConfigKeysOff,
-			configValidateConfigKeysOff,
-		);
-
-		configValidateConfigKeysOn = new UserConfig();
-		configValidateConfigKeysOn = parseValidateSection(
-			configDataValidateConfigKeysOn,
-			configValidateConfigKeysOn,
-		);
+		configValidateConfigKeysOff = new UserConfig(confValidateConfigKeysOff);
+		configValidateConfigKeysOn = new UserConfig(confValidateConfigKeysOn);
 	});
 
 	it('does not log to stdout if disabled by config', () => {
@@ -126,7 +119,7 @@ describe(`Function: clogConfigValueUnknown()`, () => {
 		{},
 		{ aKey: 'a value', anotherKey: 42 },
 	])('logs to stdout (%p)', value => {
-		clogConfigValueUnknown('some.full.key', value);
+		logConfigValueUnknown('some.full.key', value);
 		expect(logSpy).toHaveBeenCalled();
 	});
 });

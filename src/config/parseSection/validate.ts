@@ -5,7 +5,7 @@ import {
 } from '../../util/file/yaml.js';
 import {
 	clogConfigKeyUnknown,
-	clogConfigValueWrongType,
+	logConfigValueWrongType,
 	dlogConfigSectionOk,
 	dlogConfigSectionStart,
 	dlogConfigWarnMissingOptionalSection,
@@ -13,11 +13,11 @@ import {
 	vlogConfigValueLoaded,
 } from '../../util/logging/config.js';
 import { quote } from '../../util/string/quote.js';
-import { UserConfig } from '../type/UserConfig.js';
+import { ConfigData } from '../type/ConfigData.js';
 
 const topLevelSectionKey = 'validate';
 
-function parseValidateSection(data: object, config: UserConfig): UserConfig {
+function parseValidateSection(rawData: object, parsedData: ConfigData): ConfigData {
 	const keyAliases: YamlKeyAliases = {
 		// Aliases for key "configKeys"
 		configKey: 'configKeys',
@@ -37,12 +37,12 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 		exes: 'executables',
 	};
 
-	if (!Object.keys(data).includes(topLevelSectionKey)) {
+	if (!Object.keys(rawData).includes(topLevelSectionKey)) {
 		dlogConfigWarnMissingOptionalSection(topLevelSectionKey);
-		return config;
+		return parsedData;
 	}
 
-	const section = (data as Record<string, unknown>)[topLevelSectionKey];
+	const section = (rawData as Record<string, unknown>)[topLevelSectionKey];
 
 	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
 		dlogConfigWarnOptionalSectionSkippedWrongType(
@@ -50,7 +50,7 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 			'section',
 			section,
 		);
-		return config;
+		return parsedData;
 	}
 
 	dlogConfigSectionStart(topLevelSectionKey);
@@ -62,53 +62,53 @@ function parseValidateSection(data: object, config: UserConfig): UserConfig {
 		switch (resolvedKey) {
 			case 'filePaths': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.validate.filePaths = value;
+				parsedData.validate.filePaths = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'executables': {
 				if (typeof value !== 'object' || Array.isArray(value)) {
-					clogConfigValueWrongType(fullGivenKey, 'section', value);
+					logConfigValueWrongType(fullGivenKey, 'section', value);
 					break;
 				}
 
 				// TODO Warn if this subsection is missing
 
-				config = parseSubsectionExecutables(givenKey, value as object, config);
+				parsedData = parseSubsectionExecutables(givenKey, value as object, parsedData);
 				break;
 			}
 			case 'configKeys': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.validate.configKeys = value;
+				parsedData.validate.configKeys = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 			case 'executableExtensions': {
 			}
 			default: {
-				clogConfigKeyUnknown(fullGivenKey, config);
+				clogConfigKeyUnknown(fullGivenKey, parsedData);
 			}
 		}
 	}
 
 	dlogConfigSectionOk(topLevelSectionKey);
 
-	return config;
+	return parsedData;
 }
 
 function parseSubsectionExecutables(
 	givenSubsectionKey: string,
-	data: object,
-	config: UserConfig,
-): UserConfig {
+	rawData: object,
+	parsedData: ConfigData,
+): ConfigData {
 	const fullSubsectionKey = joinPathKeys(topLevelSectionKey, givenSubsectionKey);
 	const keyAliases: YamlKeyAliases = {
 		// Aliases for key "enabled"
@@ -132,7 +132,7 @@ function parseSubsectionExecutables(
 		executableExtensions: 'acceptedExtensions',
 	};
 
-	const section = data as Record<string, unknown>;
+	const section = rawData as Record<string, unknown>;
 
 	if (typeof section !== 'object' || Array.isArray(section) || section === null) {
 		dlogConfigWarnOptionalSectionSkippedWrongType(
@@ -140,7 +140,7 @@ function parseSubsectionExecutables(
 			'section',
 			section,
 		);
-		return config;
+		return parsedData;
 	}
 
 	dlogConfigSectionStart(fullSubsectionKey);
@@ -152,11 +152,11 @@ function parseSubsectionExecutables(
 		switch (resolvedKey) {
 			case 'enabled': {
 				if (typeof value !== 'boolean') {
-					clogConfigValueWrongType(fullGivenKey, 'boolean', value);
+					logConfigValueWrongType(fullGivenKey, 'boolean', value);
 					break;
 				}
 
-				config.validate.executables.enabled = value;
+				parsedData.validate.executables.enabled = value;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
@@ -165,7 +165,7 @@ function parseSubsectionExecutables(
 					typeof value !== 'object' ||
 					(!Array.isArray(value) && typeof value !== 'string')
 				) {
-					clogConfigValueWrongType(
+					logConfigValueWrongType(
 						fullGivenKey,
 						'string or array of strings',
 						value,
@@ -190,14 +190,14 @@ function parseSubsectionExecutables(
 					);
 				}
 
-				config.validate.executables.acceptedExtensions = normalized;
+				parsedData.validate.executables.acceptedExtensions = normalized;
 				vlogConfigValueLoaded(resolved, value);
 				break;
 			}
 		}
 	}
 
-	return config;
+	return parsedData;
 }
 
 export default parseValidateSection;

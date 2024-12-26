@@ -1,9 +1,8 @@
 import clr from 'chalk';
 import { USER_CONFIG_ATTRIBUTION, USER_CONFIG_FILENAME } from '../../config/loadConfig.js';
-import { UserConfig } from '../../config/type/UserConfig.js';
 import { ResolvedYamlKey } from '../file/yaml.js';
 import * as fmt from '../string/format.js';
-import { getTypeDisplayName, indefiniteArticleFor } from '../string/grammar.js';
+import { delimitedList, getTypeDisplayName, indefiniteArticleFor } from '../string/grammar.js';
 import { quote } from '../string/quote.js';
 import {
 	SB_BULLET,
@@ -16,16 +15,13 @@ import {
 } from '../string/symbols.js';
 import { clog } from './console.js';
 import { dlog, isDebugActive, vlog, vlogList } from './debug.js';
+import { ConfigData } from '../../config/type/ConfigData.js';
 
 // MARK: GENERIC
 
 // TODO Are these even used?
 
 // TODO jsdoc
-export function clogConfigSucc(str: string, emphasize = false): void {
-	clog(`  ` + (emphasize ? SB_OK_LG : SB_OK_SM) + ` ${str}`);
-	// TODO Support changing whitespace prefix?
-}
 
 export function clogConfigWarn(str: string): void {
 	console.warn(` ${SB_WARN} ${USER_CONFIG_ATTRIBUTION}: ${str}`);
@@ -98,8 +94,7 @@ export function clogConfigFatalErrMissingRequiredSection(fullSectionKey: string)
 export function clogConfigFatalErrRequiredSectionWrongType(
 	sectionKey: string,
 	expectedType: string,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	value?: any,
+	value: unknown,
 ): void {
 	const typeOfValue = getTypeDisplayName(value);
 	const articleActualType = indefiniteArticleFor(typeOfValue);
@@ -111,7 +106,16 @@ export function clogConfigFatalErrRequiredSectionWrongType(
 
 // MARK: LINT KEYS
 
-export function clogConfigKeyUnknown(fullGivenKey: string, config: UserConfig): void {
+/**
+ * Warns the user that an unknown config key was set at a fully-qualified,
+ * given key path.
+ * Uses ConfigData over UserConfig because this function is used in the
+ * process of creating the user config instance.
+ * @param fullGivenKey The fully-qualified key path given by the user.
+ * @param config The current ConfigData object, used to determine if
+ *  unknown keys should be logged.
+ */
+export function clogConfigKeyUnknown(fullGivenKey: string, config: ConfigData): void {
 	if (!config.validate.configKeys) {
 		return;
 	}
@@ -121,26 +125,10 @@ export function clogConfigKeyUnknown(fullGivenKey: string, config: UserConfig): 
 
 // MARK: LINT VALUES
 
-// TODO Move this to use unknown
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function fmtValueForLoadedLog(value?: any): string {
-	if (typeof value === 'undefined') {
-		value = '';
-	}
-
-	let fmtValue = `${value}`;
-	if (typeof value === 'string') fmtValue = value !== '' ? quote(value) : '';
-	else if (typeof value === 'boolean') fmtValue = fmt.bool(value);
-	// TODO More type fmts
-	return fmtValue;
-}
-
-// TODO Move this to use unknown
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function vlogConfigValueLoaded(resolvedPair: ResolvedYamlKey, value?: any): void {
-	const { givenKey, fullGivenKey, resolvedKey } = resolvedPair;
+export function vlogConfigValueLoaded(resolvedKeys: ResolvedYamlKey, value: unknown): void {
+	const { givenKey, fullGivenKey, resolvedKey } = resolvedKeys;
 	const isAlias = givenKey !== resolvedKey;
-	const fmtValue = fmtValueForLoadedLog(value);
+	const fmtValue = fmt.value(value);
 	const fmtIsAlias = fmt.yesNo(isAlias);
 	const fmtGivenKey = quote(givenKey);
 	const fmtInternalKey = quote(resolvedKey);
@@ -156,14 +144,17 @@ export function vlogConfigValueLoaded(resolvedPair: ResolvedYamlKey, value?: any
 }
 
 // TODO Move this to use unknown
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function clogConfigValueUnknown(fullGivenKey: string, value?: any): void {
-	const postfix = `(Value: ${fmtValueForLoadedLog(value)})`;
-
+export function logConfigValueUnknown(fullGivenKey: string, value: unknown): void {
+	const postfix = `(Value: ${fmt.value(value)})`;
 	clog(`  ${SB_WARN} Unknown value set for key ${quote(fullGivenKey)} ${postfix}`);
 }
 
-function clogConfigValueErr(key: string, msg: string): void {
+export function logConfigValueUnknownWithSuggestions(fullGivenKey: string, value: unknown, suggestions: Array<string>): void {
+	logConfigValueUnknown(fullGivenKey, value);
+	clog(`   - Valid options: ${delimitedList(suggestions)}`);
+}
+
+function logConfigValueErr(key: string, msg: string): void {
 	const prefix = isDebugActive() ? SB_ERR_SM : `${SB_ERR_LG} Config:`;
 	let blob = `${prefix} Value of key ${quote(key)} ${msg}`;
 
@@ -176,20 +167,19 @@ function clogConfigValueErr(key: string, msg: string): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/max-params
-export function clogConfigValueWrongType(
+export function logConfigValueWrongType(
 	key: string,
 	expectedType: string,
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	value?: any,
+	value: unknown,
 	displayValue = true,
 ): void {
-	const valuef = fmtValueForLoadedLog(value);
+	const valueFmtd = fmt.value(value);
 	let msg = `must be ${indefiniteArticleFor(expectedType)} ${expectedType} but was`;
 
 	if (value === undefined) msg += ` not`;
 	else msg += ` ${indefiniteArticleFor(typeof value)} ${typeof value}`;
 
-	if (displayValue) msg += ` (Value: ${valuef})`;
+	if (displayValue) msg += ` (Value: ${valueFmtd})`;
 
-	clogConfigValueErr(key, `${msg}`);
+	logConfigValueErr(key, `${msg}`);
 }

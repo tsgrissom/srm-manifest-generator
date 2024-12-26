@@ -5,6 +5,8 @@ import { isPathAccessible } from '../file/path.js';
 import * as str from './grammar.js';
 import { quote } from './quote.js';
 import { SB_ERR_SM, SB_OK_SM } from './symbols.js';
+import * as fmt from './format.js';
+import { delimitedList } from './grammar.js';
 
 // MARK: BOOLEAN
 
@@ -209,4 +211,35 @@ export function pathAsTag(
 	filePath = path(filePath, options);
 	innerPrefix = innerPrefix !== '' ? innerPrefix + ': ' : '';
 	return `(${innerPrefix}${filePath})`;
+}
+
+// MARK: MISC
+
+// MARK: value
+export function value(value: unknown): string {
+	switch (typeof value) {
+		case 'undefined':
+			return 'undefined';
+		case 'boolean':
+			return fmt.bool(value);
+		case 'number':
+			return `${value}`;
+		case 'object':
+			if (Array.isArray(value)) {
+				return delimitedList(value);
+			} else {
+				return 'Object'
+			}
+		case 'string':
+			return quote(value);
+		default:
+			return '[unknown type]'
+	};
+}
+
+// MARK: enumValue
+export function enumValue(
+	value: string
+): string {
+	return clr.cyanBright(value);
 }
