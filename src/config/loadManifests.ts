@@ -253,24 +253,35 @@ function parseManifestFileContentsToData(
 	const keyAliases: YamlKeyAliases = {
 		sourceName: 'sourceName',
 		name: 'sourceName',
+		nickname: 'sourceName',
 
-		baseDirectory: 'baseDirectory',
-		baseDir: 'baseDirectory',
+		dir: 'baseDirectory',
 		directory: 'baseDirectory',
+		folder: 'baseDirectory',
+		base: 'baseDirectory',
+		baseDir: 'baseDirectory',
+		baseFolder: 'baseDirectory',
 		root: 'baseDirectory',
 		rootDir: 'baseDirectory',
 		rootDirectory: 'baseDirectory',
+		rootFolder: 'baseDirectory',
 
 		output: 'outputPath',
 		outputPath: 'outputPath',
 		outputFile: 'outputPath',
-		out: 'outputPath',
 		outputDirectory: 'outputPath',
 		outputDir: 'outputPath',
+		outputFolder: 'outputPath',
+		out: 'outputPath',
+		outPath: 'outputPath',
+		outDir: 'outputPath',
+		outDirectory: 'outputPath',
+		outFolder: 'outputPath',
 
 		shortcuts: 'shortcuts',
 		entries: 'shortcuts',
 		titles: 'shortcuts',
+		games: 'shortcuts',
 	};
 	const data: ManifestData = {
 		sourceName: '',
@@ -387,15 +398,22 @@ function parseManifestFileContentsToData(
 		`  ${checkCross(hasShortcuts)} Has optional attribute "shortcuts"?`,
 	);
 
-	// Fallback on filename
-	// TODO This doesn't need to be here, or it should be elsewhere
-	if (!hasSourceName) data.sourceName = basenameWithoutExtensions(filePath);
-	// Make sure required attributes are present
-	// TODO Soft fail these
-	if (!hasBaseDirectory)
-		throw new Error(`Manifest is missing a root directory attribute ${pathTag}`);
-	if (!hasOutputPath)
-		throw new Error(`Manifest is missing an output directory attribute ${pathTag}`);
+	// TODO This doesn't need to be here, test
+	if (!hasSourceName) {
+		data.sourceName = basenameWithoutExtensions(filePath);
+	}
+
+	// TODO Soft fail
+	if (!hasBaseDirectory) {
+		throw new Error(
+			`Manifest "${data.sourceName}" is missing required attribute "baseDirectory" ${pathTag}`,
+		);
+	}
+	if (!hasOutputPath) {
+		throw new Error(
+			`Manifest "${data.sourceName}" is missing required attribute "outputPath" ${pathTag}`,
+		);
+	}
 
 	return data;
 }
