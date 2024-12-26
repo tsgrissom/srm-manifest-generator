@@ -6,6 +6,7 @@ import {
 import {
 	clogConfigKeyUnknown,
 	clogConfigValueWrongType,
+	dlogConfigSectionOk,
 	dlogConfigSectionStart,
 	dlogConfigWarnMissingOptionalSection,
 	dlogConfigWarnOptionalSectionSkippedWrongType,
@@ -16,8 +17,28 @@ import { UserConfig } from '../type/UserConfig.js';
 const topLevelSectionKey = 'log';
 
 function parseLogSection(data: object, config: UserConfig): UserConfig {
-	config = parseSubsectionConsole(data, config);
-	config = parseSubsectionFile(data, config);
+	if (!Object.keys(data).includes(topLevelSectionKey)) {
+		dlogConfigWarnMissingOptionalSection(topLevelSectionKey);
+		return config;
+	}
+
+	const section = (data as Record<string, unknown>)[topLevelSectionKey];
+
+	if (typeof section !== 'object' || Array.isArray(data) || section === null) {
+		dlogConfigWarnOptionalSectionSkippedWrongType(
+			topLevelSectionKey,
+			'section',
+			section,
+		);
+		return config;
+	}
+
+	dlogConfigSectionStart(topLevelSectionKey);
+
+	config = parseSubsectionConsole(section, config);
+	config = parseSubsectionFile(section, config);
+
+	dlogConfigSectionOk(topLevelSectionKey);
 
 	return config;
 }

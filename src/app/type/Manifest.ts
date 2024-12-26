@@ -138,7 +138,14 @@ class Manifest implements ManifestData {
 	}
 
 	public getExportString(): string {
-		return JSON.stringify(this.getExportData());
+		const indentSpaces = this._config?.getIndentationSpaces ?? 4;
+		const shouldMinify = this._config?.shouldMinifyOutput ?? true;
+
+		if (shouldMinify) {
+			return JSON.stringify(this.getExportData());
+		} else {
+			return JSON.stringify(this.getExportData(), null, indentSpaces);
+		}
 	}
 
 	// TODO containsShortcut?

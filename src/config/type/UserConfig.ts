@@ -122,7 +122,7 @@ class UserConfig implements ConfigData {
 		return this.transform.minify ?? true;
 	}
 
-	public get getUnminifiedNumberOfIndentationSpaces(): number {
+	public get getIndentationSpaces(): number {
 		return this.transform.indentationSpaces ?? 2;
 	}
 

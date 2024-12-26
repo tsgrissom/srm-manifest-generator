@@ -12,7 +12,7 @@ import {
 import { OutputMode } from '../type/ConfigData.js';
 import { UserConfig } from '../type/UserConfig.js';
 
-const sectionKey = 'output';
+const sectionKey = 'transform';
 const keyAliases: YamlKeyAliases = {
 	minification: 'minify',
 	indentSpaces: 'indentationSpaces',
@@ -70,6 +70,8 @@ function parseTransformSection(data: object, config: UserConfig): UserConfig {
 					clogConfigValueWrongType(fullGivenKey, 'string', value);
 					break;
 				}
+
+				// TODO Suggest correct values if unknown
 
 				const valueLow = value.toLowerCase();
 

@@ -149,7 +149,7 @@ function validateParseShortcutObjectsIntoDataSuccessful(
 		}
 
 		if (nValid === nTotal) {
-			clog(
+			dlog(
 				`${SB_OK_LG} All shortcut data in manifest ${quote(sourceName)} was valid`,
 			);
 			return true;
