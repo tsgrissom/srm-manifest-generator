@@ -55,7 +55,7 @@ describe('Function: bool()', () => {
 // });
 
 // MARK: fmtPath
-describe(`Function: fmtPath`, () => {
+describe(`Function: path`, () => {
 	test.each(setOfEmptyStrings)(`returns given str if empty: %p`, value => {
 		expect(fmt.path(value)).toBe(value);
 	});
@@ -69,7 +69,9 @@ describe(`Function: fmtPath`, () => {
 	])(
 		`returns expected for given input parameters`,
 		(filePath, useUnderline, useQuotes, expected) => {
-			expect(fmt.path(filePath, useUnderline, useQuotes)).toBe(expected);
+			expect(
+				fmt.path(filePath, { useUnderline: useUnderline, useQuotes: useQuotes }),
+			).toBe(expected);
 		},
 	);
 });

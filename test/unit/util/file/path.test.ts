@@ -76,7 +76,7 @@ describe('Function: normalizeFileExtension()', () => {
 	);
 });
 
-// MARK: pathHasFileExtension
+// MARK: hasFileExtension
 describe('Function: hasFileExtension()', () => {
 	// TEST Params
 	// Param: fileName
@@ -86,9 +86,7 @@ describe('Function: hasFileExtension()', () => {
 
 // MARK: replaceFileExtension
 describe('Function: replaceFileExtension()', () => {
-	// Param: extsToFind
-	// Param: extsToIgnore
-	// etc
+	// TEST Params
 	// TEST Functionality
 });
 

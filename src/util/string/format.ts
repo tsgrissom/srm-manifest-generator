@@ -1,6 +1,6 @@
 import clr from 'chalk';
 
-import { ConfigData } from '../../config/type/ConfigData.js';
+import { UserConfig } from '../../config/type/UserConfig.js';
 import { isPathAccessible } from '../file/path.js';
 import * as str from './grammar.js';
 import { quote } from './quote.js';
@@ -90,6 +90,16 @@ export const checkCross = (b: boolean): string => bool(b, boolPresets.CheckCross
 
 // MARK: PATH
 
+export interface PathFmtOptions {
+	useUnderline: boolean;
+	useQuotes: boolean;
+}
+
+export const defaultPathFmtOptions: PathFmtOptions = {
+	useUnderline: true,
+	useQuotes: true,
+};
+
 // MARK: path
 
 /**
@@ -105,10 +115,15 @@ export const checkCross = (b: boolean): string => bool(b, boolPresets.CheckCross
  * @returns The formatted filepath with the options applied.
  */
 // TODO Unit Test
-export function path(filePath: string, useUnderline = true, useQuotes = true): string {
+export function path(
+	filePath: string,
+	options: PathFmtOptions = defaultPathFmtOptions,
+): string {
 	if (filePath.trim() === '') {
 		return filePath;
 	}
+
+	const { useQuotes, useUnderline } = options;
 
 	if (useQuotes) {
 		filePath = quote(filePath, {
@@ -147,77 +162,79 @@ export function path(filePath: string, useUnderline = true, useQuotes = true): s
 // TODO Unit Test
 export async function pathWithExists( // TODO Update jsdoc
 	filePath: string,
-	config?: ConfigData,
-	usePrefix = true,
-	useSimplePrefix = true,
-	useUnderline = true,
-	useQuotes = true,
+	config?: UserConfig,
+	options: PathFmtOptions = defaultPathFmtOptions,
 ): Promise<string> {
-	if (useUnderline || useQuotes) filePath = path(filePath, useUnderline, useQuotes);
-	if (!(config?.validate.filePaths ?? true)) return filePath;
+	const shouldValidatePaths = config?.shouldValidateFilePaths() ?? true;
 
-	let prefixOk = '',
-		prefixErr = '';
-	if (usePrefix) {
-		prefixOk = useSimplePrefix ? SB_OK_SM + ' ' : '(' + SB_OK_SM + ') ';
-		prefixErr = useSimplePrefix ? SB_ERR_SM + ' ' : '(' + SB_ERR_SM + ') ';
+	if (options.useUnderline || options.useQuotes) {
+		filePath = path(filePath, options);
 	}
 
+	if (!shouldValidatePaths) {
+		return filePath;
+	}
+
+	const prefixOk = SB_OK_SM + ' ';
+	const prefixErr = SB_ERR_SM + ' ';
+
 	const accessible = await isPathAccessible(filePath);
-	const prefix = usePrefix ? (accessible ? prefixOk : prefixErr) : ' ';
+	const prefix = accessible ? prefixOk : prefixErr;
 
 	return prefix + filePath;
 }
 
 // MARK: pathWithName
-
 // TODO jsdoc
 // TODO Unit Test
 export function pathWithName(
 	filePath: string,
 	nickname: string,
-	useUnderline = true,
-	useQuotes = true,
+	options: PathFmtOptions = defaultPathFmtOptions,
 ): string {
-	if (useUnderline || useQuotes) filePath = path(filePath, useUnderline, useQuotes);
+	if (options.useUnderline || options.useQuotes) {
+		filePath = path(filePath, options);
+	}
 
 	return nickname + ': ' + filePath;
 }
 
 // MARK: pathWithNameAndExists
-
 // TODO jsdoc
 // TODO Unit Test
+// eslint-disable-next-line @typescript-eslint/max-params
 export async function pathWithNameAndExists(
 	filePath: string,
 	nickname: string,
-	config?: ConfigData,
-	prefix = ' ',
-	useUnderline = true,
-	useQuotes = true,
+	config?: UserConfig,
+	tabPrefix = ' ',
+	options: PathFmtOptions = defaultPathFmtOptions,
 ): Promise<string> {
-	if (useUnderline || useQuotes) filePath = path(filePath, useUnderline, useQuotes);
-	if (!(config?.validate.filePaths ?? true)) return filePath;
+	const shouldValidatePaths = config?.shouldValidateFilePaths() ?? true;
+
+	if (options.useUnderline || options.useQuotes) {
+		filePath = path(filePath, options);
+	}
+
+	if (!shouldValidatePaths) {
+		return filePath;
+	}
 
 	const accessible = await isPathAccessible(filePath);
 	const suffix = accessible ? SB_OK_SM : SB_ERR_SM;
 
-	return prefix + nickname + ': ' + filePath + ' ' + suffix;
+	return tabPrefix + nickname + ': ' + filePath + ' ' + suffix;
 }
 
 // MARK: pathAsTag
-
 // TODO jsdoc
 // TODO Unit Test
 export function pathAsTag(
 	filePath: string,
-	useUnderline = true,
-	useQuotes = true,
 	innerPrefix = 'Path',
+	options: PathFmtOptions = defaultPathFmtOptions,
 ): string {
-	if (useUnderline || useQuotes) filePath = path(filePath, useUnderline, useQuotes);
-
+	filePath = path(filePath, options);
 	innerPrefix = innerPrefix !== '' ? innerPrefix + ': ' : '';
-
-	return '(' + innerPrefix + filePath + ')';
+	return `(${innerPrefix}${filePath})`;
 }
