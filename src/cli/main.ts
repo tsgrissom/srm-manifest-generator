@@ -116,7 +116,7 @@ await yargs(hideBin(process.argv))
 function fmtPretty(value?: unknown): string {
 	switch (typeof value) {
 		case 'boolean':
-			return fmt.bool(value, fmt.boolPresets.enabledDisabled);
+			return fmt.bool(value, fmt.boolFmtPresets.enabledDisabled);
 		case 'number':
 			return clr.cyanBright(value);
 		case 'object':
@@ -194,7 +194,7 @@ function displayUserConfigInstructions(): void {
 
 	lineLocation += clr.yellowBright(fmt.path(configPath));
 
-	clog(
+	clog( 
 		clr.magentaBright.bold(`INSTRUCTIONS FOR USER CONFIG`),
 		` - Was found? ${fmt.yesNo(wasFound)}`,
 		lineLocation,

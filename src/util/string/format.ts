@@ -1,4 +1,5 @@
-import clr from 'chalk';
+import chalk from 'chalk';
+import { Chalk } from 'chalk';
 
 import { UserConfig } from '../../config/type/UserConfig.js';
 import { isPathAccessible } from '../file/path.js';
@@ -7,6 +8,7 @@ import { quote } from './quote.js';
 import { SB_ERR_SM, SB_OK_SM } from './symbols.js';
 import * as fmt from './format.js';
 import { delimitedList } from './grammar.js';
+import { vlog } from '../logging/debug.js';
 
 // MARK: BOOLEAN
 
@@ -24,7 +26,7 @@ export interface BoolFmtOptions {
 
 // TODO Unit test
 // TODO jsdoc
-export const boolPresets: Record<string, BoolFmtOptions> = {
+export const boolFmtPresets: Record<string, BoolFmtOptions> = {
 	/** "true" / "false" - color on, capitalize off */
 	TrueFalse: { color: true, capitalize: false, trueStr: 'true', falseStr: 'false' },
 	/** "Yes" / "No" - color on, capitalize off */
@@ -56,7 +58,16 @@ export const boolPresets: Record<string, BoolFmtOptions> = {
 	},
 };
 
-/**
+export function trueColor(): Chalk {
+	return chalk.rgb(186, 245, 154);
+}
+
+export function falseColor(): Chalk {
+	return chalk.rgb(255, 150, 150);
+}
+
+// MARK: bool
+/*
  * TODO Benchmark faster to store all four truth+capitalization values (trueUpper, falseLower, etc.) than current impl
  * TODO Options for color customization
  * TODO Options for formatting (bold, italic, underline)
@@ -65,11 +76,15 @@ export const boolPresets: Record<string, BoolFmtOptions> = {
 /**
  * Formats a given `boolean` into a prettier string with context-dependent
  * formatting as well as options for color-coding and auto-capitalization.
+ * 
+ * @param b The boolean value to format into a prettier string.
+ * @param options The {@link BoolFmtOptions} which inform how the boolean
+ *  will be formatted into a prettier string.
+ * @returns A string value representing the boolean value.
  */
-// TODO jsdoc
 export function bool(
 	b: boolean,
-	options: BoolFmtOptions = boolPresets.TrueFalse,
+	options: BoolFmtOptions = boolFmtPresets.TrueFalse,
 ): string {
 	const { capitalize, color, trueStr, falseStr } = options;
 	let s = b ? trueStr : falseStr;
@@ -82,16 +97,21 @@ export function bool(
 		return s;
 	}
 
-	return b ? clr.green(s) : clr.red(s);
+	return b ? trueColor()(s) : falseColor()(s);
 }
 
 // TODO jsdoc
-export const yesNo = (b: boolean): string => bool(b, boolPresets.YesNo);
+export function yesNo(b: boolean): string {
+	return bool(b, boolFmtPresets.YesNo);
+}
 // TODO jsdoc
-export const enabledDisabled = (b: boolean): string =>
-	bool(b, boolPresets.EnabledDisabled);
+export function enabledDisabled(b: boolean): string {
+	return bool(b, boolFmtPresets.EnabledDisabled);
+}
 // TODO jsdoc
-export const checkCross = (b: boolean): string => bool(b, boolPresets.CheckCross);
+export function checkCross(b: boolean): string {
+	return bool(b, boolFmtPresets.CheckCross);
+}
 
 // MARK: PATH
 
@@ -108,7 +128,15 @@ export const defaultPathFmtOptions: PathFmtOptions = {
 };
 
 // MARK: path
-// TODO jsdoc
+/**
+ * Formats a string representing some file path with the requisite
+ * options supplied by the given {@link PathFmtOptions}, including
+ * underlining and quoting the string.
+ * @param filePath The file path to format as a path.
+ * @param options The {@link PathFmtOptions} which inform how the
+ *  string will be formatted as a path.
+ * @returns 
+ */
 // TODO Unit Test
 export function path(
 	filePath: string,
@@ -129,7 +157,7 @@ export function path(
 	}
 
 	if (useUnderline) {
-		filePath = clr.underline(filePath);
+		filePath = chalk.underline(filePath);
 	}
 
 	return filePath;
@@ -241,5 +269,5 @@ export function value(value: unknown): string {
 export function enumValue(
 	value: string
 ): string {
-	return clr.cyanBright(value);
+	return chalk.cyanBright(value);
 }
