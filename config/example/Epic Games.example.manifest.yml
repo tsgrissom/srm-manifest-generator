@@ -2,7 +2,7 @@ name: Epic Games
 # Wherever you store your Epic Games library
 baseDir: G:/Libraries/Epic Games
 # Where the resulting .manifest.json file should be stored
-outputPath: G:/.metadata/output/Epic Games.manifest.json
+outputPath: G:/.metadata/manifest/Epic Games.manifest.json
 shortcuts:
     # Could be anything, but used to search for artwork for the Steam shortcut and give it a name
   - name: Fortnite

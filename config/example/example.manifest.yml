@@ -17,11 +17,11 @@ name: Example Source Name
 # REQUIRED? Yes
 #  - SRM Manifest Generator dynamically constructs the full path to your executable based on this working directory, saving a lot of hassle.
 #  - This removes a good deal of hassle from having to maintain absolute paths to your executables as in manually written JSON manifests.
-directory: C:/Users/Username/Some/Working/Directory/To/Search/In
+in: C:/Users/Username/Some/Working/Directory/To/Search/In
 # The file path to write your generated JSON Manifest File to
 # REQUIRED? Yes
 #  - Recommended to use relative path ./output within the project, and to name file ending in .manifest.json for clarity
-output: ./out/SomeSource.manifest.json
+out: ./out/SomeSource.manifest.json
 # For each app you want Steam ROM Manager to detect, create an entry in the "entries" list
 # REQUIRED? No, with some exception:
 #  - You can leave the "entries" field blank for now

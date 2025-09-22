@@ -1,6 +1,6 @@
 {
 	"name": "srm-manifest-generator",
-	"version": "1.0.1",
+	"version": "0.0.5",
 	"description": "Create manifests for Steam ROM Manager's manual parsers from simple and maintainable YAML syntax",
 	"keywords": [
 		"Steam ROM Manager",
