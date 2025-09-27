@@ -7,6 +7,7 @@ import * as fmt from '../util/string/format.js';
 import { countNoun, possessivePronounFor } from '../util/string/grammar.js';
 import { SB_SECT_END_OK, SB_SECT_START, SB_WARN } from '../util/string/symbols.js';
 import { Manifest } from './type/Manifest.js';
+import { findConfig } from '../config/findConfig.js';
 
 async function processManifest(manifest: Manifest, config: UserConfig): Promise<void> {
 	// TODO Additionally validate if write path is valid, make folders if missing
@@ -158,6 +159,12 @@ export async function transformLoadedManifests(config: UserConfig): Promise<void
 }
 
 export async function startApp(): Promise<void> {
-	const userConfig = await parseUserConfigData();
-	await transformLoadedManifests(userConfig);
+	// OLD
+	// const userConfig = await parseUserConfigData();
+	// await transformLoadedManifests(userConfig);
+	
+	// NEW
+	//const userConfig = await getContextualUserConfigData();
+	await findConfig();
+	//await transformLoadedManifests(userConfig);
 }

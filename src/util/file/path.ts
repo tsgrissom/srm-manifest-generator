@@ -52,7 +52,7 @@ export async function isPathAccessible(filePath: string): Promise<boolean> {
 
 // TODO Fn getFileExtension
 
-// MARK: pathHasFileExtension
+// MARK: hasFileExtension
 /**
  * Checks if a given file path has a file extension. When {@link extToFind} is set to *,
  * including by default, the function will return true if there is any extension

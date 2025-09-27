@@ -19,10 +19,14 @@ export const EXAMPLE_CONFIG_FILENAME = 'example.config.yml',
 	EXAMPLE_CONFIG_URL = `https://raw.githubusercontent.com/tsgrissom/srm-manifest-generator/refs/heads/main${EXAMPLE_CONFIG_PATH}`;
 // TODO How can I get this last one dynamically?
 
-export const USER_CONFIG_FILENAME = 'config.yml',
-	USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME),
-	USER_CONFIG_PFX = 'Config',
-	USER_CONFIG_ATTRIBUTION = `User ${USER_CONFIG_FILENAME}`;
+//export const USER_CONFIG_FILENAME = 'config.yml',
+	//USER_CONFIG_PATH = path.join('config', USER_CONFIG_FILENAME),
+	//USER_CONFIG_PFX = 'Config',
+	//USER_CONFIG_ATTRIBUTION = `User ${USER_CONFIG_FILENAME}`;
+
+export const fallbackConfigSearchPaths: Array<string> = [
+    path.join('config', 'config.yml'),
+];
 
 // MARK: LOAD + PARSE
 

@@ -3,32 +3,16 @@
 	"version": "0.0.5",
 	"description": "Create manifests for Steam ROM Manager's manual parsers from simple and maintainable YAML syntax",
 	"keywords": [
-		"Steam ROM Manager",
-		"steam-rom-manager",
-		"SteamROMManager",
-		"SRM",
-		"SteamGridDB",
-		"Steam",
-		"Steam Deck",
-		"PC Gaming",
-		"emulation",
-		"YAML",
-		"yml"
-	],
-	"author": {
-		"name": "tsgrissom",
-		"url": "https://github.com/tsgrissom"
-	},
+      "Steam ROM Manager","steam-rom-manager","SteamROMManager","SRM","SteamGridDB","Steam","Steam Deck",
+      "PC Gaming","emulation","YAML", "yml"
+    ],
+    "author": { "name":  "tsgrissom", "url": "https://github.com/tsgrissom"},
 	"repository": "tsgrissom/srm-manifest-generator",
 	"bugs": "https://github.com/tsgrissom/srm-manifest-generator/issues",
 	"readme": "https://github.com/tsgrissom/srm-manifest-generator/blob/main/README.md",
 	"homepage": "https://github.com/tsgrissom/srm-manifest-generator/blob/main/README.md",
 	"license": "MIT",
-	"os": [
-		"win32",
-		"darwin",
-		"linux"
-	],
+	"os": ["win32","darwin","linux"],
 	"type": "module",
 	"main": "./src/app/main.ts",
 	"bin": {
@@ -59,10 +43,11 @@
 		"test:verbose": "npm run test -- --coverage --verbose",
 		"test:v": "npm run test:verbose"
 	},
-	"packageManager": "pnpm@9.13.2+sha512.88c9c3864450350e65a33587ab801acf946d7c814ed1134da4a924f6df5a2120fd36b46aab68f7cd1d413149112d53c7db3a4136624cfd00ff1846a0c6cef48a",
+	"packageManager": "pnpm@10.17.1+sha512.17c560fca4867ae9473a3899ad84a88334914f379be46d455cbf92e5cf4b39d34985d452d2583baf19967fa76cb5c17bc9e245529d0b98745721aa7200ecaf7a",
 	"dependencies": {
 		"chalk": "^4.1.2",
 		"steamgriddb": "^2.2.0",
+		"winston": "^3.17.0",
 		"yaml": "^2.6.1",
 		"yargs": "^17.7.2"
 	},
@@ -74,6 +59,7 @@
 		"@types/mock-fs": "^4.13.4",
 		"@types/node": "^22.10.2",
 		"@types/tmp": "^0.2.6",
+		"@types/winston": "^2.4.4",
 		"@types/yargs": "^17.0.33",
 		"@typescript-eslint/eslint-plugin": "^8.18.1",
 		"@typescript-eslint/parser": "^8.18.1",
