@@ -3,16 +3,32 @@
 	"version": "0.0.5",
 	"description": "Create manifests for Steam ROM Manager's manual parsers from simple and maintainable YAML syntax",
 	"keywords": [
-      "Steam ROM Manager","steam-rom-manager","SteamROMManager","SRM","SteamGridDB","Steam","Steam Deck",
-      "PC Gaming","emulation","YAML", "yml"
-    ],
-    "author": { "name":  "tsgrissom", "url": "https://github.com/tsgrissom"},
+		"Steam ROM Manager",
+		"steam-rom-manager",
+		"SteamROMManager",
+		"SRM",
+		"SteamGridDB",
+		"Steam",
+		"Steam Deck",
+		"PC Gaming",
+		"emulation",
+		"YAML",
+		"yml"
+	],
+	"author": {
+		"name": "tsgrissom",
+		"url": "https://github.com/tsgrissom"
+	},
 	"repository": "tsgrissom/srm-manifest-generator",
 	"bugs": "https://github.com/tsgrissom/srm-manifest-generator/issues",
 	"readme": "https://github.com/tsgrissom/srm-manifest-generator/blob/main/README.md",
 	"homepage": "https://github.com/tsgrissom/srm-manifest-generator/blob/main/README.md",
 	"license": "MIT",
-	"os": ["win32","darwin","linux"],
+	"os": [
+		"win32",
+		"darwin",
+		"linux"
+	],
 	"type": "module",
 	"main": "./src/app/main.ts",
 	"bin": {
